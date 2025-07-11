@@ -1237,55 +1237,56 @@
 
         // API Functions
         async function handleLogin(e) {
-            e.preventDefault();
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-            
-            try {
-                const response = await fetch(`${API_BASE_URL}/token`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: `username=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
-                });
-                
-                if (!response.ok) {
-                    throw new Error('Login failed');
-                }
-                
-                const data = await response.json();
-                authToken = data.access_token;
-                localStorage.setItem('reporting_token', authToken);
-                
-                await fetchCurrentUser();
-                showApp();
-                showAlert('Login successful');
-            } catch (error) {
-                showAlert(error.message || 'Login failed', 'error');
-            }
+    e.preventDefault();
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/token`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `username=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
+        });
+        
+        if (!response.ok) {
+            throw new Error('Login failed');
         }
+        
+        const data = await response.json();
+        authToken = data.access_token;
+        localStorage.setItem('reporting_token', authToken);
+        
+        await fetchCurrentUser();
+        showApp();
+        showAlert('Login successful');
+    } catch (error) {
+        showAlert(error.message || 'Login failed', 'error');
+    }
+}
 
-        async function fetchCurrentUser() {
-            try {
-                const response = await fetch(`${API_BASE_URL}/users/me`, {
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    }
-                });
-                
-                if (!response.ok) {
-                    throw new Error('Failed to fetch user');
-                }
-                
-                currentUser = await response.json();
-                updateUserUI();
-            } catch (error) {
-                console.error('Error fetching user:', error);
-                localStorage.removeItem('reporting_token');
-                showLogin();
+async function fetchCurrentUser() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/users/me`, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`
             }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch user');
         }
+        
+        currentUser = await response.json();
+        updateUserUI();
+    } catch (error) {
+        console.error('Error fetching user:', error);
+        localStorage.removeItem('reporting_token');
+        showLogin();
+    }
+}
+
 
         async function loadDashboardData() {
             try {
