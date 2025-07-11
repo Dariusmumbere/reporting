@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel | Reporting System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="https://via.placeholder.com/150x50?text=Company+Logo" alt="Company Logo" class="logo">
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="reports.html">
+                            <i class="fas fa-file-alt"></i>
+                            <span>My Reports</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="create-report.html">
+                            <i class="fas fa-plus-circle"></i>
+                            <span>New Report</span>
+                        </a>
+                    </li>
+                    <li class="active">
+                        <a href="admin.html">
+                            <i class="fas fa-user-shield"></i>
+                            <span>Admin Panel</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-info">
+                        <span class="user-name" id="userName">Loading...</span>
+                        <span class="user-role" id="userRole">Loading...</span>
+                    </div>
+                </div>
+                <button id="logoutBtn" class="btn btn-text">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <h1>Admin Panel</h1>
+                <div class="header-actions">
+                    <button class="btn btn-primary" id="addUserBtn">
+                        <i class="fas fa-user-plus"></i> Add User
+                    </button>
+                </div>
+            </header>
+            
+            <div class="content-container">
+                <div class="admin-tabs">
+                    <button class="tab-btn active" data-tab="reports">Reports</button>
+                    <button class="tab-btn" data-tab="users">Users</button>
+                </div>
+                
+                <div class="admin-tab-content active" id="reportsTab">
+                    <div class="filters">
+                        <div class="filter-group">
+                            <label for="adminStatusFilter">Status</label>
+                            <select id="adminStatusFilter">
+                                <option value="all">All Statuses</option>
+                                <option value="pending">Pending</option>
+                                <option value="in_progress">In Progress</option>
+                                <option value="resolved">Resolved</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="adminUserFilter">User</label>
+                            <select id="adminUserFilter">
+                                <option value="all">All Users</option>
+                                <!-- Users will be populated here -->
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="admin-reports-table-container">
+                        <table class="admin-reports-table">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>User</th>
+                                    <th>Status</th>
+                                    <th>Created</th>
+                                    <th>Updated</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminReportsTableBody">
+                                <tr>
+                                    <td colspan="6" class="loading-row">
+                                        <i class="fas fa-spinner fa-spin"></i> Loading reports...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="admin-tab-content" id="usersTab">
+                    <div class="admin-users-table-container">
+                        <table class="admin-users-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminUsersTableBody">
+                                <tr>
+                                    <td colspan="5" class="loading-row">
+                                        <i class="fas fa-spinner fa-spin"></i> Loading users...
+                                    </td>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add User Modal -->
+    <div class="modal" id="addUserModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New User</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="addUserForm">
+                    <div class="form-group">
+                        <label for="newUserName">Full Name*</label>
+                        <input type="text" id="newUserName" required placeholder="Enter user's full name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="newUserEmail">Email*</label>
+                        <input type="email" id="newUserEmail" required placeholder="Enter user's email">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="newUserPassword">Password*</label>
+                        <input type="password" id="newUserPassword" required placeholder="Set a password">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="newUserRole">Role</label>
+                        <select id="newUserRole">
+                            <option value="staff">Staff Member</option>
+                            <option value="admin">Administrator</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-text modal-close-btn">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Create User</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Status Modal -->
+    <div class="modal" id="statusModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Update Report Status</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="statusForm">
+                    <input type="hidden" id="currentReportId">
+                    
+                    <div class="form-group">
+                        <label for="reportStatus">Status</label>
+                        <select id="reportStatus">
+                            <option value="pending">Pending</option>
+                            <option value="in_progress">In Progress</option>
+                            <option value="resolved">Resolved</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-text modal-close-btn">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Status</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="utils.js"></script>
+    <script src="auth.js"></script>
+    <script src="admin.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check authentication and admin status
+            const user = await checkAuth();
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            if (!user.is_admin) {
+                window.location.href = 'dashboard.html';
+                return;
+            }
+            
+            // Set up tab switching
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tabId = btn.getAttribute('data-tab');
+                    
+                    // Update active tab button
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    // Update active tab content
+                    document.querySelectorAll('.admin-tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    document.getElementById(`${tabId}Tab`).classList.add('active');
+                    
+                    // Load data if needed
+                    if (tabId === 'reports') {
+                        loadAdminReports();
+                    } else if (tabId === 'users') {
+                        loadUsers();
+                    }
+                });
+            });
+            
+            // Set up modal
+            setupModal('addUserModal', 'addUserBtn');
+            setupModal('statusModal');
+            
+            // Handle add user form submission
+            document.getElementById('addUserForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await addUser();
+            });
+            
+            // Handle status form submission
+            document.getElementById('statusForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await updateReportStatus();
+            });
+            
+            // Set up filters
+            document.getElementById('adminStatusFilter').addEventListener('change', loadAdminReports);
+            
+            // Initial load
+            loadAdminReports();
+            loadUsers();
+        });
+        
+        async function loadAdminReports() {
+            try {
+                const statusFilter = document.getElementById('adminStatusFilter').value;
+                const userFilter = document.getElementById('adminUserFilter').value;
+                
+                let url = '/admin/reports';
+                if (statusFilter !== 'all' || userFilter !== 'all') {
+                    url += '?';
+                    if (statusFilter !== 'all') url += `status=${statusFilter}`;
+                    if (userFilter !== 'all') url += `${statusFilter !== 'all' ? '&' : ''}user_id=${userFilter}`;
+                }
+                
+                const response = await fetchApi(url);
+                if (response.ok) {
+                    const reports = await response.json();
+                    displayAdminReports(reports);
+                } else {
+                    throw new Error('Failed to load reports');
+                }
+            } catch (error) {
+                console.error('Error loading admin reports:', error);
+                document.getElementById('adminReportsTableBody').innerHTML = `
+                    <tr>
+                        <td colspan="6" class="error-row">
+                            <i class="fas fa-exclamation-circle"></i> Error loading reports. Please try again.
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+        
+        function displayAdminReports(reports) {
+            const tableBody = document.getElementById('adminReportsTableBody');
+            
+            if (reports.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="empty-row">
+                            <i class="fas fa-file-alt"></i> No reports found
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tableBody.innerHTML = '';
+            reports.forEach(report => {
+                const statusClass = getStatusClass(report.status);
+                const createdDate = new Date(report.created_at).toLocaleDateString();
+                const updatedDate = new Date(report.updated_at).toLocaleDateString();
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        <div class="report-title">${report.title}</div>
+                        <div class="report-description">${report.description || 'No description'}</div>
+                    </td>
+                    <td>${report.owner?.email || 'Unknown'}</td>
+                    <td>
+                        <span class="status-badge ${statusClass}">${formatStatus(report.status)}</span>
+                    </td>
+                    <td>${createdDate}</td>
+                    <td>${updatedDate}</td>
+                    <td>
+                        <button class="btn btn-icon btn-primary update-status-btn" data-id="${report.id}" data-status="${report.status}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <a href="report-detail.html?id=${report.id}" class="btn btn-icon">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+            
+            // Add event listeners to status update buttons
+            document.querySelectorAll('.update-status-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const reportId = btn.getAttribute('data-id');
+                    const currentStatus = btn.getAttribute('data-status');
+                    
+                    document.getElementById('currentReportId').value = reportId;
+                    document.getElementById('reportStatus').value = currentStatus;
+                    
+                    openModal('statusModal');
+                });
+            });
+        }
+        
+        async function loadUsers() {
+            try {
+                const response = await fetchApi('/admin/users');
+                if (response.ok) {
+                    const users = await response.json();
+                    displayUsers(users);
+                    
+                    // Also populate user filter in reports tab
+                    populateUserFilter(users);
+                } else {
+                    throw new Error('Failed to load users');
+                }
+            } catch (error) {
+                console.error('Error loading users:', error);
+                document.getElementById('adminUsersTableBody').innerHTML = `
+                    <tr>
+                        <td colspan="5" class="error-row">
+                            <i class="fas fa-exclamation-circle"></i> Error loading users. Please try again.
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+        
+        function displayUsers(users) {
+            const tableBody = document.getElementById('adminUsersTableBody');
+            
+            if (users.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="empty-row">
+                            <i class="fas fa-user"></i> No users found
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tableBody.innerHTML = '';
+            users.forEach(user => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${user.full_name || 'N/A'}</td>
+                    <td>${user.email}</td>
+                    <td>
+                        <span class="role-badge ${user.is_admin ? 'role-admin' : 'role-staff'}">
+                            ${user.is_admin ? 'Administrator' : 'Staff Member'}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="status-badge ${user.is_active ? 'status-active' : 'status-inactive'}">
+                            ${user.is_active ? 'Active' : 'Inactive'}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-icon ${user.is_active ? 'btn-danger' : 'btn-success'}" data-id="${user.id}">
+                            <i class="fas ${user.is_active ? 'fa-user-slash' : 'fa-user-check'}"></i>
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+            
+            // Add event listeners to toggle user status buttons
+            document.querySelectorAll('.admin-users-table button').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const userId = btn.getAttribute('data-id');
+                    await toggleUserStatus(userId);
+                });
+            });
+        }
+        
+        function populateUserFilter(users) {
+            const userFilter = document.getElementById('adminUserFilter');
+            
+            // Clear existing options except "All Users"
+            while (userFilter.options.length > 1) {
+                userFilter.remove(1);
+            }
+            
+            users.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.id;
+                option.textContent = `${user.full_name || user.email} (${user.is_admin ? 'Admin' : 'Staff'})`;
+                userFilter.appendChild(option);
+            });
+            
+            // Add change event listener
+            userFilter.addEventListener('change', loadAdminReports);
+        }
+        
+        async function addUser() {
+            const form = document.getElementById('addUserForm');
+            const name = document.getElementById('newUserName').value.trim();
+            const email = document.getElementById('newUserEmail').value.trim();
+            const password = document.getElementById('newUserPassword').value;
+            const role = document.getElementById('newUserRole').value;
+            
+            if (!name || !email || !password) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            try {
+                const response = await fetchApi('/users/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        full_name: name,
+                        password: password,
+                        is_admin: role === 'admin'
+                    }),
+                });
+                
+                if (response.ok) {
+                    alert('User created successfully!');
+                    closeModal('addUserModal');
+                    form.reset();
+                    loadUsers();
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Failed to create user');
+                }
+            } catch (error) {
+                console.error('Error creating user:', error);
+                alert(`Error: ${error.message}`);
+            }
+        }
+        
+        async function toggleUserStatus(userId) {
+            if (!confirm('Are you sure you want to toggle this user\'s status?')) {
+                return;
+            }
+            
+            try {
+                // Note: This endpoint would need to be added to your backend
+                const response = await fetchApi(`/users/${userId}/toggle-status`, {
+                    method: 'PUT',
+                });
+                
+                if (response.ok) {
+                    alert('User status updated successfully!');
+                    loadUsers();
+                } else {
+                    throw new Error('Failed to update user status');
+                }
+            } catch (error) {
+                console.error('Error toggling user status:', error);
+                alert('Error updating user status');
+            }
+        }
+        
+        async function updateReportStatus() {
+            const reportId = document.getElementById('currentReportId').value;
+            const status = document.getElementById('reportStatus').value;
+            
+            try {
+                const response = await fetchApi(`/reports/${reportId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        status: status
+                    }),
+                });
+                
+                if (response.ok) {
+                    alert('Report status updated successfully!');
+                    closeModal('statusModal');
+                    loadAdminReports();
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Failed to update report status');
+                }
+            } catch (error) {
+                console.error('Error updating report status:', error);
+                alert(`Error: ${error.message}`);
+            }
+        }
+        
+        function getStatusClass(status) {
+            switch (status) {
+                case 'resolved': return 'status-success';
+                case 'in_progress': return 'status-info';
+                default: return 'status-warning';
+            }
+        }
+        
+        function formatStatus(status) {
+            return status.split('_').map(word => 
+                word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+        }
+    </script>
+</body>
+</html>
