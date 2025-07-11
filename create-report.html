@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Report | Reporting System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="https://via.placeholder.com/150x50?text=Company+Logo" alt="Company Logo" class="logo">
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="reports.html">
+                            <i class="fas fa-file-alt"></i>
+                            <span>My Reports</span>
+                        </a>
+                    </li>
+                    <li class="active">
+                        <a href="create-report.html">
+                            <i class="fas fa-plus-circle"></i>
+                            <span>New Report</span>
+                        </a>
+                    </li>
+                    <li id="adminLink" style="display: none;">
+                        <a href="admin.html">
+                            <i class="fas fa-user-shield"></i>
+                            <span>Admin Panel</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-info">
+                        <span class="user-name" id="userName">Loading...</span>
+                        <span class="user-role" id="userRole">Loading...</span>
+                    </div>
+                </div>
+                <button id="logoutBtn" class="btn btn-text">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <h1>Create New Report</h1>
+                <div class="header-actions">
+                    <button class="btn btn-text" onclick="window.location.href='reports.html'">
+                        <i class="fas fa-arrow-left"></i> Back to Reports
+                    </button>
+                </div>
+            </header>
+            
+            <div class="content-container">
+                <form id="reportForm" class="form-card">
+                    <div class="form-section">
+                        <h2>Report Details</h2>
+                        <div class="form-group">
+                            <label for="reportTitle">Title*</label>
+                            <input type="text" id="reportTitle" name="title" required placeholder="Enter report title">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="reportDescription">Description</label>
+                            <textarea id="reportDescription" name="description" rows="5" placeholder="Provide detailed description of the issue"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h2>Attachments</h2>
+                        <div class="file-upload-area" id="fileUploadArea">
+                            <input type="file" id="fileInput" multiple style="display: none;">
+                            <div class="upload-prompt">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>Drag & drop files here or <span class="text-link" id="browseFiles">browse</span></p>
+                                <p class="upload-hint">Supports JPG, PNG, PDF, DOCX up to 10MB each</p>
+                            </div>
+                        </div>
+                        
+                        <div class="file-preview" id="filePreview">
+                            <!-- Files will be listed here -->
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-text" onclick="window.location.href='reports.html'">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <i class="fas fa-paper-plane"></i> Submit Report
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script src="utils.js"></script>
+    <script src="auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check authentication
+            const user = await checkAuth();
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Update UI based on user role
+            if (user.is_admin) {
+                document.getElementById('adminLink').style.display = 'block';
+            }
+            
+            // Set up file upload
+            setupFileUpload();
+            
+            // Handle form submission
+            document.getElementById('reportForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await submitReport();
+            });
+        });
+        
+        function setupFileUpload() {
+            const fileInput = document.getElementById('fileInput');
+            const fileUploadArea = document.getElementById('fileUploadArea');
+            const browseFiles = document.getElementById('browseFiles');
+            const filePreview = document.getElementById('filePreview');
+            
+            let files = [];
+            
+            // Click handler for browse files
+            browseFiles.addEventListener('click', () => fileInput.click());
+            fileUploadArea.addEventListener('click', () => fileInput.click());
+            
+            // Drag and drop handlers
+            fileUploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                fileUploadArea.classList.add('dragover');
+            });
+            
+            fileUploadArea.addEventListener('dragleave', () => {
+                fileUploadArea.classList.remove('dragover');
+            });
+            
+            fileUploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                fileUploadArea.classList.remove('dragover');
+                
+                if (e.dataTransfer.files.length > 0) {
+                    handleFiles(e.dataTransfer.files);
+                }
+            });
+            
+            // File input change handler
+            fileInput.addEventListener('change', () => {
+                if (fileInput.files.length > 0) {
+                    handleFiles(fileInput.files);
+                }
+            });
+            
+            function handleFiles(newFiles) {
+                const validTypes = [
+                    'image/jpeg', 'image/png', 'application/pdf', 
+                    'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                ];
+                
+                const validFiles = Array.from(newFiles).filter(file => {
+                    if (!validTypes.includes(file.type)) {
+                        alert(`File type not supported: ${file.name}`);
+                        return false;
+                    }
+                    
+                    if (file.size > 10 * 1024 * 1024) { // 10MB
+                        alert(`File too large (max 10MB): ${file.name}`);
+                        return false;
+                    }
+                    
+                    return true;
+                });
+                
+                files = [...files, ...validFiles];
+                updateFilePreview();
+            }
+            
+            function updateFilePreview() {
+                filePreview.innerHTML = '';
+                
+                if (files.length === 0) {
+                    filePreview.innerHTML = '<p class="empty-files">No files attached</p>';
+                    return;
+                }
+                
+                files.forEach((file, index) => {
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'file-item';
+                    
+                    const fileIcon = document.createElement('div');
+                    fileIcon.className = 'file-icon';
+                    
+                    // Set appropriate icon based on file type
+                    if (file.type.startsWith('image/')) {
+                        fileIcon.innerHTML = '<i class="fas fa-image"></i>';
+                    } else if (file.type === 'application/pdf') {
+                        fileIcon.innerHTML = '<i class="fas fa-file-pdf"></i>';
+                    } else if (file.type.includes('word')) {
+                        fileIcon.innerHTML = '<i class="fas fa-file-word"></i>';
+                    } else {
+                        fileIcon.innerHTML = '<i class="fas fa-file"></i>';
+                    }
+                    
+                    const fileInfo = document.createElement('div');
+                    fileInfo.className = 'file-info';
+                    fileInfo.innerHTML = `
+                        <div class="file-name">${file.name}</div>
+                        <div class="file-size">${formatFileSize(file.size)}</div>
+                    `;
+                    
+                    const fileActions = document.createElement('div');
+                    fileActions.className = 'file-actions';
+                    fileActions.innerHTML = `
+                        <button class="btn btn-icon btn-danger" data-index="${index}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    `;
+                    
+                    fileItem.appendChild(fileIcon);
+                    fileItem.appendChild(fileInfo);
+                    fileItem.appendChild(fileActions);
+                    filePreview.appendChild(fileItem);
+                });
+                
+                // Add event listeners to delete buttons
+                document.querySelectorAll('.file-actions button').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const index = parseInt(e.currentTarget.getAttribute('data-index'));
+                        files.splice(index, 1);
+                        updateFilePreview();
+                    });
+                });
+            }
+            
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+        }
+        
+        async function submitReport() {
+            const form = document.getElementById('reportForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const title = document.getElementById('reportTitle').value.trim();
+            const description = document.getElementById('reportDescription').value.trim();
+            const fileInput = document.getElementById('fileInput');
+            
+            if (!title) {
+                alert('Please enter a title for the report');
+                return;
+            }
+            
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+            
+            try {
+                const formData = new FormData();
+                formData.append('title', title);
+                formData.append('description', description);
+                
+                // Add files to FormData
+                if (fileInput.files.length > 0) {
+                    for (let i = 0; i < fileInput.files.length; i++) {
+                        formData.append('files', fileInput.files[i]);
+                    }
+                }
+                
+                const response = await fetchApi('/reports/', {
+                    method: 'POST',
+                    body: formData,
+                    // Don't set Content-Type header, let the browser set it with the boundary
+                });
+                
+                if (response.ok) {
+                    alert('Report submitted successfully!');
+                    window.location.href = 'reports.html';
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Failed to submit report');
+                }
+            } catch (error) {
+                console.error('Error submitting report:', error);
+                alert(`Error: ${error.message}`);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Report';
+            }
+        }
+    </script>
+</body>
+</html>
