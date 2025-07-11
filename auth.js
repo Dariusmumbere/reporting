@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const errorElement = document.getElementById('loginError');
             
             try {
-                const response = await fetch(`${API_BASE_URL}/token`, {
+                const response = await fetch(`${postgresql://inventory_ihpg_user:EKkxYBPqllVfkTkIDKYRzGZKDX5Vw2ek@dpg-d16jkimmcj7s73c7li80-a/inventory_ihpg}/token`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
