@@ -1,5 +1,5 @@
 // API Base URL - Replace with your Render backend URL
-const API_BASE_URL = 'https://your-render-app.onrender.com';
+const API_BASE_URL = 'postgresql://inventory_ihpg_user:EKkxYBPqllVfkTkIDKYRzGZKDX5Vw2ek@dpg-d16jkimmcj7s73c7li80-a/inventory_ihpg';
 
 // Check authentication status
 async function checkAuth() {
