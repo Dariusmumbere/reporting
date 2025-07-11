@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Reporting System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="https://via.placeholder.com/150x50?text=Company+Logo" alt="Company Logo" class="logo">
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="active">
+                        <a href="dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="reports.html">
+                            <i class="fas fa-file-alt"></i>
+                            <span>My Reports</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="create-report.html">
+                            <i class="fas fa-plus-circle"></i>
+                            <span>New Report</span>
+                        </a>
+                    </li>
+                    <li id="adminLink" style="display: none;">
+                        <a href="admin.html">
+                            <i class="fas fa-user-shield"></i>
+                            <span>Admin Panel</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-info">
+                        <span class="user-name" id="userName">Loading...</span>
+                        <span class="user-role" id="userRole">Loading...</span>
+                    </div>
+                </div>
+                <button id="logoutBtn" class="btn btn-text">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <h1>Dashboard</h1>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="window.location.href='create-report.html'">
+                        <i class="fas fa-plus"></i> New Report
+                    </button>
+                </div>
+            </header>
+            
+            <div class="content-container">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-primary">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalReports">0</h3>
+                            <p>Total Reports</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon bg-success">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="resolvedReports">0</h3>
+                            <p>Resolved</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon bg-warning">
+                            <i class="fas fa-spinner"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="pendingReports">0</h3>
+                            <p>Pending</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon bg-info">
+                            <i class="fas fa-tasks"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="inProgressReports">0</h3>
+                            <p>In Progress</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="recent-activity">
+                    <h2>Recent Reports</h2>
+                    <div class="activity-list" id="recentReports">
+                        <div class="activity-empty">
+                            <i class="fas fa-file-alt"></i>
+                            <p>No recent reports found</p>
+                        </div>
+                    </div>
+                    <a href="reports.html" class="btn btn-text">View All Reports</a>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="utils.js"></script>
+    <script src="auth.js"></script>
+    <script src="reports.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check authentication
+            const user = await checkAuth();
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Update UI based on user role
+            if (user.is_admin) {
+                document.getElementById('adminLink').style.display = 'block';
+            }
+            
+            // Load dashboard stats
+            loadDashboardStats();
+            
+            // Load recent reports
+            loadRecentReports();
+        });
+        
+        async function loadDashboardStats() {
+            try {
+                const response = await fetchApi('/reports/');
+                if (response.ok) {
+                    const reports = await response.json();
+                    
+                    document.getElementById('totalReports').textContent = reports.length;
+                    document.getElementById('resolvedReports').textContent = reports.filter(r => r.status === 'resolved').length;
+                    document.getElementById('pendingReports').textContent = reports.filter(r => r.status === 'pending').length;
+                    document.getElementById('inProgressReports').textContent = reports.filter(r => r.status === 'in_progress').length;
+                }
+            } catch (error) {
+                console.error('Error loading dashboard stats:', error);
+            }
+        }
+        
+        async function loadRecentReports() {
+            try {
+                const response = await fetchApi('/reports/?limit=5');
+                if (response.ok) {
+                    const reports = await response.json();
+                    const container = document.getElementById('recentReports');
+                    
+                    if (reports.length === 0) {
+                        container.innerHTML = `
+                            <div class="activity-empty">
+                                <i class="fas fa-file-alt"></i>
+                                <p>No recent reports found</p>
+                            </div>
+                        `;
+                        return;
+                    }
+                    
+                    container.innerHTML = '';
+                    reports.forEach(report => {
+                        const statusClass = getStatusClass(report.status);
+                        const date = new Date(report.created_at).toLocaleDateString();
+                        
+                        const item = document.createElement('div');
+                        item.className = 'activity-item';
+                        item.innerHTML = `
+                            <div class="activity-icon ${statusClass}">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <div class="activity-details">
+                                <h3>${report.title}</h3>
+                                <p>${report.description || 'No description'}</p>
+                                <div class="activity-meta">
+                                    <span class="status-badge ${statusClass}">${formatStatus(report.status)}</span>
+                                    <span class="activity-date">${date}</span>
+                                </div>
+                            </div>
+                            <a href="report-detail.html?id=${report.id}" class="activity-action">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        `;
+                        container.appendChild(item);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading recent reports:', error);
+            }
+        }
+        
+        function getStatusClass(status) {
+            switch (status) {
+                case 'resolved': return 'status-success';
+                case 'in_progress': return 'status-info';
+                default: return 'status-warning';
+            }
+        }
+        
+        function formatStatus(status) {
+            return status.split('_').map(word => 
+                word.charAt(0).toUpperCase() + word.slice(1)
+                .join(' ');
+        }
+    </script>
+</body>
+</html>
