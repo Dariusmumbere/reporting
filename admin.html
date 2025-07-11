@@ -288,7 +288,7 @@
                 const statusFilter = document.getElementById('adminStatusFilter').value;
                 const userFilter = document.getElementById('adminUserFilter').value;
                 
-                let url = '/admin/reports';
+                let url = 'https://reporting-api-b6sx.onrender.com/admin/reports';
                 if (statusFilter !== 'all' || userFilter !== 'all') {
                     url += '?';
                     if (statusFilter !== 'all') url += `status=${statusFilter}`;
@@ -374,7 +374,7 @@
         
         async function loadUsers() {
             try {
-                const response = await fetchApi('/admin/users');
+                const response = await fetchApi('https://reporting-api-b6sx.onrender.com/admin/users');
                 if (response.ok) {
                     const users = await response.json();
                     displayUsers(users);
@@ -476,7 +476,7 @@
             }
             
             try {
-                const response = await fetchApi('/users/', {
+                const response = await fetchApi('https://reporting-api-b6sx.onrender.com/users/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -511,7 +511,7 @@
             
             try {
                 // Note: This endpoint would need to be added to your backend
-                const response = await fetchApi(`/users/${userId}/toggle-status`, {
+                const response = await fetchApi(`https://reporting-api-b6sx.onrender.com/users/${userId}/toggle-status`, {
                     method: 'PUT',
                 });
                 
@@ -532,7 +532,7 @@
             const status = document.getElementById('reportStatus').value;
             
             try {
-                const response = await fetchApi(`/reports/${reportId}`, {
+                const response = await fetchApi(`https://reporting-api-b6sx.onrender.com/reports/${reportId}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
