@@ -3,26 +3,486 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Professional Reporting System</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>Darius | Professional Reporting System</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --light: #f8fafc;
+            --dark: #1e293b;
+            --gray: #64748b;
+            --light-gray: #e2e8f0;
+            --white: #ffffff;
+            --black: #0f172a;
+            --border-radius: 12px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+            --transition: all 0.2s ease;
+        }
+
+        [data-theme="dark"] {
+            --primary: #818cf8;
+            --primary-dark: #6366f1;
+            --light: #1e293b;
+            --dark: #f8fafc;
+            --gray: #94a3b8;
+            --light-gray: #334155;
+            --white: #0f172a;
+            --black: #f8fafc;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--light);
+            color: var(--dark);
+            transition: var(--transition);
+        }
+
+        /* Modern scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--light-gray);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        /* App container */
+        #app {
+            display: flex;
+            min-height: 100vh;
+            transition: var(--transition);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background-color: var(--white);
+            box-shadow: var(--shadow-md);
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+            transition: var(--transition);
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--light-gray);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--gray);
+            cursor: pointer;
+            font-size: 1.25rem;
+        }
+
+        /* Main content */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+            background-color: var(--light);
+        }
+
+        /* Auth pages */
+        .auth-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+            background-color: var(--light);
+        }
+
+        .auth-card {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            padding: 3rem;
+            width: 100%;
+            max-width: 480px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Add more styles as needed... */
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            #app {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+            }
+            .main-content {
+                padding: 1rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="auth-container">
-        <div class="auth-card">
-            <div class="auth-header">
-                <img src="https://via.placeholder.com/150x50?text=Company+Logo" alt="Company Logo" class="logo">
-                <h1>Professional Reporting System</h1>
-                <p>Submit and manage reports efficiently</p>
-            </div>
-            <div class="auth-buttons">
-                <a href="login.html" class="btn btn-primary">Login</a>
-                <p class="auth-note">Don't have an account? Contact your administrator.</p>
-            </div>
-        </div>
+    <div id="app">
+        <!-- Dynamic content will be injected here -->
     </div>
 
-    <script src="utils.js"></script>
+    <script>
+        // Backend API URL
+        const API_BASE_URL = 'https://darius.onrender.com';
+        
+        // State management
+        let state = {
+            token: localStorage.getItem('authToken'),
+            user: null,
+            currentView: 'login',
+            theme: localStorage.getItem('theme') || 'light'
+        };
+
+        // Initialize app
+        function init() {
+            setTheme(state.theme);
+            render();
+            checkAuth();
+        }
+
+        // Theme handling
+        function setTheme(theme) {
+            state.theme = theme;
+            localStorage.setItem('theme', theme);
+            document.documentElement.setAttribute('data-theme', theme);
+        }
+
+        // Render based on current state
+        function render() {
+            const app = document.getElementById('app');
+            
+            if (!state.token) {
+                state.currentView = 'login';
+            }
+
+            switch(state.currentView) {
+                case 'login':
+                    app.innerHTML = renderLogin();
+                    break;
+                case 'dashboard':
+                    app.innerHTML = renderDashboard();
+                    fetchDashboardData();
+                    break;
+                // Add other views...
+                default:
+                    app.innerHTML = renderLogin();
+            }
+        }
+
+        // Auth functions
+        async function checkAuth() {
+            if (!state.token) return;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/users/me/`, {
+                    headers: {
+                        'Authorization': `Bearer ${state.token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    state.user = await response.json();
+                    state.currentView = 'dashboard';
+                    render();
+                } else {
+                    logout();
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                logout();
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('authToken');
+            state.token = null;
+            state.user = null;
+            render();
+        }
+
+        // View renderers
+        function renderLogin() {
+            return `
+                <div class="auth-container">
+                    <div class="auth-card">
+                        <div class="auth-header">
+                            <div class="logo">
+                                <i class="fas fa-file-alt"></i>
+                                <span>Darius</span>
+                            </div>
+                            <h1>Welcome Back</h1>
+                            <p>Sign in to your account</p>
+                        </div>
+                        
+                        <form id="loginForm" class="auth-form" onsubmit="handleLogin(event)">
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" id="email" required placeholder="your@email.com">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="password">Password</label>
+                                <div class="password-input">
+                                    <input type="password" id="password" required placeholder="••••••••">
+                                    <button type="button" class="toggle-password" onclick="togglePassword()">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary btn-block">
+                                    <i class="fas fa-sign-in-alt"></i> Sign In
+                                </button>
+                            </div>
+                            
+                            <div id="loginError" class="error-message"></div>
+                        </form>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderDashboard() {
+            return `
+                <div class="sidebar">
+                    <div class="sidebar-header">
+                        <div class="logo">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Darius</span>
+                        </div>
+                        <button class="theme-toggle" onclick="toggleTheme()">
+                            <i class="fas ${state.theme === 'dark' ? 'fa-sun' : 'fa-moon'}"></i>
+                        </button>
+                    </div>
+                    
+                    <nav class="sidebar-nav">
+                        <ul>
+                            <li class="active">
+                                <a href="#" onclick="navigate('dashboard')">
+                                    <i class="fas fa-tachometer-alt"></i>
+                                    <span>Dashboard</span>
+                                </a>
+                            </li>
+                            ${state.user?.is_admin ? `
+                            <li>
+                                <a href="#" onclick="navigate('admin')">
+                                    <i class="fas fa-user-shield"></i>
+                                    <span>Admin</span>
+                                </a>
+                            </li>
+                            ` : ''}
+                        </ul>
+                    </nav>
+                    
+                    <div class="sidebar-footer">
+                        <div class="user-profile">
+                            <div class="avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="user-info">
+                                <span class="user-name">${state.user?.full_name || state.user?.email}</span>
+                                <span class="user-role">${state.user?.is_admin ? 'Administrator' : 'Staff'}</span>
+                            </div>
+                        </div>
+                        <button onclick="logout()" class="btn btn-text">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </div>
+                </div>
+                
+                <main class="main-content">
+                    <header class="main-header">
+                        <h1>Dashboard</h1>
+                        <div class="header-actions">
+                            <button class="btn btn-primary" onclick="navigate('create-report')">
+                                <i class="fas fa-plus"></i> New Report
+                            </button>
+                        </div>
+                    </header>
+                    
+                    <div class="content-container">
+                        <div class="stats-grid" id="statsGrid">
+                            <!-- Stats will be loaded here -->
+                            <div class="loading-spinner">
+                                <i class="fas fa-spinner fa-spin"></i> Loading...
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            `;
+        }
+
+        // Event handlers
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorEl = document.getElementById('loginError');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/token`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `username=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    state.token = data.access_token;
+                    localStorage.setItem('authToken', state.token);
+                    await checkAuth();
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Login failed');
+                }
+            } catch (error) {
+                errorEl.textContent = error.message;
+                errorEl.style.display = 'block';
+            }
+        }
+
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const icon = document.querySelector('.toggle-password i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        function toggleTheme() {
+            const newTheme = state.theme === 'light' ? 'dark' : 'light';
+            setTheme(newTheme);
+            render();
+        }
+
+        function navigate(view) {
+            state.currentView = view;
+            render();
+        }
+
+        // Data fetching
+        async function fetchDashboardData() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/reports/`, {
+                    headers: {
+                        'Authorization': `Bearer ${state.token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const reports = await response.json();
+                    renderDashboardStats(reports);
+                }
+            } catch (error) {
+                console.error('Failed to fetch reports:', error);
+            }
+        }
+
+        function renderDashboardStats(reports) {
+            const statsGrid = document.getElementById('statsGrid');
+            
+            const stats = {
+                total: reports.length,
+                resolved: reports.filter(r => r.status === 'resolved').length,
+                pending: reports.filter(r => r.status === 'pending').length,
+                inProgress: reports.filter(r => r.status === 'in_progress').length
+            };
+            
+            statsGrid.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-icon bg-primary">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>${stats.total}</h3>
+                        <p>Total Reports</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon bg-success">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>${stats.resolved}</h3>
+                        <p>Resolved</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon bg-warning">
+                        <i class="fas fa-spinner"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>${stats.pending}</h3>
+                        <p>Pending</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon bg-info">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>${stats.inProgress}</h3>
+                        <p>In Progress</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
 </body>
 </html>
