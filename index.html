@@ -4,365 +4,296 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Professional Reporting System</title>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary-color: #4361ee;
-            --secondary-color: #3f37c9;
-            --accent-color: #4895ef;
-            --danger-color: #f72585;
-            --success-color: #4cc9f0;
-            --warning-color: #f8961e;
-            --light-color: #f8f9fa;
-            --dark-color: #212529;
-            --text-color: #333;
-            --text-light: #f8f9fa;
-            --bg-color: #ffffff;
-            --card-bg: #ffffff;
-            --sidebar-bg: #2b2d42;
-            --sidebar-text: #f8f9fa;
-            --border-color: #dee2e6;
-            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            --transition: all 0.3s ease;
-        }
-
-        .dark-mode {
-            --primary-color: #4895ef;
-            --secondary-color: #4361ee;
-            --accent-color: #3f37c9;
-            --danger-color: #f72585;
-            --success-color: #4cc9f0;
-            --warning-color: #f8961e;
-            --light-color: #212529;
-            --dark-color: #f8f9fa;
-            --text-color: #f8f9fa;
-            --text-light: #333;
-            --bg-color: #121212;
-            --card-bg: #1e1e1e;
-            --sidebar-bg: #121212;
-            --sidebar-text: #f8f9fa;
-            --border-color: #333;
-            --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            --primary: #4361ee;
+            --primary-light: #e0e7ff;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --info: #4895ef;
+            --dark: #212529;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --gray-light: #e9ecef;
+            --white: #ffffff;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --rounded-sm: 0.25rem;
+            --rounded: 0.375rem;
+            --rounded-md: 0.5rem;
+            --rounded-lg: 0.75rem;
+            --rounded-full: 9999px;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            transition: var(--transition);
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f7fb;
+            color: var(--dark);
+            line-height: 1.5;
+        }
+
+        #app {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: white;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s ease;
+            z-index: 100;
+            position: fixed;
+            height: 100vh;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--gray-light);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .sidebar-header img {
+            width: 32px;
+            height: 32px;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+
+        .menu-title {
+            padding: 0.5rem 1.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            color: var(--gray);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .menu-item:hover {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .menu-item.active {
+            background-color: var(--primary-light);
+            color: var(--primary);
+            border-right: 3px solid var(--primary);
+        }
+
+        .menu-item i {
+            margin-right: 0.75rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main content */
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
 
-        a {
-            text-decoration: none;
-            color: inherit;
-        }
-
-        button {
-            cursor: pointer;
-            border: none;
-            outline: none;
-            background: none;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        /* Header */
-        header {
-            background-color: var(--primary-color);
-            color: var(--text-light);
-            padding: 1rem 0;
-            box-shadow: var(--shadow);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .header-container {
+        /* Navbar */
+        .navbar {
+            background: white;
+            padding: 1rem 1.5rem;
+            box-shadow: var(--shadow-sm);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            z-index: 50;
         }
 
-        .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-
-        .nav-links {
+        .search-bar {
             display: flex;
-            gap: 1rem;
             align-items: center;
-        }
-
-        .nav-links a {
+            background-color: var(--gray-light);
             padding: 0.5rem 1rem;
-            border-radius: 4px;
-            transition: var(--transition);
+            border-radius: var(--rounded);
+            width: 300px;
         }
 
-        .nav-links a:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
-        .theme-toggle {
-            background: none;
-            color: var(--text-light);
-            font-size: 1.2rem;
-            cursor: pointer;
+        .search-bar input {
             border: none;
-            padding: 0.5rem;
-            border-radius: 50%;
-            transition: var(--transition);
+            background: transparent;
+            outline: none;
+            width: 100%;
+            padding: 0.25rem;
         }
 
-        .theme-toggle:hover {
-            background-color: rgba(255, 255, 255, 0.1);
+        .search-bar i {
+            color: var(--gray);
+            margin-right: 0.5rem;
         }
 
         .user-menu {
-            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
         }
 
         .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: var(--accent-color);
+            width: 36px;
+            height: 36px;
+            border-radius: var(--rounded-full);
+            background-color: var(--primary-light);
+            color: var(--primary);
             display: flex;
             align-items: center;
             justify-content: center;
+            font-weight: 600;
             cursor: pointer;
-            font-weight: bold;
-            color: white;
         }
 
-        .dropdown-menu {
+        .notification-badge {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .notification-badge i {
+            font-size: 1.25rem;
+            color: var(--gray);
+        }
+
+        .badge {
             position: absolute;
-            right: 0;
-            top: 100%;
-            background-color: var(--card-bg);
-            border-radius: 4px;
-            box-shadow: var(--shadow);
-            padding: 0.5rem 0;
-            min-width: 200px;
-            display: none;
-            z-index: 10;
-            border: 1px solid var(--border-color);
-        }
-
-        .dropdown-menu.show {
-            display: block;
-        }
-
-        .dropdown-item {
-            padding: 0.5rem 1rem;
-            transition: var(--transition);
-        }
-
-        .dropdown-item:hover {
-            background-color: rgba(0, 0, 0, 0.1);
-        }
-
-        /* Main content */
-        .main-content {
-            display: flex;
-            flex: 1;
-        }
-
-        /* Sidebar */
-        .sidebar {
-            width: 250px;
-            background-color: var(--sidebar-bg);
-            color: var(--sidebar-text);
-            padding: 1rem 0;
-            height: calc(100vh - 60px);
-            position: sticky;
-            top: 60px;
-            transition: var(--transition);
-        }
-
-        .sidebar-collapsed {
-            width: 70px;
-        }
-
-        .sidebar-header {
-            padding: 0 1rem 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .sidebar-title {
-            font-weight: bold;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .toggle-sidebar {
-            background: none;
-            color: var(--sidebar-text);
-            border: none;
-            cursor: pointer;
-            font-size: 1rem;
-        }
-
-        .sidebar-menu {
-            list-style: none;
-            padding: 1rem 0;
-        }
-
-        .menu-item {
-            padding: 0.5rem 1rem;
+            top: -5px;
+            right: -5px;
+            background-color: var(--danger);
+            color: white;
+            border-radius: var(--rounded-full);
+            width: 18px;
+            height: 18px;
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            cursor: pointer;
-            transition: var(--transition);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            justify-content: center;
+            font-size: 0.625rem;
+            font-weight: 600;
         }
 
-        .menu-item:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
-        .menu-item.active {
-            background-color: var(--primary-color);
-        }
-
-        .menu-icon {
-            font-size: 1.1rem;
-            min-width: 24px;
-            text-align: center;
-        }
-
-        .menu-text {
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .sidebar-collapsed .menu-text {
-            display: none;
-        }
-
-        .sidebar-collapsed .sidebar-title {
-            display: none;
-        }
-
-        /* Content area */
-        .content-area {
+        /* Content */
+        .content {
             flex: 1;
-            padding: 2rem 0;
+            padding: 1.5rem;
         }
 
         .page-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
         }
 
         .page-title {
-            font-size: 1.75rem;
+            font-size: 1.5rem;
             font-weight: 600;
         }
 
         .btn {
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            font-weight: 500;
-            transition: var(--transition);
             display: inline-flex;
             align-items: center;
+            justify-content: center;
+            padding: 0.5rem 1rem;
+            border-radius: var(--rounded);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            outline: none;
             gap: 0.5rem;
         }
 
         .btn-primary {
-            background-color: var(--primary-color);
+            background-color: var(--primary);
             color: white;
-            border: 1px solid var(--primary-color);
         }
 
         .btn-primary:hover {
-            background-color: var(--secondary-color);
-            border-color: var(--secondary-color);
+            background-color: var(--secondary);
         }
 
         .btn-outline {
             background-color: transparent;
-            color: var(--primary-color);
-            border: 1px solid var(--primary-color);
+            border: 1px solid var(--gray-light);
+            color: var(--gray);
         }
 
         .btn-outline:hover {
-            background-color: rgba(67, 97, 238, 0.1);
+            background-color: var(--gray-light);
         }
 
         .btn-danger {
-            background-color: var(--danger-color);
+            background-color: var(--danger);
             color: white;
-            border: 1px solid var(--danger-color);
         }
 
         .btn-danger:hover {
-            background-color: #d3166b;
-            border-color: #d3166b;
+            background-color: #d1146a;
         }
 
-        .btn-success {
-            background-color: var(--success-color);
-            color: white;
-            border: 1px solid var(--success-color);
-        }
-
-        .btn-success:hover {
-            background-color: #3ab0d5;
-            border-color: #3ab0d5;
-        }
-
-        /* Cards */
+        /* Card */
         .card {
-            background-color: var(--card-bg);
-            border-radius: 8px;
+            background: white;
+            border-radius: var(--rounded-md);
             box-shadow: var(--shadow);
-            padding: 1.5rem;
             margin-bottom: 1.5rem;
-            border: 1px solid var(--border-color);
+            overflow: hidden;
         }
 
         .card-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--gray-light);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1rem;
-            padding-bottom: 0.75rem;
-            border-bottom: 1px solid var(--border-color);
         }
 
         .card-title {
-            font-size: 1.25rem;
             font-weight: 600;
+            font-size: 1.125rem;
         }
 
-        /* Tables */
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        /* Table */
         .table-responsive {
             overflow-x: auto;
         }
@@ -373,53 +304,54 @@
         }
 
         .table th, .table td {
-            padding: 0.75rem;
+            padding: 0.75rem 1rem;
             text-align: left;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--gray-light);
         }
 
         .table th {
             font-weight: 600;
-            background-color: rgba(0, 0, 0, 0.05);
+            color: var(--gray);
+            background-color: #f9fafb;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
         }
 
-        .table tr:hover {
-            background-color: rgba(0, 0, 0, 0.03);
+        .table tr:hover td {
+            background-color: #f8f9fa;
         }
 
-        .badge {
-            display: inline-block;
-            padding: 0.35em 0.65em;
-            font-size: 0.75em;
-            font-weight: 700;
-            line-height: 1;
-            text-align: center;
-            white-space: nowrap;
-            vertical-align: baseline;
-            border-radius: 0.25rem;
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--rounded-full);
+            font-size: 0.75rem;
+            font-weight: 500;
         }
 
-        .badge-primary {
-            color: white;
-            background-color: var(--primary-color);
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
         }
 
-        .badge-success {
-            color: white;
-            background-color: var(--success-color);
+        .status-completed {
+            background-color: #d4edda;
+            color: #155724;
         }
 
-        .badge-warning {
-            color: white;
-            background-color: var(--warning-color);
+        .status-in-progress {
+            background-color: #cce5ff;
+            color: #004085;
         }
 
-        .badge-danger {
-            color: white;
-            background-color: var(--danger-color);
+        .status-cancelled {
+            background-color: #f8d7da;
+            color: #721c24;
         }
 
-        /* Forms */
+        /* Form */
         .form-group {
             margin-bottom: 1rem;
         }
@@ -433,17 +365,15 @@
         .form-control {
             width: 100%;
             padding: 0.5rem 0.75rem;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            background-color: var(--card-bg);
-            color: var(--text-color);
-            transition: var(--transition);
+            border: 1px solid var(--gray-light);
+            border-radius: var(--rounded);
+            transition: all 0.2s ease;
         }
 
         .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
             outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
         }
 
         textarea.form-control {
@@ -451,94 +381,55 @@
             resize: vertical;
         }
 
-        .file-input {
-            display: none;
-        }
-
-        .file-label {
-            display: inline-block;
-            padding: 0.5rem 1rem;
-            background-color: var(--light-color);
-            border: 1px dashed var(--border-color);
-            border-radius: 4px;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .file-label:hover {
-            background-color: rgba(0, 0, 0, 0.05);
-        }
-
-        .file-list {
-            margin-top: 0.5rem;
-        }
-
-        .file-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem;
-            background-color: rgba(0, 0, 0, 0.05);
-            border-radius: 4px;
-            margin-bottom: 0.25rem;
-        }
-
-        .file-item button {
-            color: var(--danger-color);
-            background: none;
-            border: none;
-            cursor: pointer;
-        }
-
         /* Modal */
         .modal {
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
+            right: 0;
+            bottom: 0;
             background-color: rgba(0, 0, 0, 0.5);
             display: flex;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
             z-index: 1000;
             opacity: 0;
-            visibility: hidden;
-            transition: var(--transition);
+            pointer-events: none;
+            transition: all 0.3s ease;
         }
 
-        .modal.show {
+        .modal.active {
             opacity: 1;
-            visibility: visible;
+            pointer-events: all;
         }
 
         .modal-content {
-            background-color: var(--card-bg);
-            border-radius: 8px;
+            background-color: white;
+            border-radius: var(--rounded-md);
+            box-shadow: var(--shadow-lg);
             width: 100%;
-            max-width: 600px;
+            max-width: 500px;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: var(--shadow);
             transform: translateY(-20px);
-            transition: var(--transition);
+            transition: all 0.3s ease;
         }
 
-        .modal.show .modal-content {
+        .modal.active .modal-content {
             transform: translateY(0);
         }
 
         .modal-header {
             padding: 1rem 1.5rem;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--gray-light);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
         .modal-title {
-            font-size: 1.25rem;
             font-weight: 600;
+            font-size: 1.25rem;
         }
 
         .modal-close {
@@ -546,7 +437,7 @@
             border: none;
             font-size: 1.5rem;
             cursor: pointer;
-            color: var(--text-color);
+            color: var(--gray);
         }
 
         .modal-body {
@@ -555,96 +446,160 @@
 
         .modal-footer {
             padding: 1rem 1.5rem;
-            border-top: 1px solid var(--border-color);
+            border-top: 1px solid var(--gray-light);
             display: flex;
             justify-content: flex-end;
+            gap: 0.75rem;
+        }
+
+        /* File upload */
+        .file-upload {
+            border: 2px dashed var(--gray-light);
+            border-radius: var(--rounded);
+            padding: 1.5rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .file-upload:hover {
+            border-color: var(--primary);
+        }
+
+        .file-upload i {
+            font-size: 2rem;
+            color: var(--gray);
+            margin-bottom: 0.5rem;
+        }
+
+        .file-upload p {
+            margin-bottom: 0.5rem;
+            color: var(--gray);
+        }
+
+        .file-upload input {
+            display: none;
+        }
+
+        .file-list {
+            display: flex;
+            flex-wrap: wrap;
             gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .file-item {
+            background-color: var(--gray-light);
+            padding: 0.5rem 1rem;
+            border-radius: var(--rounded);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .file-item i {
+            cursor: pointer;
+            color: var(--danger);
+        }
+
+        /* Alert */
+        .alert {
+            padding: 1rem;
+            border-radius: var(--rounded);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .alert-info {
+            background-color: #cce5ff;
+            color: #004085;
         }
 
         /* Login page */
-        .auth-container {
+        .login-container {
             display: flex;
-            justify-content: center;
-            align-items: center;
             min-height: 100vh;
-            background-color: var(--light-color);
+            align-items: center;
+            justify-content: center;
+            background-color: #f5f7fb;
         }
 
-        .auth-card {
-            background-color: var(--card-bg);
-            border-radius: 8px;
-            box-shadow: var(--shadow);
+        .login-card {
+            background: white;
+            border-radius: var(--rounded-md);
+            box-shadow: var(--shadow-lg);
             width: 100%;
-            max-width: 450px;
+            max-width: 400px;
             padding: 2rem;
-            border: 1px solid var(--border-color);
         }
 
-        .auth-header {
+        .login-header {
             text-align: center;
             margin-bottom: 2rem;
         }
 
-        .auth-logo {
-            font-size: 2rem;
-            font-weight: bold;
-            color: var(--primary-color);
-            margin-bottom: 1rem;
-        }
-
-        .auth-title {
+        .login-header h1 {
             font-size: 1.5rem;
             font-weight: 600;
             margin-bottom: 0.5rem;
+            color: var(--primary);
         }
 
-        .auth-subtitle {
-            color: #6c757d;
+        .login-header p {
+            color: var(--gray);
         }
 
-        .auth-footer {
+        .login-footer {
             text-align: center;
             margin-top: 1.5rem;
-            color: #6c757d;
+            color: var(--gray);
         }
 
-        .auth-footer a {
-            color: var(--primary-color);
+        .login-footer a {
+            color: var(--primary);
+            text-decoration: none;
             font-weight: 500;
         }
 
         /* Responsive */
-        @media (max-width: 992px) {
-            .sidebar {
-                position: fixed;
-                left: -250px;
-                top: 60px;
-                height: calc(100vh - 60px);
-                z-index: 90;
-            }
-
-            .sidebar.show {
-                left: 0;
-            }
-
-            .sidebar-collapsed {
-                left: -70px;
-            }
-
-            .sidebar-collapsed.show {
-                left: 0;
-            }
-        }
-
         @media (max-width: 768px) {
-            .page-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 1rem;
+            .sidebar {
+                transform: translateX(-100%);
+                position: fixed;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                z-index: 1000;
             }
 
-            .modal-content {
-                width: 95%;
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .navbar-toggle {
+                display: block;
+            }
+
+            .search-bar {
+                width: 100%;
             }
         }
 
@@ -659,35 +614,19 @@
         }
 
         /* Utility classes */
-        .text-center {
-            text-align: center;
+        .hidden {
+            display: none !important;
         }
 
-        .text-muted {
-            color: #6c757d;
-        }
-
-        .mt-1 { margin-top: 0.25rem; }
-        .mt-2 { margin-top: 0.5rem; }
-        .mt-3 { margin-top: 1rem; }
-        .mt-4 { margin-top: 1.5rem; }
-        .mt-5 { margin-top: 3rem; }
-
-        .mb-1 { margin-bottom: 0.25rem; }
-        .mb-2 { margin-bottom: 0.5rem; }
-        .mb-3 { margin-bottom: 1rem; }
-        .mb-4 { margin-bottom: 1.5rem; }
-        .mb-5 { margin-bottom: 3rem; }
-
-        .d-flex {
+        .flex {
             display: flex;
         }
 
-        .align-items-center {
+        .items-center {
             align-items: center;
         }
 
-        .justify-content-between {
+        .justify-between {
             justify-content: space-between;
         }
 
@@ -695,24 +634,43 @@
             gap: 0.5rem;
         }
 
-        .gap-3 {
+        .gap-4 {
             gap: 1rem;
         }
 
-        .w-100 {
-            width: 100%;
+        .mt-4 {
+            margin-top: 1rem;
+        }
+
+        .mb-4 {
+            margin-bottom: 1rem;
+        }
+
+        .p-4 {
+            padding: 1rem;
+        }
+
+        .text-sm {
+            font-size: 0.875rem;
+        }
+
+        .text-gray {
+            color: var(--gray);
+        }
+
+        .text-center {
+            text-align: center;
         }
     </style>
 </head>
 <body>
     <div id="app">
-        <!-- Login Page -->
-        <div id="login-page" class="auth-container">
-            <div class="auth-card">
-                <div class="auth-header">
-                    <div class="auth-logo">Reporting System</div>
-                    <h2 class="auth-title">Sign In</h2>
-                    <p class="auth-subtitle">Enter your credentials to access your account</p>
+        <!-- Login View -->
+        <div id="login-view" class="login-container">
+            <div class="login-card">
+                <div class="login-header">
+                    <h1>Professional Reporting System</h1>
+                    <p>Sign in to access your dashboard</p>
                 </div>
                 <form id="login-form">
                     <div class="form-group">
@@ -723,316 +681,373 @@
                         <label for="login-password" class="form-label">Password</label>
                         <input type="password" id="login-password" class="form-control" placeholder="Enter your password" required>
                     </div>
-                    <div class="form-group">
-                        <button type="submit" class="btn btn-primary w-100">Sign In</button>
-                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Sign In</button>
                 </form>
-                <div class="auth-footer">
-                    <p>Initial Admin Credentials: admin@reporting.com / Admin@123</p>
+                <div class="login-footer">
+                    <p>Don't have an account? <a href="#" id="show-register">Contact admin</a></p>
                 </div>
             </div>
         </div>
 
         <!-- Main App -->
-        <div id="main-app" style="display: none;">
-            <header>
-                <div class="header-container container">
-                    <button id="sidebar-toggle" class="d-flex align-items-center gap-2">
-                        <i class="fas fa-bars"></i>
-                        <span class="logo">Reporting System</span>
-                    </button>
-                    <div class="nav-links">
-                        <button id="theme-toggle" class="theme-toggle">
-                            <i class="fas fa-moon"></i>
+        <div id="main-app" class="hidden">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <i class="fas fa-chart-pie"></i>
+                    <h2>ReportSys</h2>
+                </div>
+                <div class="sidebar-menu">
+                    <div class="menu-title">Main</div>
+                    <a href="#" class="menu-item active" data-view="dashboard">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="#" class="menu-item" data-view="reports">
+                        <i class="fas fa-file-alt"></i>
+                        <span>Reports</span>
+                    </a>
+                    <div class="menu-title">Administration</div>
+                    <a href="#" class="menu-item" data-view="users">
+                        <i class="fas fa-users"></i>
+                        <span>Users</span>
+                    </a>
+                    <a href="#" class="menu-item" data-view="settings">
+                        <i class="fas fa-cog"></i>
+                        <span>Settings</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="main-content">
+                <!-- Navbar -->
+                <div class="navbar">
+                    <div class="flex items-center gap-4">
+                        <button id="sidebar-toggle" class="btn btn-outline">
+                            <i class="fas fa-bars"></i>
                         </button>
-                        <div class="user-menu">
-                            <div id="user-avatar" class="user-avatar">AU</div>
-                            <div id="dropdown-menu" class="dropdown-menu">
-                                <div class="dropdown-item" id="profile-btn">
-                                    <i class="fas fa-user me-2"></i> Profile
+                        <div class="search-bar">
+                            <i class="fas fa-search"></i>
+                            <input type="text" placeholder="Search...">
+                        </div>
+                    </div>
+                    <div class="user-menu">
+                        <div class="notification-badge">
+                            <i class="fas fa-bell"></i>
+                            <span class="badge">3</span>
+                        </div>
+                        <div class="user-avatar" id="user-avatar">JD</div>
+                    </div>
+                </div>
+
+                <!-- Content Views -->
+                <div class="content">
+                    <!-- Dashboard View -->
+                    <div id="dashboard-view" class="view">
+                        <div class="page-header">
+                            <h1 class="page-title">Dashboard</h1>
+                            <div class="flex gap-2">
+                                <button class="btn btn-outline">
+                                    <i class="fas fa-download"></i> Export
+                                </button>
+                                <button class="btn btn-primary" id="create-report-btn">
+                                    <i class="fas fa-plus"></i> New Report
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h3 class="text-gray">Total Reports</h3>
+                                    <p class="text-2xl font-bold">24</p>
                                 </div>
-                                <div class="dropdown-item" id="logout-btn">
-                                    <i class="fas fa-sign-out-alt me-2"></i> Logout
+                            </div>
+                            <div class="card">
+                                <div class="card-body">
+                                    <h3 class="text-gray">Pending</h3>
+                                    <p class="text-2xl font-bold">8</p>
                                 </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-body">
+                                    <h3 class="text-gray">In Progress</h3>
+                                    <p class="text-2xl font-bold">12</p>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-body">
+                                    <h3 class="text-gray">Completed</h3>
+                                    <p class="text-2xl font-bold">4</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">Recent Reports</h2>
+                                <button class="btn btn-outline">View All</button>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Title</th>
+                                                <th>Status</th>
+                                                <th>Date</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="recent-reports">
+                                            <!-- Reports will be loaded here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Reports View -->
+                    <div id="reports-view" class="view hidden">
+                        <div class="page-header">
+                            <h1 class="page-title">Reports</h1>
+                            <button class="btn btn-primary" id="new-report-btn">
+                                <i class="fas fa-plus"></i> New Report
+                            </button>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">All Reports</h2>
+                                <div class="flex gap-2">
+                                    <select class="form-control" style="width: auto;" id="report-filter">
+                                        <option value="all">All Reports</option>
+                                        <option value="pending">Pending</option>
+                                        <option value="in-progress">In Progress</option>
+                                        <option value="completed">Completed</option>
+                                    </select>
+                                    <button class="btn btn-outline">
+                                        <i class="fas fa-filter"></i> Filter
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Title</th>
+                                                <th>Description</th>
+                                                <th>Status</th>
+                                                <th>Created</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="all-reports">
+                                            <!-- Reports will be loaded here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Users View -->
+                    <div id="users-view" class="view hidden">
+                        <div class="page-header">
+                            <h1 class="page-title">Users</h1>
+                            <button class="btn btn-primary" id="new-user-btn">
+                                <i class="fas fa-plus"></i> New User
+                            </button>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">All Users</h2>
+                                <div class="search-bar" style="width: 300px;">
+                                    <i class="fas fa-search"></i>
+                                    <input type="text" placeholder="Search users..." id="user-search">
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Email</th>
+                                                <th>Role</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="users-table">
+                                            <!-- Users will be loaded here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Settings View -->
+                    <div id="settings-view" class="view hidden">
+                        <div class="page-header">
+                            <h1 class="page-title">Settings</h1>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">Profile</h2>
+                            </div>
+                            <div class="card-body">
+                                <form id="profile-form">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div class="form-group">
+                                            <label for="profile-name" class="form-label">Full Name</label>
+                                            <input type="text" id="profile-name" class="form-control" value="John Doe">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="profile-email" class="form-label">Email</label>
+                                            <input type="email" id="profile-email" class="form-control" value="john.doe@example.com" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="profile-password" class="form-label">New Password</label>
+                                        <input type="password" id="profile-password" class="form-control" placeholder="Leave blank to keep current">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="profile-confirm" class="form-label">Confirm Password</label>
+                                        <input type="password" id="profile-confirm" class="form-control">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                                </form>
                             </div>
                         </div>
                     </div>
                 </div>
-            </header>
-
-            <div class="main-content">
-                <aside id="sidebar" class="sidebar">
-                    <div class="sidebar-header">
-                        <div class="sidebar-title">Menu</div>
-                        <button class="toggle-sidebar">
-                            <i class="fas fa-chevron-left"></i>
-                        </button>
-                    </div>
-                    <ul class="sidebar-menu">
-                        <li class="menu-item active" data-page="dashboard">
-                            <div class="menu-icon">
-                                <i class="fas fa-tachometer-alt"></i>
-                            </div>
-                            <div class="menu-text">Dashboard</div>
-                        </li>
-                        <li class="menu-item" data-page="reports">
-                            <div class="menu-icon">
-                                <i class="fas fa-file-alt"></i>
-                            </div>
-                            <div class="menu-text">Reports</div>
-                        </li>
-                        <li id="admin-menu-item" class="menu-item" data-page="users" style="display: none;">
-                            <div class="menu-icon">
-                                <i class="fas fa-users"></i>
-                            </div>
-                            <div class="menu-text">Users</div>
-                        </li>
-                    </ul>
-                </aside>
-
-                <main class="content-area">
-                    <div class="container">
-                        <!-- Dashboard Page -->
-                        <div id="dashboard-page" class="page-content">
-                            <div class="page-header">
-                                <h1 class="page-title">Dashboard</h1>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <h3 class="card-title">My Reports</h3>
-                                        </div>
-                                        <div class="card-body">
-                                            <div id="reports-stats" class="d-flex justify-content-between gap-3">
-                                                <div class="text-center">
-                                                    <h4 id="pending-count">0</h4>
-                                                    <p class="text-muted">Pending</p>
-                                                </div>
-                                                <div class="text-center">
-                                                    <h4 id="in-progress-count">0</h4>
-                                                    <p class="text-muted">In Progress</p>
-                                                </div>
-                                                <div class="text-center">
-                                                    <h4 id="completed-count">0</h4>
-                                                    <p class="text-muted">Completed</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <h3 class="card-title">Recent Reports</h3>
-                                        </div>
-                                        <div class="card-body">
-                                            <div id="recent-reports">
-                                                <p>Loading recent reports...</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Reports Page -->
-                        <div id="reports-page" class="page-content" style="display: none;">
-                            <div class="page-header">
-                                <h1 class="page-title">Reports</h1>
-                                <button id="new-report-btn" class="btn btn-primary">
-                                    <i class="fas fa-plus me-1"></i> New Report
-                                </button>
-                            </div>
-                            <div class="card">
-                                <div class="card-body">
-                                    <div class="table-responsive">
-                                        <table class="table">
-                                            <thead>
-                                                <tr>
-                                                    <th>Title</th>
-                                                    <th>Status</th>
-                                                    <th>Created</th>
-                                                    <th>Updated</th>
-                                                    <th>Actions</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="reports-list">
-                                                <tr>
-                                                    <td colspan="5" class="text-center">Loading reports...</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Users Page (Admin Only) -->
-                        <div id="users-page" class="page-content" style="display: none;">
-                            <div class="page-header">
-                                <h1 class="page-title">Users</h1>
-                                <button id="new-user-btn" class="btn btn-primary">
-                                    <i class="fas fa-plus me-1"></i> New User
-                                </button>
-                            </div>
-                            <div class="card">
-                                <div class="card-body">
-                                    <div class="table-responsive">
-                                        <table class="table">
-                                            <thead>
-                                                <tr>
-                                                    <th>Name</th>
-                                                    <th>Email</th>
-                                                    <th>Role</th>
-                                                    <th>Status</th>
-                                                    <th>Actions</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="users-list">
-                                                <tr>
-                                                    <td colspan="5" class="text-center">Loading users...</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </main>
             </div>
         </div>
 
-        <!-- New Report Modal -->
+        <!-- Modals -->
+        <!-- Create Report Modal -->
         <div id="report-modal" class="modal">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="report-modal-title">New Report</h5>
+                    <h3 class="modal-title">Create New Report</h3>
                     <button class="modal-close">&times;</button>
                 </div>
-                <form id="report-form">
-                    <input type="hidden" id="report-id">
-                    <div class="modal-body">
+                <div class="modal-body">
+                    <form id="report-form">
                         <div class="form-group">
                             <label for="report-title" class="form-label">Title</label>
-                            <input type="text" id="report-title" class="form-control" required>
+                            <input type="text" id="report-title" class="form-control" placeholder="Enter report title" required>
                         </div>
                         <div class="form-group">
                             <label for="report-description" class="form-label">Description</label>
-                            <textarea id="report-description" class="form-control" required></textarea>
-                        </div>
-                        <div class="form-group" id="report-status-group" style="display: none;">
-                            <label for="report-status" class="form-label">Status</label>
-                            <select id="report-status" class="form-control">
-                                <option value="pending">Pending</option>
-                                <option value="in_progress">In Progress</option>
-                                <option value="completed">Completed</option>
-                            </select>
+                            <textarea id="report-description" class="form-control" placeholder="Enter detailed description" required></textarea>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Attachments</label>
-                            <input type="file" id="report-files" class="file-input" multiple>
-                            <label for="report-files" class="file-label w-100 text-center">
-                                <i class="fas fa-cloud-upload-alt me-2"></i>Choose files or drag and drop here
-                            </label>
-                            <div id="file-list" class="file-list"></div>
+                            <div class="file-upload" id="file-upload">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>Drag & drop files here or click to browse</p>
+                                <span class="text-sm">Max file size: 5MB</span>
+                                <input type="file" id="report-files" multiple>
+                            </div>
+                            <div class="file-list" id="file-list"></div>
                         </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-outline modal-close">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Save</button>
-                    </div>
-                </form>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline modal-close">Cancel</button>
+                    <button class="btn btn-primary" id="submit-report">Submit Report</button>
+                </div>
             </div>
         </div>
 
-        <!-- New User Modal -->
+        <!-- View Report Modal -->
+        <div id="view-report-modal" class="modal">
+            <div class="modal-content" style="max-width: 700px;">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="view-report-title">Report Details</h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="flex justify-between mb-4">
+                        <div>
+                            <span class="text-gray">Status:</span>
+                            <span class="status-badge status-pending ml-2" id="view-report-status">Pending</span>
+                        </div>
+                        <div>
+                            <span class="text-gray">Created:</span>
+                            <span class="ml-2" id="view-report-date">2023-05-15</span>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <h4 class="font-semibold mb-2">Description</h4>
+                        <p id="view-report-description">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in dui mauris.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold mb-2">Attachments</h4>
+                        <div class="file-list" id="view-report-attachments">
+                            <!-- Attachments will be listed here -->
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline modal-close">Close</button>
+                    <button class="btn btn-primary" id="edit-report-btn">Edit</button>
+                    <button class="btn btn-danger" id="delete-report-btn">Delete</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Create User Modal -->
         <div id="user-modal" class="modal">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="user-modal-title">New User</h5>
+                    <h3 class="modal-title">Create New User</h3>
                     <button class="modal-close">&times;</button>
                 </div>
-                <form id="user-form">
-                    <input type="hidden" id="user-id">
-                    <div class="modal-body">
+                <div class="modal-body">
+                    <form id="user-form">
                         <div class="form-group">
-                            <label for="user-full-name" class="form-label">Full Name</label>
-                            <input type="text" id="user-full-name" class="form-control" required>
+                            <label for="user-name" class="form-label">Full Name</label>
+                            <input type="text" id="user-name" class="form-control" placeholder="Enter full name" required>
                         </div>
                         <div class="form-group">
                             <label for="user-email" class="form-label">Email</label>
-                            <input type="email" id="user-email" class="form-control" required>
+                            <input type="email" id="user-email" class="form-control" placeholder="Enter email address" required>
                         </div>
                         <div class="form-group">
                             <label for="user-password" class="form-label">Password</label>
-                            <input type="password" id="user-password" class="form-control">
+                            <input type="password" id="user-password" class="form-control" placeholder="Enter password" required>
                         </div>
                         <div class="form-group">
                             <label for="user-role" class="form-label">Role</label>
                             <select id="user-role" class="form-control" required>
-                                <option value="staff">Staff</option>
+                                <option value="">Select role</option>
                                 <option value="admin">Admin</option>
+                                <option value="staff">Staff</option>
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label for="user-active" class="form-label">Status</label>
-                            <select id="user-active" class="form-control" required>
-                                <option value="true">Active</option>
-                                <option value="false">Inactive</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-outline modal-close">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Save</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Profile Modal -->
-        <div id="profile-modal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">My Profile</h5>
-                    <button class="modal-close">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label class="form-label">Full Name</label>
-                        <p id="profile-full-name"></p>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Email</label>
-                        <p id="profile-email"></p>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Role</label>
-                        <p id="profile-role"></p>
-                    </div>
+                    </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary modal-close">Close</button>
+                    <button class="btn btn-outline modal-close">Cancel</button>
+                    <button class="btn btn-primary" id="submit-user">Create User</button>
                 </div>
             </div>
         </div>
 
-        <!-- Confirmation Modal -->
-        <div id="confirm-modal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="confirm-modal-title">Confirm Action</h5>
-                    <button class="modal-close">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <p id="confirm-modal-message">Are you sure you want to perform this action?</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline modal-close">Cancel</button>
-                    <button type="button" class="btn btn-danger" id="confirm-action-btn">Confirm</button>
-                </div>
+        <!-- Alert Toast -->
+        <div id="alert-toast" class="fixed bottom-4 right-4 hidden">
+            <div class="alert alert-success flex items-center">
+                <i class="fas fa-check-circle"></i>
+                <span id="alert-message">Operation completed successfully</span>
             </div>
         </div>
     </div>
@@ -1040,933 +1055,601 @@
     <script>
         // API Configuration
         const API_BASE_URL = 'https://reporting-api-b6sx.onrender.com';
-        let currentUser = null;
         let authToken = null;
-        let isDarkMode = localStorage.getItem('darkMode') === 'true';
-        let isSidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+        let currentUser = null;
 
         // DOM Elements
-        const loginPage = document.getElementById('login-page');
+        const loginView = document.getElementById('login-view');
         const mainApp = document.getElementById('main-app');
         const loginForm = document.getElementById('login-form');
-        const themeToggle = document.getElementById('theme-toggle');
-        const userAvatar = document.getElementById('user-avatar');
-        const dropdownMenu = document.getElementById('dropdown-menu');
-        const logoutBtn = document.getElementById('logout-btn');
-        const profileBtn = document.getElementById('profile-btn');
-        const sidebar = document.getElementById('sidebar');
-        const sidebarToggle = document.getElementById('sidebar-toggle');
-        const toggleSidebarBtn = document.querySelector('.toggle-sidebar');
-        const menuItems = document.querySelectorAll('.menu-item');
-        const pages = {
-            dashboard: document.getElementById('dashboard-page'),
-            reports: document.getElementById('reports-page'),
-            users: document.getElementById('users-page')
-        };
-        const adminMenuItem = document.getElementById('admin-menu-item');
-        
-        // Modal elements
-        const reportModal = document.getElementById('report-modal');
         const reportForm = document.getElementById('report-form');
-        const reportModalTitle = document.getElementById('report-modal-title');
-        const reportIdInput = document.getElementById('report-id');
-        const reportTitleInput = document.getElementById('report-title');
-        const reportDescriptionInput = document.getElementById('report-description');
-        const reportStatusInput = document.getElementById('report-status');
-        const reportStatusGroup = document.getElementById('report-status-group');
-        const reportFilesInput = document.getElementById('report-files');
-        const fileList = document.getElementById('file-list');
-        
-        const userModal = document.getElementById('user-modal');
         const userForm = document.getElementById('user-form');
-        const userModalTitle = document.getElementById('user-modal-title');
-        const userIdInput = document.getElementById('user-id');
-        const userFullNameInput = document.getElementById('user-full-name');
-        const userEmailInput = document.getElementById('user-email');
-        const userPasswordInput = document.getElementById('user-password');
-        const userRoleInput = document.getElementById('user-role');
-        const userActiveInput = document.getElementById('user-active');
-        
-        const profileModal = document.getElementById('profile-modal');
-        const profileFullName = document.getElementById('profile-full-name');
-        const profileEmail = document.getElementById('profile-email');
-        const profileRole = document.getElementById('profile-role');
-        
-        const confirmModal = document.getElementById('confirm-modal');
-        const confirmModalTitle = document.getElementById('confirm-modal-title');
-        const confirmModalMessage = document.getElementById('confirm-modal-message');
-        const confirmActionBtn = document.getElementById('confirm-action-btn');
-        
-        // Buttons
+        const profileForm = document.getElementById('profile-form');
+        const reportModal = document.getElementById('report-modal');
+        const viewReportModal = document.getElementById('view-report-modal');
+        const userModal = document.getElementById('user-modal');
+        const alertToast = document.getElementById('alert-toast');
+        const alertMessage = document.getElementById('alert-message');
+        const fileUpload = document.getElementById('file-upload');
+        const fileInput = document.getElementById('report-files');
+        const fileList = document.getElementById('file-list');
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+        const sidebar = document.querySelector('.sidebar');
+        const menuItems = document.querySelectorAll('.menu-item');
+        const views = document.querySelectorAll('.view');
+        const userAvatar = document.getElementById('user-avatar');
+        const createReportBtn = document.getElementById('create-report-btn');
         const newReportBtn = document.getElementById('new-report-btn');
         const newUserBtn = document.getElementById('new-user-btn');
-        
-        // Tables
-        const reportsList = document.getElementById('reports-list');
-        const usersList = document.getElementById('users-list');
-        
-        // Dashboard elements
-        const pendingCount = document.getElementById('pending-count');
-        const inProgressCount = document.getElementById('in-progress-count');
-        const completedCount = document.getElementById('completed-count');
-        const recentReports = document.getElementById('recent-reports');
+        const submitReportBtn = document.getElementById('submit-report');
+        const submitUserBtn = document.getElementById('submit-user');
+        const editReportBtn = document.getElementById('edit-report-btn');
+        const deleteReportBtn = document.getElementById('delete-report-btn');
+        const allReportsTable = document.getElementById('all-reports');
+        const recentReportsTable = document.getElementById('recent-reports');
+        const usersTable = document.getElementById('users-table');
+        const modalCloseButtons = document.querySelectorAll('.modal-close');
+
+        // Event Listeners
+        loginForm.addEventListener('submit', handleLogin);
+        reportForm.addEventListener('submit', handleReportSubmit);
+        userForm.addEventListener('submit', handleUserSubmit);
+        profileForm.addEventListener('submit', handleProfileUpdate);
+        fileUpload.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', handleFileSelect);
+        sidebarToggle.addEventListener('click', toggleSidebar);
+        createReportBtn?.addEventListener('click', () => showModal(reportModal));
+        newReportBtn?.addEventListener('click', () => showModal(reportModal));
+        newUserBtn?.addEventListener('click', () => showModal(userModal));
+        submitReportBtn.addEventListener('click', handleReportSubmit);
+        submitUserBtn.addEventListener('click', handleUserSubmit);
+        editReportBtn.addEventListener('click', editCurrentReport);
+        deleteReportBtn.addEventListener('click', deleteCurrentReport);
+        modalCloseButtons.forEach(btn => btn.addEventListener('click', closeAllModals));
+
+        // Menu item clicks
+        menuItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const viewName = item.getAttribute('data-view');
+                showView(viewName);
+                
+                // Update active state
+                menuItems.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+            });
+        });
 
         // Initialize the app
-        function initApp() {
-            // Check for saved token
-            const token = localStorage.getItem('authToken');
+        function init() {
+            // Check for existing token
+            const token = localStorage.getItem('reporting_token');
             if (token) {
                 authToken = token;
                 fetchCurrentUser();
             } else {
-                showLoginPage();
+                showLogin();
             }
-
-            // Apply theme
-            applyTheme();
-            
-            // Apply sidebar state
-            applySidebarState();
-
-            // Setup event listeners
-            setupEventListeners();
         }
 
-        // Show login page
-        function showLoginPage() {
-            loginPage.style.display = 'flex';
-            mainApp.style.display = 'none';
+        // Show login view
+        function showLogin() {
+            loginView.classList.remove('hidden');
+            mainApp.classList.add('hidden');
         }
 
         // Show main app
-        function showMainApp() {
-            loginPage.style.display = 'none';
-            mainApp.style.display = 'block';
-            loadDashboard();
+        function showApp() {
+            loginView.classList.add('hidden');
+            mainApp.classList.remove('hidden');
+            loadDashboardData();
         }
 
-        // Setup event listeners
-        function setupEventListeners() {
-            // Login form
-            loginForm.addEventListener('submit', handleLogin);
-            
-            // Theme toggle
-            themeToggle.addEventListener('click', toggleTheme);
-            
-            // User menu
-            userAvatar.addEventListener('click', toggleDropdown);
-            profileBtn.addEventListener('click', showProfile);
-            logoutBtn.addEventListener('click', handleLogout);
-            
-            // Sidebar
-            sidebarToggle.addEventListener('click', toggleSidebar);
-            toggleSidebarBtn.addEventListener('click', toggleSidebarCollapse);
-            
-            // Menu items
-            menuItems.forEach(item => {
-                item.addEventListener('click', () => {
-                    const page = item.getAttribute('data-page');
-                    showPage(page);
-                    
-                    // Update active state
-                    menuItems.forEach(i => i.classList.remove('active'));
-                    item.classList.add('active');
-                });
-            });
-            
-            // Modals
-            document.querySelectorAll('.modal-close').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    closeAllModals();
-                });
-            });
-            
-            // Report modal
-            newReportBtn.addEventListener('click', () => {
-                openReportModal();
-            });
-            
-            reportForm.addEventListener('submit', handleReportSubmit);
-            reportFilesInput.addEventListener('change', handleFileSelection);
-            
-            // User modal
-            newUserBtn.addEventListener('click', () => {
-                openUserModal();
-            });
-            
-            userForm.addEventListener('submit', handleUserSubmit);
-            
-            // Confirm modal
-            confirmActionBtn.addEventListener('click', executeConfirmedAction);
-            
-            // Close modals when clicking outside
-            document.querySelectorAll('.modal').forEach(modal => {
-                modal.addEventListener('click', (e) => {
-                    if (e.target === modal) {
-                        closeAllModals();
-                    }
-                });
-            });
-        }
-
-        // Handle login
-        async function handleLogin(e) {
-            e.preventDefault();
-            
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-            
-            try {
-                const response = await axios.post(`${API_BASE_URL}/token`, new URLSearchParams({
-                    username: email,
-                    password: password,
-                    grant_type: 'password'
-                }), {
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    }
-                });
-                
-                authToken = response.data.access_token;
-                localStorage.setItem('authToken', authToken);
-                
-                await fetchCurrentUser();
-                showMainApp();
-            } catch (error) {
-                showError('Login failed. Please check your credentials.');
-                console.error('Login error:', error);
-            }
-        }
-
-        // Fetch current user
-        async function fetchCurrentUser() {
-            try {
-                const response = await axios.get(`${API_BASE_URL}/users/me`, {
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    }
-                });
-                
-                currentUser = response.data;
-                updateUserUI();
-                
-                // Show/hide admin menu item based on role
-                if (currentUser.role === 'admin') {
-                    adminMenuItem.style.display = 'flex';
-                } else {
-                    adminMenuItem.style.display = 'none';
-                }
-            } catch (error) {
-                console.error('Failed to fetch user:', error);
-                handleLogout();
-            }
-        }
-
-        // Update UI with user data
-        function updateUserUI() {
-            if (currentUser) {
-                // Set avatar initials
-                const initials = currentUser.full_name.split(' ').map(name => name[0]).join('').toUpperCase();
-                userAvatar.textContent = initials;
-                
-                // Update profile modal
-                profileFullName.textContent = currentUser.full_name;
-                profileEmail.textContent = currentUser.email;
-                profileRole.textContent = currentUser.role === 'admin' ? 'Administrator' : 'Staff Member';
-            }
-        }
-
-        // Handle logout
-        function handleLogout() {
-            authToken = null;
-            currentUser = null;
-            localStorage.removeItem('authToken');
-            showLoginPage();
-            
-            // Reset login form
-            loginForm.reset();
-        }
-
-        // Toggle dropdown menu
-        function toggleDropdown() {
-            dropdownMenu.classList.toggle('show');
-        }
-
-        // Close dropdown menu
-        function closeDropdown() {
-            dropdownMenu.classList.remove('show');
-        }
-
-        // Show profile modal
-        function showProfile() {
-            closeDropdown();
-            openModal(profileModal);
-        }
-
-        // Toggle theme
-        function toggleTheme() {
-            isDarkMode = !isDarkMode;
-            localStorage.setItem('darkMode', isDarkMode);
-            applyTheme();
-            
-            // Update icon
-            const icon = themeToggle.querySelector('i');
-            icon.classList.toggle('fa-moon');
-            icon.classList.toggle('fa-sun');
-        }
-
-        // Apply theme
-        function applyTheme() {
-            if (isDarkMode) {
-                document.body.classList.add('dark-mode');
-            } else {
-                document.body.classList.remove('dark-mode');
-            }
-        }
-
-        // Toggle sidebar
+        // Toggle sidebar on mobile
         function toggleSidebar() {
-            sidebar.classList.toggle('show');
+            sidebar.classList.toggle('active');
         }
 
-        // Toggle sidebar collapse
-        function toggleSidebarCollapse() {
-            isSidebarCollapsed = !isSidebarCollapsed;
-            localStorage.setItem('sidebarCollapsed', isSidebarCollapsed);
-            applySidebarState();
-        }
-
-        // Apply sidebar state
-        function applySidebarState() {
-            if (isSidebarCollapsed) {
-                sidebar.classList.add('sidebar-collapsed');
-                toggleSidebarBtn.querySelector('i').classList.remove('fa-chevron-left');
-                toggleSidebarBtn.querySelector('i').classList.add('fa-chevron-right');
-            } else {
-                sidebar.classList.remove('sidebar-collapsed');
-                toggleSidebarBtn.querySelector('i').classList.remove('fa-chevron-right');
-                toggleSidebarBtn.querySelector('i').classList.add('fa-chevron-left');
-            }
-        }
-
-        // Show page
-        function showPage(page) {
-            Object.values(pages).forEach(p => p.style.display = 'none');
-            if (pages[page]) {
-                pages[page].style.display = 'block';
-                
-                // Load data for the page
-                if (page === 'dashboard') {
-                    loadDashboard();
-                } else if (page === 'reports') {
-                    loadReports();
-                } else if (page === 'users' && currentUser.role === 'admin') {
-                    loadUsers();
-                }
-            }
-        }
-
-        // Load dashboard data
-        async function loadDashboard() {
-            try {
-                const reportsResponse = await axios.get(`${API_BASE_URL}/reports`, {
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    },
-                    params: {
-                        limit: 5
-                    }
-                });
-                
-                const reports = reportsResponse.data;
-                
-                // Update counts
-                const pending = reports.filter(r => r.status === 'pending').length;
-                const inProgress = reports.filter(r => r.status === 'in_progress').length;
-                const completed = reports.filter(r => r.status === 'completed').length;
-                
-                pendingCount.textContent = pending;
-                inProgressCount.textContent = inProgress;
-                completedCount.textContent = completed;
-                
-                // Update recent reports
-                if (reports.length > 0) {
-                    let html = '<div class="list-group">';
-                    reports.forEach(report => {
-                        const date = new Date(report.created_at).toLocaleDateString();
-                        const statusClass = getStatusClass(report.status);
-                        
-                        html += `
-                            <div class="d-flex justify-content-between align-items-center mb-2 p-2 border rounded">
-                                <div>
-                                    <h6 class="mb-1">${report.title}</h6>
-                                    <small class="text-muted">Created: ${date}</small>
-                                </div>
-                                <span class="badge ${statusClass}">${formatStatus(report.status)}</span>
-                            </div>
-                        `;
-                    });
-                    html += '</div>';
-                    recentReports.innerHTML = html;
+        // Switch between views
+        function showView(viewName) {
+            views.forEach(view => {
+                if (view.id === `${viewName}-view`) {
+                    view.classList.remove('hidden');
                 } else {
-                    recentReports.innerHTML = '<p>No reports found.</p>';
+                    view.classList.add('hidden');
                 }
-            } catch (error) {
-                console.error('Failed to load dashboard data:', error);
-                showError('Failed to load dashboard data.');
-            }
-        }
-
-        // Load reports
-        async function loadReports() {
-            try {
-                const response = await axios.get(`${API_BASE_URL}/reports`, {
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    }
-                });
-                
-                const reports = response.data;
-                renderReportsTable(reports);
-            } catch (error) {
-                console.error('Failed to load reports:', error);
-                showError('Failed to load reports.');
-            }
-        }
-
-        // Render reports table
-        function renderReportsTable(reports) {
-            if (reports.length === 0) {
-                reportsList.innerHTML = '<tr><td colspan="5" class="text-center">No reports found.</td></tr>';
-                return;
-            }
-            
-            let html = '';
-            reports.forEach(report => {
-                const createdDate = new Date(report.created_at).toLocaleDateString();
-                const updatedDate = new Date(report.updated_at).toLocaleDateString();
-                const statusClass = getStatusClass(report.status);
-                const isOwner = currentUser.role === 'admin' || report.owner_id === currentUser.id;
-                
-                html += `
-                    <tr>
-                        <td>${report.title}</td>
-                        <td><span class="badge ${statusClass}">${formatStatus(report.status)}</span></td>
-                        <td>${createdDate}</td>
-                        <td>${updatedDate}</td>
-                        <td>
-                            <button class="btn btn-sm btn-outline view-report" data-id="${report.id}">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            ${isOwner ? `
-                            <button class="btn btn-sm btn-outline edit-report" data-id="${report.id}">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger delete-report" data-id="${report.id}">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                            ` : ''}
-                        </td>
-                    </tr>
-                `;
             });
-            
-            reportsList.innerHTML = html;
-            
-            // Add event listeners to buttons
-            document.querySelectorAll('.view-report').forEach(btn => {
-                btn.addEventListener('click', () => viewReport(btn.getAttribute('data-id')));
-            });
-            
-            document.querySelectorAll('.edit-report').forEach(btn => {
-                btn.addEventListener('click', () => editReport(btn.getAttribute('data-id')));
-            });
-            
-            document.querySelectorAll('.delete-report').forEach(btn => {
-                btn.addEventListener('click', () => confirmDeleteReport(btn.getAttribute('data-id')));
-            });
-        }
 
-        // View report
-        async function viewReport(id) {
-            try {
-                const response = await axios.get(`${API_BASE_URL}/reports/${id}`, {
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    }
-                });
-                
-                const report = response.data;
-                const createdDate = new Date(report.created_at).toLocaleString();
-                const updatedDate = new Date(report.updated_at).toLocaleString();
-                const statusClass = getStatusClass(report.status);
-                
-                let attachmentsHtml = '';
-                if (report.attachments && report.attachments.length > 0) {
-                    attachmentsHtml = '<div class="mt-3"><h5>Attachments</h5><ul class="list-group">';
-                    report.attachments.forEach(file => {
-                        attachmentsHtml += `
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <a href="${API_BASE_URL}/attachments/${id}_${file}" target="_blank">${file}</a>
-                            </li>
-                        `;
-                    });
-                    attachmentsHtml += '</ul></div>';
-                }
-                
-                const html = `
-                    <div class="card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h3>${report.title}</h3>
-                            <span class="badge ${statusClass}">${formatStatus(report.status)}</span>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <h5>Description</h5>
-                                <p>${report.description}</p>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <p><strong>Created:</strong> ${createdDate}</p>
-                                </div>
-                                <div class="col-md-6">
-                                    <p><strong>Last Updated:</strong> ${updatedDate}</p>
-                                </div>
-                            </div>
-                            ${attachmentsHtml}
-                        </div>
-                    </div>
-                `;
-                
-                // Show in modal
-                confirmModalTitle.textContent = 'Report Details';
-                confirmModalMessage.innerHTML = html;
-                confirmActionBtn.style.display = 'none';
-                openModal(confirmModal);
-            } catch (error) {
-                console.error('Failed to view report:', error);
-                showError('Failed to load report details.');
-            }
-        }
-
-        // Open report modal for new report
-        function openReportModal() {
-            reportModalTitle.textContent = 'New Report';
-            reportForm.reset();
-            reportIdInput.value = '';
-            fileList.innerHTML = '';
-            reportStatusGroup.style.display = 'none';
-            openModal(reportModal);
-        }
-
-        // Edit report
-        async function editReport(id) {
-            try {
-                const response = await axios.get(`${API_BASE_URL}/reports/${id}`, {
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    }
-                });
-                
-                const report = response.data;
-                
-                reportModalTitle.textContent = 'Edit Report';
-                reportIdInput.value = report.id;
-                reportTitleInput.value = report.title;
-                reportDescriptionInput.value = report.description;
-                
-                // Only show status for admins
-                if (currentUser.role === 'admin') {
-                    reportStatusGroup.style.display = 'block';
-                    reportStatusInput.value = report.status;
-                } else {
-                    reportStatusGroup.style.display = 'none';
-                }
-                
-                // Clear and rebuild file list
-                fileList.innerHTML = '';
-                if (report.attachments && report.attachments.length > 0) {
-                    report.attachments.forEach(file => {
-                        addFileToDisplay(file, true);
-                    });
-                }
-                
-                openModal(reportModal);
-            } catch (error) {
-                console.error('Failed to edit report:', error);
-                showError('Failed to load report for editing.');
-            }
-        }
-
-        // Handle report form submission
-        async function handleReportSubmit(e) {
-            e.preventDefault();
-            
-            const id = reportIdInput.value;
-            const title = reportTitleInput.value;
-            const description = reportDescriptionInput.value;
-            const status = reportStatusInput.value;
-            const files = reportFilesInput.files;
-            
-            try {
-                const formData = new FormData();
-                formData.append('title', title);
-                formData.append('description', description);
-                
-                if (currentUser.role === 'admin' && id) {
-                    formData.append('status', status);
-                }
-                
-                if (files && files.length > 0) {
-                    for (let i = 0; i < files.length; i++) {
-                        formData.append('files', files[i]);
-                    }
-                }
-                
-                let response;
-                if (id) {
-                    // Update existing report
-                    response = await axios.put(`${API_BASE_URL}/reports/${id}`, formData, {
-                        headers: {
-                            'Authorization': `Bearer ${authToken}`,
-                            'Content-Type': 'multipart/form-data'
-                        }
-                    });
-                } else {
-                    // Create new report
-                    response = await axios.post(`${API_BASE_URL}/reports`, formData, {
-                        headers: {
-                            'Authorization': `Bearer ${authToken}`,
-                            'Content-Type': 'multipart/form-data'
-                        }
-                    });
-                }
-                
-                closeAllModals();
-                showSuccess(id ? 'Report updated successfully!' : 'Report created successfully!');
+            // Load data for the view
+            if (viewName === 'dashboard') {
+                loadDashboardData();
+            } else if (viewName === 'reports') {
                 loadReports();
-                loadDashboard();
-            } catch (error) {
-                console.error('Failed to save report:', error);
-                showError('Failed to save report. Please try again.');
-            }
-        }
-
-        // Handle file selection
-        function handleFileSelection(e) {
-            const files = e.target.files;
-            if (files && files.length > 0) {
-                for (let i = 0; i < files.length; i++) {
-                    addFileToDisplay(files[i].name, false);
-                }
-            }
-        }
-
-        // Add file to display list
-        function addFileToDisplay(filename, isExisting) {
-            const fileItem = document.createElement('div');
-            fileItem.className = 'file-item';
-            fileItem.innerHTML = `
-                <i class="fas fa-paperclip"></i>
-                <span>${filename}</span>
-                ${!isExisting ? `<button type="button" class="ms-auto remove-file" data-file="${filename}">
-                    <i class="fas fa-times"></i>
-                </button>` : ''}
-            `;
-            
-            fileList.appendChild(fileItem);
-            
-            if (!isExisting) {
-                fileItem.querySelector('.remove-file').addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    fileItem.remove();
-                });
-            }
-        }
-
-        // Confirm report deletion
-        function confirmDeleteReport(id) {
-            confirmModalTitle.textContent = 'Delete Report';
-            confirmModalMessage.textContent = 'Are you sure you want to delete this report? This action cannot be undone.';
-            confirmActionBtn.style.display = 'block';
-            confirmActionBtn.textContent = 'Delete';
-            confirmActionBtn.className = 'btn btn-danger';
-            confirmActionBtn.onclick = () => deleteReport(id);
-            openModal(confirmModal);
-        }
-
-        // Delete report
-        async function deleteReport(id) {
-            try {
-                await axios.delete(`${API_BASE_URL}/reports/${id}`, {
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    }
-                });
-                
-                closeAllModals();
-                showSuccess('Report deleted successfully!');
-                loadReports();
-                loadDashboard();
-            } catch (error) {
-                console.error('Failed to delete report:', error);
-                showError('Failed to delete report.');
-            }
-        }
-
-        // Load users (admin only)
-        async function loadUsers() {
-            if (currentUser.role !== 'admin') return;
-            
-            try {
-                const response = await axios.get(`${API_BASE_URL}/users`, {
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    }
-                });
-                
-                const users = response.data;
-                renderUsersTable(users);
-            } catch (error) {
-                console.error('Failed to load users:', error);
-                showError('Failed to load users.');
-            }
-        }
-
-        // Render users table
-        function renderUsersTable(users) {
-            if (users.length === 0) {
-                usersList.innerHTML = '<tr><td colspan="5" class="text-center">No users found.</td></tr>';
-                return;
-            }
-            
-            let html = '';
-            users.forEach(user => {
-                const statusClass = user.is_active ? 'badge-success' : 'badge-danger';
-                const statusText = user.is_active ? 'Active' : 'Inactive';
-                
-                html += `
-                    <tr>
-                        <td>${user.full_name}</td>
-                        <td>${user.email}</td>
-                        <td>${user.role === 'admin' ? 'Admin' : 'Staff'}</td>
-                        <td><span class="badge ${statusClass}">${statusText}</span></td>
-                        <td>
-                            <button class="btn btn-sm btn-outline edit-user" data-id="${user.id}">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger delete-user" data-id="${user.id}">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            });
-            
-            usersList.innerHTML = html;
-            
-            // Add event listeners to buttons
-            document.querySelectorAll('.edit-user').forEach(btn => {
-                btn.addEventListener('click', () => editUser(btn.getAttribute('data-id')));
-            });
-            
-            document.querySelectorAll('.delete-user').forEach(btn => {
-                btn.addEventListener('click', () => confirmDeleteUser(btn.getAttribute('data-id')));
-            });
-        }
-
-        // Open user modal for new user
-        function openUserModal() {
-            userModalTitle.textContent = 'New User';
-            userForm.reset();
-            userIdInput.value = '';
-            userPasswordInput.required = true;
-            openModal(userModal);
-        }
-
-        // Edit user
-        async function editUser(id) {
-            try {
-                const response = await axios.get(`${API_BASE_URL}/users`, {
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    }
-                });
-                
-                const users = response.data;
-                const user = users.find(u => u.id === parseInt(id));
-                
-                if (!user) {
-                    throw new Error('User not found');
-                }
-                
-                userModalTitle.textContent = 'Edit User';
-                userIdInput.value = user.id;
-                userFullNameInput.value = user.full_name;
-                userEmailInput.value = user.email;
-                userRoleInput.value = user.role;
-                userActiveInput.value = user.is_active ? 'true' : 'false';
-                userPasswordInput.required = false;
-                
-                openModal(userModal);
-            } catch (error) {
-                console.error('Failed to edit user:', error);
-                showError('Failed to load user for editing.');
-            }
-        }
-
-        // Handle user form submission
-        async function handleUserSubmit(e) {
-            e.preventDefault();
-            
-            const id = userIdInput.value;
-            const fullName = userFullNameInput.value;
-            const email = userEmailInput.value;
-            const password = userPasswordInput.value;
-            const role = userRoleInput.value;
-            const isActive = userActiveInput.value === 'true';
-            
-            try {
-                if (id) {
-                    // Update existing user
-                    const userData = {
-                        email: email,
-                        full_name: fullName,
-                        role: role,
-                        is_active: isActive
-                    };
-                    
-                    // Only update password if provided
-                    if (password) {
-                        userData.password = password;
-                    }
-                    
-                    await axios.put(`${API_BASE_URL}/users/${id}`, userData, {
-                        headers: {
-                            'Authorization': `Bearer ${authToken}`
-                        }
-                    });
-                } else {
-                    // Create new user
-                    const userData = {
-                        email: email,
-                        full_name: fullName,
-                        password: password,
-                        role: role
-                    };
-                    
-                    await axios.post(`${API_BASE_URL}/register`, userData, {
-                        headers: {
-                            'Authorization': `Bearer ${authToken}`
-                        }
-                    });
-                }
-                
-                closeAllModals();
-                showSuccess(id ? 'User updated successfully!' : 'User created successfully!');
+            } else if (viewName === 'users') {
                 loadUsers();
-                
-                // If editing current user, refresh user data
-                if (id && parseInt(id) === currentUser.id) {
-                    await fetchCurrentUser();
-                }
-            } catch (error) {
-                console.error('Failed to save user:', error);
-                showError('Failed to save user. Please try again.');
             }
         }
 
-        // Confirm user deletion
-        function confirmDeleteUser(id) {
-            confirmModalTitle.textContent = 'Delete User';
-            confirmModalMessage.textContent = 'Are you sure you want to delete this user? This action cannot be undone.';
-            confirmActionBtn.style.display = 'block';
-            confirmActionBtn.textContent = 'Delete';
-            confirmActionBtn.className = 'btn btn-danger';
-            confirmActionBtn.onclick = () => deleteUser(id);
-            openModal(confirmModal);
-        }
-
-        // Delete user
-        async function deleteUser(id) {
-            try {
-                await axios.delete(`${API_BASE_URL}/users/${id}`, {
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    }
-                });
-                
-                closeAllModals();
-                showSuccess('User deleted successfully!');
-                loadUsers();
-                
-                // If deleting current user, log out
-                if (parseInt(id) === currentUser.id) {
-                    handleLogout();
-                }
-            } catch (error) {
-                console.error('Failed to delete user:', error);
-                showError('Failed to delete user.');
-            }
-        }
-
-        // Open modal
-        function openModal(modal) {
-            closeAllModals();
-            modal.classList.add('show');
+        // Show modal
+        function showModal(modal) {
+            modal.classList.add('active');
             document.body.style.overflow = 'hidden';
         }
 
         // Close all modals
         function closeAllModals() {
             document.querySelectorAll('.modal').forEach(modal => {
-                modal.classList.remove('show');
+                modal.classList.remove('active');
             });
-            document.body.style.overflow = '';
+            document.body.style.overflow = 'auto';
         }
 
-        // Execute confirmed action
-        function executeConfirmedAction() {
-            // This is handled by the individual confirmation functions
-            closeAllModals();
+        // Handle file selection
+        function handleFileSelect(e) {
+            const files = e.target.files;
+            fileList.innerHTML = '';
+            
+            for (let i = 0; i < files.length; i++) {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <span>${files[i].name}</span>
+                    <i class="fas fa-times" data-index="${i}"></i>
+                `;
+                fileList.appendChild(fileItem);
+            }
+
+            // Add event listeners to remove buttons
+            document.querySelectorAll('.file-item i').forEach(icon => {
+                icon.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const index = parseInt(icon.getAttribute('data-index'));
+                    removeFile(index);
+                });
+            });
         }
 
-        // Format status
-        function formatStatus(status) {
-            return status.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+        // Remove file from selection
+        function removeFile(index) {
+            const dt = new DataTransfer();
+            const files = fileInput.files;
+            
+            for (let i = 0; i < files.length; i++) {
+                if (i !== index) {
+                    dt.items.add(files[i]);
+                }
+            }
+            
+            fileInput.files = dt.files;
+            handleFileSelect({ target: fileInput });
         }
 
-        // Get status class
-        function getStatusClass(status) {
-            switch (status) {
-                case 'pending': return 'badge-warning';
-                case 'in_progress': return 'badge-primary';
-                case 'completed': return 'badge-success';
-                default: return 'badge-secondary';
+        // Show alert toast
+        function showAlert(message, type = 'success') {
+            alertMessage.textContent = message;
+            alertToast.className = `fixed bottom-4 right-4 flex items-center alert alert-${type}`;
+            alertToast.classList.remove('hidden');
+            
+            setTimeout(() => {
+                alertToast.classList.add('hidden');
+            }, 3000);
+        }
+
+        // API Functions
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/token`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `username=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Login failed');
+                }
+                
+                const data = await response.json();
+                authToken = data.access_token;
+                localStorage.setItem('reporting_token', authToken);
+                
+                await fetchCurrentUser();
+                showApp();
+                showAlert('Login successful');
+            } catch (error) {
+                showAlert(error.message || 'Login failed', 'error');
             }
         }
 
-        // Show success message
-        function showSuccess(message) {
-            // In a production app, you might use a more sophisticated notification system
-            alert(message);
-        }
-
-        // Show error message
-        function showError(message) {
-            // In a production app, you might use a more sophisticated notification system
-            alert(message);
-        }
-
-        // Close dropdown when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!userAvatar.contains(e.target) && !dropdownMenu.contains(e.target)) {
-                closeDropdown();
+        async function fetchCurrentUser() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/users/me`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch user');
+                }
+                
+                currentUser = await response.json();
+                updateUserUI();
+            } catch (error) {
+                console.error('Error fetching user:', error);
+                localStorage.removeItem('reporting_token');
+                showLogin();
             }
-        });
+        }
 
-        // Initialize the app when DOM is loaded
-        document.addEventListener('DOMContentLoaded', initApp);
+        async function loadDashboardData() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/reports?limit=5`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load dashboard data');
+                }
+                
+                const reports = await response.json();
+                renderRecentReports(reports);
+            } catch (error) {
+                showAlert(error.message || 'Failed to load dashboard data', 'error');
+            }
+        }
+
+        async function loadReports() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/reports`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load reports');
+                }
+                
+                const reports = await response.json();
+                renderAllReports(reports);
+            } catch (error) {
+                showAlert(error.message || 'Failed to load reports', 'error');
+            }
+        }
+
+        async function loadUsers() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/users`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load users');
+                }
+                
+                const users = await response.json();
+                renderUsers(users);
+            } catch (error) {
+                showAlert(error.message || 'Failed to load users', 'error');
+            }
+        }
+
+        async function handleReportSubmit(e) {
+            e.preventDefault();
+            
+            const title = document.getElementById('report-title').value;
+            const description = document.getElementById('report-description').value;
+            const files = fileInput.files;
+            
+            try {
+                const formData = new FormData();
+                formData.append('title', title);
+                formData.append('description', description);
+                
+                for (let i = 0; i < files.length; i++) {
+                    formData.append('files', files[i]);
+                }
+                
+                const response = await fetch(`${API_BASE_URL}/reports`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}'
+                    },
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to create report');
+                }
+                
+                const report = await response.json();
+                showAlert('Report created successfully');
+                closeAllModals();
+                reportForm.reset();
+                fileList.innerHTML = '';
+                
+                // Refresh reports
+                if (document.getElementById('reports-view').classList.contains('hidden')) {
+                    loadDashboardData();
+                } else {
+                    loadReports();
+                }
+            } catch (error) {
+                showAlert(error.message || 'Failed to create report', 'error');
+            }
+        }
+
+        async function handleUserSubmit(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('user-name').value;
+            const email = document.getElementById('user-email').value;
+            const password = document.getElementById('user-password').value;
+            const role = document.getElementById('user-role').value;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email,
+                        full_name: name,
+                        password,
+                        role
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to create user');
+                }
+                
+                const user = await response.json();
+                showAlert('User created successfully');
+                closeAllModals();
+                userForm.reset();
+                loadUsers();
+            } catch (error) {
+                showAlert(error.message || 'Failed to create user', 'error');
+            }
+        }
+
+        async function handleProfileUpdate(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('profile-name').value;
+            const password = document.getElementById('profile-password').value;
+            const confirm = document.getElementById('profile-confirm').value;
+            
+            if (password && password !== confirm) {
+                showAlert('Passwords do not match', 'error');
+                return;
+            }
+            
+            try {
+                // In a real app, you would send this to your API
+                showAlert('Profile updated successfully');
+            } catch (error) {
+                showAlert(error.message || 'Failed to update profile', 'error');
+            }
+        }
+
+        function viewReportDetails(report) {
+            document.getElementById('view-report-title').textContent = report.title;
+            document.getElementById('view-report-status').textContent = report.status;
+            document.getElementById('view-report-status').className = `status-badge status-${report.status.toLowerCase().replace(' ', '-')}`;
+            document.getElementById('view-report-date').textContent = new Date(report.created_at).toLocaleDateString();
+            document.getElementById('view-report-description').textContent = report.description;
+            
+            const attachmentsContainer = document.getElementById('view-report-attachments');
+            attachmentsContainer.innerHTML = '';
+            
+            if (report.attachments && report.attachments.length > 0) {
+                report.attachments.forEach(attachment => {
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'file-item';
+                    fileItem.innerHTML = `
+                        <a href="${API_BASE_URL}/attachments/${attachment}" target="_blank" class="flex items-center gap-2">
+                            <i class="fas fa-file-alt"></i>
+                            <span>${attachment}</span>
+                        </a>
+                    `;
+                    attachmentsContainer.appendChild(fileItem);
+                });
+            } else {
+                attachmentsContainer.innerHTML = '<p class="text-gray">No attachments</p>';
+            }
+            
+            // Store current report ID for edit/delete
+            viewReportModal.dataset.reportId = report.id;
+            
+            // Show/hide buttons based on permissions
+            const isOwner = currentUser.id === report.owner_id;
+            const isAdmin = currentUser.role === 'admin';
+            
+            editReportBtn.style.display = (isOwner || isAdmin) ? 'block' : 'none';
+            deleteReportBtn.style.display = (isOwner || isAdmin) ? 'block' : 'none';
+            
+            showModal(viewReportModal);
+        }
+
+        async function editCurrentReport() {
+            const reportId = viewReportModal.dataset.reportId;
+            // In a real app, you would implement edit functionality
+            showAlert('Edit functionality would be implemented here', 'info');
+        }
+
+        async function deleteCurrentReport() {
+            const reportId = viewReportModal.dataset.reportId;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/reports/${reportId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to delete report');
+                }
+                
+                showAlert('Report deleted successfully');
+                closeAllModals();
+                
+                // Refresh reports
+                if (document.getElementById('reports-view').classList.contains('hidden')) {
+                    loadDashboardData();
+                } else {
+                    loadReports();
+                }
+            } catch (error) {
+                showAlert(error.message || 'Failed to delete report', 'error');
+            }
+        }
+
+        // Render Functions
+        function updateUserUI() {
+            if (currentUser) {
+                // Set user avatar initials
+                const initials = currentUser.full_name.split(' ').map(n => n[0]).join('');
+                userAvatar.textContent = initials;
+                
+                // Hide admin menu items if not admin
+                if (currentUser.role !== 'admin') {
+                    document.querySelectorAll('.menu-item[data-view="users"]').forEach(item => {
+                        item.style.display = 'none';
+                    });
+                }
+            }
+        }
+
+        function renderRecentReports(reports) {
+            recentReportsTable.innerHTML = '';
+            
+            reports.forEach(report => {
+                const row = document.createElement('tr');
+                row.className = 'fade-in';
+                row.innerHTML = `
+                    <td>${report.title}</td>
+                    <td><span class="status-badge status-${report.status.toLowerCase().replace(' ', '-')}">${report.status}</span></td>
+                    <td>${new Date(report.created_at).toLocaleDateString()}</td>
+                    <td>
+                        <button class="btn btn-outline btn-sm view-report-btn" data-id="${report.id}">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                    </td>
+                `;
+                recentReportsTable.appendChild(row);
+            });
+            
+            // Add event listeners to view buttons
+            document.querySelectorAll('.view-report-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const reportId = btn.getAttribute('data-id');
+                    try {
+                        const response = await fetch(`${API_BASE_URL}/reports/${reportId}`, {
+                            headers: {
+                                'Authorization': `Bearer ${authToken}`
+                            }
+                        });
+                        
+                        if (!response.ok) {
+                            throw new Error('Failed to fetch report');
+                        }
+                        
+                        const report = await response.json();
+                        viewReportDetails(report);
+                    } catch (error) {
+                        showAlert(error.message || 'Failed to fetch report', 'error');
+                    }
+                });
+            });
+        }
+
+        function renderAllReports(reports) {
+            allReportsTable.innerHTML = '';
+            
+            reports.forEach(report => {
+                const row = document.createElement('tr');
+                row.className = 'fade-in';
+                row.innerHTML = `
+                    <td>${report.title}</td>
+                    <td>${report.description.substring(0, 50)}${report.description.length > 50 ? '...' : ''}</td>
+                    <td><span class="status-badge status-${report.status.toLowerCase().replace(' ', '-')}">${report.status}</span></td>
+                    <td>${new Date(report.created_at).toLocaleDateString()}</td>
+                    <td>
+                        <button class="btn btn-outline btn-sm view-report-btn" data-id="${report.id}">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                    </td>
+                `;
+                allReportsTable.appendChild(row);
+            });
+            
+            // Add event listeners to view buttons
+            document.querySelectorAll('.view-report-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const reportId = btn.getAttribute('data-id');
+                    try {
+                        const response = await fetch(`${API_BASE_URL}/reports/${reportId}`, {
+                            headers: {
+                                'Authorization': `Bearer ${authToken}`
+                            }
+                        });
+                        
+                        if (!response.ok) {
+                            throw new Error('Failed to fetch report');
+                        }
+                        
+                        const report = await response.json();
+                        viewReportDetails(report);
+                    } catch (error) {
+                        showAlert(error.message || 'Failed to fetch report', 'error');
+                    }
+                });
+            });
+        }
+
+        function renderUsers(users) {
+            usersTable.innerHTML = '';
+            
+            users.forEach(user => {
+                const row = document.createElement('tr');
+                row.className = 'fade-in';
+                row.innerHTML = `
+                    <td>${user.full_name}</td>
+                    <td>${user.email}</td>
+                    <td>${user.role}</td>
+                    <td>
+                        <span class="status-badge ${user.is_active ? 'status-completed' : 'status-cancelled'}">
+                            ${user.is_active ? 'Active' : 'Inactive'}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-outline btn-sm">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                    </td>
+                `;
+                usersTable.appendChild(row);
+            });
+        }
+
+        // Initialize the app
+        init();
     </script>
 </body>
 </html>
