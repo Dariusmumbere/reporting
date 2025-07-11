@@ -224,16 +224,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             // Check authentication and admin status
-            const user = await checkAuth();
-            if (!user) {
-                window.location.href = 'login.html';
-                return;
-            }
             
-            if (!user.is_admin) {
-                window.location.href = 'dashboard.html';
-                return;
-            }
             
             // Set up tab switching
             document.querySelectorAll('.tab-btn').forEach(btn => {
