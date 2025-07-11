@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Professional Reporting System</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         :root {
             --primary: #4361ee;
@@ -19,98 +20,258 @@
             --gray: #6c757d;
             --gray-light: #e9ecef;
             --white: #ffffff;
-            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            --shadow-md: 0 6px 12px rgba(0, 0, 0, 0.15);
-            --radius: 8px;
-            --radius-sm: 4px;
-            --transition: all 0.3s ease;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --rounded-sm: 0.125rem;
+            --rounded: 0.25rem;
+            --rounded-md: 0.375rem;
+            --rounded-lg: 0.5rem;
+            --rounded-xl: 0.75rem;
+            --rounded-full: 9999px;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            background-color: #f5f7fa;
+            font-family: 'Inter', sans-serif;
+            line-height: 1.5;
             color: var(--dark);
-            line-height: 1.6;
+            background-color: #f5f7fa;
         }
 
         .container {
+            width: 100%;
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 20px;
+            padding: 0 1rem;
         }
 
-        /* Header */
-        header {
+        /* Auth Layout */
+        .auth-container {
+            display: flex;
+            min-height: 100vh;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8fafc;
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 400px;
             background-color: var(--white);
-            box-shadow: var(--shadow);
-            position: sticky;
-            top: 0;
+            border-radius: var(--rounded-lg);
+            box-shadow: var(--shadow-xl);
+            padding: 2rem;
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .auth-header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .auth-header p {
+            color: var(--gray);
+            font-size: 0.875rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.625rem 0.875rem;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            color: var(--dark);
+            background-color: var(--white);
+            background-clip: padding-box;
+            border: 1px solid var(--gray-light);
+            border-radius: var(--rounded-md);
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        .form-control:focus {
+            outline: 0;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: middle;
+            user-select: none;
+            border: 1px solid transparent;
+            padding: 0.625rem 1.25rem;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            border-radius: var(--rounded-md);
+            transition: all 0.15s ease-in-out;
+            cursor: pointer;
+        }
+
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+
+        .btn-primary {
+            color: var(--white);
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+
+        .btn-primary:focus {
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.5);
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .mt-3 {
+            margin-top: 1rem;
+        }
+
+        .text-sm {
+            font-size: 0.875rem;
+        }
+
+        .text-muted {
+            color: var(--gray);
+        }
+
+        .alert {
+            position: relative;
+            padding: 0.75rem 1.25rem;
+            margin-bottom: 1rem;
+            border: 1px solid transparent;
+            border-radius: var(--rounded);
+        }
+
+        .alert-danger {
+            color: #721c24;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+
+        .alert-success {
+            color: #155724;
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+
+        /* Dashboard Layout */
+        .dashboard {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: var(--white);
+            box-shadow: var(--shadow-md);
+            padding: 1rem 0;
+            position: fixed;
+            height: 100vh;
             z-index: 100;
         }
 
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .sidebar-header {
+            padding: 0 1rem 1.5rem;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .sidebar-menu {
             padding: 1rem 0;
         }
 
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary);
-            text-decoration: none;
+        .menu-item {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-        }
-
-        .logo i {
-            font-size: 1.8rem;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 1.5rem;
-        }
-
-        .nav-links a {
+            padding: 0.75rem 1rem;
             color: var(--dark);
             text-decoration: none;
-            font-weight: 500;
-            transition: var(--transition);
-            padding: 0.5rem 0;
-            position: relative;
+            transition: all 0.2s ease;
         }
 
-        .nav-links a:hover {
+        .menu-item:hover {
+            background-color: var(--gray-light);
+        }
+
+        .menu-item.active {
+            background-color: rgba(67, 97, 238, 0.1);
             color: var(--primary);
+            border-right: 3px solid var(--primary);
         }
 
-        .nav-links a.active {
-            color: var(--primary);
+        .menu-item i {
+            margin-right: 0.75rem;
+            width: 20px;
+            text-align: center;
         }
 
-        .nav-links a.active::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background-color: var(--primary);
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 1.5rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
         }
 
         .user-menu {
             display: flex;
             align-items: center;
-            gap: 1rem;
         }
 
         .user-avatar {
@@ -123,157 +284,78 @@
             align-items: center;
             justify-content: center;
             font-weight: 600;
-            cursor: pointer;
+            margin-right: 0.75rem;
         }
 
-        .dropdown {
+        .user-name {
+            font-weight: 500;
+            margin-right: 0.5rem;
+        }
+
+        .dropdown-menu {
             position: relative;
         }
 
+        .dropdown-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--gray);
+        }
+
         .dropdown-content {
+            display: none;
             position: absolute;
             right: 0;
-            top: 100%;
             background-color: var(--white);
+            min-width: 160px;
             box-shadow: var(--shadow-md);
-            border-radius: var(--radius);
-            padding: 0.5rem 0;
-            min-width: 200px;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(10px);
-            transition: var(--transition);
-            z-index: 10;
+            z-index: 1;
+            border-radius: var(--rounded-md);
+            overflow: hidden;
         }
 
-        .dropdown:hover .dropdown-content {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-
-        .dropdown-item {
-            padding: 0.75rem 1.5rem;
+        .dropdown-content a {
             color: var(--dark);
+            padding: 0.75rem 1rem;
             text-decoration: none;
             display: block;
-            transition: var(--transition);
-        }
-
-        .dropdown-item:hover {
-            background-color: var(--gray-light);
-            color: var(--primary);
-        }
-
-        .dropdown-divider {
-            height: 1px;
-            background-color: var(--gray-light);
-            margin: 0.5rem 0;
-        }
-
-        /* Main content */
-        .main {
-            padding: 2rem 0;
-        }
-
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
-
-        .page-title {
-            font-size: 1.75rem;
-            font-weight: 600;
-            color: var(--dark);
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.75rem 1.5rem;
-            border-radius: var(--radius);
-            font-weight: 500;
-            text-decoration: none;
-            cursor: pointer;
-            transition: var(--transition);
-            border: none;
-            outline: none;
-        }
-
-        .btn-primary {
-            background-color: var(--primary);
-            color: var(--white);
-        }
-
-        .btn-primary:hover {
-            background-color: var(--primary-dark);
-            box-shadow: var(--shadow);
-        }
-
-        .btn-secondary {
-            background-color: var(--secondary);
-            color: var(--white);
-        }
-
-        .btn-secondary:hover {
-            background-color: #3730a3;
-            box-shadow: var(--shadow);
-        }
-
-        .btn-danger {
-            background-color: var(--danger);
-            color: var(--white);
-        }
-
-        .btn-danger:hover {
-            background-color: #d1145a;
-            box-shadow: var(--shadow);
-        }
-
-        .btn-outline {
-            background-color: transparent;
-            border: 1px solid var(--primary);
-            color: var(--primary);
-        }
-
-        .btn-outline:hover {
-            background-color: var(--primary);
-            color: var(--white);
-        }
-
-        .btn-sm {
-            padding: 0.5rem 1rem;
             font-size: 0.875rem;
         }
 
-        /* Cards */
+        .dropdown-content a:hover {
+            background-color: var(--gray-light);
+        }
+
+        .dropdown-menu:hover .dropdown-content {
+            display: block;
+        }
+
         .card {
             background-color: var(--white);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            padding: 1.5rem;
+            border-radius: var(--rounded-lg);
+            box-shadow: var(--shadow-sm);
             margin-bottom: 1.5rem;
+            overflow: hidden;
         }
 
         .card-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--gray-light);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--gray-light);
         }
 
-        .card-title {
-            font-size: 1.25rem;
+        .card-header h2 {
+            font-size: 1.125rem;
             font-weight: 600;
-            color: var(--dark);
         }
 
-        /* Tables */
+        .card-body {
+            padding: 1.5rem;
+        }
+
         .table-responsive {
             overflow-x: auto;
         }
@@ -284,7 +366,7 @@
         }
 
         .table th, .table td {
-            padding: 1rem;
+            padding: 0.75rem 1rem;
             text-align: left;
             border-bottom: 1px solid var(--gray-light);
         }
@@ -292,1622 +374,1205 @@
         .table th {
             font-weight: 600;
             color: var(--dark);
-            background-color: var(--gray-light);
+            background-color: #f8f9fa;
         }
 
         .table tr:hover {
-            background-color: rgba(0, 0, 0, 0.02);
+            background-color: #f8f9fa;
         }
 
         .badge {
             display: inline-block;
-            padding: 0.35rem 0.75rem;
-            border-radius: 50px;
+            padding: 0.25rem 0.5rem;
             font-size: 0.75rem;
             font-weight: 600;
-            text-transform: capitalize;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: baseline;
+            border-radius: var(--rounded-full);
         }
 
         .badge-primary {
-            background-color: rgba(67, 97, 238, 0.1);
-            color: var(--primary);
-        }
-
-        .badge-warning {
-            background-color: rgba(248, 150, 30, 0.1);
-            color: var(--warning);
+            color: var(--white);
+            background-color: var(--primary);
         }
 
         .badge-success {
-            background-color: rgba(76, 201, 240, 0.1);
-            color: var(--success);
+            color: var(--white);
+            background-color: #28a745;
+        }
+
+        .badge-warning {
+            color: var(--dark);
+            background-color: #ffc107;
         }
 
         .badge-danger {
-            background-color: rgba(247, 37, 133, 0.1);
-            color: var(--danger);
+            color: var(--white);
+            background-color: #dc3545;
         }
 
-        /* Forms */
-        .form-group {
-            margin-bottom: 1.5rem;
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            line-height: 1.5;
+            border-radius: var(--rounded-sm);
         }
 
-        .form-label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: var(--dark);
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border: 1px solid var(--gray-light);
-            border-radius: var(--radius-sm);
-            font-size: 1rem;
-            transition: var(--transition);
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
-        }
-
-        textarea.form-control {
-            min-height: 150px;
-            resize: vertical;
-        }
-
-        .file-upload {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .file-upload-label {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-            border: 2px dashed var(--gray-light);
-            border-radius: var(--radius);
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .file-upload-label:hover {
-            border-color: var(--primary);
-        }
-
-        .file-upload-label i {
-            font-size: 2rem;
+        .btn-outline-primary {
             color: var(--primary);
-            margin-bottom: 1rem;
+            background-color: transparent;
+            background-image: none;
+            border-color: var(--primary);
         }
 
-        .file-upload-label span {
-            color: var(--gray);
-            text-align: center;
+        .btn-outline-primary:hover {
+            color: var(--white);
+            background-color: var(--primary);
+            border-color: var(--primary);
         }
 
-        .file-upload-input {
-            display: none;
-        }
-
-        .file-preview {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .file-preview-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            background-color: var(--gray-light);
-            border-radius: var(--radius);
-            font-size: 0.875rem;
-        }
-
-        .file-preview-item i {
+        .btn-outline-danger {
             color: var(--danger);
-            cursor: pointer;
+            background-color: transparent;
+            background-image: none;
+            border-color: var(--danger);
         }
 
-        /* Modal */
+        .btn-outline-danger:hover {
+            color: var(--white);
+            background-color: var(--danger);
+            border-color: var(--danger);
+        }
+
         .modal {
+            display: none;
             position: fixed;
-            top: 0;
+            z-index: 1050;
             left: 0;
+            top: 0;
             width: 100%;
             height: 100%;
+            overflow: hidden;
+            outline: 0;
             background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: var(--transition);
         }
 
-        .modal.active {
-            opacity: 1;
-            visibility: visible;
+        .modal-dialog {
+            position: relative;
+            width: auto;
+            margin: 1.75rem auto;
+            max-width: 600px;
+            pointer-events: none;
         }
 
         .modal-content {
-            background-color: var(--white);
-            border-radius: var(--radius);
+            position: relative;
+            display: flex;
+            flex-direction: column;
             width: 100%;
-            max-width: 600px;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: var(--shadow-md);
-            transform: translateY(-20px);
-            transition: var(--transition);
-        }
-
-        .modal.active .modal-content {
-            transform: translateY(0);
+            pointer-events: auto;
+            background-color: var(--white);
+            background-clip: padding-box;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            border-radius: var(--rounded-lg);
+            outline: 0;
+            box-shadow: var(--shadow-xl);
         }
 
         .modal-header {
             display: flex;
+            align-items: flex-start;
             justify-content: space-between;
-            align-items: center;
-            padding: 1.5rem;
+            padding: 1rem 1.5rem;
             border-bottom: 1px solid var(--gray-light);
         }
 
-        .modal-title {
+        .modal-header h3 {
+            margin-bottom: 0;
             font-size: 1.25rem;
             font-weight: 600;
-            color: var(--dark);
         }
 
-        .modal-close {
-            background: none;
-            border: none;
+        .modal-header .close {
+            padding: 0;
+            background-color: transparent;
+            border: 0;
             font-size: 1.5rem;
+            font-weight: 700;
+            line-height: 1;
+            color: var(--dark);
+            opacity: 0.5;
             cursor: pointer;
-            color: var(--gray);
-            transition: var(--transition);
-        }
-
-        .modal-close:hover {
-            color: var(--danger);
         }
 
         .modal-body {
+            position: relative;
+            flex: 1 1 auto;
             padding: 1.5rem;
         }
 
         .modal-footer {
             display: flex;
+            align-items: center;
             justify-content: flex-end;
-            gap: 1rem;
-            padding: 1.5rem;
+            padding: 1rem 1.5rem;
             border-top: 1px solid var(--gray-light);
         }
 
-        /* Login page */
-        .auth-container {
-            display: flex;
+        .file-input {
+            width: 0.1px;
+            height: 0.1px;
+            opacity: 0;
+            overflow: hidden;
+            position: absolute;
+            z-index: -1;
+        }
+
+        .file-input-label {
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            background-color: var(--light);
-        }
-
-        .auth-card {
-            background-color: var(--white);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow-md);
-            width: 100%;
-            max-width: 500px;
-            padding: 2.5rem;
-        }
-
-        .auth-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .auth-logo {
-            font-size: 2rem;
-            font-weight: 700;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
             color: var(--primary);
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.75rem;
+            background-color: rgba(67, 97, 238, 0.1);
+            border-radius: var(--rounded-md);
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
 
-        .auth-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--dark);
+        .file-input-label:hover {
+            background-color: rgba(67, 97, 238, 0.2);
+        }
+
+        .file-input-label i {
+            margin-right: 0.5rem;
+        }
+
+        .file-list {
+            margin-top: 1rem;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem;
+            background-color: var(--gray-light);
+            border-radius: var(--rounded-md);
             margin-bottom: 0.5rem;
         }
 
-        .auth-subtitle {
+        .file-item i {
+            margin-right: 0.5rem;
             color: var(--gray);
         }
 
-        .auth-footer {
-            text-align: center;
-            margin-top: 1.5rem;
-            color: var(--gray);
+        .file-item-name {
+            flex: 1;
+            font-size: 0.875rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        .auth-footer a {
+        .file-item-remove {
+            color: var(--danger);
+            cursor: pointer;
+            margin-left: 0.5rem;
+        }
+
+        .status-select {
+            padding: 0.375rem 1.75rem 0.375rem 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 400;
+            line-height: 1.5;
+            color: var(--dark);
+            vertical-align: middle;
+            background-color: var(--white);
+            border: 1px solid var(--gray-light);
+            border-radius: var(--rounded-md);
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 16px 12px;
+        }
+
+        .status-select:focus {
+            outline: 0;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .pagination {
+            display: flex;
+            padding-left: 0;
+            list-style: none;
+            border-radius: var(--rounded);
+        }
+
+        .page-item:first-child .page-link {
+            margin-left: 0;
+            border-top-left-radius: var(--rounded);
+            border-bottom-left-radius: var(--rounded);
+        }
+
+        .page-item:last-child .page-link {
+            border-top-right-radius: var(--rounded);
+            border-bottom-right-radius: var(--rounded);
+        }
+
+        .page-item.active .page-link {
+            z-index: 1;
+            color: var(--white);
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .page-link {
+            position: relative;
+            display: block;
+            padding: 0.5rem 0.75rem;
+            margin-left: -1px;
+            line-height: 1.25;
             color: var(--primary);
+            background-color: var(--white);
+            border: 1px solid var(--gray-light);
             text-decoration: none;
-            font-weight: 500;
         }
 
-        /* Loading spinner */
-        .spinner {
-            display: inline-block;
-            width: 1.5rem;
-            height: 1.5rem;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: var(--white);
-            animation: spin 1s ease-in-out infinite;
+        .page-link:hover {
+            z-index: 2;
+            color: var(--primary-dark);
+            background-color: var(--gray-light);
+            border-color: var(--gray-light);
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .spinner-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1001;
-            opacity: 0;
-            visibility: hidden;
-            transition: var(--transition);
-        }
-
-        .spinner-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .spinner-large {
-            width: 3rem;
-            height: 3rem;
-            border-width: 4px;
-        }
-
-        /* Empty state */
         .empty-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 3rem 0;
             text-align: center;
+            padding: 2rem;
+            color: var(--gray);
         }
 
         .empty-state i {
             font-size: 3rem;
+            margin-bottom: 1rem;
             color: var(--gray-light);
-            margin-bottom: 1.5rem;
         }
 
         .empty-state h3 {
             font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--dark);
             margin-bottom: 0.5rem;
+            color: var(--dark);
         }
 
         .empty-state p {
-            color: var(--gray);
-            max-width: 400px;
             margin-bottom: 1.5rem;
         }
 
-        /* Report details */
-        .report-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1.5rem;
-        }
-
-        .report-meta {
-            display: flex;
-            gap: 1rem;
-            color: var(--gray);
-            font-size: 0.875rem;
-            margin-bottom: 1rem;
-        }
-
-        .report-content {
-            margin-bottom: 2rem;
-        }
-
-        .attachments-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin-top: 1.5rem;
-        }
-
-        .attachment-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.75rem 1rem;
-            background-color: var(--gray-light);
-            border-radius: var(--radius);
-            text-decoration: none;
-            color: var(--dark);
-            transition: var(--transition);
-        }
-
-        .attachment-item:hover {
-            background-color: #e2e6ea;
-        }
-
-        .attachment-item i {
-            color: var(--primary);
-        }
-
-        /* Responsive */
         @media (max-width: 768px) {
-            .navbar {
-                flex-direction: column;
-                gap: 1rem;
-                padding: 1rem 0;
-            }
-
-            .nav-links {
+            .sidebar {
                 width: 100%;
-                justify-content: center;
+                height: auto;
+                position: relative;
             }
-
-            .user-menu {
-                width: 100%;
-                justify-content: center;
+            
+            .main-content {
+                margin-left: 0;
             }
-
-            .page-header {
+            
+            .dashboard {
                 flex-direction: column;
-                align-items: flex-start;
-                gap: 1rem;
-            }
-
-            .auth-card {
-                padding: 1.5rem;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Loading overlay -->
-    <div class="spinner-overlay" id="loadingOverlay">
-        <div class="spinner spinner-large"></div>
-    </div>
-
-    <!-- Login Modal -->
-    <div class="modal" id="loginModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">Login</h3>
-                <button class="modal-close" id="closeLoginModal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="loginForm">
-                    <div class="form-group">
-                        <label for="loginEmail" class="form-label">Email</label>
-                        <input type="email" id="loginEmail" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="loginPassword" class="form-label">Password</label>
-                        <input type="password" id="loginPassword" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <button type="submit" class="btn btn-primary" style="width: 100%;">
-                            <span id="loginBtnText">Login</span>
-                            <span class="spinner" id="loginSpinner" style="display: none;"></span>
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Create Report Modal -->
-    <div class="modal" id="createReportModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">Create New Report</h3>
-                <button class="modal-close" id="closeCreateReportModal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="createReportForm">
-                    <div class="form-group">
-                        <label for="reportTitle" class="form-label">Title</label>
-                        <input type="text" id="reportTitle" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="reportDescription" class="form-label">Description</label>
-                        <textarea id="reportDescription" class="form-control" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Attachments</label>
-                        <div class="file-upload">
-                            <label for="reportFiles" class="file-upload-label">
-                                <i class="fas fa-cloud-upload-alt"></i>
-                                <span>Drag & drop files here or click to browse</span>
-                            </label>
-                            <input type="file" id="reportFiles" class="file-upload-input" multiple>
-                            <div class="file-preview" id="filePreview"></div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-outline" id="cancelCreateReport">Cancel</button>
-                <button class="btn btn-primary" id="submitReport">
-                    <span id="submitReportBtnText">Submit Report</span>
-                    <span class="spinner" id="submitReportSpinner" style="display: none;"></span>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Report Details Modal -->
-    <div class="modal" id="reportDetailsModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title" id="reportDetailsTitle">Report Details</h3>
-                <button class="modal-close" id="closeReportDetailsModal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="report-meta">
-                    <span id="reportStatusBadge" class="badge badge-primary">Pending</span>
-                    <span id="reportCreatedAt">Created: Loading...</span>
-                    <span id="reportUpdatedAt">Updated: Loading...</span>
-                </div>
-                <div class="report-content" id="reportDescriptionContent">
-                    <p>Loading description...</p>
-                </div>
-                <div id="reportAttachmentsSection">
-                    <h4>Attachments</h4>
-                    <div class="attachments-list" id="reportAttachmentsList">
-                        <div class="empty-state">
-                            <i class="fas fa-paperclip"></i>
-                            <p>No attachments found for this report</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer" id="reportDetailsFooter">
-                <button class="btn btn-outline" id="closeReportDetailsBtn">Close</button>
-                <div id="adminActions" style="display: none;">
-                    <button class="btn btn-primary" id="markInProgressBtn">Mark In Progress</button>
-                    <button class="btn btn-success" id="markResolvedBtn">Mark Resolved</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Main App Container -->
-    <div id="appContainer">
-        <!-- Login Page (default view) -->
-        <div class="auth-container" id="loginPage">
+    <div id="app">
+        <!-- Auth View -->
+        <div id="auth-view" class="auth-container" v-if="!isAuthenticated">
             <div class="auth-card">
                 <div class="auth-header">
-                    <div class="auth-logo">
-                        <i class="fas fa-bug"></i>
-                        <span>ReportSys</span>
-                    </div>
-                    <h1 class="auth-title">Welcome Back</h1>
-                    <p class="auth-subtitle">Please sign in to access your reports</p>
+                    <h1>Professional Reporting System</h1>
+                    <p>Sign in to access your account</p>
                 </div>
-                <form id="mainLoginForm">
+                
+                <div v-if="authError" class="alert alert-danger">
+                    {{ authError }}
+                </div>
+                
+                <form @submit.prevent="login">
                     <div class="form-group">
-                        <label for="mainLoginEmail" class="form-label">Email</label>
-                        <input type="email" id="mainLoginEmail" class="form-control" required>
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" id="email" class="form-control" v-model="loginForm.email" required>
                     </div>
+                    
                     <div class="form-group">
-                        <label for="mainLoginPassword" class="form-label">Password</label>
-                        <input type="password" id="mainLoginPassword" class="form-control" required>
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" id="password" class="form-control" v-model="loginForm.password" required>
                     </div>
-                    <div class="form-group">
-                        <button type="submit" class="btn btn-primary" style="width: 100%;">
-                            <span id="mainLoginBtnText">Login</span>
-                            <span class="spinner" id="mainLoginSpinner" style="display: none;"></span>
-                        </button>
-                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-block">Sign In</button>
                 </form>
-                <div class="auth-footer">
-                    <p>Don't have an account? <a href="#" id="requestAccessLink">Request access</a></p>
+                
+                <div class="text-center mt-3">
+                    <p class="text-sm text-muted">Admin credentials: admin@example.com / Admin@123</p>
                 </div>
             </div>
         </div>
-
-        <!-- Dashboard (hidden by default) -->
-        <div id="dashboard" style="display: none;">
-            <header>
-                <div class="container">
-                    <nav class="navbar">
-                        <a href="#" class="logo" id="dashboardLogo">
-                            <i class="fas fa-bug"></i>
-                            <span>ReportSys</span>
-                        </a>
-                        <div class="nav-links">
-                            <a href="#" class="active" id="reportsLink">My Reports</a>
-                            <a href="#" id="adminReportsLink" style="display: none;">All Reports</a>
-                            <a href="#" id="adminUsersLink" style="display: none;">Users</a>
-                        </div>
-                        <div class="user-menu">
-                            <div class="dropdown">
-                                <div class="user-avatar" id="userAvatar">U</div>
-                                <div class="dropdown-content">
-                                    <a href="#" class="dropdown-item" id="profileLink">
-                                        <i class="fas fa-user"></i> Profile
-                                    </a>
-                                    <a href="#" class="dropdown-item" id="settingsLink">
-                                        <i class="fas fa-cog"></i> Settings
-                                    </a>
-                                    <div class="dropdown-divider"></div>
-                                    <a href="#" class="dropdown-item" id="logoutLink">
-                                        <i class="fas fa-sign-out-alt"></i> Logout
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </nav>
+        
+        <!-- Dashboard View -->
+        <div class="dashboard" v-else>
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <h2>Reporting System</h2>
                 </div>
-            </header>
-
-            <main class="main">
-                <div class="container">
-                    <!-- Reports Page -->
-                    <div id="reportsPage">
-                        <div class="page-header">
-                            <h1 class="page-title">My Reports</h1>
-                            <button class="btn btn-primary" id="newReportBtn">
-                                <i class="fas fa-plus"></i> New Report
+                
+                <div class="sidebar-menu">
+                    <a href="#" class="menu-item active" @click="setActiveView('reports')">
+                        <i class="fas fa-file-alt"></i>
+                        <span>Reports</span>
+                    </a>
+                    
+                    <a href="#" class="menu-item" @click="setActiveView('create-report')" v-if="user.role === 'staff'">
+                        <i class="fas fa-plus-circle"></i>
+                        <span>Create Report</span>
+                    </a>
+                    
+                    <a href="#" class="menu-item" @click="setActiveView('users')" v-if="user.role === 'admin'">
+                        <i class="fas fa-users"></i>
+                        <span>Users</span>
+                    </a>
+                    
+                    <a href="#" class="menu-item" @click="setActiveView('profile')">
+                        <i class="fas fa-user"></i>
+                        <span>Profile</span>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="main-content">
+                <div class="header">
+                    <h1>{{ activeViewTitle }}</h1>
+                    
+                    <div class="user-menu">
+                        <div class="user-avatar">{{ userInitials }}</div>
+                        <span class="user-name">{{ user.full_name }}</span>
+                        <div class="dropdown-menu">
+                            <button class="dropdown-toggle">
+                                <i class="fas fa-chevron-down"></i>
                             </button>
-                        </div>
-                        <div class="card">
-                            <div class="card-header">
-                                <h2 class="card-title">Recent Reports</h2>
-                                <div class="form-group" style="margin-bottom: 0; width: 200px;">
-                                    <select id="reportFilter" class="form-control">
-                                        <option value="all">All Reports</option>
-                                        <option value="pending">Pending</option>
-                                        <option value="in_progress">In Progress</option>
-                                        <option value="resolved">Resolved</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table" id="reportsTable">
-                                        <thead>
-                                            <tr>
-                                                <th>ID</th>
-                                                <th>Title</th>
-                                                <th>Status</th>
-                                                <th>Created</th>
-                                                <th>Updated</th>
-                                                <th>Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="reportsTableBody">
-                                            <tr>
-                                                <td colspan="6">
-                                                    <div class="empty-state">
-                                                        <i class="fas fa-spinner fa-spin"></i>
-                                                        <h3>Loading reports...</h3>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
+                            <div class="dropdown-content">
+                                <a href="#" @click="setActiveView('profile')">Profile</a>
+                                <a href="#" @click="logout">Logout</a>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Admin Reports Page -->
-                    <div id="adminReportsPage" style="display: none;">
-                        <div class="page-header">
-                            <h1 class="page-title">All Reports</h1>
-                        </div>
-                        <div class="card">
-                            <div class="card-header">
-                                <h2 class="card-title">System Reports</h2>
-                                <div class="form-group" style="margin-bottom: 0; width: 200px;">
-                                    <select id="adminReportFilter" class="form-control">
-                                        <option value="all">All Reports</option>
-                                        <option value="pending">Pending</option>
-                                        <option value="in_progress">In Progress</option>
-                                        <option value="resolved">Resolved</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table" id="adminReportsTable">
-                                        <thead>
-                                            <tr>
-                                                <th>ID</th>
-                                                <th>Title</th>
-                                                <th>Status</th>
-                                                <th>Created</th>
-                                                <th>Updated</th>
-                                                <th>Owner</th>
-                                                <th>Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="adminReportsTableBody">
-                                            <tr>
-                                                <td colspan="7">
-                                                    <div class="empty-state">
-                                                        <i class="fas fa-spinner fa-spin"></i>
-                                                        <h3>Loading reports...</h3>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
+                </div>
+                
+                <!-- Reports View -->
+                <div v-if="activeView === 'reports'">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>All Reports</h2>
+                            <div>
+                                <select class="status-select" v-model="reportFilter" @change="fetchReports">
+                                    <option value="all">All Statuses</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="in_progress">In Progress</option>
+                                    <option value="completed">Completed</option>
+                                </select>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Admin Users Page -->
-                    <div id="adminUsersPage" style="display: none;">
-                        <div class="page-header">
-                            <h1 class="page-title">User Management</h1>
-                            <button class="btn btn-primary" id="newUserBtn">
-                                <i class="fas fa-plus"></i> New User
-                            </button>
-                        </div>
-                        <div class="card">
-                            <div class="card-header">
-                                <h2 class="card-title">System Users</h2>
+                        
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Title</th>
+                                            <th>Status</th>
+                                            <th>Created At</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="report in reports" :key="report.id">
+                                            <td>#{{ report.id }}</td>
+                                            <td>{{ report.title }}</td>
+                                            <td>
+                                                <span class="badge" :class="{
+                                                    'badge-primary': report.status === 'pending',
+                                                    'badge-warning': report.status === 'in_progress',
+                                                    'badge-success': report.status === 'completed'
+                                                }">
+                                                    {{ formatStatus(report.status) }}
+                                                </span>
+                                            </td>
+                                            <td>{{ formatDate(report.created_at) }}</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary" @click="viewReport(report)">
+                                                    <i class="fas fa-eye"></i> View
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger" @click="confirmDeleteReport(report)" v-if="user.role === 'admin' || report.user_id === user.id">
+                                                    <i class="fas fa-trash"></i> Delete
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table" id="usersTable">
-                                        <thead>
-                                            <tr>
-                                                <th>ID</th>
-                                                <th>Name</th>
-                                                <th>Email</th>
-                                                <th>Status</th>
-                                                <th>Role</th>
-                                                <th>Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="usersTableBody">
-                                            <tr>
-                                                <td colspan="6">
-                                                    <div class="empty-state">
-                                                        <i class="fas fa-spinner fa-spin"></i>
-                                                        <h3>Loading users...</h3>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Create User Modal -->
-                    <div class="modal" id="createUserModal">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h3 class="modal-title">Create New User</h3>
-                                <button class="modal-close" id="closeCreateUserModal">&times;</button>
-                            </div>
-                            <div class="modal-body">
-                                <form id="createUserForm">
-                                    <div class="form-group">
-                                        <label for="userFullName" class="form-label">Full Name</label>
-                                        <input type="text" id="userFullName" class="form-control" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="userEmail" class="form-label">Email</label>
-                                        <input type="email" id="userEmail" class="form-control" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="userPassword" class="form-label">Password</label>
-                                        <input type="password" id="userPassword" class="form-control" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="userIsAdmin" class="form-label">
-                                            <input type="checkbox" id="userIsAdmin">
-                                            Admin User
-                                        </label>
-                                    </div>
-                                </form>
-                            </div>
-                            <div class="modal-footer">
-                                <button class="btn btn-outline" id="cancelCreateUser">Cancel</button>
-                                <button class="btn btn-primary" id="submitUser">
-                                    <span id="submitUserBtnText">Create User</span>
-                                    <span class="spinner" id="submitUserSpinner" style="display: none;"></span>
+                            
+                            <div class="empty-state" v-if="reports.length === 0">
+                                <i class="fas fa-file-alt"></i>
+                                <h3>No Reports Found</h3>
+                                <p>There are no reports to display at this time.</p>
+                                <button class="btn btn-primary" @click="setActiveView('create-report')" v-if="user.role === 'staff'">
+                                    <i class="fas fa-plus"></i> Create Report
                                 </button>
                             </div>
                         </div>
                     </div>
                 </div>
-            </main>
+                
+                <!-- Create Report View -->
+                <div v-if="activeView === 'create-report'">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Create New Report</h2>
+                        </div>
+                        
+                        <div class="card-body">
+                            <form @submit.prevent="createReport">
+                                <div class="form-group">
+                                    <label for="report-title" class="form-label">Title</label>
+                                    <input type="text" id="report-title" class="form-control" v-model="newReport.title" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="report-description" class="form-label">Description</label>
+                                    <textarea id="report-description" class="form-control" rows="5" v-model="newReport.description" required></textarea>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Attachments</label>
+                                    <input type="file" id="file-input" class="file-input" multiple @change="handleFileUpload">
+                                    <label for="file-input" class="file-input-label">
+                                        <i class="fas fa-paperclip"></i>
+                                        <span>Choose Files</span>
+                                    </label>
+                                    
+                                    <div class="file-list" v-if="newReport.files.length > 0">
+                                        <div class="file-item" v-for="(file, index) in newReport.files" :key="index">
+                                            <i class="fas fa-file"></i>
+                                            <span class="file-item-name">{{ file.name }}</span>
+                                            <span class="file-item-remove" @click="removeFile(index)">
+                                                <i class="fas fa-times"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save"></i> Submit Report
+                                    </button>
+                                    <button type="button" class="btn btn-outline-danger" @click="setActiveView('reports')">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Report Detail View -->
+                <div v-if="activeView === 'report-detail' && currentReport">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Report #{{ currentReport.id }}</h2>
+                            <div>
+                                <select class="status-select" v-model="currentReport.status" @change="updateReportStatus" v-if="user.role === 'admin'">
+                                    <option value="pending">Pending</option>
+                                    <option value="in_progress">In Progress</option>
+                                    <option value="completed">Completed</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label class="form-label">Title</label>
+                                <p>{{ currentReport.title }}</p>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Description</label>
+                                <p>{{ currentReport.description }}</p>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Status</label>
+                                <p>
+                                    <span class="badge" :class="{
+                                        'badge-primary': currentReport.status === 'pending',
+                                        'badge-warning': currentReport.status === 'in_progress',
+                                        'badge-success': currentReport.status === 'completed'
+                                    }">
+                                        {{ formatStatus(currentReport.status) }}
+                                    </span>
+                                </p>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Created At</label>
+                                <p>{{ formatDate(currentReport.created_at) }}</p>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Last Updated</label>
+                                <p>{{ formatDate(currentReport.updated_at) }}</p>
+                            </div>
+                            
+                            <div class="form-group" v-if="currentReport.attachments && currentReport.attachments.length > 0">
+                                <label class="form-label">Attachments</label>
+                                <div class="file-list">
+                                    <div class="file-item" v-for="(attachment, index) in currentReport.attachments" :key="index">
+                                        <i class="fas fa-file"></i>
+                                        <span class="file-item-name">{{ getOriginalFilename(attachment) }}</span>
+                                        <a :href="'/uploads/' + attachment" target="_blank" class="ml-2">
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <button type="button" class="btn btn-primary" @click="setActiveView('reports')">
+                                    <i class="fas fa-arrow-left"></i> Back to Reports
+                                </button>
+                                <button type="button" class="btn btn-outline-danger" @click="confirmDeleteReport(currentReport)" v-if="user.role === 'admin' || currentReport.user_id === user.id">
+                                    <i class="fas fa-trash"></i> Delete Report
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Users View (Admin Only) -->
+                <div v-if="activeView === 'users' && user.role === 'admin'">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>User Management</h2>
+                            <button class="btn btn-primary" @click="showAddUserModal = true">
+                                <i class="fas fa-plus"></i> Add User
+                            </button>
+                        </div>
+                        
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Name</th>
+                                            <th>Email</th>
+                                            <th>Role</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="userItem in users" :key="userItem.id">
+                                            <td>{{ userItem.id }}</td>
+                                            <td>{{ userItem.full_name }}</td>
+                                            <td>{{ userItem.email }}</td>
+                                            <td>
+                                                <span class="badge" :class="{
+                                                    'badge-primary': userItem.role === 'admin',
+                                                    'badge-secondary': userItem.role === 'staff'
+                                                }">
+                                                    {{ userItem.role }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="badge" :class="{
+                                                    'badge-success': userItem.is_active,
+                                                    'badge-danger': !userItem.is_active
+                                                }">
+                                                    {{ userItem.is_active ? 'Active' : 'Inactive' }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary" @click="editUser(userItem)">
+                                                    <i class="fas fa-edit"></i> Edit
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger" @click="confirmDeleteUser(userItem)">
+                                                    <i class="fas fa-trash"></i> Delete
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div class="empty-state" v-if="users.length === 0">
+                                <i class="fas fa-users"></i>
+                                <h3>No Users Found</h3>
+                                <p>There are no users to display at this time.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Profile View -->
+                <div v-if="activeView === 'profile'">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>My Profile</h2>
+                        </div>
+                        
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label class="form-label">Full Name</label>
+                                <p>{{ user.full_name }}</p>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Email</label>
+                                <p>{{ user.email }}</p>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Role</label>
+                                <p>
+                                    <span class="badge" :class="{
+                                        'badge-primary': user.role === 'admin',
+                                        'badge-secondary': user.role === 'staff'
+                                    }">
+                                        {{ user.role }}
+                                    </span>
+                                </p>
+                            </div>
+                            
+                            <div class="form-group">
+                                <button type="button" class="btn btn-primary" @click="logout">
+                                    <i class="fas fa-sign-out-alt"></i> Logout
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Add User Modal -->
+        <div class="modal" v-if="showAddUserModal" @click.self="showAddUserModal = false">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Add New User</h3>
+                        <button type="button" class="close" @click="showAddUserModal = false">
+                            <span>&times;</span>
+                        </button>
+                    </div>
+                    
+                    <div class="modal-body">
+                        <form @submit.prevent="addUser">
+                            <div class="form-group">
+                                <label for="user-full-name" class="form-label">Full Name</label>
+                                <input type="text" id="user-full-name" class="form-control" v-model="newUser.full_name" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="user-email" class="form-label">Email</label>
+                                <input type="email" id="user-email" class="form-control" v-model="newUser.email" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="user-password" class="form-label">Password</label>
+                                <input type="password" id="user-password" class="form-control" v-model="newUser.password" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="user-role" class="form-label">Role</label>
+                                <select id="user-role" class="form-control" v-model="newUser.role" required>
+                                    <option value="admin">Admin</option>
+                                    <option value="staff">Staff</option>
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-danger" @click="showAddUserModal = false">
+                            Cancel
+                        </button>
+                        <button type="button" class="btn btn-primary" @click="addUser">
+                            Save User
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Edit User Modal -->
+        <div class="modal" v-if="showEditUserModal" @click.self="showEditUserModal = false">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Edit User</h3>
+                        <button type="button" class="close" @click="showEditUserModal = false">
+                            <span>&times;</span>
+                        </button>
+                    </div>
+                    
+                    <div class="modal-body">
+                        <form @submit.prevent="updateUser">
+                            <div class="form-group">
+                                <label for="edit-user-full-name" class="form-label">Full Name</label>
+                                <input type="text" id="edit-user-full-name" class="form-control" v-model="editUserData.full_name" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="edit-user-email" class="form-label">Email</label>
+                                <input type="email" id="edit-user-email" class="form-control" v-model="editUserData.email" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="edit-user-password" class="form-label">Password (leave blank to keep current)</label>
+                                <input type="password" id="edit-user-password" class="form-control" v-model="editUserData.password">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="edit-user-role" class="form-label">Role</label>
+                                <select id="edit-user-role" class="form-control" v-model="editUserData.role" required>
+                                    <option value="admin">Admin</option>
+                                    <option value="staff">Staff</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="edit-user-status" class="form-label">Status</label>
+                                <select id="edit-user-status" class="form-control" v-model="editUserData.is_active" required>
+                                    <option :value="true">Active</option>
+                                    <option :value="false">Inactive</option>
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-danger" @click="showEditUserModal = false">
+                            Cancel
+                        </button>
+                        <button type="button" class="btn btn-primary" @click="updateUser">
+                            Update User
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Confirmation Modal -->
+        <div class="modal" v-if="showConfirmationModal" @click.self="showConfirmationModal = false">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>{{ confirmationTitle }}</h3>
+                        <button type="button" class="close" @click="showConfirmationModal = false">
+                            <span>&times;</span>
+                        </button>
+                    </div>
+                    
+                    <div class="modal-body">
+                        <p>{{ confirmationMessage }}</p>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-danger" @click="showConfirmationModal = false">
+                            Cancel
+                        </button>
+                        <button type="button" class="btn btn-primary" @click="confirmAction">
+                            Confirm
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.31/dist/vue.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
-        // Global variables
-        let currentUser = null;
-        let authToken = null;
-        const API_BASE_URL = 'https://reporting-api-b6sx.onrender.com';
-
-        // DOM elements
-        const elements = {
-            // Login page
-            loginPage: document.getElementById('loginPage'),
-            mainLoginForm: document.getElementById('mainLoginForm'),
-            mainLoginEmail: document.getElementById('mainLoginEmail'),
-            mainLoginPassword: document.getElementById('mainLoginPassword'),
-            mainLoginBtnText: document.getElementById('mainLoginBtnText'),
-            mainLoginSpinner: document.getElementById('mainLoginSpinner'),
-            requestAccessLink: document.getElementById('requestAccessLink'),
-            
-            // Dashboard
-            dashboard: document.getElementById('dashboard'),
-            dashboardLogo: document.getElementById('dashboardLogo'),
-            userAvatar: document.getElementById('userAvatar'),
-            
-            // Navigation
-            reportsLink: document.getElementById('reportsLink'),
-            adminReportsLink: document.getElementById('adminReportsLink'),
-            adminUsersLink: document.getElementById('adminUsersLink'),
-            logoutLink: document.getElementById('logoutLink'),
-            
-            // Reports page
-            reportsPage: document.getElementById('reportsPage'),
-            newReportBtn: document.getElementById('newReportBtn'),
-            reportFilter: document.getElementById('reportFilter'),
-            reportsTableBody: document.getElementById('reportsTableBody'),
-            
-            // Admin reports page
-            adminReportsPage: document.getElementById('adminReportsPage'),
-            adminReportFilter: document.getElementById('adminReportFilter'),
-            adminReportsTableBody: document.getElementById('adminReportsTableBody'),
-            
-            // Admin users page
-            adminUsersPage: document.getElementById('adminUsersPage'),
-            newUserBtn: document.getElementById('newUserBtn'),
-            usersTableBody: document.getElementById('usersTableBody'),
-            
-            // Modals
-            loginModal: document.getElementById('loginModal'),
-            closeLoginModal: document.getElementById('closeLoginModal'),
-            loginForm: document.getElementById('loginForm'),
-            loginEmail: document.getElementById('loginEmail'),
-            loginPassword: document.getElementById('loginPassword'),
-            loginBtnText: document.getElementById('loginBtnText'),
-            loginSpinner: document.getElementById('loginSpinner'),
-            
-            createReportModal: document.getElementById('createReportModal'),
-            closeCreateReportModal: document.getElementById('closeCreateReportModal'),
-            cancelCreateReport: document.getElementById('cancelCreateReport'),
-            createReportForm: document.getElementById('createReportForm'),
-            reportTitle: document.getElementById('reportTitle'),
-            reportDescription: document.getElementById('reportDescription'),
-            reportFiles: document.getElementById('reportFiles'),
-            filePreview: document.getElementById('filePreview'),
-            submitReport: document.getElementById('submitReport'),
-            submitReportBtnText: document.getElementById('submitReportBtnText'),
-            submitReportSpinner: document.getElementById('submitReportSpinner'),
-            
-            reportDetailsModal: document.getElementById('reportDetailsModal'),
-            closeReportDetailsModal: document.getElementById('closeReportDetailsModal'),
-            closeReportDetailsBtn: document.getElementById('closeReportDetailsBtn'),
-            reportDetailsTitle: document.getElementById('reportDetailsTitle'),
-            reportStatusBadge: document.getElementById('reportStatusBadge'),
-            reportCreatedAt: document.getElementById('reportCreatedAt'),
-            reportUpdatedAt: document.getElementById('reportUpdatedAt'),
-            reportDescriptionContent: document.getElementById('reportDescriptionContent'),
-            reportAttachmentsList: document.getElementById('reportAttachmentsList'),
-            adminActions: document.getElementById('adminActions'),
-            markInProgressBtn: document.getElementById('markInProgressBtn'),
-            markResolvedBtn: document.getElementById('markResolvedBtn'),
-            
-            createUserModal: document.getElementById('createUserModal'),
-            closeCreateUserModal: document.getElementById('closeCreateUserModal'),
-            cancelCreateUser: document.getElementById('cancelCreateUser'),
-            createUserForm: document.getElementById('createUserForm'),
-            userFullName: document.getElementById('userFullName'),
-            userEmail: document.getElementById('userEmail'),
-            userPassword: document.getElementById('userPassword'),
-            userIsAdmin: document.getElementById('userIsAdmin'),
-            submitUser: document.getElementById('submitUser'),
-            submitUserBtnText: document.getElementById('submitUserBtnText'),
-            submitUserSpinner: document.getElementById('submitUserSpinner'),
-            
-            // Loading overlay
-            loadingOverlay: document.getElementById('loadingOverlay')
-        };
-
-        // Event listeners
-        function setupEventListeners() {
-            // Login form
-            elements.mainLoginForm.addEventListener('submit', handleLogin);
-            elements.loginForm.addEventListener('submit', handleLogin);
-            elements.requestAccessLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                alert('Please contact your system administrator to request access.');
-            });
-            
-            // Navigation
-            elements.dashboardLogo.addEventListener('click', (e) => {
-                e.preventDefault();
-                showReportsPage();
-            });
-            
-            elements.reportsLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                showReportsPage();
-            });
-            
-            elements.adminReportsLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                showAdminReportsPage();
-            });
-            
-            elements.adminUsersLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                showAdminUsersPage();
-            });
-            
-            elements.logoutLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                logout();
-            });
-            
-            // Reports
-            elements.newReportBtn.addEventListener('click', () => {
-                showModal(elements.createReportModal);
-            });
-            
-            elements.reportFilter.addEventListener('change', loadUserReports);
-            
-            // Admin reports
-            elements.adminReportFilter.addEventListener('change', loadAllReports);
-            
-            // Admin users
-            elements.newUserBtn.addEventListener('click', () => {
-                showModal(elements.createUserModal);
-            });
-            
-            // Modals
-            elements.closeLoginModal.addEventListener('click', () => {
-                hideModal(elements.loginModal);
-            });
-            
-            elements.closeCreateReportModal.addEventListener('click', () => {
-                hideModal(elements.createReportModal);
-            });
-            
-            elements.cancelCreateReport.addEventListener('click', () => {
-                hideModal(elements.createReportModal);
-            });
-            
-            elements.closeReportDetailsModal.addEventListener('click', () => {
-                hideModal(elements.reportDetailsModal);
-            });
-            
-            elements.closeReportDetailsBtn.addEventListener('click', () => {
-                hideModal(elements.reportDetailsModal);
-            });
-            
-            elements.closeCreateUserModal.addEventListener('click', () => {
-                hideModal(elements.createUserModal);
-            });
-            
-            elements.cancelCreateUser.addEventListener('click', () => {
-                hideModal(elements.createUserModal);
-            });
-            
-            // File upload
-            elements.reportFiles.addEventListener('change', handleFileSelect);
-            
-            // Create report
-            elements.submitReport.addEventListener('click', createReport);
-            
-            // Update report status
-            elements.markInProgressBtn.addEventListener('click', () => {
-                updateReportStatus('in_progress');
-            });
-            
-            elements.markResolvedBtn.addEventListener('click', () => {
-                updateReportStatus('resolved');
-            });
-            
-            // Create user
-            elements.submitUser.addEventListener('click', createUser);
-        }
-
-        // Utility functions
-        function showLoading() {
-            elements.loadingOverlay.classList.add('active');
-        }
-
-        function hideLoading() {
-            elements.loadingOverlay.classList.remove('active');
-        }
-
-        function showModal(modal) {
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function hideModal(modal) {
-            modal.classList.remove('active');
-            document.body.style.overflow = '';
-        }
-
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-        }
-
-        function getStatusBadge(status) {
-            switch (status) {
-                case 'pending':
-                    return '<span class="badge badge-warning">Pending</span>';
-                case 'in_progress':
-                    return '<span class="badge badge-primary">In Progress</span>';
-                case 'resolved':
-                    return '<span class="badge badge-success">Resolved</span>';
-                default:
-                    return '<span class="badge badge-secondary">' + status + '</span>';
-            }
-        }
-
-        function showButtonLoading(button, spinner, text) {
-            button.disabled = true;
-            spinner.style.display = 'inline-block';
-            text.style.display = 'none';
-        }
-
-        function hideButtonLoading(button, spinner, text) {
-            button.disabled = false;
-            spinner.style.display = 'none';
-            text.style.display = 'inline-block';
-        }
-
-        // API functions
-        async function apiRequest(url, method = 'GET', body = null, requiresAuth = true) {
-            const headers = {
-                'Content-Type': 'application/json'
-            };
-            
-            if (requiresAuth && authToken) {
-                headers['Authorization'] = `Bearer ${authToken}`;
-            }
-            
-            const options = {
-                method,
-                headers
-            };
-            
-            if (body) {
-                options.body = JSON.stringify(body);
-            }
-            
-            try {
-                const response = await fetch(API_BASE_URL + url, options);
+        const { createApp, ref, computed, onMounted } = Vue;
+        
+        createApp({
+            setup() {
+                // State
+                const isAuthenticated = ref(false);
+                const authError = ref(null);
+                const user = ref({});
+                const activeView = ref('reports');
+                const reports = ref([]);
+                const users = ref([]);
+                const currentReport = ref(null);
+                const reportFilter = ref('all');
+                const showAddUserModal = ref(false);
+                const showEditUserModal = ref(false);
+                const showConfirmationModal = ref(false);
+                const confirmationTitle = ref('');
+                const confirmationMessage = ref('');
+                const confirmationAction = ref(null);
+                const confirmationData = ref(null);
                 
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.detail || 'An error occurred');
-                }
-                
-                return await response.json();
-            } catch (error) {
-                console.error('API request failed:', error);
-                throw error;
-            }
-        }
-
-        // Auth functions
-        async function handleLogin(e) {
-            e.preventDefault();
-            
-            const email = e.target === elements.mainLoginForm ? elements.mainLoginEmail.value : elements.loginEmail.value;
-            const password = e.target === elements.mainLoginForm ? elements.mainLoginPassword.value : elements.loginPassword.value;
-            
-            const loginBtnText = e.target === elements.mainLoginForm ? elements.mainLoginBtnText : elements.loginBtnText;
-            const loginSpinner = e.target === elements.mainLoginForm ? elements.mainLoginSpinner : elements.loginSpinner;
-            
-            showButtonLoading(e.target.querySelector('button'), loginSpinner, loginBtnText);
-            
-            try {
-                const response = await fetch(API_BASE_URL + '/token', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
-                    body: `username=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
+                // Forms
+                const loginForm = ref({
+                    email: '',
+                    password: ''
                 });
                 
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.detail || 'Login failed');
-                }
-                
-                const data = await response.json();
-                authToken = data.access_token;
-                
-                // Get current user
-                await fetchCurrentUser();
-                
-                // Hide login page and show dashboard
-                elements.loginPage.style.display = 'none';
-                elements.dashboard.style.display = 'block';
-                
-                // Load initial data
-                loadUserReports();
-                
-                // Hide modal if it was shown
-                if (e.target === elements.loginForm) {
-                    hideModal(elements.loginModal);
-                }
-            } catch (error) {
-                alert(error.message);
-            } finally {
-                hideButtonLoading(e.target.querySelector('button'), loginSpinner, loginBtnText);
-            }
-        }
-
-        async function fetchCurrentUser() {
-            try {
-                const user = await apiRequest('/users/me/');
-                currentUser = user;
-                
-                // Update UI with user info
-                elements.userAvatar.textContent = user.full_name ? user.full_name.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase();
-                
-                // Show admin links if user is admin
-                if (user.is_admin) {
-                    elements.adminReportsLink.style.display = 'block';
-                    elements.adminUsersLink.style.display = 'block';
-                }
-            } catch (error) {
-                console.error('Failed to fetch current user:', error);
-            }
-        }
-
-        function logout() {
-            currentUser = null;
-            authToken = null;
-            
-            // Reset UI
-            elements.loginPage.style.display = 'flex';
-            elements.dashboard.style.display = 'none';
-            elements.adminReportsLink.style.display = 'none';
-            elements.adminUsersLink.style.display = 'none';
-            
-            // Clear forms
-            elements.mainLoginForm.reset();
-            elements.loginForm.reset();
-            
-            // Show reports page by default for next login
-            showReportsPage();
-        }
-
-        // Page navigation
-        function showReportsPage() {
-            elements.reportsPage.style.display = 'block';
-            elements.adminReportsPage.style.display = 'none';
-            elements.adminUsersPage.style.display = 'none';
-            
-            // Update active nav link
-            elements.reportsLink.classList.add('active');
-            elements.adminReportsLink.classList.remove('active');
-            elements.adminUsersLink.classList.remove('active');
-            
-            loadUserReports();
-        }
-
-        function showAdminReportsPage() {
-            elements.reportsPage.style.display = 'none';
-            elements.adminReportsPage.style.display = 'block';
-            elements.adminUsersPage.style.display = 'none';
-            
-            // Update active nav link
-            elements.reportsLink.classList.remove('active');
-            elements.adminReportsLink.classList.add('active');
-            elements.adminUsersLink.classList.remove('active');
-            
-            loadAllReports();
-        }
-
-        function showAdminUsersPage() {
-            elements.reportsPage.style.display = 'none';
-            elements.adminReportsPage.style.display = 'none';
-            elements.adminUsersPage.style.display = 'block';
-            
-            // Update active nav link
-            elements.reportsLink.classList.remove('active');
-            elements.adminReportsLink.classList.remove('active');
-            elements.adminUsersLink.classList.add('active');
-            
-            loadUsers();
-        }
-
-        // Report functions
-        async function loadUserReports() {
-            showLoading();
-            
-            try {
-                const filter = elements.reportFilter.value;
-                let url = '/reports/';
-                
-                if (filter !== 'all') {
-                    url += `?status=${filter}`;
-                }
-                
-                const reports = await apiRequest(url);
-                
-                if (reports.length === 0) {
-                    elements.reportsTableBody.innerHTML = `
-                        <tr>
-                            <td colspan="6">
-                                <div class="empty-state">
-                                    <i class="fas fa-clipboard-list"></i>
-                                    <h3>No reports found</h3>
-                                    <p>You haven't submitted any reports yet. Click "New Report" to create one.</p>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-                    return;
-                }
-                
-                let html = '';
-                reports.forEach(report => {
-                    html += `
-                        <tr>
-                            <td>${report.id}</td>
-                            <td>${report.title}</td>
-                            <td>${getStatusBadge(report.status)}</td>
-                            <td>${formatDate(report.created_at)}</td>
-                            <td>${formatDate(report.updated_at)}</td>
-                            <td>
-                                <button class="btn btn-sm btn-outline view-report-btn" data-id="${report.id}">
-                                    <i class="fas fa-eye"></i> View
-                                </button>
-                            </td>
-                        </tr>
-                    `;
+                const newReport = ref({
+                    title: '',
+                    description: '',
+                    files: []
                 });
                 
-                elements.reportsTableBody.innerHTML = html;
-                
-                // Add event listeners to view buttons
-                document.querySelectorAll('.view-report-btn').forEach(button => {
-                    button.addEventListener('click', () => {
-                        const reportId = button.getAttribute('data-id');
-                        viewReportDetails(reportId);
-                    });
-                });
-            } catch (error) {
-                console.error('Failed to load reports:', error);
-                elements.reportsTableBody.innerHTML = `
-                    <tr>
-                        <td colspan="6">
-                            <div class="empty-state">
-                                <i class="fas fa-exclamation-circle"></i>
-                                <h3>Failed to load reports</h3>
-                                <p>${error.message}</p>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            } finally {
-                hideLoading();
-            }
-        }
-
-        async function loadAllReports() {
-            showLoading();
-            
-            try {
-                const filter = elements.adminReportFilter.value;
-                let url = '/admin/reports';
-                
-                if (filter !== 'all') {
-                    url += `?status=${filter}`;
-                }
-                
-                const reports = await apiRequest(url);
-                
-                if (reports.length === 0) {
-                    elements.adminReportsTableBody.innerHTML = `
-                        <tr>
-                            <td colspan="7">
-                                <div class="empty-state">
-                                    <i class="fas fa-clipboard-list"></i>
-                                    <h3>No reports found</h3>
-                                    <p>There are no reports in the system yet.</p>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-                    return;
-                }
-                
-                let html = '';
-                reports.forEach(report => {
-                    html += `
-                        <tr>
-                            <td>${report.id}</td>
-                            <td>${report.title}</td>
-                            <td>${getStatusBadge(report.status)}</td>
-                            <td>${formatDate(report.created_at)}</td>
-                            <td>${formatDate(report.updated_at)}</td>
-                            <td>User ${report.owner_id}</td>
-                            <td>
-                                <button class="btn btn-sm btn-outline view-report-btn" data-id="${report.id}">
-                                    <i class="fas fa-eye"></i> View
-                                </button>
-                            </td>
-                        </tr>
-                    `;
+                const newUser = ref({
+                    full_name: '',
+                    email: '',
+                    password: '',
+                    role: 'staff'
                 });
                 
-                elements.adminReportsTableBody.innerHTML = html;
-                
-                // Add event listeners to view buttons
-                document.querySelectorAll('.view-report-btn').forEach(button => {
-                    button.addEventListener('click', () => {
-                        const reportId = button.getAttribute('data-id');
-                        viewReportDetails(reportId);
-                    });
+                const editUserData = ref({
+                    id: null,
+                    full_name: '',
+                    email: '',
+                    password: '',
+                    role: 'staff',
+                    is_active: true
                 });
-            } catch (error) {
-                console.error('Failed to load reports:', error);
-                elements.adminReportsTableBody.innerHTML = `
-                    <tr>
-                        <td colspan="7">
-                            <div class="empty-state">
-                                <i class="fas fa-exclamation-circle"></i>
-                                <h3>Failed to load reports</h3>
-                                <p>${error.message}</p>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            } finally {
-                hideLoading();
-            }
-        }
-
-        async function viewReportDetails(reportId) {
-            showLoading();
-            
-            try {
-                const report = await apiRequest(`/reports/${reportId}`);
                 
-                // Update modal content
-                elements.reportDetailsTitle.textContent = report.title;
-                elements.reportStatusBadge.className = 'badge ' + (
-                    report.status === 'pending' ? 'badge-warning' : 
-                    report.status === 'in_progress' ? 'badge-primary' : 'badge-success'
-                );
-                elements.reportStatusBadge.textContent = report.status.replace('_', ' ');
-                elements.reportCreatedAt.textContent = `Created: ${formatDate(report.created_at)}`;
-                elements.reportUpdatedAt.textContent = `Updated: ${formatDate(report.updated_at)}`;
-                elements.reportDescriptionContent.innerHTML = `<p>${report.description}</p>`;
+                // API Configuration
+                const API_BASE_URL = 'https://reporting-api-b6sx.onrender.com'; // Replace with your Render URL
+                axios.defaults.baseURL = API_BASE_URL;
                 
-                // Update attachments
-                if (report.attachments && report.attachments.length > 0) {
-                    let attachmentsHtml = '';
-                    report.attachments.forEach(attachment => {
-                        const fileName = attachment.split('/').pop();
-                        attachmentsHtml += `
-                            <a href="${API_BASE_URL}${attachment}" target="_blank" class="attachment-item">
-                                <i class="fas fa-paperclip"></i>
-                                <span>${fileName}</span>
-                            </a>
-                        `;
-                    });
-                    elements.reportAttachmentsList.innerHTML = attachmentsHtml;
-                } else {
-                    elements.reportAttachmentsList.innerHTML = `
-                        <div class="empty-state">
-                            <i class="fas fa-paperclip"></i>
-                            <p>No attachments found for this report</p>
-                        </div>
-                    `;
-                }
-                
-                // Show admin actions if user is admin
-                if (currentUser.is_admin) {
-                    elements.adminActions.style.display = 'flex';
-                } else {
-                    elements.adminActions.style.display = 'none';
-                }
-                
-                // Store current report ID in modal for status updates
-                elements.reportDetailsModal.setAttribute('data-report-id', reportId);
-                
-                // Show modal
-                showModal(elements.reportDetailsModal);
-            } catch (error) {
-                console.error('Failed to load report details:', error);
-                alert(`Failed to load report: ${error.message}`);
-            } finally {
-                hideLoading();
-            }
-        }
-
-        function handleFileSelect() {
-            elements.filePreview.innerHTML = '';
-            
-            if (elements.reportFiles.files.length === 0) return;
-            
-            for (let i = 0; i < elements.reportFiles.files.length; i++) {
-                const file = elements.reportFiles.files[i];
-                const fileItem = document.createElement('div');
-                fileItem.className = 'file-preview-item';
-                fileItem.innerHTML = `
-                    <span>${file.name}</span>
-                    <i class="fas fa-times remove-file" data-index="${i}"></i>
-                `;
-                elements.filePreview.appendChild(fileItem);
-            }
-            
-            // Add event listeners to remove buttons
-            document.querySelectorAll('.remove-file').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const index = button.getAttribute('data-index');
-                    removeFile(index);
-                });
-            });
-        }
-
-        function removeFile(index) {
-            const files = Array.from(elements.reportFiles.files);
-            files.splice(index, 1);
-            
-            // Create new FileList (not directly possible, so we use DataTransfer)
-            const dataTransfer = new DataTransfer();
-            files.forEach(file => dataTransfer.items.add(file));
-            elements.reportFiles.files = dataTransfer.files;
-            
-            // Update preview
-            handleFileSelect();
-        }
-
-        async function createReport() {
-            showButtonLoading(elements.submitReport, elements.submitReportSpinner, elements.submitReportBtnText);
-            
-            try {
-                const formData = new FormData();
-                formData.append('title', elements.reportTitle.value);
-                formData.append('description', elements.reportDescription.value);
-                
-                // Add files if any
-                if (elements.reportFiles.files.length > 0) {
-                    for (let i = 0; i < elements.reportFiles.files.length; i++) {
-                        formData.append('files', elements.reportFiles.files[i]);
+                // Computed properties
+                const activeViewTitle = computed(() => {
+                    switch (activeView.value) {
+                        case 'reports': return 'Reports';
+                        case 'create-report': return 'Create Report';
+                        case 'report-detail': return 'Report Details';
+                        case 'users': return 'User Management';
+                        case 'profile': return 'My Profile';
+                        default: return 'Dashboard';
                     }
-                }
-                
-                const response = await fetch(API_BASE_URL + '/reports/', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    },
-                    body: formData
                 });
                 
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.detail || 'Failed to create report');
-                }
-                
-                const report = await response.json();
-                
-                // Reset form
-                elements.createReportForm.reset();
-                elements.filePreview.innerHTML = '';
-                
-                // Hide modal
-                hideModal(elements.createReportModal);
-                
-                // Reload reports
-                loadUserReports();
-                
-                // Show success message
-                alert('Report created successfully!');
-            } catch (error) {
-                console.error('Failed to create report:', error);
-                alert(`Failed to create report: ${error.message}`);
-            } finally {
-                hideButtonLoading(elements.submitReport, elements.submitReportSpinner, elements.submitReportBtnText);
-            }
-        }
-
-        async function updateReportStatus(status) {
-            showLoading();
-            
-            try {
-                const reportId = elements.reportDetailsModal.getAttribute('data-report-id');
-                
-                await apiRequest(`/reports/${reportId}`, 'PUT', { status });
-                
-                // Reload report details
-                await viewReportDetails(reportId);
-                
-                // Reload reports list
-                if (currentUser.is_admin) {
-                    loadAllReports();
-                } else {
-                    loadUserReports();
-                }
-                
-                // Show success message
-                alert('Report status updated successfully!');
-            } catch (error) {
-                console.error('Failed to update report status:', error);
-                alert(`Failed to update report status: ${error.message}`);
-            } finally {
-                hideLoading();
-            }
-        }
-
-        // User management functions
-        async function loadUsers() {
-            showLoading();
-            
-            try {
-                const users = await apiRequest('/admin/users');
-                
-                if (users.length === 0) {
-                    elements.usersTableBody.innerHTML = `
-                        <tr>
-                            <td colspan="6">
-                                <div class="empty-state">
-                                    <i class="fas fa-users"></i>
-                                    <h3>No users found</h3>
-                                    <p>There are no users in the system yet.</p>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-                    return;
-                }
-                
-                let html = '';
-                users.forEach(user => {
-                    html += `
-                        <tr>
-                            <td>${user.id}</td>
-                            <td>${user.full_name || 'N/A'}</td>
-                            <td>${user.email}</td>
-                            <td>
-                                ${user.is_active ? 
-                                    '<span class="badge badge-success">Active</span>' : 
-                                    '<span class="badge badge-danger">Inactive</span>'}
-                            </td>
-                            <td>
-                                ${user.is_admin ? 
-                                    '<span class="badge badge-primary">Admin</span>' : 
-                                    '<span class="badge badge-secondary">User</span>'}
-                            </td>
-                            <td>
-                                <button class="btn btn-sm btn-outline" disabled>
-                                    <i class="fas fa-edit"></i> Edit
-                                </button>
-                            </td>
-                        </tr>
-                    `;
+                const userInitials = computed(() => {
+                    if (!user.value.full_name) return '';
+                    const names = user.value.full_name.split(' ');
+                    return names.map(name => name[0]).join('').toUpperCase();
                 });
                 
-                elements.usersTableBody.innerHTML = html;
-            } catch (error) {
-                console.error('Failed to load users:', error);
-                elements.usersTableBody.innerHTML = `
-                    <tr>
-                        <td colspan="6">
-                            <div class="empty-state">
-                                <i class="fas fa-exclamation-circle"></i>
-                                <h3>Failed to load users</h3>
-                                <p>${error.message}</p>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            } finally {
-                hideLoading();
-            }
-        }
-
-        async function createUser() {
-            showButtonLoading(elements.submitUser, elements.submitUserSpinner, elements.submitUserBtnText);
-            
-            try {
-                const userData = {
-                    email: elements.userEmail.value,
-                    full_name: elements.userFullName.value,
-                    password: elements.userPassword.value,
-                    is_admin: elements.userIsAdmin.checked
+                // Methods
+                const checkAuth = () => {
+                    const token = localStorage.getItem('token');
+                    if (token) {
+                        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                        isAuthenticated.value = true;
+                        fetchUserProfile();
+                    }
                 };
                 
-                await apiRequest('/users/', 'POST', userData);
+                const login = async () => {
+                    try {
+                        authError.value = null;
+                        const formData = new FormData();
+                        formData.append('username', loginForm.value.email);
+                        formData.append('password', loginForm.value.password);
+                        
+                        const response = await axios.post('/token', formData);
+                        localStorage.setItem('token', response.data.access_token);
+                        axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.access_token}`;
+                        isAuthenticated.value = true;
+                        await fetchUserProfile();
+                        await fetchReports();
+                    } catch (error) {
+                        authError.value = 'Invalid email or password';
+                        console.error('Login error:', error);
+                    }
+                };
                 
-                // Reset form
-                elements.createUserForm.reset();
+                const logout = () => {
+                    localStorage.removeItem('token');
+                    delete axios.defaults.headers.common['Authorization'];
+                    isAuthenticated.value = false;
+                    user.value = {};
+                    activeView.value = 'reports';
+                };
                 
-                // Hide modal
-                hideModal(elements.createUserModal);
+                const fetchUserProfile = async () => {
+                    try {
+                        const response = await axios.get('/users/me');
+                        user.value = response.data;
+                    } catch (error) {
+                        console.error('Failed to fetch user profile:', error);
+                        logout();
+                    }
+                };
                 
-                // Reload users
-                loadUsers();
+                const fetchReports = async () => {
+                    try {
+                        let url = '/reports/';
+                        if (reportFilter.value !== 'all') {
+                            url += `?status=${reportFilter.value}`;
+                        }
+                        
+                        const response = await axios.get(url);
+                        reports.value = response.data;
+                    } catch (error) {
+                        console.error('Failed to fetch reports:', error);
+                    }
+                };
                 
-                // Show success message
-                alert('User created successfully!');
-            } catch (error) {
-                console.error('Failed to create user:', error);
-                alert(`Failed to create user: ${error.message}`);
-            } finally {
-                hideButtonLoading(elements.submitUser, elements.submitUserSpinner, elements.submitUserBtnText);
-            }
-        }
-
-        // Initialize app
-        function init() {
-            setupEventListeners();
-            
-            // Check for existing token in localStorage (for persistence)
-            const token = localStorage.getItem('authToken');
-            if (token) {
-                authToken = token;
-                fetchCurrentUser().then(() => {
-                    elements.loginPage.style.display = 'none';
-                    elements.dashboard.style.display = 'block';
-                    loadUserReports();
-                }).catch(() => {
-                    localStorage.removeItem('authToken');
+                const fetchUsers = async () => {
+                    try {
+                        const response = await axios.get('/users/');
+                        users.value = response.data;
+                    } catch (error) {
+                        console.error('Failed to fetch users:', error);
+                    }
+                };
+                
+                const setActiveView = (view) => {
+                    activeView.value = view;
+                    
+                    if (view === 'reports') {
+                        fetchReports();
+                    } else if (view === 'users') {
+                        fetchUsers();
+                    }
+                };
+                
+                const createReport = async () => {
+                    try {
+                        const formData = new FormData();
+                        formData.append('title', newReport.value.title);
+                        formData.append('description', newReport.value.description);
+                        
+                        for (const file of newReport.value.files) {
+                            formData.append('files', file);
+                        }
+                        
+                        const response = await axios.post('/reports/', formData, {
+                            headers: {
+                                'Content-Type': 'multipart/form-data'
+                            }
+                        });
+                        
+                        reports.value.unshift(response.data);
+                        newReport.value = { title: '', description: '', files: [] };
+                        setActiveView('reports');
+                    } catch (error) {
+                        console.error('Failed to create report:', error);
+                        alert('Failed to create report. Please try again.');
+                    }
+                };
+                
+                const viewReport = (report) => {
+                    currentReport.value = report;
+                    activeView.value = 'report-detail';
+                };
+                
+                const updateReportStatus = async () => {
+                    try {
+                        await axios.put(`/reports/${currentReport.value.id}`, {
+                            status: currentReport.value.status
+                        });
+                    } catch (error) {
+                        console.error('Failed to update report status:', error);
+                    }
+                };
+                
+                const confirmDeleteReport = (report) => {
+                    confirmationTitle.value = 'Delete Report';
+                    confirmationMessage.value = `Are you sure you want to delete report "${report.title}"? This action cannot be undone.`;
+                    confirmationAction.value = deleteReport;
+                    confirmationData.value = report;
+                    showConfirmationModal.value = true;
+                };
+                
+                const deleteReport = async () => {
+                    try {
+                        await axios.delete(`/reports/${confirmationData.value.id}`);
+                        reports.value = reports.value.filter(r => r.id !== confirmationData.value.id);
+                        if (activeView.value === 'report-detail' && currentReport.value.id === confirmationData.value.id) {
+                            setActiveView('reports');
+                        }
+                        showConfirmationModal.value = false;
+                    } catch (error) {
+                        console.error('Failed to delete report:', error);
+                    }
+                };
+                
+                const addUser = async () => {
+                    try {
+                        const response = await axios.post('/users/', newUser.value);
+                        users.value.push(response.data);
+                        newUser.value = { full_name: '', email: '', password: '', role: 'staff' };
+                        showAddUserModal.value = false;
+                    } catch (error) {
+                        console.error('Failed to add user:', error);
+                        alert('Failed to add user. Please try again.');
+                    }
+                };
+                
+                const editUser = (user) => {
+                    editUserData.value = {
+                        id: user.id,
+                        full_name: user.full_name,
+                        email: user.email,
+                        password: '',
+                        role: user.role,
+                        is_active: user.is_active
+                    };
+                    showEditUserModal.value = true;
+                };
+                
+                const updateUser = async () => {
+                    try {
+                        const payload = {
+                            full_name: editUserData.value.full_name,
+                            email: editUserData.value.email,
+                            role: editUserData.value.role,
+                            is_active: editUserData.value.is_active
+                        };
+                        
+                        if (editUserData.value.password) {
+                            payload.password = editUserData.value.password;
+                        }
+                        
+                        const response = await axios.put(`/users/${editUserData.value.id}`, payload);
+                        
+                        const index = users.value.findIndex(u => u.id === editUserData.value.id);
+                        if (index !== -1) {
+                            users.value[index] = response.data;
+                        }
+                        
+                        if (user.value.id === editUserData.value.id) {
+                            user.value = response.data;
+                        }
+                        
+                        showEditUserModal.value = false;
+                    } catch (error) {
+                        console.error('Failed to update user:', error);
+                        alert('Failed to update user. Please try again.');
+                    }
+                };
+                
+                const confirmDeleteUser = (user) => {
+                    confirmationTitle.value = 'Delete User';
+                    confirmationMessage.value = `Are you sure you want to delete user "${user.full_name}"? This action cannot be undone.`;
+                    confirmationAction.value = deleteUser;
+                    confirmationData.value = user;
+                    showConfirmationModal.value = true;
+                };
+                
+                const deleteUser = async () => {
+                    try {
+                        await axios.delete(`/users/${confirmationData.value.id}`);
+                        users.value = users.value.filter(u => u.id !== confirmationData.value.id);
+                        showConfirmationModal.value = false;
+                    } catch (error) {
+                        console.error('Failed to delete user:', error);
+                    }
+                };
+                
+                const confirmAction = () => {
+                    if (confirmationAction.value) {
+                        confirmationAction.value();
+                    }
+                };
+                
+                const handleFileUpload = (event) => {
+                    newReport.value.files = Array.from(event.target.files);
+                };
+                
+                const removeFile = (index) => {
+                    newReport.value.files.splice(index, 1);
+                };
+                
+                const formatDate = (dateString) => {
+                    const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+                    return new Date(dateString).toLocaleDateString(undefined, options);
+                };
+                
+                const formatStatus = (status) => {
+                    return status.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+                };
+                
+                const getOriginalFilename = (filePath) => {
+                    // In a real app, you would query the database for the original filename
+                    // For this demo, we'll just return the filename part
+                    return filePath.split('/').pop();
+                };
+                
+                // Lifecycle hooks
+                onMounted(() => {
+                    checkAuth();
                 });
+                
+                // Return everything needed in the template
+                return {
+                    isAuthenticated,
+                    authError,
+                    loginForm,
+                    login,
+                    logout,
+                    user,
+                    activeView,
+                    activeViewTitle,
+                    setActiveView,
+                    reports,
+                    reportFilter,
+                    fetchReports,
+                    newReport,
+                    createReport,
+                    handleFileUpload,
+                    removeFile,
+                    currentReport,
+                    viewReport,
+                    updateReportStatus,
+                    confirmDeleteReport,
+                    deleteReport,
+                    users,
+                    showAddUserModal,
+                    newUser,
+                    addUser,
+                    showEditUserModal,
+                    editUserData,
+                    editUser,
+                    updateUser,
+                    confirmDeleteUser,
+                    deleteUser,
+                    showConfirmationModal,
+                    confirmationTitle,
+                    confirmationMessage,
+                    confirmAction,
+                    userInitials,
+                    formatDate,
+                    formatStatus,
+                    getOriginalFilename
+                };
             }
-        }
-
-        // Start the app
-        document.addEventListener('DOMContentLoaded', init);
+        }).mount('#app');
     </script>
 </body>
 </html>
