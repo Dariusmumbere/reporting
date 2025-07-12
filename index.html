@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
+        /* [Previous CSS styles remain exactly the same] */
         :root {
             --primary-color: #4361ee;
             --primary-dark: #3a56d4;
@@ -70,7 +71,6 @@
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
-
         #app {
             display: flex;
             min-height: 100vh;
@@ -1586,6 +1586,9 @@
         ::-webkit-scrollbar-thumb:hover {
             background: var(--primary-dark);
         }
+
+        /* [Rest of the CSS styles remain exactly the same] */
+        /* ... */
     </style>
 </head>
 <body>
@@ -1768,7 +1771,7 @@
                                     <div class="d-flex align-items-center justify-content-between">
                                         <div>
                                             <h3 style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Total Reports</h3>
-                                            <p style="font-size: 1.75rem; font-weight: 600; margin-bottom: 0;">24</p>
+                                            <p style="font-size: 1.75rem; font-weight: 600; margin-bottom: 0;" id="total-reports-count">0</p>
                                         </div>
                                         <div style="width: 48px; height: 48px; border-radius: 50%; background-color: rgba(67, 97, 238, 0.1); display: flex; align-items: center; justify-content: center;">
                                             <i class="fas fa-file-alt" style="font-size: 1.25rem; color: var(--primary-color);"></i>
@@ -1781,7 +1784,7 @@
                                     <div class="d-flex align-items-center justify-content-between">
                                         <div>
                                             <h3 style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Pending</h3>
-                                            <p style="font-size: 1.75rem; font-weight: 600; margin-bottom: 0;">5</p>
+                                            <p style="font-size: 1.75rem; font-weight: 600; margin-bottom: 0;" id="pending-reports-count">0</p>
                                         </div>
                                         <div style="width: 48px; height: 48px; border-radius: 50%; background-color: rgba(248, 150, 30, 0.1); display: flex; align-items: center; justify-content: center;">
                                             <i class="fas fa-clock" style="font-size: 1.25rem; color: var(--warning-color);"></i>
@@ -1794,7 +1797,7 @@
                                     <div class="d-flex align-items-center justify-content-between">
                                         <div>
                                             <h3 style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Approved</h3>
-                                            <p style="font-size: 1.75rem; font-weight: 600; margin-bottom: 0;">16</p>
+                                            <p style="font-size: 1.75rem; font-weight: 600; margin-bottom: 0;" id="approved-reports-count">0</p>
                                         </div>
                                         <div style="width: 48px; height: 48px; border-radius: 50%; background-color: rgba(76, 201, 240, 0.1); display: flex; align-items: center; justify-content: center;">
                                             <i class="fas fa-check-circle" style="font-size: 1.25rem; color: var(--success-color);"></i>
@@ -1807,7 +1810,7 @@
                                     <div class="d-flex align-items-center justify-content-between">
                                         <div>
                                             <h3 style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Rejected</h3>
-                                            <p style="font-size: 1.75rem; font-weight: 600; margin-bottom: 0;">3</p>
+                                            <p style="font-size: 1.75rem; font-weight: 600; margin-bottom: 0;" id="rejected-reports-count">0</p>
                                         </div>
                                         <div style="width: 48px; height: 48px; border-radius: 50%; background-color: rgba(247, 37, 133, 0.1); display: flex; align-items: center; justify-content: center;">
                                             <i class="fas fa-times-circle" style="font-size: 1.25rem; color: var(--danger-color);"></i>
@@ -1834,77 +1837,8 @@
                                                 <th>Actions</th>
                                             </tr>
                                         </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>#REP-2023-001</td>
-                                                <td>Quarterly Financial Report</td>
-                                                <td><span class="badge badge-success">Approved</span></td>
-                                                <td>2023-10-15</td>
-                                                <td>
-                                                    <button class="action-btn view-report-btn" data-id="1" title="View">
-                                                        <i class="fas fa-eye"></i>
-                                                    </button>
-                                                    <button class="action-btn" title="Download">
-                                                        <i class="fas fa-download"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>#REP-2023-002</td>
-                                                <td>Marketing Campaign Analysis</td>
-                                                <td><span class="badge badge-warning">Pending</span></td>
-                                                <td>2023-10-12</td>
-                                                <td>
-                                                    <button class="action-btn view-report-btn" data-id="2" title="View">
-                                                        <i class="fas fa-eye"></i>
-                                                    </button>
-                                                    <button class="action-btn" title="Download">
-                                                        <i class="fas fa-download"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>#REP-2023-003</td>
-                                                <td>Inventory Audit</td>
-                                                <td><span class="badge badge-success">Approved</span></td>
-                                                <td>2023-10-10</td>
-                                                <td>
-                                                    <button class="action-btn view-report-btn" data-id="3" title="View">
-                                                        <i class="fas fa-eye"></i>
-                                                    </button>
-                                                    <button class="action-btn" title="Download">
-                                                        <i class="fas fa-download"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>#REP-2023-004</td>
-                                                <td>Employee Satisfaction Survey</td>
-                                                <td><span class="badge badge-danger">Rejected</span></td>
-                                                <td>2023-10-08</td>
-                                                <td>
-                                                    <button class="action-btn view-report-btn" data-id="4" title="View">
-                                                        <i class="fas fa-eye"></i>
-                                                    </button>
-                                                    <button class="action-btn" title="Download">
-                                                        <i class="fas fa-download"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>#REP-2023-005</td>
-                                                <td>IT Infrastructure Upgrade</td>
-                                                <td><span class="badge badge-warning">Pending</span></td>
-                                                <td>2023-10-05</td>
-                                                <td>
-                                                    <button class="action-btn view-report-btn" data-id="5" title="View">
-                                                        <i class="fas fa-eye"></i>
-                                                    </button>
-                                                    <button class="action-btn" title="Download">
-                                                        <i class="fas fa-download"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
+                                        <tbody id="dashboard-reports-table-body">
+                                            <!-- Reports will be loaded here -->
                                         </tbody>
                                     </table>
                                 </div>
@@ -1927,13 +1861,13 @@
                             <div class="card-header">
                                 <h2 class="card-title">All Reports</h2>
                                 <div class="d-flex align-items-center flex-wrap gap-2">
-                                    <select class="form-control form-select" style="width: 150px;">
-                                        <option>All Status</option>
-                                        <option>Pending</option>
-                                        <option>Approved</option>
-                                        <option>Rejected</option>
+                                    <select class="form-control form-select" id="report-status-filter" style="width: 150px;">
+                                        <option value="">All Status</option>
+                                        <option value="pending">Pending</option>
+                                        <option value="approved">Approved</option>
+                                        <option value="rejected">Rejected</option>
                                     </select>
-                                    <input type="text" class="form-control" placeholder="Search reports..." style="width: 200px;">
+                                    <input type="text" class="form-control" id="report-search" placeholder="Search reports..." style="width: 200px;">
                                 </div>
                             </div>
                             <div class="card-body">
@@ -1951,19 +1885,12 @@
                                             </tr>
                                         </thead>
                                         <tbody id="reports-table-body">
-                                            <!-- Loading state -->
-                                            <tr>
-                                                <td colspan="7" class="text-center">
-                                                    <div class="d-flex justify-content-center py-4">
-                                                        <div class="spinner spinner-primary"></div>
-                                                    </div>
-                                                </td>
-                                            </tr>
+                                            <!-- Reports will be loaded here -->
                                         </tbody>
                                     </table>
                                 </div>
                                 <div class="card-footer">
-                                    <div class="text-muted">Showing <span id="reports-from">1</span> to <span id="reports-to">10</span> of <span id="reports-total">24</span> entries</div>
+                                    <div class="text-muted">Showing <span id="reports-from">1</span> to <span id="reports-to">10</span> of <span id="reports-total">0</span> entries</div>
                                     <div class="d-flex gap-1">
                                         <button class="btn btn-outline btn-sm" disabled id="reports-prev-btn">
                                             <i class="fas fa-chevron-left"></i> Previous
@@ -1991,7 +1918,7 @@
                         <div class="card">
                             <div class="card-header">
                                 <h2 class="card-title">All Users</h2>
-                                <input type="text" class="form-control" placeholder="Search users..." style="width: 250px;">
+                                <input type="text" class="form-control" id="user-search" placeholder="Search users..." style="width: 250px;">
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
@@ -2007,19 +1934,12 @@
                                             </tr>
                                         </thead>
                                         <tbody id="users-table-body">
-                                            <!-- Loading state -->
-                                            <tr>
-                                                <td colspan="6" class="text-center">
-                                                    <div class="d-flex justify-content-center py-4">
-                                                        <div class="spinner spinner-primary"></div>
-                                                    </div>
-                                                </td>
-                                            </tr>
+                                            <!-- Users will be loaded here -->
                                         </tbody>
                                     </table>
                                 </div>
                                 <div class="card-footer">
-                                    <div class="text-muted">Showing <span id="users-from">1</span> to <span id="users-to">5</span> of <span id="users-total">12</span> entries</div>
+                                    <div class="text-muted">Showing <span id="users-from">1</span> to <span id="users-to">5</span> of <span id="users-total">0</span> entries</div>
                                     <div class="d-flex gap-1">
                                         <button class="btn btn-outline btn-sm" disabled id="users-prev-btn">
                                             <i class="fas fa-chevron-left"></i> Previous
@@ -2243,22 +2163,7 @@
                         </div>
                         <div class="card-body">
                             <div class="file-list" id="view-report-attachments">
-                                <div class="file-item">
-                                    <i class="fas fa-file-pdf file-icon" style="color: #e74c3c;"></i>
-                                    <div class="file-info">
-                                        <div class="file-name">Q3_Financial_Report.pdf</div>
-                                        <div class="file-size">2.4 MB</div>
-                                    </div>
-                                    <i class="fas fa-download file-icon" style="cursor: pointer;"></i>
-                                </div>
-                                <div class="file-item">
-                                    <i class="fas fa-file-excel file-icon" style="color: #2ecc71;"></i>
-                                    <div class="file-info">
-                                        <div class="file-name">Financial_Data_Q3.xlsx</div>
-                                        <div class="file-size">1.8 MB</div>
-                                    </div>
-                                    <i class="fas fa-download file-icon" style="cursor: pointer;"></i>
-                                </div>
+                                <!-- Attachments will be loaded here -->
                             </div>
                         </div>
                     </div>
@@ -2305,6 +2210,11 @@
         let users = [];
         let selectedReportId = null;
         let isSidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+        let currentPage = {
+            reports: 1,
+            users: 1
+        };
+        const ITEMS_PER_PAGE = 10;
 
         // DOM Elements
         const loginView = document.getElementById('login-view');
@@ -2373,6 +2283,24 @@
         const adminComments = document.getElementById('admin-comments');
         const settingsForm = document.getElementById('settings-form');
         const saveSettingsBtn = document.getElementById('save-settings-btn');
+        const dashboardReportsTableBody = document.getElementById('dashboard-reports-table-body');
+        const totalReportsCount = document.getElementById('total-reports-count');
+        const pendingReportsCount = document.getElementById('pending-reports-count');
+        const approvedReportsCount = document.getElementById('approved-reports-count');
+        const rejectedReportsCount = document.getElementById('rejected-reports-count');
+        const reportStatusFilter = document.getElementById('report-status-filter');
+        const reportSearch = document.getElementById('report-search');
+        const userSearch = document.getElementById('user-search');
+        const reportsPrevBtn = document.getElementById('reports-prev-btn');
+        const reportsNextBtn = document.getElementById('reports-next-btn');
+        const usersPrevBtn = document.getElementById('users-prev-btn');
+        const usersNextBtn = document.getElementById('users-next-btn');
+        const reportsFrom = document.getElementById('reports-from');
+        const reportsTo = document.getElementById('reports-to');
+        const reportsTotal = document.getElementById('reports-total');
+        const usersFrom = document.getElementById('users-from');
+        const usersTo = document.getElementById('users-to');
+        const usersTotal = document.getElementById('users-total');
 
         // Initialize the application
         function init() {
@@ -2525,6 +2453,73 @@
                     const reportId = btn.getAttribute('data-id');
                     viewReport(reportId);
                 }
+                
+                if (e.target.closest('.edit-report-btn')) {
+                    const btn = e.target.closest('.edit-report-btn');
+                    const reportId = btn.getAttribute('data-id');
+                    editReport(reportId);
+                }
+                
+                if (e.target.closest('.delete-report-btn')) {
+                    const btn = e.target.closest('.delete-report-btn');
+                    const reportId = btn.getAttribute('data-id');
+                    deleteReport(reportId);
+                }
+                
+                if (e.target.closest('.edit-user-btn')) {
+                    const btn = e.target.closest('.edit-user-btn');
+                    const userId = btn.getAttribute('data-id');
+                    editUser(userId);
+                }
+                
+                if (e.target.closest('.delete-user-btn')) {
+                    const btn = e.target.closest('.delete-user-btn');
+                    const userId = btn.getAttribute('data-id');
+                    deleteUser(userId);
+                }
+            });
+            
+            // Report status filter
+            reportStatusFilter.addEventListener('change', () => {
+                currentPage.reports = 1;
+                loadReports();
+            });
+            
+            // Report search
+            reportSearch.addEventListener('input', () => {
+                currentPage.reports = 1;
+                loadReports();
+            });
+            
+            // User search
+            userSearch.addEventListener('input', () => {
+                currentPage.users = 1;
+                loadUsers();
+            });
+            
+            // Pagination buttons
+            reportsPrevBtn.addEventListener('click', () => {
+                if (currentPage.reports > 1) {
+                    currentPage.reports--;
+                    loadReports();
+                }
+            });
+            
+            reportsNextBtn.addEventListener('click', () => {
+                currentPage.reports++;
+                loadReports();
+            });
+            
+            usersPrevBtn.addEventListener('click', () => {
+                if (currentPage.users > 1) {
+                    currentPage.users--;
+                    loadUsers();
+                }
+            });
+            
+            usersNextBtn.addEventListener('click', () => {
+                currentPage.users++;
+                loadUsers();
             });
         }
 
@@ -2550,7 +2545,7 @@
                     }
                 })
                 .then(data => {
-                    currentUser = data.user;
+                    currentUser = data;
                     setupUIForUser();
                     loadInitialData();
                     loginView.classList.add('hidden');
@@ -2580,7 +2575,7 @@
             loginBtnText.textContent = 'Signing in...';
             loginSpinner.classList.remove('hidden');
             
-            // Create URLSearchParams for form data
+            // Create form data
             const formData = new URLSearchParams();
             formData.append('username', email);
             formData.append('password', password);
@@ -2689,15 +2684,109 @@
                 loadReports();
             } else if (viewId === 'users' && currentUser.role === 'admin') {
                 loadUsers();
+            } else if (viewId === 'dashboard') {
+                loadDashboardData();
             }
         }
 
         // Load initial data for the dashboard
         function loadInitialData() {
-            loadReports();
+            loadDashboardData();
             if (currentUser.role === 'admin') {
                 loadUsers();
             }
+        }
+
+        // Load dashboard data
+        function loadDashboardData() {
+            // Show loading state
+            dashboardReportsTableBody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center">
+                        <div class="d-flex justify-content-center py-4">
+                            <div class="spinner spinner-primary"></div>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            
+            // Get reports for the dashboard
+            fetch(`${API_BASE_URL}/reports?limit=5`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch reports');
+                }
+                return response.json();
+            })
+            .then(data => {
+                reports = data;
+                renderDashboardReportsTable();
+                updateReportCounts();
+            })
+            .catch(error => {
+                console.error('Error loading dashboard data:', error);
+                showAlert('Failed to load dashboard data', 'danger');
+            });
+        }
+
+        // Update report counts
+        function updateReportCounts() {
+            totalReportsCount.textContent = reports.length;
+            pendingReportsCount.textContent = reports.filter(r => r.status === 'pending').length;
+            approvedReportsCount.textContent = reports.filter(r => r.status === 'approved').length;
+            rejectedReportsCount.textContent = reports.filter(r => r.status === 'rejected').length;
+        }
+
+        // Render dashboard reports table
+        function renderDashboardReportsTable() {
+            dashboardReportsTableBody.innerHTML = '';
+            
+            if (reports.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td colspan="5" class="text-center text-muted">No reports found</td>
+                `;
+                dashboardReportsTableBody.appendChild(row);
+                return;
+            }
+            
+            reports.forEach(report => {
+                const row = document.createElement('tr');
+                
+                // Determine status badge
+                let statusBadge;
+                if (report.status === 'approved') {
+                    statusBadge = '<span class="badge badge-success">Approved</span>';
+                } else if (report.status === 'pending') {
+                    statusBadge = '<span class="badge badge-warning">Pending</span>';
+                } else {
+                    statusBadge = '<span class="badge badge-danger">Rejected</span>';
+                }
+                
+                // Format date
+                const reportDate = new Date(report.created_at).toLocaleDateString();
+                
+                row.innerHTML = `
+                    <td>#REP-${report.id.toString().padStart(3, '0')}</td>
+                    <td>${report.title}</td>
+                    <td>${statusBadge}</td>
+                    <td>${reportDate}</td>
+                    <td>
+                        <button class="action-btn view-report-btn" data-id="${report.id}" title="View">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="action-btn" title="Download">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </td>
+                `;
+                
+                dashboardReportsTableBody.appendChild(row);
+            });
         }
 
         // Load reports from API
@@ -2713,72 +2802,41 @@
                 </tr>
             `;
             
-            // Simulate API call with timeout
-            setTimeout(() => {
-                // Mock data for demonstration
-                reports = [
-                    {
-                        id: 1,
-                        title: "Quarterly Financial Report",
-                        author_name: "John Doe",
-                        status: "approved",
-                        created_at: "2023-10-15T00:00:00Z",
-                        description: "Financial performance for Q3 2023",
-                        category: "financial",
-                        attachments: [
-                            { name: "Q3_Financial_Report.pdf", type: "application/pdf", size: 2400000, url: "#" },
-                            { name: "Financial_Data_Q3.xlsx", type: "application/vnd.ms-excel", size: 1800000, url: "#" }
-                        ]
-                    },
-                    {
-                        id: 2,
-                        title: "Marketing Campaign Analysis",
-                        author_name: "Jane Smith",
-                        status: "pending",
-                        created_at: "2023-10-12T00:00:00Z",
-                        description: "Analysis of summer marketing campaign",
-                        category: "marketing",
-                        attachments: []
-                    },
-                    {
-                        id: 3,
-                        title: "Inventory Audit",
-                        author_name: "Mike Johnson",
-                        status: "approved",
-                        created_at: "2023-10-10T00:00:00Z",
-                        description: "Yearly inventory audit results",
-                        category: "operations",
-                        attachments: [
-                            { name: "Inventory_Report.pdf", type: "application/pdf", size: 1500000, url: "#" }
-                        ]
-                    },
-                    {
-                        id: 4,
-                        title: "Employee Satisfaction Survey",
-                        author_name: "Sarah Williams",
-                        status: "rejected",
-                        created_at: "2023-10-08T00:00:00Z",
-                        description: "Results of annual employee survey",
-                        category: "hr",
-                        attachments: []
-                    },
-                    {
-                        id: 5,
-                        title: "IT Infrastructure Upgrade",
-                        author_name: "David Brown",
-                        status: "pending",
-                        created_at: "2023-10-05T00:00:00Z",
-                        description: "Proposal for IT infrastructure upgrades",
-                        category: "it",
-                        attachments: [
-                            { name: "IT_Upgrade_Plan.pdf", type: "application/pdf", size: 3200000, url: "#" },
-                            { name: "Cost_Analysis.xlsx", type: "application/vnd.ms-excel", size: 1200000, url: "#" }
-                        ]
-                    }
-                ];
-                
+            // Build query parameters
+            const params = new URLSearchParams();
+            params.append('skip', (currentPage.reports - 1) * ITEMS_PER_PAGE);
+            params.append('limit', ITEMS_PER_PAGE);
+            
+            // Add status filter if selected
+            if (reportStatusFilter.value) {
+                params.append('status', reportStatusFilter.value);
+            }
+            
+            // Add search term if entered
+            if (reportSearch.value) {
+                params.append('search', reportSearch.value);
+            }
+            
+            fetch(`${API_BASE_URL}/reports?${params.toString()}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch reports');
+                }
+                return response.json();
+            })
+            .then(data => {
+                reports = data;
                 renderReportsTable();
-            }, 800); // Simulate network delay
+                updatePagination('reports', data.length);
+            })
+            .catch(error => {
+                console.error('Error loading reports:', error);
+                showAlert('Failed to load reports', 'danger');
+            });
         }
 
         // Render reports table
@@ -2842,11 +2900,6 @@
                 
                 reportsTableBody.appendChild(row);
             });
-            
-            // Update pagination info
-            document.getElementById('reports-from').textContent = '1';
-            document.getElementById('reports-to').textContent = reports.length;
-            document.getElementById('reports-total').textContent = reports.length;
         }
 
         // Load users from API (admin only)
@@ -2862,46 +2915,36 @@
                 </tr>
             `;
             
-            // Simulate API call with timeout
-            setTimeout(() => {
-                // Mock data for demonstration
-                users = [
-                    {
-                        id: 1,
-                        name: "Admin User",
-                        email: "admin@reporthub.com",
-                        role: "admin",
-                        is_active: true,
-                        last_active: "2023-10-20T14:30:00Z"
-                    },
-                    {
-                        id: 2,
-                        name: "John Doe",
-                        email: "john.doe@example.com",
-                        role: "staff",
-                        is_active: true,
-                        last_active: "2023-10-19T10:15:00Z"
-                    },
-                    {
-                        id: 3,
-                        name: "Jane Smith",
-                        email: "jane.smith@example.com",
-                        role: "staff",
-                        is_active: true,
-                        last_active: "2023-10-18T16:45:00Z"
-                    },
-                    {
-                        id: 4,
-                        name: "Mike Johnson",
-                        email: "mike.johnson@example.com",
-                        role: "staff",
-                        is_active: false,
-                        last_active: "2023-09-30T08:20:00Z"
-                    }
-                ];
-                
+            // Build query parameters
+            const params = new URLSearchParams();
+            params.append('skip', (currentPage.users - 1) * ITEMS_PER_PAGE);
+            params.append('limit', ITEMS_PER_PAGE);
+            
+            // Add search term if entered
+            if (userSearch.value) {
+                params.append('search', userSearch.value);
+            }
+            
+            fetch(`${API_BASE_URL}/users?${params.toString()}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch users');
+                }
+                return response.json();
+            })
+            .then(data => {
+                users = data;
                 renderUsersTable();
-            }, 800); // Simulate network delay
+                updatePagination('users', data.length);
+            })
+            .catch(error => {
+                console.error('Error loading users:', error);
+                showAlert('Failed to load users', 'danger');
+            });
         }
 
         // Render users table
@@ -2950,11 +2993,30 @@
                 
                 usersTableBody.appendChild(row);
             });
+        }
+
+        // Update pagination info
+        function updatePagination(type, totalItems) {
+            const from = (currentPage[type] - 1) * ITEMS_PER_PAGE + 1;
+            const to = Math.min(currentPage[type] * ITEMS_PER_PAGE, totalItems);
             
-            // Update pagination info
-            document.getElementById('users-from').textContent = '1';
-            document.getElementById('users-to').textContent = users.length;
-            document.getElementById('users-total').textContent = users.length;
+            if (type === 'reports') {
+                reportsFrom.textContent = from;
+                reportsTo.textContent = to;
+                reportsTotal.textContent = totalItems;
+                
+                // Enable/disable pagination buttons
+                reportsPrevBtn.disabled = currentPage.reports <= 1;
+                reportsNextBtn.disabled = currentPage.reports * ITEMS_PER_PAGE >= totalItems;
+            } else if (type === 'users') {
+                usersFrom.textContent = from;
+                usersTo.textContent = to;
+                usersTotal.textContent = totalItems;
+                
+                // Enable/disable pagination buttons
+                usersPrevBtn.disabled = currentPage.users <= 1;
+                usersNextBtn.disabled = currentPage.users * ITEMS_PER_PAGE >= totalItems;
+            }
         }
 
         // Handle file upload for report attachments
@@ -3059,24 +3121,34 @@
             submitReportText.textContent = 'Submitting...';
             submitReportSpinner.classList.remove('hidden');
             
-            // Simulate API call with timeout
-            setTimeout(() => {
-                // Create mock report
-                const newReport = {
-                    id: reports.length + 1,
-                    title,
-                    description,
-                    category,
-                    status: 'pending',
-                    author_name: currentUser.name,
-                    created_at: new Date().toISOString(),
-                    attachments: []
-                };
-                
-                // Add to reports array
-                reports.unshift(newReport);
-                
-                // Show success message
+            // Create form data
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('description', description);
+            formData.append('category', category);
+            
+            // Add attachments if any
+            const files = reportAttachments.files;
+            for (let i = 0; i < files.length; i++) {
+                formData.append('attachments', files[i]);
+            }
+            
+            fetch(`${API_BASE_URL}/reports`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.detail || 'Failed to create report');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
                 showAlert('Report created successfully', 'success');
                 
                 // Close modal and reset form
@@ -3086,7 +3158,15 @@
                 
                 // Reload reports
                 loadReports();
-            }, 1500); // Simulate network delay
+                loadDashboardData();
+            })
+            .catch(error => {
+                showAlert(error.message, 'danger');
+            })
+            .finally(() => {
+                submitReportText.textContent = 'Submit Report';
+                submitReportSpinner.classList.add('hidden');
+            });
         }
 
         // Handle add user submission (admin only)
@@ -3111,22 +3191,31 @@
             submitUserText.textContent = 'Adding...';
             submitUserSpinner.classList.remove('hidden');
             
-            // Simulate API call with timeout
-            setTimeout(() => {
-                // Create mock user
-                const newUser = {
-                    id: users.length + 1,
-                    name: fullName,
-                    email,
-                    role,
-                    is_active: true,
-                    last_active: new Date().toISOString()
-                };
-                
-                // Add to users array
-                users.push(newUser);
-                
-                // Show success message
+            // Create user data
+            const userData = {
+                name: fullName,
+                email: email,
+                role: role,
+                password: password
+            };
+            
+            fetch(`${API_BASE_URL}/users`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(userData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.detail || 'Failed to add user');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
                 showAlert('User added successfully', 'success');
                 
                 // Close modal and reset form
@@ -3135,109 +3224,127 @@
                 
                 // Reload users
                 loadUsers();
-            }, 1500); // Simulate network delay
+            })
+            .catch(error => {
+                showAlert(error.message, 'danger');
+            })
+            .finally(() => {
+                submitUserText.textContent = 'Add User';
+                submitUserSpinner.classList.add('hidden');
+            });
         }
 
         // View report details
         function viewReport(reportId) {
-            const report = reports.find(r => r.id === parseInt(reportId));
-            if (!report) {
-                showAlert('Report not found', 'danger');
-                return;
-            }
-            
-            selectedReportId = reportId;
-            
-            // Set report details
-            viewReportTitle.textContent = report.title;
-            viewReportAuthor.textContent = report.author_name;
-            viewReportDate.textContent = new Date(report.created_at).toLocaleDateString();
-            viewReportDescription.textContent = report.description;
-            viewReportCategory.textContent = report.category;
-            
-            // Set status
-            let statusBadge;
-            if (report.status === 'approved') {
-                statusBadge = '<span class="badge badge-success">Approved</span>';
-            } else if (report.status === 'pending') {
-                statusBadge = '<span class="badge badge-warning">Pending</span>';
-            } else {
-                statusBadge = '<span class="badge badge-danger">Rejected</span>';
-            }
-            viewReportStatus.innerHTML = statusBadge;
-            
-            // Set status dropdown
-            reportStatusChange.value = report.status;
-            
-            // Set admin comments if any
-            adminComments.value = report.admin_comments || '';
-            
-            // Set attachments
-            viewReportAttachments.innerHTML = '';
-            if (report.attachments && report.attachments.length > 0) {
-                report.attachments.forEach(attachment => {
-                    const fileItem = document.createElement('div');
-                    fileItem.className = 'file-item';
-                    
-                    // Get file icon based on type
-                    let fileIcon, fileColor;
-                    if (attachment.type.includes('image')) {
-                        fileIcon = 'fa-file-image';
-                        fileColor = '#e74c3c';
-                    } else if (attachment.type.includes('pdf')) {
-                        fileIcon = 'fa-file-pdf';
-                        fileColor = '#e74c3c';
-                    } else if (attachment.type.includes('word') || attachment.type.includes('document')) {
-                        fileIcon = 'fa-file-word';
-                        fileColor = '#2c7be5';
-                    } else if (attachment.type.includes('excel') || attachment.type.includes('spreadsheet')) {
-                        fileIcon = 'fa-file-excel';
-                        fileColor = '#2ecc71';
-                    } else {
-                        fileIcon = 'fa-file';
-                        fileColor = '#95a5a6';
-                    }
-                    
-                    // Format file size
-                    const fileSize = formatFileSize(attachment.size);
-                    
-                    fileItem.innerHTML = `
-                        <i class="fas ${fileIcon} file-icon" style="color: ${fileColor};"></i>
-                        <div class="file-info">
-                            <div class="file-name">${attachment.name}</div>
-                            <div class="file-size">${fileSize}</div>
-                        </div>
-                        <i class="fas fa-download file-icon" style="cursor: pointer;" data-url="${attachment.url}"></i>
-                    `;
-                    
-                    viewReportAttachments.appendChild(fileItem);
-                });
+            fetch(`${API_BASE_URL}/reports/${reportId}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch report');
+                }
+                return response.json();
+            })
+            .then(report => {
+                selectedReportId = reportId;
                 
-                // Add event listeners to download buttons
-                document.querySelectorAll('#view-report-attachments .fa-download').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const url = e.currentTarget.getAttribute('data-url');
-                        downloadFile(url);
+                // Set report details
+                viewReportTitle.textContent = report.title;
+                viewReportAuthor.textContent = report.author_name;
+                viewReportDate.textContent = new Date(report.created_at).toLocaleDateString();
+                viewReportDescription.textContent = report.description;
+                viewReportCategory.textContent = report.category;
+                
+                // Set status
+                let statusBadge;
+                if (report.status === 'approved') {
+                    statusBadge = '<span class="badge badge-success">Approved</span>';
+                } else if (report.status === 'pending') {
+                    statusBadge = '<span class="badge badge-warning">Pending</span>';
+                } else {
+                    statusBadge = '<span class="badge badge-danger">Rejected</span>';
+                }
+                viewReportStatus.innerHTML = statusBadge;
+                
+                // Set status dropdown
+                reportStatusChange.value = report.status;
+                
+                // Set admin comments if any
+                adminComments.value = report.admin_comments || '';
+                
+                // Set attachments
+                viewReportAttachments.innerHTML = '';
+                if (report.attachments && report.attachments.length > 0) {
+                    report.attachments.forEach(attachment => {
+                        const fileItem = document.createElement('div');
+                        fileItem.className = 'file-item';
+                        
+                        // Get file icon based on type
+                        let fileIcon, fileColor;
+                        if (attachment.type.includes('image')) {
+                            fileIcon = 'fa-file-image';
+                            fileColor = '#e74c3c';
+                        } else if (attachment.type.includes('pdf')) {
+                            fileIcon = 'fa-file-pdf';
+                            fileColor = '#e74c3c';
+                        } else if (attachment.type.includes('word') || attachment.type.includes('document')) {
+                            fileIcon = 'fa-file-word';
+                            fileColor = '#2c7be5';
+                        } else if (attachment.type.includes('excel') || attachment.type.includes('spreadsheet')) {
+                            fileIcon = 'fa-file-excel';
+                            fileColor = '#2ecc71';
+                        } else {
+                            fileIcon = 'fa-file';
+                            fileColor = '#95a5a6';
+                        }
+                        
+                        // Format file size
+                        const fileSize = formatFileSize(attachment.size);
+                        
+                        fileItem.innerHTML = `
+                            <i class="fas ${fileIcon} file-icon" style="color: ${fileColor};"></i>
+                            <div class="file-info">
+                                <div class="file-name">${attachment.name}</div>
+                                <div class="file-size">${fileSize}</div>
+                            </div>
+                            <i class="fas fa-download file-icon" style="cursor: pointer;" data-url="${attachment.url}"></i>
+                        `;
+                        
+                        viewReportAttachments.appendChild(fileItem);
                     });
-                });
-            } else {
-                const noFiles = document.createElement('div');
-                noFiles.className = 'text-center text-muted';
-                noFiles.textContent = 'No attachments';
-                viewReportAttachments.appendChild(noFiles);
-            }
-            
-            // Show admin actions if user is admin
-            if (currentUser.role === 'admin') {
-                adminReportActions.classList.remove('hidden');
-                saveReportChanges.classList.remove('hidden');
-            } else {
-                adminReportActions.classList.add('hidden');
-                saveReportChanges.classList.add('hidden');
-            }
-            
-            // Show the modal
-            viewReportModal.classList.add('active');
+                    
+                    // Add event listeners to download buttons
+                    document.querySelectorAll('#view-report-attachments .fa-download').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            const url = e.currentTarget.getAttribute('data-url');
+                            downloadFile(url);
+                        });
+                    });
+                } else {
+                    const noFiles = document.createElement('div');
+                    noFiles.className = 'text-center text-muted';
+                    noFiles.textContent = 'No attachments';
+                    viewReportAttachments.appendChild(noFiles);
+                }
+                
+                // Show admin actions if user is admin
+                if (currentUser.role === 'admin') {
+                    adminReportActions.classList.remove('hidden');
+                    saveReportChanges.classList.remove('hidden');
+                } else {
+                    adminReportActions.classList.add('hidden');
+                    saveReportChanges.classList.add('hidden');
+                }
+                
+                // Show the modal
+                viewReportModal.classList.add('active');
+            })
+            .catch(error => {
+                console.error('Error loading report:', error);
+                showAlert('Failed to load report details', 'danger');
+            });
         }
 
         // Edit report
@@ -3251,18 +3358,27 @@
                 return;
             }
             
-            // Find report index
-            const reportIndex = reports.findIndex(r => r.id === parseInt(reportId));
-            if (reportIndex === -1) return;
-            
-            // Remove from array
-            reports.splice(reportIndex, 1);
-            
-            // Show success message
-            showAlert('Report deleted successfully', 'success');
-            
-            // Reload reports
-            loadReports();
+            fetch(`${API_BASE_URL}/reports/${reportId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to delete report');
+                }
+                return response.json();
+            })
+            .then(data => {
+                showAlert('Report deleted successfully', 'success');
+                loadReports();
+                loadDashboardData();
+            })
+            .catch(error => {
+                console.error('Error deleting report:', error);
+                showAlert('Failed to delete report', 'danger');
+            });
         }
 
         // Edit user
@@ -3276,18 +3392,26 @@
                 return;
             }
             
-            // Find user index
-            const userIndex = users.findIndex(u => u.id === parseInt(userId));
-            if (userIndex === -1) return;
-            
-            // Remove from array
-            users.splice(userIndex, 1);
-            
-            // Show success message
-            showAlert('User deleted successfully', 'success');
-            
-            // Reload users
-            loadUsers();
+            fetch(`${API_BASE_URL}/users/${userId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to delete user');
+                }
+                return response.json();
+            })
+            .then(data => {
+                showAlert('User deleted successfully', 'success');
+                loadUsers();
+            })
+            .catch(error => {
+                console.error('Error deleting user:', error);
+                showAlert('Failed to delete user', 'danger');
+            });
         }
 
         // Handle saving report changes (admin only)
@@ -3299,17 +3423,25 @@
             saveChangesText.textContent = 'Saving...';
             saveChangesSpinner.classList.remove('hidden');
             
-            // Find report
-            const report = reports.find(r => r.id === parseInt(selectedReportId));
-            if (!report) return;
+            const updateData = {};
+            if (status) updateData.status = status;
+            if (comments !== undefined) updateData.admin_comments = comments;
             
-            // Simulate API call with timeout
-            setTimeout(() => {
-                // Update report
-                report.status = status;
-                report.admin_comments = comments;
-                
-                // Show success message
+            fetch(`${API_BASE_URL}/reports/${selectedReportId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updateData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to update report');
+                }
+                return response.json();
+            })
+            .then(data => {
                 showAlert('Report updated successfully', 'success');
                 
                 // Close modal
@@ -3317,7 +3449,16 @@
                 
                 // Reload reports
                 loadReports();
-            }, 1000); // Simulate network delay
+                loadDashboardData();
+            })
+            .catch(error => {
+                console.error('Error updating report:', error);
+                showAlert('Failed to update report', 'danger');
+            })
+            .finally(() => {
+                saveChangesText.textContent = 'Save Changes';
+                saveChangesSpinner.classList.add('hidden');
+            });
         }
 
         // Handle saving settings
