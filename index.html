@@ -1986,45 +1986,63 @@
             }
         }
 
-        // Handle login form submission
-        function handleLogin(e) {
-            e.preventDefault();
-            
-            const email = emailInput.value;
-            const password = passwordInput.value;
-            
-            fetch(`${API_BASE_URL}/auth/login`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ email, password })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(err => {
-                        throw new Error(err.message || 'Login failed');
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                localStorage.setItem('token', data.token);
-                currentUser = data.user;
-                setupUIForUser();
-                loadInitialData();
-                loginView.classList.add('hidden');
-                appView.classList.remove('hidden');
-            })
-            .catch(error => {
-                loginErrorMessage.textContent = error.message;
-                loginError.classList.remove('hidden');
-                setTimeout(() => {
-                    loginError.classList.add('hidden');
-                }, 5000);
+        // Replace the existing handleLogin function with this:
+function handleLogin(e) {
+    e.preventDefault();
+    
+    const email = emailInput.value;
+    const password = passwordInput.value;
+    
+    // Create URLSearchParams for form data
+    const formData = new URLSearchParams();
+    formData.append('username', email);
+    formData.append('password', password);
+    
+    fetch(`${API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => {
+                throw new Error(err.detail || 'Login failed');
             });
         }
-
+        return response.json();
+    })
+    .then(data => {
+        localStorage.setItem('token', data.access_token);
+        // Get user info using the token
+        return fetch(`${API_BASE_URL}/auth/me`, {
+            headers: {
+                'Authorization': `Bearer ${data.access_token}`
+            }
+        });
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to get user info');
+        }
+        return response.json();
+    })
+    .then(userData => {
+        currentUser = userData;
+        setupUIForUser();
+        loadInitialData();
+        loginView.classList.add('hidden');
+        appView.classList.remove('hidden');
+    })
+    .catch(error => {
+        loginErrorMessage.textContent = error.message;
+        loginError.classList.remove('hidden');
+        setTimeout(() => {
+            loginError.classList.add('hidden');
+        }, 5000);
+    });
+}
         // Handle logout
         function handleLogout() {
             localStorage.removeItem('token');
