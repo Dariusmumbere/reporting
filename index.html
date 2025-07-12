@@ -3,32 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Professional Reporting System</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>ReportHub | Professional Reporting System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary: #4361ee;
-            --primary-light: #e0e7ff;
-            --secondary: #3f37c9;
-            --success: #4cc9f0;
-            --danger: #f72585;
-            --warning: #f8961e;
-            --info: #4895ef;
-            --dark: #212529;
-            --light: #f8f9fa;
-            --gray: #6c757d;
-            --gray-light: #e9ecef;
-            --white: #ffffff;
+            --primary-color: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary-color: #3f37c9;
+            --accent-color: #4895ef;
+            --danger-color: #f72585;
+            --success-color: #4cc9f0;
+            --warning-color: #f8961e;
+            --text-primary: #2b2d42;
+            --text-secondary: #8d99ae;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-tertiary: #e9ecef;
+            --border-color: #dee2e6;
             --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            --rounded-sm: 0.25rem;
-            --rounded: 0.375rem;
-            --rounded-md: 0.5rem;
-            --rounded-lg: 0.75rem;
-            --rounded-full: 9999px;
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            --radius-sm: 0.125rem;
+            --radius: 0.25rem;
+            --radius-md: 0.375rem;
+            --radius-lg: 0.5rem;
+            --radius-xl: 0.75rem;
+            --radius-2xl: 1rem;
+            --radius-3xl: 1.5rem;
+            --transition: all 0.2s ease-in-out;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #4895ef;
+            --primary-dark: #3f37c9;
+            --secondary-color: #4361ee;
+            --accent-color: #4cc9f0;
+            --danger-color: #f72585;
+            --success-color: #4cc9f0;
+            --warning-color: #f8961e;
+            --text-primary: #f8f9fa;
+            --text-secondary: #adb5bd;
+            --bg-primary: #212529;
+            --bg-secondary: #343a40;
+            --bg-tertiary: #495057;
+            --border-color: #6c757d;
         }
 
         * {
@@ -38,80 +58,82 @@
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f5f7fb;
-            color: var(--dark);
-            line-height: 1.5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-primary);
+            background-color: var(--bg-secondary);
+            line-height: 1.6;
+            transition: var(--transition);
         }
 
         #app {
             display: flex;
             min-height: 100vh;
+            transition: var(--transition);
         }
 
-        /* Sidebar */
+        /* Sidebar Styles */
         .sidebar {
             width: 260px;
-            background: white;
+            background-color: var(--bg-primary);
             box-shadow: var(--shadow-md);
-            transition: all 0.3s ease;
-            z-index: 100;
-            position: fixed;
-            height: 100vh;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
         }
 
         .sidebar-header {
             padding: 1.5rem;
-            border-bottom: 1px solid var(--gray-light);
+            border-bottom: 1px solid var(--border-color);
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-        }
-
-        .sidebar-header img {
-            width: 32px;
-            height: 32px;
+            justify-content: space-between;
         }
 
         .sidebar-header h2 {
             font-size: 1.25rem;
             font-weight: 600;
-            color: var(--primary);
+            color: var(--primary-color);
         }
 
         .sidebar-menu {
+            flex: 1;
+            overflow-y: auto;
             padding: 1rem 0;
         }
 
-        .menu-title {
+        .menu-category {
             padding: 0.5rem 1.5rem;
             font-size: 0.75rem;
             font-weight: 600;
-            color: var(--gray);
             text-transform: uppercase;
             letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            margin-top: 1rem;
+        }
+
+        .menu-category:first-child {
+            margin-top: 0;
         }
 
         .menu-item {
             display: flex;
             align-items: center;
             padding: 0.75rem 1.5rem;
-            color: var(--gray);
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
+            margin: 0.25rem 0;
+            color: var(--text-primary);
             text-decoration: none;
+            border-radius: var(--radius);
+            transition: var(--transition);
         }
 
         .menu-item:hover {
-            background-color: var(--primary-light);
-            color: var(--primary);
+            background-color: var(--bg-tertiary);
         }
 
         .menu-item.active {
-            background-color: var(--primary-light);
-            color: var(--primary);
-            border-right: 3px solid var(--primary);
+            background-color: var(--primary-color);
+            color: white;
         }
 
         .menu-item i {
@@ -120,103 +142,185 @@
             text-align: center;
         }
 
-        /* Main content */
-        .main-content {
-            flex: 1;
-            margin-left: 260px;
-            min-height: 100vh;
+        .sidebar-footer {
+            padding: 1rem;
+            border-top: 1px solid var(--border-color);
             display: flex;
-            flex-direction: column;
-        }
-
-        /* Navbar */
-        .navbar {
-            background: white;
-            padding: 1rem 1.5rem;
-            box-shadow: var(--shadow-sm);
-            display: flex;
+            align-items: center;
             justify-content: space-between;
-            align-items: center;
-            z-index: 50;
         }
 
-        .search-bar {
+        .user-profile {
             display: flex;
             align-items: center;
-            background-color: var(--gray-light);
-            padding: 0.5rem 1rem;
-            border-radius: var(--rounded);
-            width: 300px;
-        }
-
-        .search-bar input {
-            border: none;
-            background: transparent;
-            outline: none;
-            width: 100%;
-            padding: 0.25rem;
-        }
-
-        .search-bar i {
-            color: var(--gray);
-            margin-right: 0.5rem;
-        }
-
-        .user-menu {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
         }
 
         .user-avatar {
             width: 36px;
             height: 36px;
-            border-radius: var(--rounded-full);
-            background-color: var(--primary-light);
-            color: var(--primary);
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
             display: flex;
             align-items: center;
             justify-content: center;
+            margin-right: 0.75rem;
             font-weight: 600;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .user-role {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
             cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .logout-btn:hover {
+            color: var(--danger-color);
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .navbar {
+            background-color: var(--bg-primary);
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: var(--shadow-sm);
+            z-index: 5;
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .sidebar-toggle {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.25rem;
+            margin-right: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .sidebar-toggle:hover {
+            color: var(--primary-color);
+        }
+
+        .search-bar {
+            position: relative;
+            width: 300px;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 0.5rem 1rem 0.5rem 2.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: var(--transition);
+        }
+
+        .search-bar input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
+        }
+
+        .search-bar i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.25rem;
+            margin-right: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .theme-toggle:hover {
+            color: var(--primary-color);
+        }
+
+        .notification-btn {
+            position: relative;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.25rem;
+            margin-right: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .notification-btn:hover {
+            color: var(--primary-color);
         }
 
         .notification-badge {
-            position: relative;
-            cursor: pointer;
-        }
-
-        .notification-badge i {
-            font-size: 1.25rem;
-            color: var(--gray);
-        }
-
-        .badge {
             position: absolute;
             top: -5px;
             right: -5px;
-            background-color: var(--danger);
-            color: white;
-            border-radius: var(--rounded-full);
             width: 18px;
             height: 18px;
+            background-color: var(--danger-color);
+            color: white;
+            border-radius: 50%;
+            font-size: 0.625rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.625rem;
-            font-weight: 600;
         }
 
-        /* Content */
+        /* Content Styles */
         .content {
             flex: 1;
             padding: 1.5rem;
+            overflow-y: auto;
+            background-color: var(--bg-secondary);
         }
 
         .page-header {
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
             margin-bottom: 1.5rem;
         }
 
@@ -225,75 +329,82 @@
             font-weight: 600;
         }
 
+        .page-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
         .btn {
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            padding: 0.5rem 1rem;
-            border-radius: var(--rounded);
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border: none;
-            outline: none;
             gap: 0.5rem;
+            border: 1px solid transparent;
         }
 
         .btn-primary {
-            background-color: var(--primary);
+            background-color: var(--primary-color);
             color: white;
+            border-color: var(--primary-color);
         }
 
         .btn-primary:hover {
-            background-color: var(--secondary);
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
         }
 
         .btn-outline {
             background-color: transparent;
-            border: 1px solid var(--gray-light);
-            color: var(--gray);
+            color: var(--primary-color);
+            border-color: var(--border-color);
         }
 
         .btn-outline:hover {
-            background-color: var(--gray-light);
+            background-color: var(--bg-tertiary);
         }
 
         .btn-danger {
-            background-color: var(--danger);
+            background-color: var(--danger-color);
             color: white;
+            border-color: var(--danger-color);
         }
 
         .btn-danger:hover {
-            background-color: #d1146a;
+            background-color: #e5177b;
+            border-color: #e5177b;
         }
 
-        /* Card */
         .card {
-            background: white;
-            border-radius: var(--rounded-md);
-            box-shadow: var(--shadow);
+            background-color: var(--bg-primary);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
             margin-bottom: 1.5rem;
             overflow: hidden;
+            transition: var(--transition);
         }
 
         .card-header {
             padding: 1rem 1.5rem;
-            border-bottom: 1px solid var(--gray-light);
+            border-bottom: 1px solid var(--border-color);
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
         }
 
         .card-title {
-            font-weight: 600;
             font-size: 1.125rem;
+            font-weight: 600;
         }
 
         .card-body {
             padding: 1.5rem;
         }
 
-        /* Table */
         .table-responsive {
             overflow-x: auto;
         }
@@ -303,99 +414,221 @@
             border-collapse: collapse;
         }
 
-        .table th, .table td {
+        .table th {
+            background-color: var(--bg-tertiary);
             padding: 0.75rem 1rem;
             text-align: left;
-            border-bottom: 1px solid var(--gray-light);
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
         }
 
-        .table th {
-            font-weight: 600;
-            color: var(--gray);
-            background-color: #f9fafb;
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 0.05em;
+        .table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.875rem;
+        }
+
+        .table tr:last-child td {
+            border-bottom: none;
         }
 
         .table tr:hover td {
-            background-color: #f8f9fa;
+            background-color: var(--bg-tertiary);
         }
 
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.25rem 0.75rem;
-            border-radius: var(--rounded-full);
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: var(--radius-sm);
             font-size: 0.75rem;
-            font-weight: 500;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
-        .status-pending {
-            background-color: #fff3cd;
-            color: #856404;
+        .badge-success {
+            background-color: rgba(76, 201, 240, 0.1);
+            color: var(--success-color);
         }
 
-        .status-completed {
-            background-color: #d4edda;
-            color: #155724;
+        .badge-warning {
+            background-color: rgba(248, 150, 30, 0.1);
+            color: var(--warning-color);
         }
 
-        .status-in-progress {
-            background-color: #cce5ff;
-            color: #004085;
+        .badge-danger {
+            background-color: rgba(247, 37, 133, 0.1);
+            color: var(--danger-color);
         }
 
-        .status-cancelled {
-            background-color: #f8d7da;
-            color: #721c24;
+        .badge-info {
+            background-color: rgba(72, 149, 239, 0.1);
+            color: var(--accent-color);
         }
 
-        /* Form */
+        .action-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            margin-right: 0.5rem;
+            transition: var(--transition);
+        }
+
+        .action-btn:hover {
+            color: var(--primary-color);
+        }
+
+        .action-btn.delete:hover {
+            color: var(--danger-color);
+        }
+
+        /* Form Styles */
         .form-group {
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
         }
 
         .form-label {
             display: block;
             margin-bottom: 0.5rem;
             font-weight: 500;
+            font-size: 0.875rem;
         }
 
         .form-control {
             width: 100%;
-            padding: 0.5rem 0.75rem;
-            border: 1px solid var(--gray-light);
-            border-radius: var(--rounded);
-            transition: all 0.2s ease;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: var(--transition);
         }
 
         .form-control:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
             outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
         }
 
-        textarea.form-control {
-            min-height: 120px;
+        .form-textarea {
+            min-height: 150px;
             resize: vertical;
         }
 
-        /* Modal */
+        .form-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1rem;
+        }
+
+        .file-upload {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-upload-input {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-upload-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            border: 2px dashed var(--border-color);
+            border-radius: var(--radius);
+            background-color: var(--bg-secondary);
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .file-upload-label:hover {
+            border-color: var(--primary-color);
+            background-color: var(--bg-tertiary);
+        }
+
+        .file-upload-label i {
+            font-size: 1.5rem;
+            margin-right: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .file-upload-text {
+            font-size: 0.875rem;
+        }
+
+        .file-upload-text strong {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .file-list {
+            margin-top: 1rem;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            background-color: var(--bg-tertiary);
+            border-radius: var(--radius);
+            margin-bottom: 0.5rem;
+        }
+
+        .file-icon {
+            margin-right: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-name {
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .file-size {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .file-remove {
+            color: var(--danger-color);
+            cursor: pointer;
+        }
+
+        /* Modal Styles */
         .modal {
             position: fixed;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
+            width: 100%;
+            height: 100%;
             background-color: rgba(0, 0, 0, 0.5);
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
+            z-index: 100;
             opacity: 0;
             pointer-events: none;
-            transition: all 0.3s ease;
+            transition: var(--transition);
         }
 
         .modal.active {
@@ -404,15 +637,15 @@
         }
 
         .modal-content {
-            background-color: white;
-            border-radius: var(--rounded-md);
-            box-shadow: var(--shadow-lg);
+            background-color: var(--bg-primary);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-xl);
             width: 100%;
             max-width: 500px;
             max-height: 90vh;
             overflow-y: auto;
             transform: translateY(-20px);
-            transition: all 0.3s ease;
+            transition: var(--transition);
         }
 
         .modal.active .modal-content {
@@ -420,24 +653,29 @@
         }
 
         .modal-header {
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid var(--gray-light);
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
         }
 
         .modal-title {
-            font-weight: 600;
             font-size: 1.25rem;
+            font-weight: 600;
         }
 
         .modal-close {
             background: none;
             border: none;
+            color: var(--text-secondary);
             font-size: 1.5rem;
             cursor: pointer;
-            color: var(--gray);
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            color: var(--danger-color);
         }
 
         .modal-body {
@@ -446,259 +684,507 @@
 
         .modal-footer {
             padding: 1rem 1.5rem;
-            border-top: 1px solid var(--gray-light);
+            border-top: 1px solid var(--border-color);
             display: flex;
+            align-items: center;
             justify-content: flex-end;
             gap: 0.75rem;
         }
 
-        /* File upload */
-        .file-upload {
-            border: 2px dashed var(--gray-light);
-            border-radius: var(--rounded);
-            padding: 1.5rem;
-            text-align: center;
-            margin-bottom: 1rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .file-upload:hover {
-            border-color: var(--primary);
-        }
-
-        .file-upload i {
-            font-size: 2rem;
-            color: var(--gray);
-            margin-bottom: 0.5rem;
-        }
-
-        .file-upload p {
-            margin-bottom: 0.5rem;
-            color: var(--gray);
-        }
-
-        .file-upload input {
-            display: none;
-        }
-
-        .file-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .file-item {
-            background-color: var(--gray-light);
-            padding: 0.5rem 1rem;
-            border-radius: var(--rounded);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.875rem;
-        }
-
-        .file-item i {
-            cursor: pointer;
-            color: var(--danger);
-        }
-
-        /* Alert */
-        .alert {
-            padding: 1rem;
-            border-radius: var(--rounded);
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .alert-success {
-            background-color: #d4edda;
-            color: #155724;
-        }
-
-        .alert-error {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-
-        .alert-info {
-            background-color: #cce5ff;
-            color: #004085;
-        }
-
-        /* Login page */
+        /* Login Page Styles */
         .login-container {
             display: flex;
             min-height: 100vh;
+            background-color: var(--bg-secondary);
+        }
+
+        .login-left {
+            flex: 1;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
             align-items: center;
             justify-content: center;
-            background-color: #f5f7fb;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
         }
 
-        .login-card {
-            background: white;
-            border-radius: var(--rounded-md);
+        .login-left::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            transform: rotate(30deg);
+        }
+
+        .login-left-content {
+            max-width: 500px;
+            z-index: 1;
+        }
+
+        .login-left h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+        }
+
+        .login-left p {
+            font-size: 1.125rem;
+            line-height: 1.7;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .login-features {
+            margin-top: 2rem;
+        }
+
+        .login-feature {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .login-feature i {
+            font-size: 1.25rem;
+            margin-right: 1rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .login-feature span {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .login-right {
+            width: 500px;
+            background-color: var(--bg-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
             box-shadow: var(--shadow-lg);
+        }
+
+        .login-form {
             width: 100%;
             max-width: 400px;
-            padding: 2rem;
         }
 
-        .login-header {
+        .login-logo {
             text-align: center;
             margin-bottom: 2rem;
         }
 
-        .login-header h1 {
-            font-size: 1.5rem;
-            font-weight: 600;
+        .login-logo h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--primary-color);
             margin-bottom: 0.5rem;
-            color: var(--primary);
         }
 
-        .login-header p {
-            color: var(--gray);
+        .login-logo p {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .login-form .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .login-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+        }
+
+        .remember-me input {
+            margin-right: 0.5rem;
+        }
+
+        .forgot-password {
+            color: var(--primary-color);
+            font-size: 0.875rem;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .forgot-password:hover {
+            text-decoration: underline;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 0.75rem;
+            font-weight: 600;
+        }
+
+        .login-divider {
+            display: flex;
+            align-items: center;
+            margin: 1.5rem 0;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .login-divider::before,
+        .login-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background-color: var(--border-color);
+            margin: 0 0.5rem;
+        }
+
+        .social-login {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .social-btn {
+            flex: 1;
+            padding: 0.5rem;
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .social-btn.google {
+            background-color: #fff;
+            color: #4285f4;
+            border: 1px solid var(--border-color);
+        }
+
+        .social-btn.google:hover {
+            background-color: #f8f9fa;
+        }
+
+        .social-btn.microsoft {
+            background-color: #fff;
+            color: #0078d4;
+            border: 1px solid var(--border-color);
+        }
+
+        .social-btn.microsoft:hover {
+            background-color: #f8f9fa;
         }
 
         .login-footer {
             text-align: center;
             margin-top: 1.5rem;
-            color: var(--gray);
+            font-size: 0.875rem;
+            color: var(--text-secondary);
         }
 
         .login-footer a {
-            color: var(--primary);
+            color: var(--primary-color);
             text-decoration: none;
-            font-weight: 500;
+            transition: var(--transition);
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
+        .login-footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Alert Styles */
+        .alert {
+            padding: 1rem;
+            border-radius: var(--radius);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .alert i {
+            margin-right: 0.75rem;
+            font-size: 1.25rem;
+        }
+
+        .alert-success {
+            background-color: rgba(76, 201, 240, 0.1);
+            color: var(--success-color);
+            border-left: 4px solid var(--success-color);
+        }
+
+        .alert-danger {
+            background-color: rgba(247, 37, 133, 0.1);
+            color: var(--danger-color);
+            border-left: 4px solid var(--danger-color);
+        }
+
+        .alert-warning {
+            background-color: rgba(248, 150, 30, 0.1);
+            color: var(--warning-color);
+            border-left: 4px solid var(--warning-color);
+        }
+
+        .alert-info {
+            background-color: rgba(72, 149, 239, 0.1);
+            color: var(--accent-color);
+            border-left: 4px solid var(--accent-color);
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 1024px) {
             .sidebar {
-                transform: translateX(-100%);
                 position: fixed;
                 top: 0;
-                left: 0;
-                bottom: 0;
-                z-index: 1000;
+                left: -260px;
+                height: 100vh;
+                z-index: 20;
+                transition: var(--transition);
             }
 
             .sidebar.active {
-                transform: translateX(0);
+                left: 0;
             }
 
-            .main-content {
-                margin-left: 0;
+            .sidebar-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 15;
+                opacity: 0;
+                pointer-events: none;
+                transition: var(--transition);
             }
 
-            .navbar-toggle {
-                display: block;
+            .sidebar-overlay.active {
+                opacity: 1;
+                pointer-events: all;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .login-container {
+                flex-direction: column;
+            }
+
+            .login-left {
+                display: none;
+            }
+
+            .login-right {
+                width: 100%;
+                height: 100vh;
             }
 
             .search-bar {
+                width: 200px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .navbar {
+                padding: 1rem;
+            }
+
+            .search-bar {
+                display: none;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .page-actions {
                 width: 100%;
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .modal-content {
+                max-width: 95%;
             }
         }
 
         /* Animations */
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
         .fade-in {
             animation: fadeIn 0.3s ease-in-out;
         }
 
-        /* Utility classes */
-        .hidden {
-            display: none !important;
+        .slide-in {
+            animation: slideIn 0.3s ease-in-out;
         }
 
-        .flex {
+        /* Utility Classes */
+        .text-primary {
+            color: var(--primary-color);
+        }
+
+        .text-success {
+            color: var(--success-color);
+        }
+
+        .text-danger {
+            color: var(--danger-color);
+        }
+
+        .text-warning {
+            color: var(--warning-color);
+        }
+
+        .text-muted {
+            color: var(--text-secondary);
+        }
+
+        .mb-0 {
+            margin-bottom: 0 !important;
+        }
+
+        .mt-0 {
+            margin-top: 0 !important;
+        }
+
+        .ml-auto {
+            margin-left: auto;
+        }
+
+        .d-flex {
             display: flex;
         }
 
-        .items-center {
+        .align-items-center {
             align-items: center;
         }
 
-        .justify-between {
+        .justify-content-between {
             justify-content: space-between;
         }
 
-        .gap-2 {
-            gap: 0.5rem;
-        }
-
-        .gap-4 {
-            gap: 1rem;
-        }
-
-        .mt-4 {
-            margin-top: 1rem;
-        }
-
-        .mb-4 {
-            margin-bottom: 1rem;
-        }
-
-        .p-4 {
-            padding: 1rem;
-        }
-
-        .text-sm {
-            font-size: 0.875rem;
-        }
-
-        .text-gray {
-            color: var(--gray);
+        .w-100 {
+            width: 100%;
         }
 
         .text-center {
             text-align: center;
         }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .hidden {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
     <div id="app">
-        <!-- Login View -->
-        <div id="login-view" class="login-container">
-            <div class="login-card">
-                <div class="login-header">
-                    <h1>Professional Reporting System</h1>
-                    <p>Sign in to access your dashboard</p>
+        <!-- Login View (initial state) -->
+        <div class="login-container" id="login-view">
+            <div class="login-left">
+                <div class="login-left-content">
+                    <h1>Welcome to ReportHub</h1>
+                    <p>A modern, professional reporting system designed to streamline your workflow and enhance productivity with secure, role-based access and comprehensive reporting capabilities.</p>
+                    <div class="login-features">
+                        <div class="login-feature">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Secure role-based authentication</span>
+                        </div>
+                        <div class="login-feature">
+                            <i class="fas fa-file-upload"></i>
+                            <span>Document attachments for reports</span>
+                        </div>
+                        <div class="login-feature">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Comprehensive reporting dashboard</span>
+                        </div>
+                    </div>
                 </div>
-                <form id="login-form">
-                    <div class="form-group">
-                        <label for="login-email" class="form-label">Email</label>
-                        <input type="email" id="login-email" class="form-control" placeholder="Enter your email" required>
+            </div>
+            <div class="login-right">
+                <div class="login-form">
+                    <div class="login-logo">
+                        <h2>ReportHub</h2>
+                        <p>Sign in to your account</p>
                     </div>
-                    <div class="form-group">
-                        <label for="login-password" class="form-label">Password</label>
-                        <input type="password" id="login-password" class="form-control" placeholder="Enter your password" required>
+                    <form id="login-form">
+                        <div class="alert alert-danger hidden" id="login-error">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <div>
+                                <strong>Login failed</strong>
+                                <p id="login-error-message">Invalid email or password</p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" id="email" class="form-control" placeholder="Enter your email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" id="password" class="form-control" placeholder="Enter your password" required>
+                        </div>
+                        <div class="login-actions">
+                            <div class="remember-me">
+                                <input type="checkbox" id="remember-me">
+                                <label for="remember-me">Remember me</label>
+                            </div>
+                            <a href="#" class="forgot-password">Forgot password?</a>
+                        </div>
+                        <button type="submit" class="btn btn-primary login-btn">
+                            <i class="fas fa-sign-in-alt"></i> Sign In
+                        </button>
+                    </form>
+                    <div class="login-footer">
+                        <p>Default admin credentials: <strong>admin@reporthub.com</strong> / <strong>Admin123!</strong></p>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100">Sign In</button>
-                </form>
-                <div class="login-footer">
-                    <p>Don't have an account? <a href="#" id="show-register">Contact admin</a></p>
                 </div>
             </div>
         </div>
 
-        <!-- Main App -->
-        <div id="main-app" class="hidden">
+        <!-- Main App View (hidden initially) -->
+        <div class="hidden" id="app-view">
             <!-- Sidebar -->
-            <div class="sidebar">
+            <div class="sidebar" id="sidebar">
                 <div class="sidebar-header">
-                    <i class="fas fa-chart-pie"></i>
-                    <h2>ReportSys</h2>
+                    <h2>ReportHub</h2>
                 </div>
                 <div class="sidebar-menu">
-                    <div class="menu-title">Main</div>
+                    <div class="menu-category">Main</div>
                     <a href="#" class="menu-item active" data-view="dashboard">
                         <i class="fas fa-tachometer-alt"></i>
                         <span>Dashboard</span>
@@ -707,24 +1193,39 @@
                         <i class="fas fa-file-alt"></i>
                         <span>Reports</span>
                     </a>
-                    <div class="menu-title">Administration</div>
-                    <a href="#" class="menu-item" data-view="users">
-                        <i class="fas fa-users"></i>
-                        <span>Users</span>
-                    </a>
-                    <a href="#" class="menu-item" data-view="settings">
-                        <i class="fas fa-cog"></i>
-                        <span>Settings</span>
-                    </a>
+                    <div id="admin-menu" class="hidden">
+                        <div class="menu-category">Administration</div>
+                        <a href="#" class="menu-item" data-view="users">
+                            <i class="fas fa-users"></i>
+                            <span>User Management</span>
+                        </a>
+                        <a href="#" class="menu-item" data-view="settings">
+                            <i class="fas fa-cog"></i>
+                            <span>Settings</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="sidebar-footer">
+                    <div class="user-profile">
+                        <div class="user-avatar" id="user-avatar">A</div>
+                        <div class="user-info">
+                            <div class="user-name" id="user-name">Admin User</div>
+                            <div class="user-role" id="user-role">Administrator</div>
+                        </div>
+                    </div>
+                    <button class="logout-btn" id="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
                 </div>
             </div>
+            <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
             <!-- Main Content -->
             <div class="main-content">
                 <!-- Navbar -->
                 <div class="navbar">
-                    <div class="flex items-center gap-4">
-                        <button id="sidebar-toggle" class="btn btn-outline">
+                    <div class="navbar-left">
+                        <button class="sidebar-toggle" id="sidebar-toggle">
                             <i class="fas fa-bars"></i>
                         </button>
                         <div class="search-bar">
@@ -732,54 +1233,88 @@
                             <input type="text" placeholder="Search...">
                         </div>
                     </div>
-                    <div class="user-menu">
-                        <div class="notification-badge">
+                    <div class="navbar-right">
+                        <button class="theme-toggle" id="theme-toggle">
+                            <i class="fas fa-moon"></i>
+                        </button>
+                        <button class="notification-btn">
                             <i class="fas fa-bell"></i>
-                            <span class="badge">3</span>
-                        </div>
-                        <div class="user-avatar" id="user-avatar">JD</div>
+                            <span class="notification-badge">3</span>
+                        </button>
                     </div>
                 </div>
 
-                <!-- Content Views -->
+                <!-- Content Area -->
                 <div class="content">
                     <!-- Dashboard View -->
-                    <div id="dashboard-view" class="view">
+                    <div class="view" id="dashboard-view">
                         <div class="page-header">
                             <h1 class="page-title">Dashboard</h1>
-                            <div class="flex gap-2">
-                                <button class="btn btn-outline">
-                                    <i class="fas fa-download"></i> Export
-                                </button>
-                                <button class="btn btn-primary" id="create-report-btn">
+                            <div class="page-actions">
+                                <button class="btn btn-primary" id="new-report-btn">
                                     <i class="fas fa-plus"></i> New Report
                                 </button>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h3 class="text-gray">Total Reports</h3>
-                                    <p class="text-2xl font-bold">24</p>
-                                </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">Overview</h2>
                             </div>
-                            <div class="card">
-                                <div class="card-body">
-                                    <h3 class="text-gray">Pending</h3>
-                                    <p class="text-2xl font-bold">8</p>
-                                </div>
-                            </div>
-                            <div class="card">
-                                <div class="card-body">
-                                    <h3 class="text-gray">In Progress</h3>
-                                    <p class="text-2xl font-bold">12</p>
-                                </div>
-                            </div>
-                            <div class="card">
-                                <div class="card-body">
-                                    <h3 class="text-gray">Completed</h3>
-                                    <p class="text-2xl font-bold">4</p>
+                            <div class="card-body">
+                                <div class="grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
+                                    <div class="card" style="margin-bottom: 0;">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <div>
+                                                    <h3 style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Total Reports</h3>
+                                                    <p style="font-size: 1.75rem; font-weight: 600; margin-bottom: 0;">24</p>
+                                                </div>
+                                                <div style="width: 48px; height: 48px; border-radius: 50%; background-color: rgba(67, 97, 238, 0.1); display: flex; align-items: center; justify-content: center;">
+                                                    <i class="fas fa-file-alt" style="font-size: 1.25rem; color: var(--primary-color);"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card" style="margin-bottom: 0;">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <div>
+                                                    <h3 style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Pending</h3>
+                                                    <p style="font-size: 1.75rem; font-weight: 600; margin-bottom: 0;">5</p>
+                                                </div>
+                                                <div style="width: 48px; height: 48px; border-radius: 50%; background-color: rgba(248, 150, 30, 0.1); display: flex; align-items: center; justify-content: center;">
+                                                    <i class="fas fa-clock" style="font-size: 1.25rem; color: var(--warning-color);"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card" style="margin-bottom: 0;">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <div>
+                                                    <h3 style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Approved</h3>
+                                                    <p style="font-size: 1.75rem; font-weight: 600; margin-bottom: 0;">16</p>
+                                                </div>
+                                                <div style="width: 48px; height: 48px; border-radius: 50%; background-color: rgba(76, 201, 240, 0.1); display: flex; align-items: center; justify-content: center;">
+                                                    <i class="fas fa-check-circle" style="font-size: 1.25rem; color: var(--success-color);"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card" style="margin-bottom: 0;">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <div>
+                                                    <h3 style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Rejected</h3>
+                                                    <p style="font-size: 1.75rem; font-weight: 600; margin-bottom: 0;">3</p>
+                                                </div>
+                                                <div style="width: 48px; height: 48px; border-radius: 50%; background-color: rgba(247, 37, 133, 0.1); display: flex; align-items: center; justify-content: center;">
+                                                    <i class="fas fa-times-circle" style="font-size: 1.25rem; color: var(--danger-color);"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -787,21 +1322,91 @@
                         <div class="card">
                             <div class="card-header">
                                 <h2 class="card-title">Recent Reports</h2>
-                                <button class="btn btn-outline">View All</button>
+                                <a href="#" class="btn btn-outline" data-view="reports">View All</a>
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
                                     <table class="table">
                                         <thead>
                                             <tr>
+                                                <th>Report ID</th>
                                                 <th>Title</th>
                                                 <th>Status</th>
                                                 <th>Date</th>
                                                 <th>Actions</th>
                                             </tr>
                                         </thead>
-                                        <tbody id="recent-reports">
-                                            <!-- Reports will be loaded here -->
+                                        <tbody>
+                                            <tr>
+                                                <td>#REP-2023-001</td>
+                                                <td>Quarterly Financial Report</td>
+                                                <td><span class="badge badge-success">Approved</span></td>
+                                                <td>2023-10-15</td>
+                                                <td>
+                                                    <button class="action-btn" title="View">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                    <button class="action-btn" title="Download">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>#REP-2023-002</td>
+                                                <td>Marketing Campaign Analysis</td>
+                                                <td><span class="badge badge-warning">Pending</span></td>
+                                                <td>2023-10-12</td>
+                                                <td>
+                                                    <button class="action-btn" title="View">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                    <button class="action-btn" title="Download">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>#REP-2023-003</td>
+                                                <td>Inventory Audit</td>
+                                                <td><span class="badge badge-success">Approved</span></td>
+                                                <td>2023-10-10</td>
+                                                <td>
+                                                    <button class="action-btn" title="View">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                    <button class="action-btn" title="Download">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>#REP-2023-004</td>
+                                                <td>Employee Satisfaction Survey</td>
+                                                <td><span class="badge badge-danger">Rejected</span></td>
+                                                <td>2023-10-08</td>
+                                                <td>
+                                                    <button class="action-btn" title="View">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                    <button class="action-btn" title="Download">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>#REP-2023-005</td>
+                                                <td>IT Infrastructure Upgrade</td>
+                                                <td><span class="badge badge-warning">Pending</span></td>
+                                                <td>2023-10-05</td>
+                                                <td>
+                                                    <button class="action-btn" title="View">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                    <button class="action-btn" title="Download">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
                                         </tbody>
                                     </table>
                                 </div>
@@ -810,27 +1415,27 @@
                     </div>
 
                     <!-- Reports View -->
-                    <div id="reports-view" class="view hidden">
+                    <div class="view hidden" id="reports-view">
                         <div class="page-header">
                             <h1 class="page-title">Reports</h1>
-                            <button class="btn btn-primary" id="new-report-btn">
-                                <i class="fas fa-plus"></i> New Report
-                            </button>
+                            <div class="page-actions">
+                                <button class="btn btn-primary" id="create-report-btn">
+                                    <i class="fas fa-plus"></i> Create Report
+                                </button>
+                            </div>
                         </div>
 
                         <div class="card">
                             <div class="card-header">
                                 <h2 class="card-title">All Reports</h2>
-                                <div class="flex gap-2">
-                                    <select class="form-control" style="width: auto;" id="report-filter">
-                                        <option value="all">All Reports</option>
-                                        <option value="pending">Pending</option>
-                                        <option value="in-progress">In Progress</option>
-                                        <option value="completed">Completed</option>
+                                <div class="d-flex align-items-center">
+                                    <select class="form-control form-select" style="width: 150px; margin-right: 0.75rem;">
+                                        <option>All Status</option>
+                                        <option>Pending</option>
+                                        <option>Approved</option>
+                                        <option>Rejected</option>
                                     </select>
-                                    <button class="btn btn-outline">
-                                        <i class="fas fa-filter"></i> Filter
-                                    </button>
+                                    <input type="text" class="form-control" placeholder="Search reports..." style="width: 200px;">
                                 </div>
                             </div>
                             <div class="card-body">
@@ -838,38 +1443,50 @@
                                     <table class="table">
                                         <thead>
                                             <tr>
+                                                <th>Report ID</th>
                                                 <th>Title</th>
-                                                <th>Description</th>
+                                                <th>Author</th>
                                                 <th>Status</th>
-                                                <th>Created</th>
+                                                <th>Date</th>
+                                                <th>Attachments</th>
                                                 <th>Actions</th>
                                             </tr>
                                         </thead>
-                                        <tbody id="all-reports">
-                                            <!-- Reports will be loaded here -->
+                                        <tbody id="reports-table-body">
+                                            <!-- Reports will be loaded here dynamically -->
                                         </tbody>
                                     </table>
+                                </div>
+                                <div class="d-flex align-items-center justify-content-between mt-3">
+                                    <div class="text-muted">Showing 1 to 10 of 24 entries</div>
+                                    <div class="d-flex gap-1">
+                                        <button class="btn btn-outline" disabled>
+                                            <i class="fas fa-chevron-left"></i> Previous
+                                        </button>
+                                        <button class="btn btn-outline">
+                                            Next <i class="fas fa-chevron-right"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Users View -->
-                    <div id="users-view" class="view hidden">
+                    <!-- Users View (Admin only) -->
+                    <div class="view hidden" id="users-view">
                         <div class="page-header">
-                            <h1 class="page-title">Users</h1>
-                            <button class="btn btn-primary" id="new-user-btn">
-                                <i class="fas fa-plus"></i> New User
-                            </button>
+                            <h1 class="page-title">User Management</h1>
+                            <div class="page-actions">
+                                <button class="btn btn-primary" id="add-user-btn">
+                                    <i class="fas fa-plus"></i> Add User
+                                </button>
+                            </div>
                         </div>
 
                         <div class="card">
                             <div class="card-header">
                                 <h2 class="card-title">All Users</h2>
-                                <div class="search-bar" style="width: 300px;">
-                                    <i class="fas fa-search"></i>
-                                    <input type="text" placeholder="Search users..." id="user-search">
-                                </div>
+                                <input type="text" class="form-control" placeholder="Search users..." style="width: 250px;">
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
@@ -880,49 +1497,82 @@
                                                 <th>Email</th>
                                                 <th>Role</th>
                                                 <th>Status</th>
+                                                <th>Last Active</th>
                                                 <th>Actions</th>
                                             </tr>
                                         </thead>
-                                        <tbody id="users-table">
-                                            <!-- Users will be loaded here -->
+                                        <tbody id="users-table-body">
+                                            <!-- Users will be loaded here dynamically -->
                                         </tbody>
                                     </table>
+                                </div>
+                                <div class="d-flex align-items-center justify-content-between mt-3">
+                                    <div class="text-muted">Showing 1 to 5 of 12 entries</div>
+                                    <div class="d-flex gap-1">
+                                        <button class="btn btn-outline" disabled>
+                                            <i class="fas fa-chevron-left"></i> Previous
+                                        </button>
+                                        <button class="btn btn-outline">
+                                            Next <i class="fas fa-chevron-right"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Settings View -->
-                    <div id="settings-view" class="view hidden">
+                    <!-- Settings View (Admin only) -->
+                    <div class="view hidden" id="settings-view">
                         <div class="page-header">
-                            <h1 class="page-title">Settings</h1>
+                            <h1 class="page-title">System Settings</h1>
                         </div>
 
                         <div class="card">
                             <div class="card-header">
-                                <h2 class="card-title">Profile</h2>
+                                <h2 class="card-title">General Settings</h2>
                             </div>
                             <div class="card-body">
-                                <form id="profile-form">
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div class="form-group">
-                                            <label for="profile-name" class="form-label">Full Name</label>
-                                            <input type="text" id="profile-name" class="form-control" value="John Doe">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="profile-email" class="form-label">Email</label>
-                                            <input type="email" id="profile-email" class="form-control" value="john.doe@example.com" disabled>
+                                <form id="settings-form">
+                                    <div class="form-group">
+                                        <label for="system-name" class="form-label">System Name</label>
+                                        <input type="text" id="system-name" class="form-control" value="ReportHub">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="timezone" class="form-label">Timezone</label>
+                                        <select id="timezone" class="form-control form-select">
+                                            <option value="UTC">UTC</option>
+                                            <option value="EST" selected>Eastern Standard Time (EST)</option>
+                                            <option value="PST">Pacific Standard Time (PST)</option>
+                                            <option value="CST">Central Standard Time (CST)</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="date-format" class="form-label">Date Format</label>
+                                        <select id="date-format" class="form-control form-select">
+                                            <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                                            <option value="MM/DD/YYYY" selected>MM/DD/YYYY</option>
+                                            <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">System Logo</label>
+                                        <div class="file-upload">
+                                            <input type="file" id="system-logo" class="file-upload-input" accept="image/*">
+                                            <label for="system-logo" class="file-upload-label">
+                                                <i class="fas fa-cloud-upload-alt"></i>
+                                                <div class="file-upload-text">
+                                                    <strong>Click to upload</strong> or drag and drop
+                                                </div>
+                                            </label>
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label for="profile-password" class="form-label">New Password</label>
-                                        <input type="password" id="profile-password" class="form-control" placeholder="Leave blank to keep current">
+                                        <div class="d-flex justify-content-end">
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-save"></i> Save Changes
+                                            </button>
+                                        </div>
                                     </div>
-                                    <div class="form-group">
-                                        <label for="profile-confirm" class="form-label">Confirm Password</label>
-                                        <input type="password" id="profile-confirm" class="form-control">
-                                    </div>
-                                    <button type="submit" class="btn btn-primary">Save Changes</button>
                                 </form>
                             </div>
                         </div>
@@ -931,123 +1581,193 @@
             </div>
         </div>
 
-        <!-- Modals -->
         <!-- Create Report Modal -->
-        <div id="report-modal" class="modal">
+        <div class="modal" id="create-report-modal">
             <div class="modal-content">
                 <div class="modal-header">
                     <h3 class="modal-title">Create New Report</h3>
-                    <button class="modal-close">&times;</button>
+                    <button class="modal-close" id="close-create-report-modal">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
                 <div class="modal-body">
-                    <form id="report-form">
+                    <form id="create-report-form">
                         <div class="form-group">
-                            <label for="report-title" class="form-label">Title</label>
+                            <label for="report-title" class="form-label">Report Title</label>
                             <input type="text" id="report-title" class="form-control" placeholder="Enter report title" required>
                         </div>
                         <div class="form-group">
                             <label for="report-description" class="form-label">Description</label>
-                            <textarea id="report-description" class="form-control" placeholder="Enter detailed description" required></textarea>
+                            <textarea id="report-description" class="form-control form-textarea" placeholder="Enter report description" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="report-category" class="form-label">Category</label>
+                            <select id="report-category" class="form-control form-select" required>
+                                <option value="">Select a category</option>
+                                <option value="financial">Financial</option>
+                                <option value="marketing">Marketing</option>
+                                <option value="operations">Operations</option>
+                                <option value="hr">Human Resources</option>
+                                <option value="it">Information Technology</option>
+                            </select>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Attachments</label>
-                            <div class="file-upload" id="file-upload">
-                                <i class="fas fa-cloud-upload-alt"></i>
-                                <p>Drag & drop files here or click to browse</p>
-                                <span class="text-sm">Max file size: 5MB</span>
-                                <input type="file" id="report-files" multiple>
+                            <div class="file-upload">
+                                <input type="file" id="report-attachments" class="file-upload-input" multiple>
+                                <label for="report-attachments" class="file-upload-label">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <div class="file-upload-text">
+                                        <strong>Click to upload</strong> or drag and drop
+                                        <div style="font-size: 0.75rem; margin-top: 0.25rem;">PDF, DOCX, XLSX, JPG, PNG (Max 10MB each)</div>
+                                    </div>
+                                </label>
                             </div>
-                            <div class="file-list" id="file-list"></div>
+                            <div class="file-list" id="report-attachments-list"></div>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-outline modal-close">Cancel</button>
-                    <button class="btn btn-primary" id="submit-report">Submit Report</button>
+                    <button class="btn btn-outline" id="cancel-create-report">Cancel</button>
+                    <button class="btn btn-primary" id="submit-create-report">Submit Report</button>
                 </div>
             </div>
         </div>
 
-        <!-- View Report Modal -->
-        <div id="view-report-modal" class="modal">
-            <div class="modal-content" style="max-width: 700px;">
-                <div class="modal-header">
-                    <h3 class="modal-title" id="view-report-title">Report Details</h3>
-                    <button class="modal-close">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <div class="flex justify-between mb-4">
-                        <div>
-                            <span class="text-gray">Status:</span>
-                            <span class="status-badge status-pending ml-2" id="view-report-status">Pending</span>
-                        </div>
-                        <div>
-                            <span class="text-gray">Created:</span>
-                            <span class="ml-2" id="view-report-date">2023-05-15</span>
-                        </div>
-                    </div>
-                    <div class="mb-4">
-                        <h4 class="font-semibold mb-2">Description</h4>
-                        <p id="view-report-description">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in dui mauris.</p>
-                    </div>
-                    <div>
-                        <h4 class="font-semibold mb-2">Attachments</h4>
-                        <div class="file-list" id="view-report-attachments">
-                            <!-- Attachments will be listed here -->
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-outline modal-close">Close</button>
-                    <button class="btn btn-primary" id="edit-report-btn">Edit</button>
-                    <button class="btn btn-danger" id="delete-report-btn">Delete</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Create User Modal -->
-        <div id="user-modal" class="modal">
+        <!-- Add User Modal (Admin only) -->
+        <div class="modal" id="add-user-modal">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3 class="modal-title">Create New User</h3>
-                    <button class="modal-close">&times;</button>
+                    <h3 class="modal-title">Add New User</h3>
+                    <button class="modal-close" id="close-add-user-modal">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
                 <div class="modal-body">
-                    <form id="user-form">
+                    <form id="add-user-form">
                         <div class="form-group">
-                            <label for="user-name" class="form-label">Full Name</label>
-                            <input type="text" id="user-name" class="form-control" placeholder="Enter full name" required>
+                            <label for="user-fullname" class="form-label">Full Name</label>
+                            <input type="text" id="user-fullname" class="form-control" placeholder="Enter full name" required>
                         </div>
                         <div class="form-group">
-                            <label for="user-email" class="form-label">Email</label>
+                            <label for="user-email" class="form-label">Email Address</label>
                             <input type="email" id="user-email" class="form-control" placeholder="Enter email address" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="user-role" class="form-label">Role</label>
+                            <select id="user-role" class="form-control form-select" required>
+                                <option value="">Select a role</option>
+                                <option value="admin">Administrator</option>
+                                <option value="staff">Staff Member</option>
+                            </select>
                         </div>
                         <div class="form-group">
                             <label for="user-password" class="form-label">Password</label>
                             <input type="password" id="user-password" class="form-control" placeholder="Enter password" required>
                         </div>
                         <div class="form-group">
-                            <label for="user-role" class="form-label">Role</label>
-                            <select id="user-role" class="form-control" required>
-                                <option value="">Select role</option>
-                                <option value="admin">Admin</option>
-                                <option value="staff">Staff</option>
-                            </select>
+                            <label for="user-confirm-password" class="form-label">Confirm Password</label>
+                            <input type="password" id="user-confirm-password" class="form-control" placeholder="Confirm password" required>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-outline modal-close">Cancel</button>
-                    <button class="btn btn-primary" id="submit-user">Create User</button>
+                    <button class="btn btn-outline" id="cancel-add-user">Cancel</button>
+                    <button class="btn btn-primary" id="submit-add-user">Add User</button>
                 </div>
             </div>
         </div>
 
-        <!-- Alert Toast -->
-        <div id="alert-toast" class="fixed bottom-4 right-4 hidden">
-            <div class="alert alert-success flex items-center">
-                <i class="fas fa-check-circle"></i>
-                <span id="alert-message">Operation completed successfully</span>
+        <!-- View Report Modal -->
+        <div class="modal" id="view-report-modal">
+            <div class="modal-content" style="max-width: 800px;">
+                <div class="modal-header">
+                    <h3 class="modal-title">Report Details</h3>
+                    <button class="modal-close" id="close-view-report-modal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="card" style="margin-bottom: 1.5rem;">
+                        <div class="card-body">
+                            <h2 id="view-report-title" style="margin-bottom: 1rem;">Quarterly Financial Report</h2>
+                            <div style="display: flex; gap: 1.5rem; margin-bottom: 1.5rem;">
+                                <div>
+                                    <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Author</div>
+                                    <div id="view-report-author">John Doe</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Date</div>
+                                    <div id="view-report-date">2023-10-15</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Status</div>
+                                    <div id="view-report-status"><span class="badge badge-success">Approved</span></div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Category</div>
+                                    <div id="view-report-category">Financial</div>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Description</div>
+                                <div id="view-report-description" style="line-height: 1.7;">
+                                    This report contains the financial performance of the company for the third quarter of 2023. It includes revenue, expenses, profit margins, and comparisons with previous quarters.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Attachments</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="file-list" id="view-report-attachments">
+                                <div class="file-item">
+                                    <i class="fas fa-file-pdf file-icon" style="color: #e74c3c;"></i>
+                                    <div class="file-info">
+                                        <div class="file-name">Q3_Financial_Report.pdf</div>
+                                        <div class="file-size">2.4 MB</div>
+                                    </div>
+                                    <i class="fas fa-download file-icon" style="cursor: pointer;"></i>
+                                </div>
+                                <div class="file-item">
+                                    <i class="fas fa-file-excel file-icon" style="color: #2ecc71;"></i>
+                                    <div class="file-info">
+                                        <div class="file-name">Financial_Data_Q3.xlsx</div>
+                                        <div class="file-size">1.8 MB</div>
+                                    </div>
+                                    <i class="fas fa-download file-icon" style="cursor: pointer;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card" id="admin-report-actions" style="margin-top: 1.5rem;">
+                        <div class="card-header">
+                            <h2 class="card-title">Admin Actions</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label for="report-status-change" class="form-label">Change Status</label>
+                                <select id="report-status-change" class="form-control form-select">
+                                    <option value="pending">Pending</option>
+                                    <option value="approved">Approved</option>
+                                    <option value="rejected">Rejected</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="admin-comments" class="form-label">Comments</label>
+                                <textarea id="admin-comments" class="form-control form-textarea" placeholder="Enter your comments"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline" id="close-report-modal">Close</button>
+                    <button class="btn btn-primary hidden" id="save-report-changes">Save Changes</button>
+                </div>
             </div>
         </div>
     </div>
@@ -1055,602 +1775,930 @@
     <script>
         // API Configuration
         const API_BASE_URL = 'https://reporting-api-b6sx.onrender.com';
-        let authToken = null;
+        
+        // State Management
         let currentUser = null;
+        let currentTheme = localStorage.getItem('theme') || 'light';
+        let reports = [];
+        let users = [];
+        let selectedReportId = null;
 
         // DOM Elements
         const loginView = document.getElementById('login-view');
-        const mainApp = document.getElementById('main-app');
+        const appView = document.getElementById('app-view');
         const loginForm = document.getElementById('login-form');
-        const reportForm = document.getElementById('report-form');
-        const userForm = document.getElementById('user-form');
-        const profileForm = document.getElementById('profile-form');
-        const reportModal = document.getElementById('report-modal');
-        const viewReportModal = document.getElementById('view-report-modal');
-        const userModal = document.getElementById('user-modal');
-        const alertToast = document.getElementById('alert-toast');
-        const alertMessage = document.getElementById('alert-message');
-        const fileUpload = document.getElementById('file-upload');
-        const fileInput = document.getElementById('report-files');
-        const fileList = document.getElementById('file-list');
+        const loginError = document.getElementById('login-error');
+        const loginErrorMessage = document.getElementById('login-error-message');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const logoutBtn = document.getElementById('logout-btn');
+        const sidebar = document.getElementById('sidebar');
         const sidebarToggle = document.getElementById('sidebar-toggle');
-        const sidebar = document.querySelector('.sidebar');
-        const menuItems = document.querySelectorAll('.menu-item');
-        const views = document.querySelectorAll('.view');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        const themeToggle = document.getElementById('theme-toggle');
+        const adminMenu = document.getElementById('admin-menu');
         const userAvatar = document.getElementById('user-avatar');
-        const createReportBtn = document.getElementById('create-report-btn');
+        const userName = document.getElementById('user-name');
+        const userRole = document.getElementById('user-role');
+        const views = document.querySelectorAll('.view');
+        const menuItems = document.querySelectorAll('.menu-item');
         const newReportBtn = document.getElementById('new-report-btn');
-        const newUserBtn = document.getElementById('new-user-btn');
-        const submitReportBtn = document.getElementById('submit-report');
-        const submitUserBtn = document.getElementById('submit-user');
-        const editReportBtn = document.getElementById('edit-report-btn');
-        const deleteReportBtn = document.getElementById('delete-report-btn');
-        const allReportsTable = document.getElementById('all-reports');
-        const recentReportsTable = document.getElementById('recent-reports');
-        const usersTable = document.getElementById('users-table');
-        const modalCloseButtons = document.querySelectorAll('.modal-close');
+        const createReportBtn = document.getElementById('create-report-btn');
+        const createReportModal = document.getElementById('create-report-modal');
+        const closeCreateReportModal = document.getElementById('close-create-report-modal');
+        const cancelCreateReport = document.getElementById('cancel-create-report');
+        const submitCreateReport = document.getElementById('submit-create-report');
+        const createReportForm = document.getElementById('create-report-form');
+        const reportAttachments = document.getElementById('report-attachments');
+        const reportAttachmentsList = document.getElementById('report-attachments-list');
+        const addUserBtn = document.getElementById('add-user-btn');
+        const addUserModal = document.getElementById('add-user-modal');
+        const closeAddUserModal = document.getElementById('close-add-user-modal');
+        const cancelAddUser = document.getElementById('cancel-add-user');
+        const submitAddUser = document.getElementById('submit-add-user');
+        const addUserForm = document.getElementById('add-user-form');
+        const reportsTableBody = document.getElementById('reports-table-body');
+        const usersTableBody = document.getElementById('users-table-body');
+        const viewReportModal = document.getElementById('view-report-modal');
+        const closeViewReportModal = document.getElementById('close-view-report-modal');
+        const closeReportModal = document.getElementById('close-report-modal');
+        const saveReportChanges = document.getElementById('save-report-changes');
+        const viewReportTitle = document.getElementById('view-report-title');
+        const viewReportAuthor = document.getElementById('view-report-author');
+        const viewReportDate = document.getElementById('view-report-date');
+        const viewReportStatus = document.getElementById('view-report-status');
+        const viewReportCategory = document.getElementById('view-report-category');
+        const viewReportDescription = document.getElementById('view-report-description');
+        const viewReportAttachments = document.getElementById('view-report-attachments');
+        const adminReportActions = document.getElementById('admin-report-actions');
+        const reportStatusChange = document.getElementById('report-status-change');
+        const adminComments = document.getElementById('admin-comments');
 
-        // Event Listeners
-        loginForm.addEventListener('submit', handleLogin);
-        reportForm.addEventListener('submit', handleReportSubmit);
-        userForm.addEventListener('submit', handleUserSubmit);
-        profileForm.addEventListener('submit', handleProfileUpdate);
-        fileUpload.addEventListener('click', () => fileInput.click());
-        fileInput.addEventListener('change', handleFileSelect);
-        sidebarToggle.addEventListener('click', toggleSidebar);
-        createReportBtn?.addEventListener('click', () => showModal(reportModal));
-        newReportBtn?.addEventListener('click', () => showModal(reportModal));
-        newUserBtn?.addEventListener('click', () => showModal(userModal));
-        submitReportBtn.addEventListener('click', handleReportSubmit);
-        submitUserBtn.addEventListener('click', handleUserSubmit);
-        editReportBtn.addEventListener('click', editCurrentReport);
-        deleteReportBtn.addEventListener('click', deleteCurrentReport);
-        modalCloseButtons.forEach(btn => btn.addEventListener('click', closeAllModals));
-
-        // Menu item clicks
-        menuItems.forEach(item => {
-            item.addEventListener('click', (e) => {
-                e.preventDefault();
-                const viewName = item.getAttribute('data-view');
-                showView(viewName);
-                
-                // Update active state
-                menuItems.forEach(i => i.classList.remove('active'));
-                item.classList.add('active');
-            });
-        });
-
-        // Initialize the app
+        // Initialize the application
         function init() {
-            // Check for existing token
-            const token = localStorage.getItem('reporting_token');
-            if (token) {
-                authToken = token;
-                fetchCurrentUser();
+            applyTheme();
+            setupEventListeners();
+            checkAuth();
+        }
+
+        // Apply the current theme
+        function applyTheme() {
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            localStorage.setItem('theme', currentTheme);
+            
+            if (currentTheme === 'dark') {
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
             } else {
-                showLogin();
+                themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
             }
         }
 
-        // Show login view
-        function showLogin() {
+        // Toggle between light and dark theme
+        function toggleTheme() {
+            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+            applyTheme();
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Login form submission
+            loginForm.addEventListener('submit', handleLogin);
+            
+            // Logout button
+            logoutBtn.addEventListener('click', handleLogout);
+            
+            // Theme toggle
+            themeToggle.addEventListener('click', toggleTheme);
+            
+            // Sidebar toggle
+            sidebarToggle.addEventListener('click', () => {
+                sidebar.classList.add('active');
+                sidebarOverlay.classList.add('active');
+            });
+            
+            // Sidebar overlay
+            sidebarOverlay.addEventListener('click', () => {
+                sidebar.classList.remove('active');
+                sidebarOverlay.classList.remove('active');
+            });
+            
+            // Menu items for view switching
+            menuItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const viewId = item.getAttribute('data-view');
+                    switchView(viewId);
+                    
+                    // Update active state
+                    menuItems.forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    
+                    // Close sidebar on mobile
+                    sidebar.classList.remove('active');
+                    sidebarOverlay.classList.remove('active');
+                });
+            });
+            
+            // New report button
+            newReportBtn.addEventListener('click', () => {
+                createReportModal.classList.add('active');
+            });
+            
+            createReportBtn.addEventListener('click', () => {
+                createReportModal.classList.add('active');
+            });
+            
+            // Close create report modal
+            closeCreateReportModal.addEventListener('click', () => {
+                createReportModal.classList.remove('active');
+            });
+            
+            cancelCreateReport.addEventListener('click', () => {
+                createReportModal.classList.remove('active');
+            });
+            
+            // Submit create report form
+            submitCreateReport.addEventListener('click', handleCreateReport);
+            
+            // File upload for report attachments
+            reportAttachments.addEventListener('change', handleFileUpload);
+            
+            // Add user button (admin only)
+            addUserBtn.addEventListener('click', () => {
+                addUserModal.classList.add('active');
+            });
+            
+            // Close add user modal
+            closeAddUserModal.addEventListener('click', () => {
+                addUserModal.classList.remove('active');
+            });
+            
+            cancelAddUser.addEventListener('click', () => {
+                addUserModal.classList.remove('active');
+            });
+            
+            // Submit add user form
+            submitAddUser.addEventListener('click', handleAddUser);
+            
+            // Close view report modal
+            closeViewReportModal.addEventListener('click', () => {
+                viewReportModal.classList.remove('active');
+            });
+            
+            closeReportModal.addEventListener('click', () => {
+                viewReportModal.classList.remove('active');
+            });
+            
+            // Save report changes (admin only)
+            saveReportChanges.addEventListener('click', handleSaveReportChanges);
+        }
+
+        // Check authentication status
+        function checkAuth() {
+            const token = localStorage.getItem('token');
+            if (token) {
+                // Validate token with backend
+                fetch(`${API_BASE_URL}/auth/me`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error('Invalid token');
+                    }
+                })
+                .then(data => {
+                    currentUser = data.user;
+                    setupUIForUser();
+                    loadInitialData();
+                    loginView.classList.add('hidden');
+                    appView.classList.remove('hidden');
+                })
+                .catch(error => {
+                    console.error('Authentication check failed:', error);
+                    localStorage.removeItem('token');
+                    loginView.classList.remove('hidden');
+                    appView.classList.add('hidden');
+                });
+            }
+        }
+
+        // Handle login form submission
+        function handleLogin(e) {
+            e.preventDefault();
+            
+            const email = emailInput.value;
+            const password = passwordInput.value;
+            
+            fetch(`${API_BASE_URL}/auth/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, password })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.message || 'Login failed');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                localStorage.setItem('token', data.token);
+                currentUser = data.user;
+                setupUIForUser();
+                loadInitialData();
+                loginView.classList.add('hidden');
+                appView.classList.remove('hidden');
+            })
+            .catch(error => {
+                loginErrorMessage.textContent = error.message;
+                loginError.classList.remove('hidden');
+                setTimeout(() => {
+                    loginError.classList.add('hidden');
+                }, 5000);
+            });
+        }
+
+        // Handle logout
+        function handleLogout() {
+            localStorage.removeItem('token');
+            currentUser = null;
             loginView.classList.remove('hidden');
-            mainApp.classList.add('hidden');
+            appView.classList.add('hidden');
+            loginForm.reset();
         }
 
-        // Show main app
-        function showApp() {
-            loginView.classList.add('hidden');
-            mainApp.classList.remove('hidden');
-            loadDashboardData();
-        }
-
-        // Toggle sidebar on mobile
-        function toggleSidebar() {
-            sidebar.classList.toggle('active');
+        // Setup UI based on user role
+        function setupUIForUser() {
+            if (!currentUser) return;
+            
+            // Set user info
+            userName.textContent = currentUser.name;
+            userRole.textContent = currentUser.role === 'admin' ? 'Administrator' : 'Staff Member';
+            userAvatar.textContent = currentUser.name.charAt(0).toUpperCase();
+            
+            // Show/hide admin menu
+            if (currentUser.role === 'admin') {
+                adminMenu.classList.remove('hidden');
+                adminReportActions.classList.remove('hidden');
+                saveReportChanges.classList.remove('hidden');
+            } else {
+                adminMenu.classList.add('hidden');
+                adminReportActions.classList.add('hidden');
+                saveReportChanges.classList.add('hidden');
+            }
         }
 
         // Switch between views
-        function showView(viewName) {
+        function switchView(viewId) {
             views.forEach(view => {
-                if (view.id === `${viewName}-view`) {
+                if (view.id === `${viewId}-view`) {
                     view.classList.remove('hidden');
                 } else {
                     view.classList.add('hidden');
                 }
             });
-
-            // Load data for the view
-            if (viewName === 'dashboard') {
-                loadDashboardData();
-            } else if (viewName === 'reports') {
+            
+            // Load data for the view if needed
+            if (viewId === 'reports') {
                 loadReports();
-            } else if (viewName === 'users') {
+            } else if (viewId === 'users' && currentUser.role === 'admin') {
                 loadUsers();
             }
         }
 
-        // Show modal
-        function showModal(modal) {
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
-
-        // Close all modals
-        function closeAllModals() {
-            document.querySelectorAll('.modal').forEach(modal => {
-                modal.classList.remove('active');
-            });
-            document.body.style.overflow = 'auto';
-        }
-
-        // Handle file selection
-        function handleFileSelect(e) {
-            const files = e.target.files;
-            fileList.innerHTML = '';
-            
-            for (let i = 0; i < files.length; i++) {
-                const fileItem = document.createElement('div');
-                fileItem.className = 'file-item';
-                fileItem.innerHTML = `
-                    <span>${files[i].name}</span>
-                    <i class="fas fa-times" data-index="${i}"></i>
-                `;
-                fileList.appendChild(fileItem);
+        // Load initial data for the dashboard
+        function loadInitialData() {
+            loadReports();
+            if (currentUser.role === 'admin') {
+                loadUsers();
             }
-
-            // Add event listeners to remove buttons
-            document.querySelectorAll('.file-item i').forEach(icon => {
-                icon.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const index = parseInt(icon.getAttribute('data-index'));
-                    removeFile(index);
-                });
-            });
         }
 
-        // Remove file from selection
-        function removeFile(index) {
-            const dt = new DataTransfer();
-            const files = fileInput.files;
-            
-            for (let i = 0; i < files.length; i++) {
-                if (i !== index) {
-                    dt.items.add(files[i]);
+        // Load reports from API
+        function loadReports() {
+            fetch(`${API_BASE_URL}/reports`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
                 }
-            }
-            
-            fileInput.files = dt.files;
-            handleFileSelect({ target: fileInput });
-        }
-
-        // Show alert toast
-        function showAlert(message, type = 'success') {
-            alertMessage.textContent = message;
-            alertToast.className = `fixed bottom-4 right-4 flex items-center alert alert-${type}`;
-            alertToast.classList.remove('hidden');
-            
-            setTimeout(() => {
-                alertToast.classList.add('hidden');
-            }, 3000);
-        }
-
-        // API Functions
-        async function handleLogin(e) {
-    e.preventDefault();
-    const email = document.getElementById('login-email').value;
-    const password = document.getElementById('login-password').value;
-    
-    try {
-        const response = await fetch(`${API_BASE_URL}/token`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: `username=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
-        });
-        
-        if (!response.ok) {
-            throw new Error('Login failed');
-        }
-        
-        const data = await response.json();
-        authToken = data.access_token;
-        localStorage.setItem('reporting_token', authToken);
-        
-        await fetchCurrentUser();
-        showApp();
-        showAlert('Login successful');
-    } catch (error) {
-        showAlert(error.message || 'Login failed', 'error');
-    }
-}
-
-async function fetchCurrentUser() {
-    try {
-        const response = await fetch(`${API_BASE_URL}/users/me`, {
-            headers: {
-                'Authorization': `Bearer ${authToken}`
-            }
-        });
-        
-        if (!response.ok) {
-            throw new Error('Failed to fetch user');
-        }
-        
-        currentUser = await response.json();
-        updateUserUI();
-    } catch (error) {
-        console.error('Error fetching user:', error);
-        localStorage.removeItem('reporting_token');
-        showLogin();
-    }
-}
-
-
-        async function loadDashboardData() {
-            try {
-                const response = await fetch(`${API_BASE_URL}/reports?limit=5`, {
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    }
-                });
-                
-                if (!response.ok) {
-                    throw new Error('Failed to load dashboard data');
-                }
-                
-                const reports = await response.json();
-                renderRecentReports(reports);
-            } catch (error) {
-                showAlert(error.message || 'Failed to load dashboard data', 'error');
-            }
-        }
-
-        async function loadReports() {
-            try {
-                const response = await fetch(`${API_BASE_URL}/reports`, {
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    }
-                });
-                
+            })
+            .then(response => {
                 if (!response.ok) {
                     throw new Error('Failed to load reports');
                 }
-                
-                const reports = await response.json();
-                renderAllReports(reports);
-            } catch (error) {
-                showAlert(error.message || 'Failed to load reports', 'error');
-            }
+                return response.json();
+            })
+            .then(data => {
+                reports = data.reports;
+                renderReportsTable();
+            })
+            .catch(error => {
+                console.error('Error loading reports:', error);
+                showAlert('Error loading reports. Please try again.', 'danger');
+            });
         }
 
-        async function loadUsers() {
-            try {
-                const response = await fetch(`${API_BASE_URL}/users`, {
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    }
-                });
-                
-                if (!response.ok) {
-                    throw new Error('Failed to load users');
-                }
-                
-                const users = await response.json();
-                renderUsers(users);
-            } catch (error) {
-                showAlert(error.message || 'Failed to load users', 'error');
-            }
-        }
-
-        async function handleReportSubmit(e) {
-            e.preventDefault();
+        // Render reports table
+        function renderReportsTable() {
+            reportsTableBody.innerHTML = '';
             
-            const title = document.getElementById('report-title').value;
-            const description = document.getElementById('report-description').value;
-            const files = fileInput.files;
-            
-            try {
-                const formData = new FormData();
-                formData.append('title', title);
-                formData.append('description', description);
-                
-                for (let i = 0; i < files.length; i++) {
-                    formData.append('files', files[i]);
-                }
-                
-                const response = await fetch(`${API_BASE_URL}/reports`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${authToken}'
-                    },
-                    body: formData
-                });
-                
-                if (!response.ok) {
-                    throw new Error('Failed to create report');
-                }
-                
-                const report = await response.json();
-                showAlert('Report created successfully');
-                closeAllModals();
-                reportForm.reset();
-                fileList.innerHTML = '';
-                
-                // Refresh reports
-                if (document.getElementById('reports-view').classList.contains('hidden')) {
-                    loadDashboardData();
-                } else {
-                    loadReports();
-                }
-            } catch (error) {
-                showAlert(error.message || 'Failed to create report', 'error');
-            }
-        }
-
-        async function handleUserSubmit(e) {
-            e.preventDefault();
-            
-            const name = document.getElementById('user-name').value;
-            const email = document.getElementById('user-email').value;
-            const password = document.getElementById('user-password').value;
-            const role = document.getElementById('user-role').value;
-            
-            try {
-                const response = await fetch(`${API_BASE_URL}/register`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        email,
-                        full_name: name,
-                        password,
-                        role
-                    })
-                });
-                
-                if (!response.ok) {
-                    throw new Error('Failed to create user');
-                }
-                
-                const user = await response.json();
-                showAlert('User created successfully');
-                closeAllModals();
-                userForm.reset();
-                loadUsers();
-            } catch (error) {
-                showAlert(error.message || 'Failed to create user', 'error');
-            }
-        }
-
-        async function handleProfileUpdate(e) {
-            e.preventDefault();
-            
-            const name = document.getElementById('profile-name').value;
-            const password = document.getElementById('profile-password').value;
-            const confirm = document.getElementById('profile-confirm').value;
-            
-            if (password && password !== confirm) {
-                showAlert('Passwords do not match', 'error');
+            if (reports.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td colspan="7" class="text-center text-muted">No reports found</td>
+                `;
+                reportsTableBody.appendChild(row);
                 return;
             }
             
-            try {
-                // In a real app, you would send this to your API
-                showAlert('Profile updated successfully');
-            } catch (error) {
-                showAlert(error.message || 'Failed to update profile', 'error');
-            }
+            reports.forEach(report => {
+                const row = document.createElement('tr');
+                
+                // Determine status badge
+                let statusBadge;
+                if (report.status === 'approved') {
+                    statusBadge = '<span class="badge badge-success">Approved</span>';
+                } else if (report.status === 'pending') {
+                    statusBadge = '<span class="badge badge-warning">Pending</span>';
+                } else {
+                    statusBadge = '<span class="badge badge-danger">Rejected</span>';
+                }
+                
+                // Format date
+                const reportDate = new Date(report.created_at).toLocaleDateString();
+                
+                // Count attachments
+                const attachmentCount = report.attachments ? report.attachments.length : 0;
+                const attachmentIcon = attachmentCount > 0 ? 
+                    `<i class="fas fa-paperclip"></i> ${attachmentCount}` : 
+                    '<span class="text-muted">None</span>';
+                
+                row.innerHTML = `
+                    <td>#${report.id}</td>
+                    <td>${report.title}</td>
+                    <td>${report.author_name}</td>
+                    <td>${statusBadge}</td>
+                    <td>${reportDate}</td>
+                    <td>${attachmentIcon}</td>
+                    <td>
+                        <button class="action-btn view-report-btn" data-id="${report.id}" title="View">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        ${currentUser.role === 'admin' || currentUser.id === report.author_id ? `
+                        <button class="action-btn edit-report-btn" data-id="${report.id}" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        ` : ''}
+                        ${currentUser.role === 'admin' ? `
+                        <button class="action-btn delete-report-btn delete" data-id="${report.id}" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        ` : ''}
+                    </td>
+                `;
+                
+                reportsTableBody.appendChild(row);
+            });
+            
+            // Add event listeners to view buttons
+            document.querySelectorAll('.view-report-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const reportId = e.currentTarget.getAttribute('data-id');
+                    viewReport(reportId);
+                });
+            });
+            
+            // Add event listeners to edit buttons
+            document.querySelectorAll('.edit-report-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const reportId = e.currentTarget.getAttribute('data-id');
+                    editReport(reportId);
+                });
+            });
+            
+            // Add event listeners to delete buttons
+            document.querySelectorAll('.delete-report-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const reportId = e.currentTarget.getAttribute('data-id');
+                    deleteReport(reportId);
+                });
+            });
         }
 
-        function viewReportDetails(report) {
-            document.getElementById('view-report-title').textContent = report.title;
-            document.getElementById('view-report-status').textContent = report.status;
-            document.getElementById('view-report-status').className = `status-badge status-${report.status.toLowerCase().replace(' ', '-')}`;
-            document.getElementById('view-report-date').textContent = new Date(report.created_at).toLocaleDateString();
-            document.getElementById('view-report-description').textContent = report.description;
+        // Load users from API (admin only)
+        function loadUsers() {
+            fetch(`${API_BASE_URL}/users`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to load users');
+                }
+                return response.json();
+            })
+            .then(data => {
+                users = data.users;
+                renderUsersTable();
+            })
+            .catch(error => {
+                console.error('Error loading users:', error);
+                showAlert('Error loading users. Please try again.', 'danger');
+            });
+        }
+
+        // Render users table
+        function renderUsersTable() {
+            usersTableBody.innerHTML = '';
             
-            const attachmentsContainer = document.getElementById('view-report-attachments');
-            attachmentsContainer.innerHTML = '';
+            if (users.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td colspan="6" class="text-center text-muted">No users found</td>
+                `;
+                usersTableBody.appendChild(row);
+                return;
+            }
             
+            users.forEach(user => {
+                const row = document.createElement('tr');
+                
+                // Format last active time
+                const lastActive = user.last_active ? 
+                    new Date(user.last_active).toLocaleString() : 
+                    'Never';
+                
+                // Determine status
+                const status = user.is_active ? 
+                    '<span class="badge badge-success">Active</span>' : 
+                    '<span class="badge badge-danger">Inactive</span>';
+                
+                row.innerHTML = `
+                    <td>${user.name}</td>
+                    <td>${user.email}</td>
+                    <td>${user.role === 'admin' ? 'Administrator' : 'Staff Member'}</td>
+                    <td>${status}</td>
+                    <td>${lastActive}</td>
+                    <td>
+                        <button class="action-btn edit-user-btn" data-id="${user.id}" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        ${user.id !== currentUser.id ? `
+                        <button class="action-btn delete-user-btn delete" data-id="${user.id}" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        ` : ''}
+                    </td>
+                `;
+                
+                usersTableBody.appendChild(row);
+            });
+            
+            // Add event listeners to edit buttons
+            document.querySelectorAll('.edit-user-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const userId = e.currentTarget.getAttribute('data-id');
+                    editUser(userId);
+                });
+            });
+            
+            // Add event listeners to delete buttons
+            document.querySelectorAll('.delete-user-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const userId = e.currentTarget.getAttribute('data-id');
+                    deleteUser(userId);
+                });
+            });
+        }
+
+        // Handle file upload for report attachments
+        function handleFileUpload(e) {
+            const files = e.target.files;
+            if (!files || files.length === 0) return;
+            
+            reportAttachmentsList.innerHTML = '';
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                
+                // Get file icon based on type
+                let fileIcon;
+                if (file.type.includes('image')) {
+                    fileIcon = 'fa-file-image';
+                } else if (file.type.includes('pdf')) {
+                    fileIcon = 'fa-file-pdf';
+                } else if (file.type.includes('word') || file.type.includes('document')) {
+                    fileIcon = 'fa-file-word';
+                } else if (file.type.includes('excel') || file.type.includes('spreadsheet')) {
+                    fileIcon = 'fa-file-excel';
+                } else {
+                    fileIcon = 'fa-file';
+                }
+                
+                // Format file size
+                const fileSize = formatFileSize(file.size);
+                
+                fileItem.innerHTML = `
+                    <i class="fas ${fileIcon} file-icon"></i>
+                    <div class="file-info">
+                        <div class="file-name">${file.name}</div>
+                        <div class="file-size">${fileSize}</div>
+                    </div>
+                    <i class="fas fa-times file-remove" data-index="${i}"></i>
+                `;
+                
+                reportAttachmentsList.appendChild(fileItem);
+            }
+            
+            // Add event listeners to remove buttons
+            document.querySelectorAll('.file-remove').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = parseInt(e.currentTarget.getAttribute('data-index'));
+                    removeFileFromList(index);
+                });
+            });
+        }
+
+        // Remove file from upload list
+        function removeFileFromList(index) {
+            // Create a new DataTransfer object to manipulate files
+            const dataTransfer = new DataTransfer();
+            const files = reportAttachments.files;
+            
+            // Add all files except the one to be removed
+            for (let i = 0; i < files.length; i++) {
+                if (i !== index) {
+                    dataTransfer.items.add(files[i]);
+                }
+            }
+            
+            // Update the file input
+            reportAttachments.files = dataTransfer.files;
+            
+            // Re-render the file list
+            const event = new Event('change');
+            reportAttachments.dispatchEvent(event);
+        }
+
+        // Format file size
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Handle create report submission
+        function handleCreateReport() {
+            const title = document.getElementById('report-title').value;
+            const description = document.getElementById('report-description').value;
+            const category = document.getElementById('report-category').value;
+            
+            if (!title || !description || !category) {
+                showAlert('Please fill in all required fields', 'danger');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('description', description);
+            formData.append('category', category);
+            
+            // Add attachments if any
+            const files = reportAttachments.files;
+            for (let i = 0; i < files.length; i++) {
+                formData.append('attachments', files[i]);
+            }
+            
+            fetch(`${API_BASE_URL}/reports`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.message || 'Failed to create report');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                showAlert('Report created successfully', 'success');
+                createReportModal.classList.remove('active');
+                createReportForm.reset();
+                reportAttachmentsList.innerHTML = '';
+                
+                // Reload reports
+                loadReports();
+            })
+            .catch(error => {
+                showAlert(error.message, 'danger');
+            });
+        }
+
+        // Handle add user submission (admin only)
+        function handleAddUser() {
+            const fullName = document.getElementById('user-fullname').value;
+            const email = document.getElementById('user-email').value;
+            const role = document.getElementById('user-role').value;
+            const password = document.getElementById('user-password').value;
+            const confirmPassword = document.getElementById('user-confirm-password').value;
+            
+            if (!fullName || !email || !role || !password || !confirmPassword) {
+                showAlert('Please fill in all required fields', 'danger');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showAlert('Passwords do not match', 'danger');
+                return;
+            }
+            
+            fetch(`${API_BASE_URL}/users`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: fullName,
+                    email,
+                    role,
+                    password
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.message || 'Failed to add user');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                showAlert('User added successfully', 'success');
+                addUserModal.classList.remove('active');
+                addUserForm.reset();
+                
+                // Reload users
+                loadUsers();
+            })
+            .catch(error => {
+                showAlert(error.message, 'danger');
+            });
+        }
+
+        // View report details
+        function viewReport(reportId) {
+            const report = reports.find(r => r.id === parseInt(reportId));
+            if (!report) {
+                showAlert('Report not found', 'danger');
+                return;
+            }
+            
+            selectedReportId = reportId;
+            
+            // Set report details
+            viewReportTitle.textContent = report.title;
+            viewReportAuthor.textContent = report.author_name;
+            viewReportDate.textContent = new Date(report.created_at).toLocaleDateString();
+            viewReportDescription.textContent = report.description;
+            viewReportCategory.textContent = report.category;
+            
+            // Set status
+            let statusBadge;
+            if (report.status === 'approved') {
+                statusBadge = '<span class="badge badge-success">Approved</span>';
+            } else if (report.status === 'pending') {
+                statusBadge = '<span class="badge badge-warning">Pending</span>';
+            } else {
+                statusBadge = '<span class="badge badge-danger">Rejected</span>';
+            }
+            viewReportStatus.innerHTML = statusBadge;
+            
+            // Set status dropdown
+            reportStatusChange.value = report.status;
+            
+            // Set admin comments if any
+            adminComments.value = report.admin_comments || '';
+            
+            // Set attachments
+            viewReportAttachments.innerHTML = '';
             if (report.attachments && report.attachments.length > 0) {
                 report.attachments.forEach(attachment => {
                     const fileItem = document.createElement('div');
                     fileItem.className = 'file-item';
+                    
+                    // Get file icon based on type
+                    let fileIcon, fileColor;
+                    if (attachment.type.includes('image')) {
+                        fileIcon = 'fa-file-image';
+                        fileColor = '#e74c3c';
+                    } else if (attachment.type.includes('pdf')) {
+                        fileIcon = 'fa-file-pdf';
+                        fileColor = '#e74c3c';
+                    } else if (attachment.type.includes('word') || attachment.type.includes('document')) {
+                        fileIcon = 'fa-file-word';
+                        fileColor = '#2c7be5';
+                    } else if (attachment.type.includes('excel') || attachment.type.includes('spreadsheet')) {
+                        fileIcon = 'fa-file-excel';
+                        fileColor = '#2ecc71';
+                    } else {
+                        fileIcon = 'fa-file';
+                        fileColor = '#95a5a6';
+                    }
+                    
+                    // Format file size
+                    const fileSize = formatFileSize(attachment.size);
+                    
                     fileItem.innerHTML = `
-                        <a href="${API_BASE_URL}/attachments/${attachment}" target="_blank" class="flex items-center gap-2">
-                            <i class="fas fa-file-alt"></i>
-                            <span>${attachment}</span>
-                        </a>
+                        <i class="fas ${fileIcon} file-icon" style="color: ${fileColor};"></i>
+                        <div class="file-info">
+                            <div class="file-name">${attachment.name}</div>
+                            <div class="file-size">${fileSize}</div>
+                        </div>
+                        <i class="fas fa-download file-icon" style="cursor: pointer;" data-url="${attachment.url}"></i>
                     `;
-                    attachmentsContainer.appendChild(fileItem);
+                    
+                    viewReportAttachments.appendChild(fileItem);
+                });
+                
+                // Add event listeners to download buttons
+                document.querySelectorAll('#view-report-attachments .fa-download').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const url = e.currentTarget.getAttribute('data-url');
+                        downloadFile(url);
+                    });
                 });
             } else {
-                attachmentsContainer.innerHTML = '<p class="text-gray">No attachments</p>';
+                const noFiles = document.createElement('div');
+                noFiles.className = 'text-center text-muted';
+                noFiles.textContent = 'No attachments';
+                viewReportAttachments.appendChild(noFiles);
             }
             
-            // Store current report ID for edit/delete
-            viewReportModal.dataset.reportId = report.id;
-            
-            // Show/hide buttons based on permissions
-            const isOwner = currentUser.id === report.owner_id;
-            const isAdmin = currentUser.role === 'admin';
-            
-            editReportBtn.style.display = (isOwner || isAdmin) ? 'block' : 'none';
-            deleteReportBtn.style.display = (isOwner || isAdmin) ? 'block' : 'none';
-            
-            showModal(viewReportModal);
+            // Show the modal
+            viewReportModal.classList.add('active');
         }
 
-        async function editCurrentReport() {
-            const reportId = viewReportModal.dataset.reportId;
-            // In a real app, you would implement edit functionality
+        // Edit report
+        function editReport(reportId) {
+            // In a real implementation, this would open an edit form
+            // For this demo, we'll just show an alert
             showAlert('Edit functionality would be implemented here', 'info');
         }
 
-        async function deleteCurrentReport() {
-            const reportId = viewReportModal.dataset.reportId;
+        // Delete report
+        function deleteReport(reportId) {
+            if (!confirm('Are you sure you want to delete this report?')) {
+                return;
+            }
             
-            try {
-                const response = await fetch(`${API_BASE_URL}/reports/${reportId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    }
-                });
-                
+            fetch(`${API_BASE_URL}/reports/${reportId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            })
+            .then(response => {
                 if (!response.ok) {
                     throw new Error('Failed to delete report');
                 }
-                
-                showAlert('Report deleted successfully');
-                closeAllModals();
-                
-                // Refresh reports
-                if (document.getElementById('reports-view').classList.contains('hidden')) {
-                    loadDashboardData();
-                } else {
-                    loadReports();
-                }
-            } catch (error) {
-                showAlert(error.message || 'Failed to delete report', 'error');
+                return response.json();
+            })
+            .then(data => {
+                showAlert('Report deleted successfully', 'success');
+                loadReports();
+            })
+            .catch(error => {
+                showAlert(error.message, 'danger');
+            });
+        }
+
+        // Edit user
+        function editUser(userId) {
+            // In a real implementation, this would open an edit form
+            // For this demo, we'll just show an alert
+            showAlert('Edit user functionality would be implemented here', 'info');
+        }
+
+        // Delete user
+        function deleteUser(userId) {
+            if (!confirm('Are you sure you want to delete this user?')) {
+                return;
             }
-        }
-
-        // Render Functions
-        function updateUserUI() {
-            if (currentUser) {
-                // Set user avatar initials
-                const initials = currentUser.full_name.split(' ').map(n => n[0]).join('');
-                userAvatar.textContent = initials;
-                
-                // Hide admin menu items if not admin
-                if (currentUser.role !== 'admin') {
-                    document.querySelectorAll('.menu-item[data-view="users"]').forEach(item => {
-                        item.style.display = 'none';
-                    });
+            
+            fetch(`${API_BASE_URL}/users/${userId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
                 }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to delete user');
+                }
+                return response.json();
+            })
+            .then(data => {
+                showAlert('User deleted successfully', 'success');
+                loadUsers();
+            })
+            .catch(error => {
+                showAlert(error.message, 'danger');
+            });
+        }
+
+        // Handle saving report changes (admin only)
+        function handleSaveReportChanges() {
+            const status = reportStatusChange.value;
+            const comments = adminComments.value;
+            
+            fetch(`${API_BASE_URL}/reports/${selectedReportId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    status,
+                    admin_comments: comments
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to update report');
+                }
+                return response.json();
+            })
+            .then(data => {
+                showAlert('Report updated successfully', 'success');
+                viewReportModal.classList.remove('active');
+                loadReports();
+            })
+            .catch(error => {
+                showAlert(error.message, 'danger');
+            });
+        }
+
+        // Download file
+        function downloadFile(url) {
+            // In a real implementation, this would download the file
+            // For this demo, we'll just open in a new tab
+            window.open(url, '_blank');
+        }
+
+        // Show alert message
+        function showAlert(message, type) {
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} fade-in`;
+            
+            let icon;
+            if (type === 'success') {
+                icon = 'fa-check-circle';
+            } else if (type === 'danger') {
+                icon = 'fa-exclamation-circle';
+            } else if (type === 'warning') {
+                icon = 'fa-exclamation-triangle';
+            } else {
+                icon = 'fa-info-circle';
             }
-        }
-
-        function renderRecentReports(reports) {
-            recentReportsTable.innerHTML = '';
             
-            reports.forEach(report => {
-                const row = document.createElement('tr');
-                row.className = 'fade-in';
-                row.innerHTML = `
-                    <td>${report.title}</td>
-                    <td><span class="status-badge status-${report.status.toLowerCase().replace(' ', '-')}">${report.status}</span></td>
-                    <td>${new Date(report.created_at).toLocaleDateString()}</td>
-                    <td>
-                        <button class="btn btn-outline btn-sm view-report-btn" data-id="${report.id}">
-                            <i class="fas fa-eye"></i> View
-                        </button>
-                    </td>
-                `;
-                recentReportsTable.appendChild(row);
-            });
+            alert.innerHTML = `
+                <i class="fas ${icon}"></i>
+                <div>${message}</div>
+            `;
             
-            // Add event listeners to view buttons
-            document.querySelectorAll('.view-report-btn').forEach(btn => {
-                btn.addEventListener('click', async () => {
-                    const reportId = btn.getAttribute('data-id');
-                    try {
-                        const response = await fetch(`${API_BASE_URL}/reports/${reportId}`, {
-                            headers: {
-                                'Authorization': `Bearer ${authToken}`
-                            }
-                        });
-                        
-                        if (!response.ok) {
-                            throw new Error('Failed to fetch report');
-                        }
-                        
-                        const report = await response.json();
-                        viewReportDetails(report);
-                    } catch (error) {
-                        showAlert(error.message || 'Failed to fetch report', 'error');
-                    }
-                });
-            });
-        }
-
-        function renderAllReports(reports) {
-            allReportsTable.innerHTML = '';
+            // Insert at the top of the content area
+            const content = document.querySelector('.content');
+            content.insertBefore(alert, content.firstChild);
             
-            reports.forEach(report => {
-                const row = document.createElement('tr');
-                row.className = 'fade-in';
-                row.innerHTML = `
-                    <td>${report.title}</td>
-                    <td>${report.description.substring(0, 50)}${report.description.length > 50 ? '...' : ''}</td>
-                    <td><span class="status-badge status-${report.status.toLowerCase().replace(' ', '-')}">${report.status}</span></td>
-                    <td>${new Date(report.created_at).toLocaleDateString()}</td>
-                    <td>
-                        <button class="btn btn-outline btn-sm view-report-btn" data-id="${report.id}">
-                            <i class="fas fa-eye"></i> View
-                        </button>
-                    </td>
-                `;
-                allReportsTable.appendChild(row);
-            });
-            
-            // Add event listeners to view buttons
-            document.querySelectorAll('.view-report-btn').forEach(btn => {
-                btn.addEventListener('click', async () => {
-                    const reportId = btn.getAttribute('data-id');
-                    try {
-                        const response = await fetch(`${API_BASE_URL}/reports/${reportId}`, {
-                            headers: {
-                                'Authorization': `Bearer ${authToken}`
-                            }
-                        });
-                        
-                        if (!response.ok) {
-                            throw new Error('Failed to fetch report');
-                        }
-                        
-                        const report = await response.json();
-                        viewReportDetails(report);
-                    } catch (error) {
-                        showAlert(error.message || 'Failed to fetch report', 'error');
-                    }
-                });
-            });
-        }
-
-        function renderUsers(users) {
-            usersTable.innerHTML = '';
-            
-            users.forEach(user => {
-                const row = document.createElement('tr');
-                row.className = 'fade-in';
-                row.innerHTML = `
-                    <td>${user.full_name}</td>
-                    <td>${user.email}</td>
-                    <td>${user.role}</td>
-                    <td>
-                        <span class="status-badge ${user.is_active ? 'status-completed' : 'status-cancelled'}">
-                            ${user.is_active ? 'Active' : 'Inactive'}
-                        </span>
-                    </td>
-                    <td>
-                        <button class="btn btn-outline btn-sm">
-                            <i class="fas fa-edit"></i> Edit
-                        </button>
-                    </td>
-                `;
-                usersTable.appendChild(row);
-            });
+            // Remove after 5 seconds
+            setTimeout(() => {
+                alert.classList.add('hidden');
+                setTimeout(() => {
+                    alert.remove();
+                }, 300);
+            }, 5000);
         }
 
         // Initialize the app
-        init();
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
