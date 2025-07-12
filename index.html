@@ -3194,70 +3194,78 @@
         }
 
         // Handle add user submission (admin only)
-        function handleAddUser() {
-            const fullName = document.getElementById('user-fullname').value;
-            const email = document.getElementById('user-email').value;
-            const role = document.getElementById('user-role').value;
-            const password = document.getElementById('user-password').value;
-            const confirmPassword = document.getElementById('user-confirm-password').value;
-            
-            if (!fullName || !email || !role || !password || !confirmPassword) {
-                showAlert('Please fill in all required fields', 'danger');
-                return;
-            }
-            
-            if (password !== confirmPassword) {
-                showAlert('Passwords do not match', 'danger');
-                return;
-            }
-            
-            // Show loading state
-            submitUserText.textContent = 'Adding...';
-            submitUserSpinner.classList.remove('hidden');
-            
-            const userData = {
-                name: fullName,
-                email: email,
-                role: role,
-                password: password
-            };
-            
-            fetch(`${API_BASE_URL}/users`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(userData)
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(err => {
-                        throw new Error(err.detail || 'Failed to add user');
-                    });
-                }
-                return response.json();
-            })
-            .then(user => {
-                // Show success message
-                showAlert('User added successfully', 'success');
-                
-                // Close modal and reset form
-                addUserModal.classList.remove('active');
-                addUserForm.reset();
-                
-                // Reload users
-                loadUsers();
-            })
-            .catch(error => {
-                showAlert(error.message, 'danger');
-            })
-            .finally(() => {
-                submitUserText.textContent = 'Add User';
-                submitUserSpinner.classList.add('hidden');
+        // Handle add user submission (admin only)
+function handleAddUser() {
+    const fullName = document.getElementById('user-fullname').value.trim();
+    const email = document.getElementById('user-email').value.trim();
+    const role = document.getElementById('user-role').value;
+    const password = document.getElementById('user-password').value;
+    const confirmPassword = document.getElementById('user-confirm-password').value;
+    
+    // Validate all fields are filled
+    if (!fullName || !email || !role || !password || !confirmPassword) {
+        showAlert('Please fill in all required fields', 'danger');
+        return;
+    }
+    
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        showAlert('Please enter a valid email address', 'danger');
+        return;
+    }
+    
+    if (password !== confirmPassword) {
+        showAlert('Passwords do not match', 'danger');
+        return;
+    }
+    
+    // Show loading state
+    submitUserText.textContent = 'Adding...';
+    submitUserSpinner.classList.remove('hidden');
+    
+    const userData = {
+        name: fullName,
+        email: email,
+        role: role,
+        password: password
+    };
+    
+    fetch(`${API_BASE_URL}/users`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(userData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => {
+                throw new Error(err.detail || 'Failed to add user');
             });
         }
-
+        return response.json();
+    })
+    .then(user => {
+        // Show success message
+        showAlert('User added successfully', 'success');
+        
+        // Close modal and reset form
+        addUserModal.classList.remove('active');
+        addUserForm.reset();
+        
+        // Reload users
+        loadUsers();
+    })
+    .catch(error => {
+        showAlert(error.message, 'danger');
+    })
+    .finally(() => {
+        submitUserText.textContent = 'Add User';
+        submitUserSpinner.classList.add('hidden');
+    });
+}
         // View report details
         function viewReport(reportId) {
             fetch(`${API_BASE_URL}/reports/${reportId}`, {
