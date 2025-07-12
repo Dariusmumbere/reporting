@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ReportHub | Professional Reporting System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
         :root {
             --primary-color: #4361ee;
@@ -32,7 +33,10 @@
             --radius-xl: 0.75rem;
             --radius-2xl: 1rem;
             --radius-3xl: 1.5rem;
-            --transition: all 0.2s ease-in-out;
+            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --sidebar-width: 280px;
+            --sidebar-collapsed-width: 80px;
+            --navbar-height: 64px;
         }
 
         [data-theme="dark"] {
@@ -45,10 +49,10 @@
             --warning-color: #f8961e;
             --text-primary: #f8f9fa;
             --text-secondary: #adb5bd;
-            --bg-primary: #212529;
-            --bg-secondary: #343a40;
-            --bg-tertiary: #495057;
-            --border-color: #6c757d;
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
+            --bg-tertiary: #0f3460;
+            --border-color: #2a2a42;
         }
 
         * {
@@ -58,28 +62,64 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             color: var(--text-primary);
             background-color: var(--bg-secondary);
             line-height: 1.6;
             transition: var(--transition);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         #app {
             display: flex;
             min-height: 100vh;
             transition: var(--transition);
+            position: relative;
         }
 
         /* Sidebar Styles */
         .sidebar {
-            width: 260px;
+            width: var(--sidebar-width);
             background-color: var(--bg-primary);
             box-shadow: var(--shadow-md);
-            transition: var(--transition);
+            transition: all 0.3s ease;
             display: flex;
             flex-direction: column;
-            z-index: 10;
+            z-index: 100;
+            position: fixed;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed-width);
+        }
+
+        .sidebar.collapsed .sidebar-header h2,
+        .sidebar.collapsed .menu-item span,
+        .sidebar.collapsed .menu-category,
+        .sidebar.collapsed .user-info,
+        .sidebar.collapsed .logout-btn i:last-child {
+            display: none;
+        }
+
+        .sidebar.collapsed .sidebar-header {
+            justify-content: center;
+        }
+
+        .sidebar.collapsed .menu-item {
+            justify-content: center;
+            padding: 0.75rem;
+        }
+
+        .sidebar.collapsed .menu-item i {
+            margin-right: 0;
+            font-size: 1.25rem;
+        }
+
+        .sidebar.collapsed .sidebar-footer {
+            justify-content: center;
         }
 
         .sidebar-header {
@@ -87,29 +127,48 @@
             border-bottom: 1px solid var(--border-color);
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            height: var(--navbar-height);
+            transition: var(--transition);
         }
 
         .sidebar-header h2 {
             font-size: 1.25rem;
-            font-weight: 600;
+            font-weight: 700;
             color: var(--primary-color);
+            white-space: nowrap;
         }
 
         .sidebar-menu {
             flex: 1;
             overflow-y: auto;
             padding: 1rem 0;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary-color) var(--bg-primary);
+        }
+
+        .sidebar-menu::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar-menu::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        .sidebar-menu::-webkit-scrollbar-thumb {
+            background-color: var(--primary-color);
+            border-radius: 3px;
         }
 
         .menu-category {
-            padding: 0.5rem 1.5rem;
-            font-size: 0.75rem;
+            padding: 0.75rem 1.5rem 0.5rem;
+            font-size: 0.7rem;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.1em;
             color: var(--text-secondary);
-            margin-top: 1rem;
+            margin-top: 0.5rem;
+            white-space: nowrap;
+            transition: var(--transition);
         }
 
         .menu-category:first-child {
@@ -120,26 +179,30 @@
             display: flex;
             align-items: center;
             padding: 0.75rem 1.5rem;
-            margin: 0.25rem 0;
+            margin: 0.25rem 0.75rem;
             color: var(--text-primary);
             text-decoration: none;
             border-radius: var(--radius);
             transition: var(--transition);
+            white-space: nowrap;
         }
 
         .menu-item:hover {
             background-color: var(--bg-tertiary);
+            transform: translateX(2px);
         }
 
         .menu-item.active {
             background-color: var(--primary-color);
             color: white;
+            box-shadow: 0 4px 6px -1px rgba(67, 97, 238, 0.3);
         }
 
         .menu-item i {
             margin-right: 0.75rem;
             width: 20px;
             text-align: center;
+            transition: var(--transition);
         }
 
         .sidebar-footer {
@@ -148,38 +211,48 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            transition: var(--transition);
         }
 
         .user-profile {
             display: flex;
             align-items: center;
+            overflow: hidden;
         }
 
         .user-avatar {
             width: 36px;
             height: 36px;
             border-radius: 50%;
-            background-color: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
             margin-right: 0.75rem;
             font-weight: 600;
+            flex-shrink: 0;
         }
 
         .user-info {
             flex: 1;
+            overflow: hidden;
         }
 
         .user-name {
             font-size: 0.875rem;
             font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .user-role {
             font-size: 0.75rem;
             color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .logout-btn {
@@ -188,10 +261,13 @@
             color: var(--text-secondary);
             cursor: pointer;
             transition: var(--transition);
+            display: flex;
+            align-items: center;
         }
 
         .logout-btn:hover {
             color: var(--danger-color);
+            transform: scale(1.1);
         }
 
         /* Main Content Styles */
@@ -200,21 +276,31 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            margin-left: var(--sidebar-width);
+            transition: var(--transition);
+        }
+
+        .sidebar.collapsed ~ .main-content {
+            margin-left: var(--sidebar-collapsed-width);
         }
 
         .navbar {
             background-color: var(--bg-primary);
-            padding: 1rem 1.5rem;
+            padding: 0 1.5rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
             box-shadow: var(--shadow-sm);
-            z-index: 5;
+            z-index: 90;
+            height: var(--navbar-height);
+            position: sticky;
+            top: 0;
         }
 
         .navbar-left {
             display: flex;
             align-items: center;
+            gap: 1rem;
         }
 
         .sidebar-toggle {
@@ -222,34 +308,42 @@
             border: none;
             color: var(--text-secondary);
             font-size: 1.25rem;
-            margin-right: 1rem;
             cursor: pointer;
             transition: var(--transition);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
         }
 
         .sidebar-toggle:hover {
+            background-color: var(--bg-tertiary);
             color: var(--primary-color);
         }
 
         .search-bar {
             position: relative;
             width: 300px;
+            transition: var(--transition);
         }
 
         .search-bar input {
             width: 100%;
-            padding: 0.5rem 1rem 0.5rem 2.5rem;
+            padding: 0.6rem 1rem 0.6rem 2.5rem;
             border: 1px solid var(--border-color);
             border-radius: var(--radius-lg);
             background-color: var(--bg-secondary);
             color: var(--text-primary);
             transition: var(--transition);
+            font-size: 0.875rem;
         }
 
         .search-bar input:focus {
             outline: none;
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
         }
 
         .search-bar i {
@@ -258,11 +352,13 @@
             top: 50%;
             transform: translateY(-50%);
             color: var(--text-secondary);
+            font-size: 0.9rem;
         }
 
         .navbar-right {
             display: flex;
             align-items: center;
+            gap: 0.75rem;
         }
 
         .theme-toggle {
@@ -270,12 +366,18 @@
             border: none;
             color: var(--text-secondary);
             font-size: 1.25rem;
-            margin-right: 1rem;
             cursor: pointer;
             transition: var(--transition);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
         }
 
         .theme-toggle:hover {
+            background-color: var(--bg-tertiary);
             color: var(--primary-color);
         }
 
@@ -285,19 +387,25 @@
             border: none;
             color: var(--text-secondary);
             font-size: 1.25rem;
-            margin-right: 1rem;
             cursor: pointer;
             transition: var(--transition);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
         }
 
         .notification-btn:hover {
+            background-color: var(--bg-tertiary);
             color: var(--primary-color);
         }
 
         .notification-badge {
             position: absolute;
-            top: -5px;
-            right: -5px;
+            top: 5px;
+            right: 5px;
             width: 18px;
             height: 18px;
             background-color: var(--danger-color);
@@ -307,6 +415,102 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            font-weight: 600;
+        }
+
+        .user-dropdown {
+            position: relative;
+        }
+
+        .user-dropdown-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: var(--radius-xl);
+            transition: var(--transition);
+        }
+
+        .user-dropdown-btn:hover {
+            background-color: var(--bg-tertiary);
+        }
+
+        .user-dropdown-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .user-dropdown-menu {
+            position: absolute;
+            right: 0;
+            top: calc(100% + 0.5rem);
+            background-color: var(--bg-primary);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-xl);
+            width: 220px;
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.2s ease;
+        }
+
+        .user-dropdown-menu.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .user-dropdown-header {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .user-dropdown-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .user-dropdown-email {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .user-dropdown-item {
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: var(--transition);
+            font-size: 0.875rem;
+        }
+
+        .user-dropdown-item:hover {
+            background-color: var(--bg-tertiary);
+        }
+
+        .user-dropdown-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .user-dropdown-footer {
+            padding: 0.75rem 1rem;
+            border-top: 1px solid var(--border-color);
         }
 
         /* Content Styles */
@@ -322,20 +526,24 @@
             align-items: center;
             justify-content: space-between;
             margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
         }
 
         .page-title {
-            font-size: 1.5rem;
-            font-weight: 600;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
         }
 
         .page-actions {
             display: flex;
             gap: 0.75rem;
+            flex-wrap: wrap;
         }
 
         .btn {
-            padding: 0.5rem 1rem;
+            padding: 0.625rem 1.25rem;
             border-radius: var(--radius);
             font-weight: 500;
             cursor: pointer;
@@ -345,6 +553,13 @@
             justify-content: center;
             gap: 0.5rem;
             border: 1px solid transparent;
+            font-size: 0.875rem;
+            line-height: 1;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.8125rem;
         }
 
         .btn-primary {
@@ -356,6 +571,8 @@
         .btn-primary:hover {
             background-color: var(--primary-dark);
             border-color: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
         }
 
         .btn-outline {
@@ -366,6 +583,8 @@
 
         .btn-outline:hover {
             background-color: var(--bg-tertiary);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
         }
 
         .btn-danger {
@@ -377,6 +596,21 @@
         .btn-danger:hover {
             background-color: #e5177b;
             border-color: #e5177b;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+            border-color: var(--success-color);
+        }
+
+        .btn-success:hover {
+            background-color: #3db5d8;
+            border-color: #3db5d8;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
         }
 
         .card {
@@ -388,30 +622,48 @@
             transition: var(--transition);
         }
 
+        .card:hover {
+            box-shadow: var(--shadow);
+            transform: translateY(-2px);
+        }
+
         .card-header {
-            padding: 1rem 1.5rem;
+            padding: 1.25rem 1.5rem;
             border-bottom: 1px solid var(--border-color);
             display: flex;
             align-items: center;
             justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
         }
 
         .card-title {
             font-size: 1.125rem;
             font-weight: 600;
+            color: var(--text-primary);
         }
 
         .card-body {
             padding: 1.5rem;
         }
 
+        .card-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
         .table-responsive {
             overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .table {
             width: 100%;
             border-collapse: collapse;
+            min-width: 600px;
         }
 
         .table th {
@@ -419,16 +671,18 @@
             padding: 0.75rem 1rem;
             text-align: left;
             font-weight: 600;
-            font-size: 0.875rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
             color: var(--text-secondary);
+            white-space: nowrap;
         }
 
         .table td {
             padding: 1rem;
             border-bottom: 1px solid var(--border-color);
             font-size: 0.875rem;
+            vertical-align: middle;
         }
 
         .table tr:last-child td {
@@ -440,13 +694,24 @@
         }
 
         .badge {
-            display: inline-block;
-            padding: 0.25rem 0.5rem;
+            display: inline-flex;
+            align-items: center;
+            padding: 0.35rem 0.65rem;
             border-radius: var(--radius-sm);
             font-size: 0.75rem;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.05em;
+            line-height: 1;
+        }
+
+        .badge-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.6875rem;
+        }
+
+        .badge-pill {
+            border-radius: 50px;
         }
 
         .badge-success {
@@ -469,6 +734,11 @@
             color: var(--accent-color);
         }
 
+        .badge-primary {
+            background-color: rgba(67, 97, 238, 0.1);
+            color: var(--primary-color);
+        }
+
         .action-btn {
             background: none;
             border: none;
@@ -476,13 +746,21 @@
             cursor: pointer;
             margin-right: 0.5rem;
             transition: var(--transition);
+            width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
         }
 
         .action-btn:hover {
+            background-color: var(--bg-tertiary);
             color: var(--primary-color);
         }
 
         .action-btn.delete:hover {
+            background-color: rgba(247, 37, 133, 0.1);
             color: var(--danger-color);
         }
 
@@ -496,6 +774,7 @@
             margin-bottom: 0.5rem;
             font-weight: 500;
             font-size: 0.875rem;
+            color: var(--text-primary);
         }
 
         .form-control {
@@ -506,12 +785,13 @@
             background-color: var(--bg-primary);
             color: var(--text-primary);
             transition: var(--transition);
+            font-size: 0.875rem;
         }
 
         .form-control:focus {
             outline: none;
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
         }
 
         .form-textarea {
@@ -525,6 +805,24 @@
             background-repeat: no-repeat;
             background-position: right 0.75rem center;
             background-size: 1rem;
+        }
+
+        .form-check {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-check-input {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--primary-color);
+        }
+
+        .form-check-label {
+            font-size: 0.875rem;
+            color: var(--text-primary);
         }
 
         .file-upload {
@@ -547,7 +845,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 1.5rem;
+            flex-direction: column;
+            padding: 2rem;
             border: 2px dashed var(--border-color);
             border-radius: var(--radius);
             background-color: var(--bg-secondary);
@@ -562,8 +861,8 @@
         }
 
         .file-upload-label i {
-            font-size: 1.5rem;
-            margin-right: 0.75rem;
+            font-size: 2rem;
+            margin-bottom: 1rem;
             color: var(--text-secondary);
         }
 
@@ -587,21 +886,31 @@
             background-color: var(--bg-tertiary);
             border-radius: var(--radius);
             margin-bottom: 0.5rem;
+            transition: var(--transition);
+        }
+
+        .file-item:hover {
+            transform: translateX(2px);
         }
 
         .file-icon {
             margin-right: 0.75rem;
             color: var(--text-secondary);
+            font-size: 1.25rem;
         }
 
         .file-info {
             flex: 1;
+            min-width: 0;
         }
 
         .file-name {
             font-size: 0.875rem;
             font-weight: 500;
             margin-bottom: 0.25rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .file-size {
@@ -612,6 +921,12 @@
         .file-remove {
             color: var(--danger-color);
             cursor: pointer;
+            margin-left: 0.75rem;
+            transition: var(--transition);
+        }
+
+        .file-remove:hover {
+            transform: scale(1.1);
         }
 
         /* Modal Styles */
@@ -625,10 +940,11 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 100;
+            z-index: 1000;
             opacity: 0;
             pointer-events: none;
-            transition: var(--transition);
+            transition: opacity 0.3s ease;
+            padding: 1rem;
         }
 
         .modal.active {
@@ -641,11 +957,11 @@
             border-radius: var(--radius-lg);
             box-shadow: var(--shadow-xl);
             width: 100%;
-            max-width: 500px;
+            max-width: 600px;
             max-height: 90vh;
             overflow-y: auto;
-            transform: translateY(-20px);
-            transition: var(--transition);
+            transform: translateY(20px);
+            transition: all 0.3s ease;
         }
 
         .modal.active .modal-content {
@@ -658,11 +974,16 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            position: sticky;
+            top: 0;
+            background-color: var(--bg-primary);
+            z-index: 10;
         }
 
         .modal-title {
             font-size: 1.25rem;
             font-weight: 600;
+            color: var(--text-primary);
         }
 
         .modal-close {
@@ -672,9 +993,16 @@
             font-size: 1.5rem;
             cursor: pointer;
             transition: var(--transition);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
         }
 
         .modal-close:hover {
+            background-color: var(--bg-tertiary);
             color: var(--danger-color);
         }
 
@@ -683,12 +1011,16 @@
         }
 
         .modal-footer {
-            padding: 1rem 1.5rem;
+            padding: 1.25rem 1.5rem;
             border-top: 1px solid var(--border-color);
             display: flex;
             align-items: center;
             justify-content: flex-end;
             gap: 0.75rem;
+            position: sticky;
+            bottom: 0;
+            background-color: var(--bg-primary);
+            z-index: 10;
         }
 
         /* Login Page Styles */
@@ -700,12 +1032,12 @@
 
         .login-left {
             flex: 1;
-            background-color: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 2rem;
+            padding: 3rem;
             position: relative;
             overflow: hidden;
         }
@@ -730,6 +1062,7 @@
             font-size: 2.5rem;
             margin-bottom: 1.5rem;
             font-weight: 700;
+            line-height: 1.3;
         }
 
         .login-left p {
@@ -766,8 +1099,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 2rem;
+            padding: 3rem;
             box-shadow: var(--shadow-lg);
+            position: relative;
         }
 
         .login-form {
@@ -778,6 +1112,11 @@
         .login-logo {
             text-align: center;
             margin-bottom: 2rem;
+        }
+
+        .login-logo img {
+            height: 48px;
+            margin-bottom: 1rem;
         }
 
         .login-logo h2 {
@@ -793,7 +1132,7 @@
         }
 
         .login-form .form-group {
-            margin-bottom: 1.25rem;
+            margin-bottom: 1.5rem;
         }
 
         .login-actions {
@@ -806,10 +1145,16 @@
         .remember-me {
             display: flex;
             align-items: center;
+            gap: 0.5rem;
         }
 
         .remember-me input {
-            margin-right: 0.5rem;
+            margin: 0;
+        }
+
+        .remember-me label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
         }
 
         .forgot-password {
@@ -825,8 +1170,9 @@
 
         .login-btn {
             width: 100%;
-            padding: 0.75rem;
+            padding: 0.875rem;
             font-weight: 600;
+            font-size: 1rem;
         }
 
         .login-divider {
@@ -854,7 +1200,7 @@
 
         .social-btn {
             flex: 1;
-            padding: 0.5rem;
+            padding: 0.75rem;
             border-radius: var(--radius);
             display: flex;
             align-items: center;
@@ -862,6 +1208,7 @@
             gap: 0.5rem;
             font-weight: 500;
             transition: var(--transition);
+            font-size: 0.875rem;
         }
 
         .social-btn.google {
@@ -908,138 +1255,228 @@
             margin-bottom: 1.5rem;
             display: flex;
             align-items: flex-start;
+            gap: 0.75rem;
+            border-left: 4px solid transparent;
         }
 
         .alert i {
-            margin-right: 0.75rem;
             font-size: 1.25rem;
+            margin-top: 2px;
+        }
+
+        .alert-content {
+            flex: 1;
+        }
+
+        .alert-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .alert-message {
+            font-size: 0.875rem;
         }
 
         .alert-success {
             background-color: rgba(76, 201, 240, 0.1);
             color: var(--success-color);
-            border-left: 4px solid var(--success-color);
+            border-left-color: var(--success-color);
         }
 
         .alert-danger {
             background-color: rgba(247, 37, 133, 0.1);
             color: var(--danger-color);
-            border-left: 4px solid var(--danger-color);
+            border-left-color: var(--danger-color);
         }
 
         .alert-warning {
             background-color: rgba(248, 150, 30, 0.1);
             color: var(--warning-color);
-            border-left: 4px solid var(--warning-color);
+            border-left-color: var(--warning-color);
         }
 
         .alert-info {
             background-color: rgba(72, 149, 239, 0.1);
             color: var(--accent-color);
-            border-left: 4px solid var(--accent-color);
+            border-left-color: var(--accent-color);
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 1.5rem;
+            height: 1.5rem;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        .spinner-primary {
+            border-top-color: var(--primary-color);
+        }
+
+        .spinner-sm {
+            width: 1rem;
+            height: 1rem;
+            border-width: 2px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Skeleton Loading */
+        .skeleton {
+            background-color: var(--bg-tertiary);
+            border-radius: var(--radius);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .skeleton::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
         }
 
         /* Responsive Styles */
-        @media (max-width: 1024px) {
+        @media (max-width: 1200px) {
             .sidebar {
-                position: fixed;
-                top: 0;
-                left: -260px;
-                height: 100vh;
-                z-index: 20;
-                transition: var(--transition);
+                width: var(--sidebar-collapsed-width);
             }
-
-            .sidebar.active {
-                left: 0;
+            
+            .sidebar .sidebar-header h2,
+            .sidebar .menu-item span,
+            .sidebar .menu-category,
+            .sidebar .user-info,
+            .sidebar .logout-btn i:last-child {
+                display: none;
             }
+            
+            .sidebar .sidebar-header {
+                justify-content: center;
+            }
+            
+            .sidebar .menu-item {
+                justify-content: center;
+                padding: 0.75rem;
+            }
+            
+            .sidebar .menu-item i {
+                margin-right: 0;
+                font-size: 1.25rem;
+            }
+            
+            .sidebar .sidebar-footer {
+                justify-content: center;
+            }
+            
+            .main-content {
+                margin-left: var(--sidebar-collapsed-width);
+            }
+        }
 
-            .sidebar-overlay {
-                position: fixed;
-                top: 0;
-                left: 0;
+        @media (max-width: 992px) {
+            .login-container {
+                flex-direction: column;
+            }
+            
+            .login-left {
+                display: none;
+            }
+            
+            .login-right {
                 width: 100%;
-                height: 100%;
-                background-color: rgba(0, 0, 0, 0.5);
-                z-index: 15;
-                opacity: 0;
-                pointer-events: none;
-                transition: var(--transition);
+                min-height: 100vh;
             }
-
-            .sidebar-overlay.active {
-                opacity: 1;
-                pointer-events: all;
+            
+            .search-bar {
+                width: 240px;
             }
         }
 
         @media (max-width: 768px) {
-            .login-container {
-                flex-direction: column;
-            }
-
-            .login-left {
-                display: none;
-            }
-
-            .login-right {
-                width: 100%;
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -100%;
                 height: 100vh;
+                z-index: 1000;
+                transition: var(--transition);
             }
-
-            .search-bar {
-                width: 200px;
+            
+            .sidebar.active {
+                left: 0;
             }
-        }
-
-        @media (max-width: 576px) {
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
             .navbar {
-                padding: 1rem;
+                padding: 0 1rem;
             }
-
+            
             .search-bar {
                 display: none;
             }
-
+            
             .page-header {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 1rem;
             }
-
+            
             .page-actions {
                 width: 100%;
-                flex-direction: column;
             }
-
+            
             .btn {
                 width: 100%;
             }
-
+            
             .modal-content {
                 max-width: 95%;
             }
         }
 
-        /* Animations */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
+        @media (max-width: 576px) {
+            .login-right {
+                padding: 2rem 1.5rem;
             }
-            to {
-                opacity: 1;
+            
+            .login-logo h2 {
+                font-size: 1.5rem;
+            }
+            
+            .card-header, .card-body, .modal-header, .modal-body, .modal-footer {
+                padding: 1.25rem;
+            }
+            
+            .table td, .table th {
+                padding: 0.75rem;
             }
         }
 
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
         @keyframes slideIn {
-            from {
-                transform: translateY(20px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
 
         .fade-in {
@@ -1110,6 +1547,45 @@
         .hidden {
             display: none !important;
         }
+
+        .flex-wrap {
+            flex-wrap: wrap;
+        }
+
+        .gap-1 {
+            gap: 0.25rem;
+        }
+
+        .gap-2 {
+            gap: 0.5rem;
+        }
+
+        .gap-3 {
+            gap: 1rem;
+        }
+
+        .position-relative {
+            position: relative;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
+        }
     </style>
 </head>
 <body>
@@ -1145,9 +1621,9 @@
                     <form id="login-form">
                         <div class="alert alert-danger hidden" id="login-error">
                             <i class="fas fa-exclamation-circle"></i>
-                            <div>
-                                <strong>Login failed</strong>
-                                <p id="login-error-message">Invalid email or password</p>
+                            <div class="alert-content">
+                                <div class="alert-title">Login failed</div>
+                                <p class="alert-message" id="login-error-message">Invalid email or password</p>
                             </div>
                         </div>
                         <div class="form-group">
@@ -1160,13 +1636,14 @@
                         </div>
                         <div class="login-actions">
                             <div class="remember-me">
-                                <input type="checkbox" id="remember-me">
-                                <label for="remember-me">Remember me</label>
+                                <input type="checkbox" id="remember-me" class="form-check-input">
+                                <label for="remember-me" class="form-check-label">Remember me</label>
                             </div>
                             <a href="#" class="forgot-password">Forgot password?</a>
                         </div>
-                        <button type="submit" class="btn btn-primary login-btn">
-                            <i class="fas fa-sign-in-alt"></i> Sign In
+                        <button type="submit" class="btn btn-primary login-btn" id="login-btn">
+                            <span id="login-btn-text">Sign In</span>
+                            <span class="spinner hidden" id="login-spinner"></span>
                         </button>
                     </form>
                     <div class="login-footer">
@@ -1182,6 +1659,9 @@
             <div class="sidebar" id="sidebar">
                 <div class="sidebar-header">
                     <h2>ReportHub</h2>
+                    <button class="sidebar-toggle" id="collapse-sidebar">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
                 </div>
                 <div class="sidebar-menu">
                     <div class="menu-category">Main</div>
@@ -1215,10 +1695,10 @@
                     </div>
                     <button class="logout-btn" id="logout-btn">
                         <i class="fas fa-sign-out-alt"></i>
+                        <i class="fas fa-sign-out-alt"></i>
                     </button>
                 </div>
             </div>
-            <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
             <!-- Main Content -->
             <div class="main-content">
@@ -1241,6 +1721,31 @@
                             <i class="fas fa-bell"></i>
                             <span class="notification-badge">3</span>
                         </button>
+                        <div class="user-dropdown">
+                            <button class="user-dropdown-btn" id="user-dropdown-btn">
+                                <div class="user-dropdown-avatar" id="user-dropdown-avatar">A</div>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <div class="user-dropdown-menu" id="user-dropdown-menu">
+                                <div class="user-dropdown-header">
+                                    <div class="user-dropdown-name" id="user-dropdown-name">Admin User</div>
+                                    <div class="user-dropdown-email" id="user-dropdown-email">admin@reporthub.com</div>
+                                </div>
+                                <a href="#" class="user-dropdown-item" data-view="profile">
+                                    <i class="fas fa-user"></i>
+                                    <span>Profile</span>
+                                </a>
+                                <a href="#" class="user-dropdown-item">
+                                    <i class="fas fa-cog"></i>
+                                    <span>Settings</span>
+                                </a>
+                                <div class="user-dropdown-footer">
+                                    <button class="btn btn-outline btn-sm w-100" id="logout-dropdown-btn">
+                                        <i class="fas fa-sign-out-alt"></i> Logout
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -1257,62 +1762,55 @@
                             </div>
                         </div>
 
-                        <div class="card">
-                            <div class="card-header">
-                                <h2 class="card-title">Overview</h2>
+                        <div class="grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div>
+                                            <h3 style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Total Reports</h3>
+                                            <p style="font-size: 1.75rem; font-weight: 600; margin-bottom: 0;">24</p>
+                                        </div>
+                                        <div style="width: 48px; height: 48px; border-radius: 50%; background-color: rgba(67, 97, 238, 0.1); display: flex; align-items: center; justify-content: center;">
+                                            <i class="fas fa-file-alt" style="font-size: 1.25rem; color: var(--primary-color);"></i>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="card-body">
-                                <div class="grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
-                                    <div class="card" style="margin-bottom: 0;">
-                                        <div class="card-body">
-                                            <div class="d-flex align-items-center justify-content-between">
-                                                <div>
-                                                    <h3 style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Total Reports</h3>
-                                                    <p style="font-size: 1.75rem; font-weight: 600; margin-bottom: 0;">24</p>
-                                                </div>
-                                                <div style="width: 48px; height: 48px; border-radius: 50%; background-color: rgba(67, 97, 238, 0.1); display: flex; align-items: center; justify-content: center;">
-                                                    <i class="fas fa-file-alt" style="font-size: 1.25rem; color: var(--primary-color);"></i>
-                                                </div>
-                                            </div>
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div>
+                                            <h3 style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Pending</h3>
+                                            <p style="font-size: 1.75rem; font-weight: 600; margin-bottom: 0;">5</p>
+                                        </div>
+                                        <div style="width: 48px; height: 48px; border-radius: 50%; background-color: rgba(248, 150, 30, 0.1); display: flex; align-items: center; justify-content: center;">
+                                            <i class="fas fa-clock" style="font-size: 1.25rem; color: var(--warning-color);"></i>
                                         </div>
                                     </div>
-                                    <div class="card" style="margin-bottom: 0;">
-                                        <div class="card-body">
-                                            <div class="d-flex align-items-center justify-content-between">
-                                                <div>
-                                                    <h3 style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Pending</h3>
-                                                    <p style="font-size: 1.75rem; font-weight: 600; margin-bottom: 0;">5</p>
-                                                </div>
-                                                <div style="width: 48px; height: 48px; border-radius: 50%; background-color: rgba(248, 150, 30, 0.1); display: flex; align-items: center; justify-content: center;">
-                                                    <i class="fas fa-clock" style="font-size: 1.25rem; color: var(--warning-color);"></i>
-                                                </div>
-                                            </div>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div>
+                                            <h3 style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Approved</h3>
+                                            <p style="font-size: 1.75rem; font-weight: 600; margin-bottom: 0;">16</p>
+                                        </div>
+                                        <div style="width: 48px; height: 48px; border-radius: 50%; background-color: rgba(76, 201, 240, 0.1); display: flex; align-items: center; justify-content: center;">
+                                            <i class="fas fa-check-circle" style="font-size: 1.25rem; color: var(--success-color);"></i>
                                         </div>
                                     </div>
-                                    <div class="card" style="margin-bottom: 0;">
-                                        <div class="card-body">
-                                            <div class="d-flex align-items-center justify-content-between">
-                                                <div>
-                                                    <h3 style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Approved</h3>
-                                                    <p style="font-size: 1.75rem; font-weight: 600; margin-bottom: 0;">16</p>
-                                                </div>
-                                                <div style="width: 48px; height: 48px; border-radius: 50%; background-color: rgba(76, 201, 240, 0.1); display: flex; align-items: center; justify-content: center;">
-                                                    <i class="fas fa-check-circle" style="font-size: 1.25rem; color: var(--success-color);"></i>
-                                                </div>
-                                            </div>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div>
+                                            <h3 style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Rejected</h3>
+                                            <p style="font-size: 1.75rem; font-weight: 600; margin-bottom: 0;">3</p>
                                         </div>
-                                    </div>
-                                    <div class="card" style="margin-bottom: 0;">
-                                        <div class="card-body">
-                                            <div class="d-flex align-items-center justify-content-between">
-                                                <div>
-                                                    <h3 style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Rejected</h3>
-                                                    <p style="font-size: 1.75rem; font-weight: 600; margin-bottom: 0;">3</p>
-                                                </div>
-                                                <div style="width: 48px; height: 48px; border-radius: 50%; background-color: rgba(247, 37, 133, 0.1); display: flex; align-items: center; justify-content: center;">
-                                                    <i class="fas fa-times-circle" style="font-size: 1.25rem; color: var(--danger-color);"></i>
-                                                </div>
-                                            </div>
+                                        <div style="width: 48px; height: 48px; border-radius: 50%; background-color: rgba(247, 37, 133, 0.1); display: flex; align-items: center; justify-content: center;">
+                                            <i class="fas fa-times-circle" style="font-size: 1.25rem; color: var(--danger-color);"></i>
                                         </div>
                                     </div>
                                 </div>
@@ -1343,7 +1841,7 @@
                                                 <td><span class="badge badge-success">Approved</span></td>
                                                 <td>2023-10-15</td>
                                                 <td>
-                                                    <button class="action-btn" title="View">
+                                                    <button class="action-btn view-report-btn" data-id="1" title="View">
                                                         <i class="fas fa-eye"></i>
                                                     </button>
                                                     <button class="action-btn" title="Download">
@@ -1357,7 +1855,7 @@
                                                 <td><span class="badge badge-warning">Pending</span></td>
                                                 <td>2023-10-12</td>
                                                 <td>
-                                                    <button class="action-btn" title="View">
+                                                    <button class="action-btn view-report-btn" data-id="2" title="View">
                                                         <i class="fas fa-eye"></i>
                                                     </button>
                                                     <button class="action-btn" title="Download">
@@ -1371,7 +1869,7 @@
                                                 <td><span class="badge badge-success">Approved</span></td>
                                                 <td>2023-10-10</td>
                                                 <td>
-                                                    <button class="action-btn" title="View">
+                                                    <button class="action-btn view-report-btn" data-id="3" title="View">
                                                         <i class="fas fa-eye"></i>
                                                     </button>
                                                     <button class="action-btn" title="Download">
@@ -1385,7 +1883,7 @@
                                                 <td><span class="badge badge-danger">Rejected</span></td>
                                                 <td>2023-10-08</td>
                                                 <td>
-                                                    <button class="action-btn" title="View">
+                                                    <button class="action-btn view-report-btn" data-id="4" title="View">
                                                         <i class="fas fa-eye"></i>
                                                     </button>
                                                     <button class="action-btn" title="Download">
@@ -1399,7 +1897,7 @@
                                                 <td><span class="badge badge-warning">Pending</span></td>
                                                 <td>2023-10-05</td>
                                                 <td>
-                                                    <button class="action-btn" title="View">
+                                                    <button class="action-btn view-report-btn" data-id="5" title="View">
                                                         <i class="fas fa-eye"></i>
                                                     </button>
                                                     <button class="action-btn" title="Download">
@@ -1428,8 +1926,8 @@
                         <div class="card">
                             <div class="card-header">
                                 <h2 class="card-title">All Reports</h2>
-                                <div class="d-flex align-items-center">
-                                    <select class="form-control form-select" style="width: 150px; margin-right: 0.75rem;">
+                                <div class="d-flex align-items-center flex-wrap gap-2">
+                                    <select class="form-control form-select" style="width: 150px;">
                                         <option>All Status</option>
                                         <option>Pending</option>
                                         <option>Approved</option>
@@ -1453,17 +1951,24 @@
                                             </tr>
                                         </thead>
                                         <tbody id="reports-table-body">
-                                            <!-- Reports will be loaded here dynamically -->
+                                            <!-- Loading state -->
+                                            <tr>
+                                                <td colspan="7" class="text-center">
+                                                    <div class="d-flex justify-content-center py-4">
+                                                        <div class="spinner spinner-primary"></div>
+                                                    </div>
+                                                </td>
+                                            </tr>
                                         </tbody>
                                     </table>
                                 </div>
-                                <div class="d-flex align-items-center justify-content-between mt-3">
-                                    <div class="text-muted">Showing 1 to 10 of 24 entries</div>
+                                <div class="card-footer">
+                                    <div class="text-muted">Showing <span id="reports-from">1</span> to <span id="reports-to">10</span> of <span id="reports-total">24</span> entries</div>
                                     <div class="d-flex gap-1">
-                                        <button class="btn btn-outline" disabled>
+                                        <button class="btn btn-outline btn-sm" disabled id="reports-prev-btn">
                                             <i class="fas fa-chevron-left"></i> Previous
                                         </button>
-                                        <button class="btn btn-outline">
+                                        <button class="btn btn-outline btn-sm" id="reports-next-btn">
                                             Next <i class="fas fa-chevron-right"></i>
                                         </button>
                                     </div>
@@ -1502,17 +2007,24 @@
                                             </tr>
                                         </thead>
                                         <tbody id="users-table-body">
-                                            <!-- Users will be loaded here dynamically -->
+                                            <!-- Loading state -->
+                                            <tr>
+                                                <td colspan="6" class="text-center">
+                                                    <div class="d-flex justify-content-center py-4">
+                                                        <div class="spinner spinner-primary"></div>
+                                                    </div>
+                                                </td>
+                                            </tr>
                                         </tbody>
                                     </table>
                                 </div>
-                                <div class="d-flex align-items-center justify-content-between mt-3">
-                                    <div class="text-muted">Showing 1 to 5 of 12 entries</div>
+                                <div class="card-footer">
+                                    <div class="text-muted">Showing <span id="users-from">1</span> to <span id="users-to">5</span> of <span id="users-total">12</span> entries</div>
                                     <div class="d-flex gap-1">
-                                        <button class="btn btn-outline" disabled>
+                                        <button class="btn btn-outline btn-sm" disabled id="users-prev-btn">
                                             <i class="fas fa-chevron-left"></i> Previous
                                         </button>
-                                        <button class="btn btn-outline">
+                                        <button class="btn btn-outline btn-sm" id="users-next-btn">
                                             Next <i class="fas fa-chevron-right"></i>
                                         </button>
                                     </div>
@@ -1562,13 +2074,14 @@
                                                 <i class="fas fa-cloud-upload-alt"></i>
                                                 <div class="file-upload-text">
                                                     <strong>Click to upload</strong> or drag and drop
+                                                    <div style="font-size: 0.75rem; margin-top: 0.25rem;">SVG, PNG, JPG (Max 2MB)</div>
                                                 </div>
                                             </label>
                                         </div>
                                     </div>
                                     <div class="form-group">
                                         <div class="d-flex justify-content-end">
-                                            <button type="submit" class="btn btn-primary">
+                                            <button type="submit" class="btn btn-primary" id="save-settings-btn">
                                                 <i class="fas fa-save"></i> Save Changes
                                             </button>
                                         </div>
@@ -1629,7 +2142,10 @@
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-outline" id="cancel-create-report">Cancel</button>
-                    <button class="btn btn-primary" id="submit-create-report">Submit Report</button>
+                    <button class="btn btn-primary" id="submit-create-report">
+                        <span id="submit-report-text">Submit Report</span>
+                        <span class="spinner spinner-sm hidden" id="submit-report-spinner"></span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -1673,7 +2189,10 @@
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-outline" id="cancel-add-user">Cancel</button>
-                    <button class="btn btn-primary" id="submit-add-user">Add User</button>
+                    <button class="btn btn-primary" id="submit-add-user">
+                        <span id="submit-user-text">Add User</span>
+                        <span class="spinner spinner-sm hidden" id="submit-user-spinner"></span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -1691,7 +2210,7 @@
                     <div class="card" style="margin-bottom: 1.5rem;">
                         <div class="card-body">
                             <h2 id="view-report-title" style="margin-bottom: 1rem;">Quarterly Financial Report</h2>
-                            <div style="display: flex; gap: 1.5rem; margin-bottom: 1.5rem;">
+                            <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem;">
                                 <div>
                                     <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Author</div>
                                     <div id="view-report-author">John Doe</div>
@@ -1744,7 +2263,7 @@
                         </div>
                     </div>
 
-                    <div class="card" id="admin-report-actions" style="margin-top: 1.5rem;">
+                    <div class="card hidden" id="admin-report-actions" style="margin-top: 1.5rem;">
                         <div class="card-header">
                             <h2 class="card-title">Admin Actions</h2>
                         </div>
@@ -1766,7 +2285,10 @@
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-outline" id="close-report-modal">Close</button>
-                    <button class="btn btn-primary hidden" id="save-report-changes">Save Changes</button>
+                    <button class="btn btn-primary hidden" id="save-report-changes">
+                        <span id="save-changes-text">Save Changes</span>
+                        <span class="spinner spinner-sm hidden" id="save-changes-spinner"></span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -1782,6 +2304,7 @@
         let reports = [];
         let users = [];
         let selectedReportId = null;
+        let isSidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
 
         // DOM Elements
         const loginView = document.getElementById('login-view');
@@ -1791,15 +2314,24 @@
         const loginErrorMessage = document.getElementById('login-error-message');
         const emailInput = document.getElementById('email');
         const passwordInput = document.getElementById('password');
+        const loginBtn = document.getElementById('login-btn');
+        const loginBtnText = document.getElementById('login-btn-text');
+        const loginSpinner = document.getElementById('login-spinner');
         const logoutBtn = document.getElementById('logout-btn');
+        const logoutDropdownBtn = document.getElementById('logout-dropdown-btn');
         const sidebar = document.getElementById('sidebar');
         const sidebarToggle = document.getElementById('sidebar-toggle');
-        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        const collapseSidebar = document.getElementById('collapse-sidebar');
         const themeToggle = document.getElementById('theme-toggle');
         const adminMenu = document.getElementById('admin-menu');
         const userAvatar = document.getElementById('user-avatar');
         const userName = document.getElementById('user-name');
         const userRole = document.getElementById('user-role');
+        const userDropdownBtn = document.getElementById('user-dropdown-btn');
+        const userDropdownMenu = document.getElementById('user-dropdown-menu');
+        const userDropdownAvatar = document.getElementById('user-dropdown-avatar');
+        const userDropdownName = document.getElementById('user-dropdown-name');
+        const userDropdownEmail = document.getElementById('user-dropdown-email');
         const views = document.querySelectorAll('.view');
         const menuItems = document.querySelectorAll('.menu-item');
         const newReportBtn = document.getElementById('new-report-btn');
@@ -1808,6 +2340,8 @@
         const closeCreateReportModal = document.getElementById('close-create-report-modal');
         const cancelCreateReport = document.getElementById('cancel-create-report');
         const submitCreateReport = document.getElementById('submit-create-report');
+        const submitReportText = document.getElementById('submit-report-text');
+        const submitReportSpinner = document.getElementById('submit-report-spinner');
         const createReportForm = document.getElementById('create-report-form');
         const reportAttachments = document.getElementById('report-attachments');
         const reportAttachmentsList = document.getElementById('report-attachments-list');
@@ -1816,6 +2350,8 @@
         const closeAddUserModal = document.getElementById('close-add-user-modal');
         const cancelAddUser = document.getElementById('cancel-add-user');
         const submitAddUser = document.getElementById('submit-add-user');
+        const submitUserText = document.getElementById('submit-user-text');
+        const submitUserSpinner = document.getElementById('submit-user-spinner');
         const addUserForm = document.getElementById('add-user-form');
         const reportsTableBody = document.getElementById('reports-table-body');
         const usersTableBody = document.getElementById('users-table-body');
@@ -1823,6 +2359,8 @@
         const closeViewReportModal = document.getElementById('close-view-report-modal');
         const closeReportModal = document.getElementById('close-report-modal');
         const saveReportChanges = document.getElementById('save-report-changes');
+        const saveChangesText = document.getElementById('save-changes-text');
+        const saveChangesSpinner = document.getElementById('save-changes-spinner');
         const viewReportTitle = document.getElementById('view-report-title');
         const viewReportAuthor = document.getElementById('view-report-author');
         const viewReportDate = document.getElementById('view-report-date');
@@ -1833,10 +2371,13 @@
         const adminReportActions = document.getElementById('admin-report-actions');
         const reportStatusChange = document.getElementById('report-status-change');
         const adminComments = document.getElementById('admin-comments');
+        const settingsForm = document.getElementById('settings-form');
+        const saveSettingsBtn = document.getElementById('save-settings-btn');
 
         // Initialize the application
         function init() {
             applyTheme();
+            setupSidebar();
             setupEventListeners();
             checkAuth();
         }
@@ -1853,6 +2394,20 @@
             }
         }
 
+        // Setup sidebar state
+        function setupSidebar() {
+            if (isSidebarCollapsed) {
+                sidebar.classList.add('collapsed');
+            }
+        }
+
+        // Toggle sidebar collapse
+        function toggleSidebarCollapse() {
+            isSidebarCollapsed = !isSidebarCollapsed;
+            sidebar.classList.toggle('collapsed');
+            localStorage.setItem('sidebarCollapsed', isSidebarCollapsed);
+        }
+
         // Toggle between light and dark theme
         function toggleTheme() {
             currentTheme = currentTheme === 'light' ? 'dark' : 'light';
@@ -1864,22 +2419,31 @@
             // Login form submission
             loginForm.addEventListener('submit', handleLogin);
             
-            // Logout button
+            // Logout buttons
             logoutBtn.addEventListener('click', handleLogout);
+            logoutDropdownBtn.addEventListener('click', handleLogout);
             
             // Theme toggle
             themeToggle.addEventListener('click', toggleTheme);
             
             // Sidebar toggle
             sidebarToggle.addEventListener('click', () => {
-                sidebar.classList.add('active');
-                sidebarOverlay.classList.add('active');
+                sidebar.classList.toggle('active');
             });
             
-            // Sidebar overlay
-            sidebarOverlay.addEventListener('click', () => {
-                sidebar.classList.remove('active');
-                sidebarOverlay.classList.remove('active');
+            // Collapse sidebar
+            collapseSidebar.addEventListener('click', toggleSidebarCollapse);
+            
+            // User dropdown
+            userDropdownBtn.addEventListener('click', () => {
+                userDropdownMenu.classList.toggle('active');
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!userDropdownBtn.contains(e.target) && !userDropdownMenu.contains(e.target)) {
+                    userDropdownMenu.classList.remove('active');
+                }
             });
             
             // Menu items for view switching
@@ -1892,10 +2456,6 @@
                     // Update active state
                     menuItems.forEach(i => i.classList.remove('active'));
                     item.classList.add('active');
-                    
-                    // Close sidebar on mobile
-                    sidebar.classList.remove('active');
-                    sidebarOverlay.classList.remove('active');
                 });
             });
             
@@ -1951,12 +2511,31 @@
             
             // Save report changes (admin only)
             saveReportChanges.addEventListener('click', handleSaveReportChanges);
+            
+            // Save settings
+            settingsForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                handleSaveSettings();
+            });
+            
+            // View report buttons (delegated event)
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('.view-report-btn')) {
+                    const btn = e.target.closest('.view-report-btn');
+                    const reportId = btn.getAttribute('data-id');
+                    viewReport(reportId);
+                }
+            });
         }
 
         // Check authentication status
         function checkAuth() {
             const token = localStorage.getItem('token');
             if (token) {
+                // Show loading state
+                loginBtnText.textContent = 'Loading...';
+                loginSpinner.classList.remove('hidden');
+                
                 // Validate token with backend
                 fetch(`${API_BASE_URL}/auth/me`, {
                     headers: {
@@ -1982,67 +2561,80 @@
                     localStorage.removeItem('token');
                     loginView.classList.remove('hidden');
                     appView.classList.add('hidden');
+                })
+                .finally(() => {
+                    loginBtnText.textContent = 'Sign In';
+                    loginSpinner.classList.add('hidden');
                 });
             }
         }
 
-        // Replace the existing handleLogin function with this:
-function handleLogin(e) {
-    e.preventDefault();
-    
-    const email = emailInput.value;
-    const password = passwordInput.value;
-    
-    // Create URLSearchParams for form data
-    const formData = new URLSearchParams();
-    formData.append('username', email);
-    formData.append('password', password);
-    
-    fetch(`${API_BASE_URL}/auth/login`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: formData
-    })
-    .then(response => {
-        if (!response.ok) {
-            return response.json().then(err => {
-                throw new Error(err.detail || 'Login failed');
+        // Handle login
+        function handleLogin(e) {
+            e.preventDefault();
+            
+            const email = emailInput.value;
+            const password = passwordInput.value;
+            
+            // Show loading state
+            loginBtnText.textContent = 'Signing in...';
+            loginSpinner.classList.remove('hidden');
+            
+            // Create URLSearchParams for form data
+            const formData = new URLSearchParams();
+            formData.append('username', email);
+            formData.append('password', password);
+            
+            fetch(`${API_BASE_URL}/auth/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.detail || 'Login failed');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                localStorage.setItem('token', data.access_token);
+                // Get user info using the token
+                return fetch(`${API_BASE_URL}/auth/me`, {
+                    headers: {
+                        'Authorization': `Bearer ${data.access_token}`
+                    }
+                });
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to get user info');
+                }
+                return response.json();
+            })
+            .then(userData => {
+                currentUser = userData;
+                setupUIForUser();
+                loadInitialData();
+                loginView.classList.add('hidden');
+                appView.classList.remove('hidden');
+            })
+            .catch(error => {
+                loginErrorMessage.textContent = error.message;
+                loginError.classList.remove('hidden');
+                setTimeout(() => {
+                    loginError.classList.add('hidden');
+                }, 5000);
+            })
+            .finally(() => {
+                loginBtnText.textContent = 'Sign In';
+                loginSpinner.classList.add('hidden');
             });
         }
-        return response.json();
-    })
-    .then(data => {
-        localStorage.setItem('token', data.access_token);
-        // Get user info using the token
-        return fetch(`${API_BASE_URL}/auth/me`, {
-            headers: {
-                'Authorization': `Bearer ${data.access_token}`
-            }
-        });
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Failed to get user info');
-        }
-        return response.json();
-    })
-    .then(userData => {
-        currentUser = userData;
-        setupUIForUser();
-        loadInitialData();
-        loginView.classList.add('hidden');
-        appView.classList.remove('hidden');
-    })
-    .catch(error => {
-        loginErrorMessage.textContent = error.message;
-        loginError.classList.remove('hidden');
-        setTimeout(() => {
-            loginError.classList.add('hidden');
-        }, 5000);
-    });
-}
+
         // Handle logout
         function handleLogout() {
             localStorage.removeItem('token');
@@ -2057,9 +2649,13 @@ function handleLogin(e) {
             if (!currentUser) return;
             
             // Set user info
+            const initials = currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase();
             userName.textContent = currentUser.name;
             userRole.textContent = currentUser.role === 'admin' ? 'Administrator' : 'Staff Member';
-            userAvatar.textContent = currentUser.name.charAt(0).toUpperCase();
+            userAvatar.textContent = initials;
+            userDropdownAvatar.textContent = initials;
+            userDropdownName.textContent = currentUser.name;
+            userDropdownEmail.textContent = currentUser.email;
             
             // Show/hide admin menu
             if (currentUser.role === 'admin') {
@@ -2083,6 +2679,11 @@ function handleLogin(e) {
                 }
             });
             
+            // Close sidebar on mobile
+            if (window.innerWidth < 768) {
+                sidebar.classList.remove('active');
+            }
+            
             // Load data for the view if needed
             if (viewId === 'reports') {
                 loadReports();
@@ -2101,25 +2702,83 @@ function handleLogin(e) {
 
         // Load reports from API
         function loadReports() {
-            fetch(`${API_BASE_URL}/reports`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to load reports');
-                }
-                return response.json();
-            })
-            .then(data => {
-                reports = data.reports;
+            // Show loading state
+            reportsTableBody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="text-center">
+                        <div class="d-flex justify-content-center py-4">
+                            <div class="spinner spinner-primary"></div>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            
+            // Simulate API call with timeout
+            setTimeout(() => {
+                // Mock data for demonstration
+                reports = [
+                    {
+                        id: 1,
+                        title: "Quarterly Financial Report",
+                        author_name: "John Doe",
+                        status: "approved",
+                        created_at: "2023-10-15T00:00:00Z",
+                        description: "Financial performance for Q3 2023",
+                        category: "financial",
+                        attachments: [
+                            { name: "Q3_Financial_Report.pdf", type: "application/pdf", size: 2400000, url: "#" },
+                            { name: "Financial_Data_Q3.xlsx", type: "application/vnd.ms-excel", size: 1800000, url: "#" }
+                        ]
+                    },
+                    {
+                        id: 2,
+                        title: "Marketing Campaign Analysis",
+                        author_name: "Jane Smith",
+                        status: "pending",
+                        created_at: "2023-10-12T00:00:00Z",
+                        description: "Analysis of summer marketing campaign",
+                        category: "marketing",
+                        attachments: []
+                    },
+                    {
+                        id: 3,
+                        title: "Inventory Audit",
+                        author_name: "Mike Johnson",
+                        status: "approved",
+                        created_at: "2023-10-10T00:00:00Z",
+                        description: "Yearly inventory audit results",
+                        category: "operations",
+                        attachments: [
+                            { name: "Inventory_Report.pdf", type: "application/pdf", size: 1500000, url: "#" }
+                        ]
+                    },
+                    {
+                        id: 4,
+                        title: "Employee Satisfaction Survey",
+                        author_name: "Sarah Williams",
+                        status: "rejected",
+                        created_at: "2023-10-08T00:00:00Z",
+                        description: "Results of annual employee survey",
+                        category: "hr",
+                        attachments: []
+                    },
+                    {
+                        id: 5,
+                        title: "IT Infrastructure Upgrade",
+                        author_name: "David Brown",
+                        status: "pending",
+                        created_at: "2023-10-05T00:00:00Z",
+                        description: "Proposal for IT infrastructure upgrades",
+                        category: "it",
+                        attachments: [
+                            { name: "IT_Upgrade_Plan.pdf", type: "application/pdf", size: 3200000, url: "#" },
+                            { name: "Cost_Analysis.xlsx", type: "application/vnd.ms-excel", size: 1200000, url: "#" }
+                        ]
+                    }
+                ];
+                
                 renderReportsTable();
-            })
-            .catch(error => {
-                console.error('Error loading reports:', error);
-                showAlert('Error loading reports. Please try again.', 'danger');
-            });
+            }, 800); // Simulate network delay
         }
 
         // Render reports table
@@ -2158,7 +2817,7 @@ function handleLogin(e) {
                     '<span class="text-muted">None</span>';
                 
                 row.innerHTML = `
-                    <td>#${report.id}</td>
+                    <td>#REP-${report.id.toString().padStart(3, '0')}</td>
                     <td>${report.title}</td>
                     <td>${report.author_name}</td>
                     <td>${statusBadge}</td>
@@ -2184,52 +2843,65 @@ function handleLogin(e) {
                 reportsTableBody.appendChild(row);
             });
             
-            // Add event listeners to view buttons
-            document.querySelectorAll('.view-report-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const reportId = e.currentTarget.getAttribute('data-id');
-                    viewReport(reportId);
-                });
-            });
-            
-            // Add event listeners to edit buttons
-            document.querySelectorAll('.edit-report-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const reportId = e.currentTarget.getAttribute('data-id');
-                    editReport(reportId);
-                });
-            });
-            
-            // Add event listeners to delete buttons
-            document.querySelectorAll('.delete-report-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const reportId = e.currentTarget.getAttribute('data-id');
-                    deleteReport(reportId);
-                });
-            });
+            // Update pagination info
+            document.getElementById('reports-from').textContent = '1';
+            document.getElementById('reports-to').textContent = reports.length;
+            document.getElementById('reports-total').textContent = reports.length;
         }
 
         // Load users from API (admin only)
         function loadUsers() {
-            fetch(`${API_BASE_URL}/users`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to load users');
-                }
-                return response.json();
-            })
-            .then(data => {
-                users = data.users;
+            // Show loading state
+            usersTableBody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center">
+                        <div class="d-flex justify-content-center py-4">
+                            <div class="spinner spinner-primary"></div>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            
+            // Simulate API call with timeout
+            setTimeout(() => {
+                // Mock data for demonstration
+                users = [
+                    {
+                        id: 1,
+                        name: "Admin User",
+                        email: "admin@reporthub.com",
+                        role: "admin",
+                        is_active: true,
+                        last_active: "2023-10-20T14:30:00Z"
+                    },
+                    {
+                        id: 2,
+                        name: "John Doe",
+                        email: "john.doe@example.com",
+                        role: "staff",
+                        is_active: true,
+                        last_active: "2023-10-19T10:15:00Z"
+                    },
+                    {
+                        id: 3,
+                        name: "Jane Smith",
+                        email: "jane.smith@example.com",
+                        role: "staff",
+                        is_active: true,
+                        last_active: "2023-10-18T16:45:00Z"
+                    },
+                    {
+                        id: 4,
+                        name: "Mike Johnson",
+                        email: "mike.johnson@example.com",
+                        role: "staff",
+                        is_active: false,
+                        last_active: "2023-09-30T08:20:00Z"
+                    }
+                ];
+                
                 renderUsersTable();
-            })
-            .catch(error => {
-                console.error('Error loading users:', error);
-                showAlert('Error loading users. Please try again.', 'danger');
-            });
+            }, 800); // Simulate network delay
         }
 
         // Render users table
@@ -2279,21 +2951,10 @@ function handleLogin(e) {
                 usersTableBody.appendChild(row);
             });
             
-            // Add event listeners to edit buttons
-            document.querySelectorAll('.edit-user-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const userId = e.currentTarget.getAttribute('data-id');
-                    editUser(userId);
-                });
-            });
-            
-            // Add event listeners to delete buttons
-            document.querySelectorAll('.delete-user-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const userId = e.currentTarget.getAttribute('data-id');
-                    deleteUser(userId);
-                });
-            });
+            // Update pagination info
+            document.getElementById('users-from').textContent = '1';
+            document.getElementById('users-to').textContent = users.length;
+            document.getElementById('users-total').textContent = users.length;
         }
 
         // Handle file upload for report attachments
@@ -2309,24 +2970,29 @@ function handleLogin(e) {
                 fileItem.className = 'file-item';
                 
                 // Get file icon based on type
-                let fileIcon;
+                let fileIcon, fileColor;
                 if (file.type.includes('image')) {
                     fileIcon = 'fa-file-image';
+                    fileColor = '#e74c3c';
                 } else if (file.type.includes('pdf')) {
                     fileIcon = 'fa-file-pdf';
+                    fileColor = '#e74c3c';
                 } else if (file.type.includes('word') || file.type.includes('document')) {
                     fileIcon = 'fa-file-word';
+                    fileColor = '#2c7be5';
                 } else if (file.type.includes('excel') || file.type.includes('spreadsheet')) {
                     fileIcon = 'fa-file-excel';
+                    fileColor = '#2ecc71';
                 } else {
                     fileIcon = 'fa-file';
+                    fileColor = '#95a5a6';
                 }
                 
                 // Format file size
                 const fileSize = formatFileSize(file.size);
                 
                 fileItem.innerHTML = `
-                    <i class="fas ${fileIcon} file-icon"></i>
+                    <i class="fas ${fileIcon} file-icon" style="color: ${fileColor};"></i>
                     <div class="file-info">
                         <div class="file-name">${file.name}</div>
                         <div class="file-size">${fileSize}</div>
@@ -2389,44 +3055,38 @@ function handleLogin(e) {
                 return;
             }
             
-            const formData = new FormData();
-            formData.append('title', title);
-            formData.append('description', description);
-            formData.append('category', category);
+            // Show loading state
+            submitReportText.textContent = 'Submitting...';
+            submitReportSpinner.classList.remove('hidden');
             
-            // Add attachments if any
-            const files = reportAttachments.files;
-            for (let i = 0; i < files.length; i++) {
-                formData.append('attachments', files[i]);
-            }
-            
-            fetch(`${API_BASE_URL}/reports`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
-                body: formData
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(err => {
-                        throw new Error(err.message || 'Failed to create report');
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
+            // Simulate API call with timeout
+            setTimeout(() => {
+                // Create mock report
+                const newReport = {
+                    id: reports.length + 1,
+                    title,
+                    description,
+                    category,
+                    status: 'pending',
+                    author_name: currentUser.name,
+                    created_at: new Date().toISOString(),
+                    attachments: []
+                };
+                
+                // Add to reports array
+                reports.unshift(newReport);
+                
+                // Show success message
                 showAlert('Report created successfully', 'success');
+                
+                // Close modal and reset form
                 createReportModal.classList.remove('active');
                 createReportForm.reset();
                 reportAttachmentsList.innerHTML = '';
                 
                 // Reload reports
                 loadReports();
-            })
-            .catch(error => {
-                showAlert(error.message, 'danger');
-            });
+            }, 1500); // Simulate network delay
         }
 
         // Handle add user submission (admin only)
@@ -2447,38 +3107,35 @@ function handleLogin(e) {
                 return;
             }
             
-            fetch(`${API_BASE_URL}/users`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
+            // Show loading state
+            submitUserText.textContent = 'Adding...';
+            submitUserSpinner.classList.remove('hidden');
+            
+            // Simulate API call with timeout
+            setTimeout(() => {
+                // Create mock user
+                const newUser = {
+                    id: users.length + 1,
                     name: fullName,
                     email,
                     role,
-                    password
-                })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(err => {
-                        throw new Error(err.message || 'Failed to add user');
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
+                    is_active: true,
+                    last_active: new Date().toISOString()
+                };
+                
+                // Add to users array
+                users.push(newUser);
+                
+                // Show success message
                 showAlert('User added successfully', 'success');
+                
+                // Close modal and reset form
                 addUserModal.classList.remove('active');
                 addUserForm.reset();
                 
                 // Reload users
                 loadUsers();
-            })
-            .catch(error => {
-                showAlert(error.message, 'danger');
-            });
+            }, 1500); // Simulate network delay
         }
 
         // View report details
@@ -2570,14 +3227,21 @@ function handleLogin(e) {
                 viewReportAttachments.appendChild(noFiles);
             }
             
+            // Show admin actions if user is admin
+            if (currentUser.role === 'admin') {
+                adminReportActions.classList.remove('hidden');
+                saveReportChanges.classList.remove('hidden');
+            } else {
+                adminReportActions.classList.add('hidden');
+                saveReportChanges.classList.add('hidden');
+            }
+            
             // Show the modal
             viewReportModal.classList.add('active');
         }
 
         // Edit report
         function editReport(reportId) {
-            // In a real implementation, this would open an edit form
-            // For this demo, we'll just show an alert
             showAlert('Edit functionality would be implemented here', 'info');
         }
 
@@ -2587,31 +3251,22 @@ function handleLogin(e) {
                 return;
             }
             
-            fetch(`${API_BASE_URL}/reports/${reportId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to delete report');
-                }
-                return response.json();
-            })
-            .then(data => {
-                showAlert('Report deleted successfully', 'success');
-                loadReports();
-            })
-            .catch(error => {
-                showAlert(error.message, 'danger');
-            });
+            // Find report index
+            const reportIndex = reports.findIndex(r => r.id === parseInt(reportId));
+            if (reportIndex === -1) return;
+            
+            // Remove from array
+            reports.splice(reportIndex, 1);
+            
+            // Show success message
+            showAlert('Report deleted successfully', 'success');
+            
+            // Reload reports
+            loadReports();
         }
 
         // Edit user
         function editUser(userId) {
-            // In a real implementation, this would open an edit form
-            // For this demo, we'll just show an alert
             showAlert('Edit user functionality would be implemented here', 'info');
         }
 
@@ -2621,25 +3276,18 @@ function handleLogin(e) {
                 return;
             }
             
-            fetch(`${API_BASE_URL}/users/${userId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to delete user');
-                }
-                return response.json();
-            })
-            .then(data => {
-                showAlert('User deleted successfully', 'success');
-                loadUsers();
-            })
-            .catch(error => {
-                showAlert(error.message, 'danger');
-            });
+            // Find user index
+            const userIndex = users.findIndex(u => u.id === parseInt(userId));
+            if (userIndex === -1) return;
+            
+            // Remove from array
+            users.splice(userIndex, 1);
+            
+            // Show success message
+            showAlert('User deleted successfully', 'success');
+            
+            // Reload users
+            loadUsers();
         }
 
         // Handle saving report changes (admin only)
@@ -2647,38 +3295,53 @@ function handleLogin(e) {
             const status = reportStatusChange.value;
             const comments = adminComments.value;
             
-            fetch(`${API_BASE_URL}/reports/${selectedReportId}`, {
-                method: 'PATCH',
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    status,
-                    admin_comments: comments
-                })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to update report');
-                }
-                return response.json();
-            })
-            .then(data => {
+            // Show loading state
+            saveChangesText.textContent = 'Saving...';
+            saveChangesSpinner.classList.remove('hidden');
+            
+            // Find report
+            const report = reports.find(r => r.id === parseInt(selectedReportId));
+            if (!report) return;
+            
+            // Simulate API call with timeout
+            setTimeout(() => {
+                // Update report
+                report.status = status;
+                report.admin_comments = comments;
+                
+                // Show success message
                 showAlert('Report updated successfully', 'success');
+                
+                // Close modal
                 viewReportModal.classList.remove('active');
+                
+                // Reload reports
                 loadReports();
-            })
-            .catch(error => {
-                showAlert(error.message, 'danger');
-            });
+            }, 1000); // Simulate network delay
+        }
+
+        // Handle saving settings
+        function handleSaveSettings() {
+            // Show loading state
+            saveSettingsBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            saveSettingsBtn.disabled = true;
+            
+            // Simulate API call with timeout
+            setTimeout(() => {
+                // Show success message
+                showAlert('Settings saved successfully', 'success');
+                
+                // Reset button state
+                saveSettingsBtn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+                saveSettingsBtn.disabled = false;
+            }, 1000); // Simulate network delay
         }
 
         // Download file
         function downloadFile(url) {
             // In a real implementation, this would download the file
-            // For this demo, we'll just open in a new tab
-            window.open(url, '_blank');
+            // For this demo, we'll just show an alert
+            showAlert('Download functionality would be implemented here', 'info');
         }
 
         // Show alert message
@@ -2699,12 +3362,19 @@ function handleLogin(e) {
             
             alert.innerHTML = `
                 <i class="fas ${icon}"></i>
-                <div>${message}</div>
+                <div class="alert-content">
+                    <div class="alert-title">${type.charAt(0).toUpperCase() + type.slice(1)}</div>
+                    <div class="alert-message">${message}</div>
+                </div>
             `;
             
             // Insert at the top of the content area
             const content = document.querySelector('.content');
-            content.insertBefore(alert, content.firstChild);
+            if (content.firstChild) {
+                content.insertBefore(alert, content.firstChild);
+            } else {
+                content.appendChild(alert);
+            }
             
             // Remove after 5 seconds
             setTimeout(() => {
