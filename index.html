@@ -1586,140 +1586,6 @@
         ::-webkit-scrollbar-thumb:hover {
             background: var(--primary-dark);
         }
-        .notification-dropdown {
-            position: absolute;
-            right: 0;
-            top: calc(100% + 0.5rem);
-            background-color: var(--bg-primary);
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-xl);
-            width: 360px;
-            max-height: 500px;
-            overflow-y: auto;
-            z-index: 100;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-10px);
-            transition: all 0.2s ease;
-        }
-
-        .notification-dropdown.active {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-
-        .notification-header {
-            padding: 1rem;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: sticky;
-            top: 0;
-            background-color: var(--bg-primary);
-            z-index: 10;
-        }
-
-        .notification-title {
-            font-weight: 600;
-            font-size: 0.875rem;
-        }
-
-        .notification-clear {
-            color: var(--primary-color);
-            font-size: 0.75rem;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .notification-clear:hover {
-            text-decoration: underline;
-        }
-
-        .notification-item {
-            padding: 1rem;
-            border-bottom: 1px solid var(--border-color);
-            transition: var(--transition);
-            cursor: pointer;
-        }
-
-        .notification-item:hover {
-            background-color: var(--bg-tertiary);
-        }
-
-        .notification-item.unread {
-            background-color: rgba(67, 97, 238, 0.05);
-        }
-
-        .notification-content {
-            display: flex;
-            gap: 0.75rem;
-        }
-
-        .notification-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background-color: var(--bg-tertiary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            color: var(--primary-color);
-            font-size: 1rem;
-        }
-
-        .notification-details {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .notification-message {
-            font-size: 0.875rem;
-            margin-bottom: 0.25rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .notification-time {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-        }
-
-        .notification-footer {
-            padding: 0.75rem;
-            text-align: center;
-            font-size: 0.75rem;
-            color: var(--primary-color);
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .notification-footer:hover {
-            text-decoration: underline;
-        }
-
-        /* PDF download button */
-        .download-pdf-btn {
-            background-color: #e74c3c;
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: var(--radius);
-            cursor: pointer;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.875rem;
-        }
-
-        .download-pdf-btn:hover {
-            background-color: #c0392b;
-            transform: translateY(-1px);
-        }
     </style>
 </head>
 <body>
@@ -1851,56 +1717,10 @@
                         <button class="theme-toggle" id="theme-toggle">
                             <i class="fas fa-moon"></i>
                         </button>
-                        <div class="notification-container position-relative">
-            <button class="notification-btn" id="notification-btn">
-                <i class="fas fa-bell"></i>
-                <span class="notification-badge" id="notification-badge">3</span>
-            </button>
-            <div class="notification-dropdown" id="notification-dropdown">
-                <div class="notification-header">
-                    <div class="notification-title">Notifications</div>
-                    <div class="notification-clear" id="clear-notifications">Mark all as read</div>
-                </div>
-                <div class="notification-list" id="notification-list">
-                    <div class="notification-item unread">
-                        <div class="notification-content">
-                            <div class="notification-icon">
-                                <i class="fas fa-file-alt"></i>
-                            </div>
-                            <div class="notification-details">
-                                <div class="notification-message">Your report "Q3 Financial Summary" has been approved</div>
-                                <div class="notification-time">2 hours ago</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="notification-item unread">
-                        <div class="notification-content">
-                            <div class="notification-icon">
-                                <i class="fas fa-user-plus"></i>
-                            </div>
-                            <div class="notification-details">
-                                <div class="notification-message">New user "John Smith" has been added to the system</div>
-                                <div class="notification-time">1 day ago</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="notification-item">
-                        <div class="notification-content">
-                            <div class="notification-icon">
-                                <i class="fas fa-comment"></i>
-                            </div>
-                            <div class="notification-details">
-                                <div class="notification-message">Admin left a comment on your report "Marketing Analysis"</div>
-                                <div class="notification-time">3 days ago</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="notification-footer" id="view-all-notifications">
-                    View all notifications
-                </div>
-            </div>
-        </div>
+                        <button class="notification-btn">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-badge">3</span>
+                        </button>
                         <div class="user-dropdown">
                             <button class="user-dropdown-btn" id="user-dropdown-btn">
                                 <div class="user-dropdown-avatar" id="user-dropdown-avatar">A</div>
@@ -2380,15 +2200,12 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-        <button class="btn btn-outline" id="close-report-modal">Close</button>
-        <button class="download-pdf-btn" id="download-pdf-btn">
-            <i class="fas fa-file-pdf"></i> Download PDF
-        </button>
-        <button class="btn btn-primary hidden" id="save-report-changes">
-            <span id="save-changes-text">Save Changes</span>
-            <span class="spinner hidden" id="save-changes-spinner"></span>
-        </button>
-    </div>
+                    <button class="btn btn-outline" id="close-report-modal">Close</button>
+                    <button class="btn btn-primary hidden" id="save-report-changes">
+                        <span id="save-changes-text">Save Changes</span>
+                        <span class="spinner hidden" id="save-changes-spinner"></span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -2553,28 +2370,6 @@
             userDropdownBtn.addEventListener('click', () => {
                 userDropdownMenu.classList.toggle('active');
             });
-            notificationBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                notificationDropdown.classList.toggle('active');
-            });
-            document.addEventListener('click', (e) => {
-                if (!notificationBtn.contains(e.target) && !notificationDropdown.contains(e.target)) {
-                    notificationDropdown.classList.remove('active');
-                }
-            });
-            clearNotifications.addEventListener('click', () => {
-                document.querySelectorAll('.notification-item.unread').forEach(item => {
-                    item.classList.remove('unread');
-                });
-                notificationBadge.textContent = '0';
-                notificationDropdown.classList.remove('active');
-            });
-            viewAllNotifications.addEventListener('click', () => {
-                // In a real app, this would navigate to a notifications page
-                showAlert('View all notifications functionality would be implemented here', 'info');
-                notificationDropdown.classList.remove('active');
-            });
-            downloadPdfBtn.addEventListener('click', generateReportPdf);
             
             // Close dropdown when clicking outside
             document.addEventListener('click', (e) => {
@@ -3398,81 +3193,79 @@
             });
         }
 
-        async function handleAddUser() {
-            const fullName = document.getElementById('user-fullname').value;
-            const email = document.getElementById('user-email').value;
-            const role = document.getElementById('user-role').value;
-            const password = document.getElementById('user-password').value;
-            const confirmPassword = document.getElementById('user-confirm-password').value;
-            
-            // Validate all fields are filled
-            if (!fullName || !email || !role || !password || !confirmPassword) {
-                showAlert('Please fill in all required fields', 'danger');
-                return;
-            }
-            
-            // Validate password match
-            if (password !== confirmPassword) {
-                showAlert('Passwords do not match', 'danger');
-                return;
-            }
-            
-            // Validate password complexity
-            if (password.length < 8 || 
-                !/[A-Z]/.test(password) || 
-                !/[a-z]/.test(password) || 
-                !/[0-9]/.test(password) || 
-                !/[!@#$%^&*()_+]/.test(password)) {
-                showAlert('Password must be at least 8 characters long and contain uppercase, lowercase, number, and special character', 'danger');
-                return;
-            }
-            
-            // Show loading state
-            submitUserText.textContent = 'Adding...';
-            submitUserSpinner.classList.remove('hidden');
-            
-            try {
-                const userData = {
-                    name: fullName,
-                    email: email,
-                    role: role,
-                    password: password
-                };
-                
-                const response = await fetch(`${API_BASE_URL}/users`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(userData)
-                });
-                
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.detail || 'Failed to add user');
-                }
-                
-                const user = await response.json();
-                
-                // Show success message
-                showAlert('User added successfully', 'success');
-                
-                // Close modal and reset form
-                addUserModal.classList.remove('active');
-                addUserForm.reset();
-                
-                // Reload users
-                loadUsers();
-            } catch (error) {
-                console.error('Error adding user:', error);
-                showAlert(error.message, 'danger');
-            } finally {
-                submitUserText.textContent = 'Add User';
-                submitUserSpinner.classList.add('hidden');
-            }
+        // Handle add user submission (admin only)
+        // Handle add user submission (admin only)
+function handleAddUser() {
+    const fullName = document.getElementById('user-fullname').value.trim();
+    const email = document.getElementById('user-email').value.trim();
+    const role = document.getElementById('user-role').value;
+    const password = document.getElementById('user-password').value;
+    const confirmPassword = document.getElementById('user-confirm-password').value;
+    
+    // Validate all fields are filled
+    if (!fullName || !email || !role || !password || !confirmPassword) {
+        showAlert('Please fill in all required fields', 'danger');
+        return;
+    }
+    
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        showAlert('Please enter a valid email address', 'danger');
+        return;
+    }
+    
+    if (password !== confirmPassword) {
+        showAlert('Passwords do not match', 'danger');
+        return;
+    }
+    
+    // Show loading state
+    submitUserText.textContent = 'Adding...';
+    submitUserSpinner.classList.remove('hidden');
+    
+    const userData = {
+        name: fullName,
+        email: email,
+        role: role,
+        password: password
+    };
+    
+    fetch(`${API_BASE_URL}/users`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(userData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => {
+                throw new Error(err.detail || 'Failed to add user');
+            });
         }
-
+        return response.json();
+    })
+    .then(user => {
+        // Show success message
+        showAlert('User added successfully', 'success');
+        
+        // Close modal and reset form
+        addUserModal.classList.remove('active');
+        addUserForm.reset();
+        
+        // Reload users
+        loadUsers();
+    })
+    .catch(error => {
+        showAlert(error.message, 'danger');
+    })
+    .finally(() => {
+        submitUserText.textContent = 'Add User';
+        submitUserSpinner.classList.add('hidden');
+    });
+}
         // View report details
         function viewReport(reportId) {
             fetch(`${API_BASE_URL}/reports/${reportId}`, {
@@ -3584,71 +3377,6 @@
                 console.error('Error viewing report:', error);
                 showAlert('Failed to load report details', 'danger');
             });
-            viewReportAttachments.innerHTML = '';
-                if (report.attachments && report.attachments.length > 0) {
-                    report.attachments.forEach(attachment => {
-                        const fileItem = document.createElement('div');
-                        fileItem.className = 'file-item';
-                        
-                        // Get file icon based on type
-                        let fileIcon, fileColor;
-                        if (attachment.type.includes('image')) {
-                            fileIcon = 'fa-file-image';
-                            fileColor = '#e74c3c';
-                        } else if (attachment.type.includes('pdf')) {
-                            fileIcon = 'fa-file-pdf';
-                            fileColor = '#e74c3c';
-                        } else if (attachment.type.includes('word') || attachment.type.includes('document')) {
-                            fileIcon = 'fa-file-word';
-                            fileColor = '#2c7be5';
-                        } else if (attachment.type.includes('excel') || attachment.type.includes('spreadsheet')) {
-                            fileIcon = 'fa-file-excel';
-                            fileColor = '#2ecc71';
-                        } else {
-                            fileIcon = 'fa-file';
-                            fileColor = '#95a5a6';
-                        }
-                        
-                        // Format file size
-                        const fileSize = formatFileSize(attachment.size);
-                        
-                        fileItem.innerHTML = `
-                            <i class="fas ${fileIcon} file-icon" style="color: ${fileColor};"></i>
-                            <div class="file-info">
-                                <div class="file-name">${attachment.name}</div>
-                                <div class="file-size">${fileSize}</div>
-                            </div>
-                            <button class="download-pdf-btn" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" data-url="${attachment.url}">
-                                <i class="fas fa-download"></i> Download
-                            </button>
-                        `;
-                        
-                        viewReportAttachments.appendChild(fileItem);
-                    });
-                    
-                    // Add event listeners to download buttons
-                    document.querySelectorAll('#view-report-attachments .download-pdf-btn').forEach(btn => {
-                        btn.addEventListener('click', (e) => {
-                            const url = e.currentTarget.getAttribute('data-url');
-                            downloadAttachment(url);
-                        });
-                    });
-                } else {
-                    const noFiles = document.createElement('div');
-                    noFiles.className = 'text-center text-muted';
-                    noFiles.textContent = 'No attachments';
-                    viewReportAttachments.appendChild(noFiles);
-                }
-                
-                // Show the modal
-                viewReportModal.classList.add('active');
-            })
-            .catch(error => {
-                console.error('Error viewing report:', error);
-                showAlert('Failed to load report details', 'danger');
-            });
-        }
-
         }
 
         // Edit report
@@ -3836,86 +3564,6 @@
                     alert.remove();
                 }, 300);
             }, 5000);
-        }
-        function generateReportPdf() {
-            if (!selectedReportId) return;
-            
-            // Show loading state
-            downloadPdfBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
-            downloadPdfBtn.disabled = true;
-            
-            fetch(`${API_BASE_URL}/reports/${selectedReportId}/pdf`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to generate PDF');
-                }
-                return response.blob();
-            })
-            .then(blob => {
-                // Create a download link
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                
-                // Get the report title for the filename
-                const reportTitle = viewReportTitle.textContent.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-                a.download = `${reportTitle}_report.pdf`;
-                
-                // Trigger download
-                document.body.appendChild(a);
-                a.click();
-                
-                // Clean up
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
-            })
-            .catch(error => {
-                console.error('Error generating PDF:', error);
-                showAlert('Failed to generate PDF report', 'danger');
-            })
-            .finally(() => {
-                downloadPdfBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Download PDF';
-                downloadPdfBtn.disabled = false;
-            });
-        }
-         function downloadAttachment(url) {
-            fetch(`${API_BASE_URL}${url}`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to download attachment');
-                }
-                return response.blob();
-            })
-            .then(blob => {
-                // Create a download link
-                const downloadUrl = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = downloadUrl;
-                
-                // Extract filename from URL
-                const filename = url.split('/').pop();
-                a.download = filename;
-                
-                // Trigger download
-                document.body.appendChild(a);
-                a.click();
-                
-                // Clean up
-                window.URL.revokeObjectURL(downloadUrl);
-                document.body.removeChild(a);
-            })
-            .catch(error => {
-                console.error('Error downloading attachment:', error);
-                showAlert('Failed to download attachment', 'danger');
-            });
         }
 
         // Initialize the app
