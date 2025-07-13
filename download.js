@@ -1,7 +1,6 @@
 // download.js - Modern Report PDF Generation, Download, and Attachment Handling
 
 // Global Configuration
-const API_BASE_URL = 'https://reporting-api-uvze.onrender.com';
 const CONFIG = {
   DESIGN: {
     PRIMARY_COLOR: [40, 53, 147],
