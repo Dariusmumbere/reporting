@@ -1,92 +1,120 @@
 // download.js - Report PDF generation and download functionality
 
+// Global API configuration (should match your main HTML file)
+const API_BASE_URL = 'https://reporting-api-uvze.onrender.com';
+
+// Function to load jsPDF library if not already loaded
+async function loadJSPDFLibrary() {
+    return new Promise((resolve, reject) => {
+        if (window.jspdf) {
+            resolve();
+            return;
+        }
+        
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+    });
+}
+
 // Function to generate a PDF from a report
 async function generateReportPDF(report) {
-    // Create a new PDF document
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    
-    // Add ReportHub logo (placeholder - in a real app, use your actual logo)
-    doc.addImage('https://via.placeholder.com/150x50?text=ReportHub', 'PNG', 20, 10, 40, 15);
-    
-    // Report title
-    doc.setFontSize(20);
-    doc.setTextColor(40, 53, 147); // Dark blue color
-    doc.text(report.title, 105, 30, { align: 'center' });
-    
-    // Report metadata
-    doc.setFontSize(12);
-    doc.setTextColor(100, 100, 100); // Gray color
-    doc.text(`Report ID: #REP-${report.id.toString().padStart(3, '0')}`, 20, 50);
-    doc.text(`Author: ${report.author_name}`, 20, 60);
-    doc.text(`Date: ${new Date(report.created_at).toLocaleDateString()}`, 20, 70);
-    doc.text(`Category: ${report.category}`, 20, 80);
-    
-    // Status badge
-    let statusColor;
-    if (report.status === 'approved') {
-        statusColor = [76, 201, 240]; // Success blue
-    } else if (report.status === 'pending') {
-        statusColor = [248, 150, 30]; // Warning orange
-    } else {
-        statusColor = [247, 37, 133]; // Danger pink
-    }
-    
-    doc.setFillColor(...statusColor);
-    doc.setDrawColor(...statusColor);
-    doc.roundedRect(150, 45, 40, 15, 3, 3, 'FD');
-    doc.setTextColor(255, 255, 255);
-    doc.text(report.status.charAt(0).toUpperCase() + report.status.slice(1), 170, 55, { align: 'center' });
-    
-    // Horizontal line
-    doc.setDrawColor(200, 200, 200);
-    doc.line(20, 85, 190, 85);
-    
-    // Report description
-    doc.setFontSize(12);
-    doc.setTextColor(50, 50, 50);
-    const descriptionLines = doc.splitTextToSize(report.description, 170);
-    doc.text(descriptionLines, 20, 100);
-    
-    // Admin comments (if exists)
-    if (report.admin_comments) {
-        doc.setFontSize(12);
-        doc.setTextColor(100, 100, 100);
-        doc.text('Admin Comments:', 20, doc.autoTable.previous.finalY + 15);
+    try {
+        // Ensure jsPDF is loaded
+        if (!window.jspdf) {
+            await loadJSPDFLibrary();
+        }
         
-        doc.setFontSize(11);
-        doc.setTextColor(70, 70, 70);
-        const commentLines = doc.splitTextToSize(report.admin_comments, 170);
-        doc.text(commentLines, 20, doc.autoTable.previous.finalY + 25);
-    }
-    
-    // Attachments list
-    if (report.attachments && report.attachments.length > 0) {
-        doc.setFontSize(12);
-        doc.setTextColor(100, 100, 100);
-        doc.text('Attachments:', 20, doc.autoTable.previous.finalY + 15);
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
         
-        doc.setFontSize(10);
-        report.attachments.forEach((attachment, index) => {
-            const yPos = doc.autoTable.previous.finalY + 25 + (index * 7);
-            doc.setTextColor(67, 97, 238); // Primary color
-            doc.textWithLink(attachment.name, 20, yPos, { url: attachment.url });
+        // Add ReportHub logo (placeholder - in a real app, use your actual logo)
+        doc.addImage('https://via.placeholder.com/150x50?text=ReportHub', 'PNG', 20, 10, 40, 15);
+        
+        // Report title
+        doc.setFontSize(20);
+        doc.setTextColor(40, 53, 147); // Dark blue color
+        doc.text(report.title, 105, 30, { align: 'center' });
+        
+        // Report metadata
+        doc.setFontSize(12);
+        doc.setTextColor(100, 100, 100); // Gray color
+        doc.text(`Report ID: #REP-${report.id.toString().padStart(3, '0')}`, 20, 50);
+        doc.text(`Author: ${report.author_name}`, 20, 60);
+        doc.text(`Date: ${new Date(report.created_at).toLocaleDateString()}`, 20, 70);
+        doc.text(`Category: ${report.category}`, 20, 80);
+        
+        // Status badge
+        let statusColor;
+        if (report.status === 'approved') {
+            statusColor = [76, 201, 240]; // Success blue
+        } else if (report.status === 'pending') {
+            statusColor = [248, 150, 30]; // Warning orange
+        } else {
+            statusColor = [247, 37, 133]; // Danger pink
+        }
+        
+        doc.setFillColor(...statusColor);
+        doc.setDrawColor(...statusColor);
+        doc.roundedRect(150, 45, 40, 15, 3, 3, 'FD');
+        doc.setTextColor(255, 255, 255);
+        doc.text(report.status.charAt(0).toUpperCase() + report.status.slice(1), 170, 55, { align: 'center' });
+        
+        // Horizontal line
+        doc.setDrawColor(200, 200, 200);
+        doc.line(20, 85, 190, 85);
+        
+        // Report description
+        doc.setFontSize(12);
+        doc.setTextColor(50, 50, 50);
+        const descriptionLines = doc.splitTextToSize(report.description, 170);
+        doc.text(descriptionLines, 20, 100);
+        
+        // Admin comments (if exists)
+        if (report.admin_comments) {
+            doc.setFontSize(12);
             doc.setTextColor(100, 100, 100);
-            doc.text(`(${formatFileSize(attachment.size)})`, 170, yPos, { align: 'right' });
-        });
+            doc.text('Admin Comments:', 20, doc.autoTable.previous.finalY + 15);
+            
+            doc.setFontSize(11);
+            doc.setTextColor(70, 70, 70);
+            const commentLines = doc.splitTextToSize(report.admin_comments, 170);
+            doc.text(commentLines, 20, doc.autoTable.previous.finalY + 25);
+        }
+        
+        // Attachments list
+        if (report.attachments && report.attachments.length > 0) {
+            doc.setFontSize(12);
+            doc.setTextColor(100, 100, 100);
+            doc.text('Attachments:', 20, doc.autoTable.previous.finalY + 15);
+            
+            doc.setFontSize(10);
+            report.attachments.forEach((attachment, index) => {
+                const yPos = doc.autoTable.previous.finalY + 25 + (index * 7);
+                doc.setTextColor(67, 97, 238); // Primary color
+                doc.textWithLink(attachment.name, 20, yPos, { url: attachment.url });
+                doc.setTextColor(100, 100, 100);
+                doc.text(`(${formatFileSize(attachment.size)})`, 170, yPos, { align: 'right' });
+            });
+        }
+        
+        // Footer
+        const pageCount = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(8);
+            doc.setTextColor(150, 150, 150);
+            doc.text(`Page ${i} of ${pageCount}`, 105, 285, { align: 'center' });
+            doc.text(`Generated by ReportHub on ${new Date().toLocaleDateString()}`, 105, 290, { align: 'center' });
+        }
+        
+        return doc;
+    } catch (error) {
+        console.error('Error generating PDF:', error);
+        throw error;
     }
-    
-    // Footer
-    const pageCount = doc.internal.getNumberOfPages();
-    for (let i = 1; i <= pageCount; i++) {
-        doc.setPage(i);
-        doc.setFontSize(8);
-        doc.setTextColor(150, 150, 150);
-        doc.text(`Page ${i} of ${pageCount}`, 105, 285, { align: 'center' });
-        doc.text(`Generated by ReportHub on ${new Date().toLocaleDateString()}`, 105, 290, { align: 'center' });
-    }
-    
-    return doc;
 }
 
 // Function to download a report as PDF
@@ -112,7 +140,7 @@ async function downloadReportAsPDF(reportId) {
         const pdfDoc = await generateReportPDF(report);
         
         // Download the PDF
-        pdfDoc.save(`ReportHub-${report.title}-${report.id}.pdf`);
+        pdfDoc.save(`ReportHub-${report.title.replace(/[^a-z0-9]/gi, '_')}-${report.id}.pdf`);
         
         // Close loading toast
         loadingToast.close();
@@ -133,7 +161,7 @@ function formatFileSize(bytes) {
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
 // Helper function to show toast messages
@@ -243,22 +271,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // If using a framework that dynamically loads content, you might need to call
     // updateReportButtons() after content changes
 });
-
-// Add jsPDF library if not already loaded
-function loadJSPDFLibrary() {
-    return new Promise((resolve, reject) => {
-        if (window.jspdf) {
-            resolve();
-            return;
-        }
-        
-        const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-        script.onload = resolve;
-        script.onerror = reject;
-        document.head.appendChild(script);
-    });
-}
 
 // Initialize the PDF library when the page loads
 window.addEventListener('load', async () => {
