@@ -2082,51 +2082,56 @@
         </div>
 
         <!-- Add User Modal (Admin only) -->
-        <div class="modal" id="add-user-modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 class="modal-title">Add New User</h3>
-                    <button class="modal-close" id="close-add-user-modal">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form id="add-user-form">
-                        <div class="form-group">
-                            <label for="user-fullname" class="form-label">Full Name</label>
-                            <input type="text" id="user-fullname" class="form-control" placeholder="Enter full name" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="user-email" class="form-label">Email Address</label>
-                            <input type="email" id="user-email" class="form-control" placeholder="Enter email address" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="user-role" class="form-label">Role</label>
-                            <select id="user-role" class="form-control form-select" required>
-                                <option value="">Select a role</option>
-                                <option value="admin">Administrator</option>
-                                <option value="staff">Staff Member</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="user-password" class="form-label">Password</label>
-                            <input type="password" id="user-password" class="form-control" placeholder="Enter password" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="user-confirm-password" class="form-label">Confirm Password</label>
-                            <input type="password" id="user-confirm-password" class="form-control" placeholder="Confirm password" required>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-outline" id="cancel-add-user">Cancel</button>
-                    <button class="btn btn-primary" id="submit-add-user">
-                        <span id="submit-user-text">Add User</span>
-                        <span class="spinner hidden" id="submit-user-spinner"></span>
-                    </button>
-                </div>
-            </div>
+<div class="modal" id="add-user-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Add New User</h3>
+            <button class="modal-close" id="close-add-user-modal">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
+        <div class="modal-body">
+            <form id="add-user-form">
+                <div class="form-group">
+                    <label for="user-fullname" class="form-label">Full Name</label>
+                    <input type="text" id="user-fullname" class="form-control" placeholder="Enter full name" required>
+                    <div class="invalid-feedback">Please provide a full name</div>
+                </div>
+                <div class="form-group">
+                    <label for="user-email" class="form-label">Email Address</label>
+                    <input type="email" id="user-email" class="form-control" placeholder="Enter email address" required>
+                    <div class="invalid-feedback">Please provide a valid email</div>
+                </div>
+                <div class="form-group">
+                    <label for="user-role" class="form-label">Role</label>
+                    <select id="user-role" class="form-control form-select" required>
+                        <option value="">Select a role</option>
+                        <option value="admin">Administrator</option>
+                        <option value="staff">Staff Member</option>
+                    </select>
+                    <div class="invalid-feedback">Please select a role</div>
+                </div>
+                <div class="form-group">
+                    <label for="user-password" class="form-label">Password</label>
+                    <input type="password" id="user-password" class="form-control" placeholder="Enter password" required>
+                    <div class="invalid-feedback">Password must be at least 8 characters with uppercase, lowercase, number, and special character</div>
+                </div>
+                <div class="form-group">
+                    <label for="user-confirm-password" class="form-label">Confirm Password</label>
+                    <input type="password" id="user-confirm-password" class="form-control" placeholder="Confirm password" required>
+                    <div class="invalid-feedback">Passwords do not match</div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" id="cancel-add-user">Cancel</button>
+            <button class="btn btn-primary" id="submit-add-user" onclick="handleAddUser()">
+                <span id="submit-user-text">Add User</span>
+                <span class="spinner hidden" id="submit-user-spinner"></span>
+            </button>
+        </div>
+    </div>
+</div>
 
         <!-- View Report Modal -->
         <div class="modal" id="view-report-modal">
@@ -3193,82 +3198,116 @@
             });
         }
 
-        async function handleAddUser(event) {
-            event.preventDefault();
-            const fullName = document.getElementById('user-fullname').value;
-            const email = document.getElementById('user-email').value;
-            const role = document.getElementById('user-role').value;
-            const password = document.getElementById('user-password').value;
-            const confirmPassword = document.getElementById('user-confirm-password').value;
-            
-            // Validate all fields are filled
-            if (!fullName || !email || !role || !password || !confirmPassword) {
-                showAlert('Please fill in all required fields', 'danger');
-                return;
-            }
-            
-            // Validate password match
-            if (password !== confirmPassword) {
-                showAlert('Passwords do not match', 'danger');
-                return;
-            }
-            
-            // Validate password complexity
-            if (password.length < 8 || 
-                !/[A-Z]/.test(password) || 
-                !/[a-z]/.test(password) || 
-                !/[0-9]/.test(password) || 
-                !/[!@#$%^&*()_+]/.test(password)) {
-                showAlert('Password must be at least 8 characters long and contain uppercase, lowercase, number, and special character', 'danger');
-                return;
-            }
-            
-            // Show loading state
-            submitUserText.textContent = 'Adding...';
-            submitUserSpinner.classList.remove('hidden');
-            
-            try {
-                const userData = {
-                    name: fullName,
-                    email: email,
-                    role: role,
-                    password: password
-                };
-                
-                const response = await fetch(`${API_BASE_URL}/users`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(userData)
-                });
-                
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.detail || 'Failed to add user');
-                }
-                
-                const user = await response.json();
-                
-                // Show success message
-                showAlert('User added successfully', 'success');
-                
-                // Close modal and reset form
-                addUserModal.classList.remove('active');
-                addUserForm.reset();
-                
-                // Reload users
-                loadUsers();
-            } catch (error) {
-                console.error('Error adding user:', error);
-                showAlert(error.message, 'danger');
-            } finally {
-                submitUserText.textContent = 'Add User';
-                submitUserSpinner.classList.add('hidden');
-            }
+        async function handleAddUser() {
+    // Get form elements
+    const fullName = document.getElementById('user-fullname').value.trim();
+    const email = document.getElementById('user-email').value.trim();
+    const role = document.getElementById('user-role').value;
+    const password = document.getElementById('user-password').value;
+    const confirmPassword = document.getElementById('user-confirm-password').value;
+    
+    // Clear previous invalid states
+    document.getElementById('user-fullname').classList.remove('is-invalid');
+    document.getElementById('user-email').classList.remove('is-invalid');
+    document.getElementById('user-role').classList.remove('is-invalid');
+    document.getElementById('user-password').classList.remove('is-invalid');
+    document.getElementById('user-confirm-password').classList.remove('is-invalid');
+    
+    // Validate all fields are filled
+    let isValid = true;
+    
+    if (!fullName) {
+        document.getElementById('user-fullname').classList.add('is-invalid');
+        isValid = false;
+    }
+    if (!email) {
+        document.getElementById('user-email').classList.add('is-invalid');
+        isValid = false;
+    }
+    if (!role) {
+        document.getElementById('user-role').classList.add('is-invalid');
+        isValid = false;
+    }
+    if (!password) {
+        document.getElementById('user-password').classList.add('is-invalid');
+        isValid = false;
+    }
+    if (!confirmPassword) {
+        document.getElementById('user-confirm-password').classList.add('is-invalid');
+        isValid = false;
+    }
+    
+    if (!isValid) {
+        showAlert('Please fill in all required fields', 'danger');
+        return;
+    }
+    
+    // Validate password match
+    if (password !== confirmPassword) {
+        showAlert('Passwords do not match', 'danger');
+        document.getElementById('user-password').classList.add('is-invalid');
+        document.getElementById('user-confirm-password').classList.add('is-invalid');
+        return;
+    }
+    
+    // Validate password complexity
+    if (password.length < 8 || 
+        !/[A-Z]/.test(password) || 
+        !/[a-z]/.test(password) || 
+        !/[0-9]/.test(password) || 
+        !/[!@#$%^&*()_+]/.test(password)) {
+        showAlert('Password must be at least 8 characters long and contain uppercase, lowercase, number, and special character', 'danger');
+        document.getElementById('user-password').classList.add('is-invalid');
+        return;
+    }
+    
+    // Show loading state
+    const submitUserText = document.getElementById('submit-user-text');
+    const submitUserSpinner = document.getElementById('submit-user-spinner');
+    submitUserText.textContent = 'Adding...';
+    submitUserSpinner.classList.remove('hidden');
+    
+    try {
+        const userData = {
+            name: fullName,
+            email: email,
+            role: role,
+            password: password
+        };
+        
+        const response = await fetch(`${API_BASE_URL}/users`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(userData)
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || 'Failed to add user');
         }
-
+        
+        // Show success message
+        showAlert('User added successfully', 'success');
+        
+        // Close modal and reset form
+        const addUserModal = document.getElementById('add-user-modal');
+        const addUserForm = document.getElementById('add-user-form');
+        addUserModal.classList.remove('active');
+        addUserForm.reset();
+        
+        // Reload users
+        loadUsers();
+    } catch (error) {
+        console.error('Error adding user:', error);
+        showAlert(error.message, 'danger');
+    } finally {
+        submitUserText.textContent = 'Add User';
+        submitUserSpinner.classList.add('hidden');
+    }
+}
         // View report details
         function viewReport(reportId) {
             fetch(`${API_BASE_URL}/reports/${reportId}`, {
