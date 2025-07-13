@@ -1,8 +1,5 @@
 // download.js - Report PDF generation and download functionality
 
-// Global API configuration (should match your main HTML file)
-const API_BASE_URL = 'https://reporting-api-uvze.onrender.com';
-
 // Function to load jsPDF library if not already loaded
 async function loadJSPDFLibrary() {
     return new Promise((resolve, reject) => {
