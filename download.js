@@ -1,7 +1,12 @@
 // download.js - Report PDF generation and download functionality
-const LOGO_URL = 'logo.jpg';
 
-// Function to load jsPDF library if not already loaded
+// Global Configuration
+const LOGO_URL = 'logo.jpg'; // Make sure this path is correct
+const LOGO_WIDTH = 40;
+const LOGO_HEIGHT = 15;
+const LOGO_POSITION = { x: 20, y: 10 };
+
+// Function to load jsPDF library
 async function loadJSPDFLibrary() {
     return new Promise((resolve, reject) => {
         if (window.jspdf) {
@@ -12,84 +17,82 @@ async function loadJSPDFLibrary() {
         const script = document.createElement('script');
         script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
         script.onload = resolve;
-        script.onerror = reject;
+        script.onerror = () => reject(new Error('Failed to load jsPDF library'));
         document.head.appendChild(script);
     });
 }
 
-// Function to generate a PDF from a report
+// Function to load image
+function loadImage(url) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(new Error(`Failed to load image: ${url}`));
+        img.src = url;
+    });
+}
+
+// Generate PDF Report
 async function generateReportPDF(report) {
     try {
-        // Ensure jsPDF is loaded
-        if (!window.jspdf) {
-            await loadJSPDFLibrary();
-        }
-        
+        // Initialize PDF document
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
         
-        // Add ReportHub logo
+        // Add Logo
         try {
-            // Load logo image
-            const logoImg = new Image();
-            logoImg.src = LOGO_URL;
-            
-            // Wait for logo to load
-            await new Promise((resolve, reject) => {
-                logoImg.onload = resolve;
-                logoImg.onerror = reject;
-            });
-            
-            // Add logo to PDF (adjust dimensions as needed)
-            doc.addImage(logoImg, 'JPEG', 20, 10, 40, 15);
-        } catch (logoError) {
-            console.warn('Failed to load logo, using fallback:', logoError);
-            // Fallback to text if logo fails
+            const logoImg = await loadImage(LOGO_URL);
+            doc.addImage(logoImg, 'JPEG', 
+                LOGO_POSITION.x, 
+                LOGO_POSITION.y, 
+                LOGO_WIDTH, 
+                LOGO_HEIGHT
+            );
+        } catch (error) {
+            console.warn('Using text fallback for logo:', error.message);
             doc.setFontSize(12);
             doc.setTextColor(40, 53, 147);
-            doc.text('ReportHub', 20, 20);
+            doc.text('ReportHub', LOGO_POSITION.x, LOGO_POSITION.y + 10);
         }
-        
-        // Report title
+
+        // Report Header
         doc.setFontSize(20);
-        doc.setTextColor(40, 53, 147); // Dark blue color
+        doc.setTextColor(40, 53, 147);
         doc.text(report.title, 105, 30, { align: 'center' });
-        
-        // Report metadata
+
+        // Metadata
         doc.setFontSize(12);
-        doc.setTextColor(100, 100, 100); // Gray color
+        doc.setTextColor(100, 100, 100);
         doc.text(`Report ID: #REP-${report.id.toString().padStart(3, '0')}`, 20, 50);
         doc.text(`Author: ${report.author_name}`, 20, 60);
         doc.text(`Date: ${new Date(report.created_at).toLocaleDateString()}`, 20, 70);
         doc.text(`Category: ${report.category}`, 20, 80);
+
+        // Status Badge
+        const statusConfig = {
+            approved: { color: [76, 201, 240], text: 'Approved' },
+            pending: { color: [248, 150, 30], text: 'Pending' },
+            rejected: { color: [247, 37, 133], text: 'Rejected' }
+        };
+        const status = statusConfig[report.status] || statusConfig.pending;
         
-        // Status badge
-        let statusColor;
-        if (report.status === 'approved') {
-            statusColor = [76, 201, 240]; // Success blue
-        } else if (report.status === 'pending') {
-            statusColor = [248, 150, 30]; // Warning orange
-        } else {
-            statusColor = [247, 37, 133]; // Danger pink
-        }
-        
-        doc.setFillColor(...statusColor);
-        doc.setDrawColor(...statusColor);
+        doc.setFillColor(...status.color);
+        doc.setDrawColor(...status.color);
         doc.roundedRect(150, 45, 40, 15, 3, 3, 'FD');
         doc.setTextColor(255, 255, 255);
-        doc.text(report.status.charAt(0).toUpperCase() + report.status.slice(1), 170, 55, { align: 'center' });
-        
-        // Horizontal line
+        doc.text(status.text, 170, 55, { align: 'center' });
+
+        // Content Separator
         doc.setDrawColor(200, 200, 200);
         doc.line(20, 85, 190, 85);
-        
-        // Report description
+
+        // Report Content
         doc.setFontSize(12);
         doc.setTextColor(50, 50, 50);
-        const descriptionLines = doc.splitTextToSize(report.description, 170);
-        doc.text(descriptionLines, 20, 100);
-        
-        // Admin comments (if exists)
+        const descLines = doc.splitTextToSize(report.description, 170);
+        doc.text(descLines, 20, 100);
+
+        // Admin Comments
         if (report.admin_comments) {
             doc.setFontSize(12);
             doc.setTextColor(100, 100, 100);
@@ -100,9 +103,9 @@ async function generateReportPDF(report) {
             const commentLines = doc.splitTextToSize(report.admin_comments, 170);
             doc.text(commentLines, 20, doc.autoTable.previous.finalY + 25);
         }
-        
-        // Attachments list
-        if (report.attachments && report.attachments.length > 0) {
+
+        // Attachments
+        if (report.attachments?.length > 0) {
             doc.setFontSize(12);
             doc.setTextColor(100, 100, 100);
             doc.text('Attachments:', 20, doc.autoTable.previous.finalY + 15);
@@ -110,13 +113,13 @@ async function generateReportPDF(report) {
             doc.setFontSize(10);
             report.attachments.forEach((attachment, index) => {
                 const yPos = doc.autoTable.previous.finalY + 25 + (index * 7);
-                doc.setTextColor(67, 97, 238); // Primary color
+                doc.setTextColor(67, 97, 238);
                 doc.textWithLink(attachment.name, 20, yPos, { url: attachment.url });
                 doc.setTextColor(100, 100, 100);
                 doc.text(`(${formatFileSize(attachment.size)})`, 170, yPos, { align: 'right' });
             });
         }
-        
+
         // Footer
         const pageCount = doc.internal.getNumberOfPages();
         for (let i = 1; i <= pageCount; i++) {
@@ -124,179 +127,122 @@ async function generateReportPDF(report) {
             doc.setFontSize(8);
             doc.setTextColor(150, 150, 150);
             doc.text(`Page ${i} of ${pageCount}`, 105, 285, { align: 'center' });
-            doc.text(`Generated by ReportHub on ${new Date().toLocaleDateString()}`, 105, 290, { align: 'center' });
+            doc.text(`Generated on ${new Date().toLocaleDateString()}`, 105, 290, { align: 'center' });
         }
-        
+
         return doc;
     } catch (error) {
-        console.error('Error generating PDF:', error);
+        console.error('PDF Generation Error:', error);
         throw error;
     }
 }
-        
 
-// Function to download a report as PDF
+// Download Report as PDF
 async function downloadReportAsPDF(reportId) {
     try {
-        // Show loading state
-        const loadingToast = showToast('Generating PDF...', 'info');
+        showToast('Preparing PDF...', 'info');
         
-        // Fetch report data
         const response = await fetch(`${API_BASE_URL}/reports/${reportId}`, {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
         });
         
-        if (!response.ok) {
-            throw new Error('Failed to fetch report data');
-        }
+        if (!response.ok) throw new Error('Failed to fetch report');
         
         const report = await response.json();
-        
-        // Generate PDF
         const pdfDoc = await generateReportPDF(report);
         
-        // Download the PDF
-        pdfDoc.save(`ReportHub-${report.title.replace(/[^a-z0-9]/gi, '_')}-${report.id}.pdf`);
+        // Sanitize filename
+        const cleanTitle = report.title.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_');
+        pdfDoc.save(`Report_${cleanTitle}_${report.id}.pdf`);
         
-        // Close loading toast
-        loadingToast.close();
-        
-        // Show success message
         showToast('PDF downloaded successfully', 'success');
     } catch (error) {
-        console.error('Error downloading report as PDF:', error);
+        console.error('Download Error:', error);
         showToast('Failed to generate PDF', 'danger');
     }
 }
 
-// Helper function to format file size
+// Helper Functions
 function formatFileSize(bytes) {
     if (bytes === 0) return '0 Bytes';
-    
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
-// Helper function to show toast messages
 function showToast(message, type) {
     const toast = document.createElement('div');
-    toast.className = `toast toast-${type} fade-in`;
-    toast.innerHTML = `
-        <div class="toast-message">${message}</div>
-    `;
-    
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `<div class="toast-message">${message}</div>`;
     document.body.appendChild(toast);
     
-    // Auto-remove after 5 seconds
     setTimeout(() => {
         toast.classList.add('fade-out');
         setTimeout(() => toast.remove(), 300);
     }, 5000);
     
     return {
-        close: () => {
-            toast.classList.add('fade-out');
-            setTimeout(() => toast.remove(), 300);
-        }
+        close: () => toast.remove()
     };
 }
 
+// Initialize PDF functionality
+function initializePDFFeatures() {
+    // Add event listeners for download buttons
+    document.addEventListener('click', async (e) => {
+        if (e.target.closest('.download-report-btn')) {
+            const reportId = e.target.closest('.download-report-btn').getAttribute('data-id');
+            await downloadReportAsPDF(reportId);
+        }
+    });
+
+    // Ensure jsPDF is loaded
+    window.addEventListener('load', async () => {
+        try {
+            await loadJSPDFLibrary();
+            console.log('PDF library ready');
+        } catch (error) {
+            console.error('PDF initialization failed:', error);
+            showToast('PDF features unavailable', 'danger');
+        }
+    });
+}
+
 // Add CSS for toast notifications
-const toastStyles = document.createElement('style');
-toastStyles.innerHTML = `
+const toastCSS = `
 .toast {
     position: fixed;
     bottom: 20px;
     right: 20px;
     padding: 12px 20px;
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-md);
+    border-radius: 4px;
     color: white;
     z-index: 10000;
-    transform: translateY(20px);
-    opacity: 0;
-    transition: all 0.3s ease;
+    animation: fadeIn 0.3s;
     max-width: 300px;
 }
-
-.toast.fade-in {
-    transform: translateY(0);
-    opacity: 1;
-}
-
 .toast.fade-out {
-    transform: translateY(-20px);
-    opacity: 0;
+    animation: fadeOut 0.3s;
 }
-
-.toast-success {
-    background-color: var(--success-color);
-}
-
-.toast-danger {
-    background-color: var(--danger-color);
-}
-
-.toast-info {
-    background-color: var(--accent-color);
-}
-
-.toast-warning {
-    background-color: var(--warning-color);
-}
+.toast-success { background-color: #4cc9f0; }
+.toast-danger { background-color: #f72585; }
+.toast-info { background-color: #4895ef; }
+.toast-warning { background-color: #f8961e; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
 `;
-document.head.appendChild(toastStyles);
 
-// Add event listeners for download buttons
-document.addEventListener('DOMContentLoaded', () => {
-    // Delegate download button clicks
-    document.addEventListener('click', async (e) => {
-        if (e.target.closest('.download-report-btn')) {
-            const btn = e.target.closest('.download-report-btn');
-            const reportId = btn.getAttribute('data-id');
-            await downloadReportAsPDF(reportId);
-        }
-    });
-    
-    // Update existing report buttons to include download functionality
-    const updateReportButtons = () => {
-        document.querySelectorAll('.view-report-btn').forEach(btn => {
-            const reportId = btn.getAttribute('data-id');
-            const actionsCell = btn.closest('td');
-            
-            // Check if download button already exists
-            if (!actionsCell.querySelector('.download-report-btn')) {
-                const downloadBtn = document.createElement('button');
-                downloadBtn.className = 'action-btn download-report-btn';
-                downloadBtn.setAttribute('data-id', reportId);
-                downloadBtn.title = 'Download';
-                downloadBtn.innerHTML = '<i class="fas fa-download"></i>';
-                
-                // Insert after view button
-                btn.parentNode.insertBefore(downloadBtn, btn.nextSibling);
-            }
-        });
-    };
-    
-    // Run initially and after any dynamic content loads
-    updateReportButtons();
-    
-    // If using a framework that dynamically loads content, you might need to call
-    // updateReportButtons() after content changes
-});
+// Inject styles
+const styleTag = document.createElement('style');
+styleTag.innerHTML = toastCSS;
+document.head.appendChild(styleTag);
 
-// Initialize the PDF library when the page loads
-window.addEventListener('load', async () => {
-    try {
-        await loadJSPDFLibrary();
-        console.log('jsPDF library loaded successfully');
-    } catch (error) {
-        console.error('Failed to load jsPDF library:', error);
-        showToast('Failed to load PDF generator', 'danger');
-    }
-});
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializePDFFeatures);
+} else {
+    initializePDFFeatures();
+}
