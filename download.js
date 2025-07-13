@@ -1,4 +1,4 @@
-// download.js - Report PDF Generation and Download functionality
+// download.js - Report PDF generation and download functionality
 
 // Function to generate a PDF from a report
 async function generateReportPDF(report) {
@@ -6,121 +6,96 @@ async function generateReportPDF(report) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
     
-    // Add ReportHub logo (placeholder - you would replace with your actual logo)
-    const logoUrl = 'https://via.placeholder.com/150x50?text=ReportHub';
-    const logoResponse = await fetch(logoUrl);
-    const logoBlob = await logoResponse.blob();
-    const logoDataUrl = await new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result);
-        reader.readAsDataURL(logoBlob);
-    });
+    // Add ReportHub logo (placeholder - in a real app, use your actual logo)
+    doc.addImage('https://via.placeholder.com/150x50?text=ReportHub', 'PNG', 20, 10, 40, 15);
     
-    // Add logo to PDF
-    doc.addImage(logoDataUrl, 'JPEG', 15, 10, 40, 15);
-    
-    // Add report title with styling
+    // Report title
     doc.setFontSize(20);
-    doc.setTextColor(33, 37, 41); // Dark gray
-    doc.setFont('helvetica', 'bold');
-    doc.text(report.title, 15, 40);
+    doc.setTextColor(40, 53, 147); // Dark blue color
+    doc.text(report.title, 105, 30, { align: 'center' });
     
-    // Add report metadata in a modern layout
+    // Report metadata
     doc.setFontSize(12);
-    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(100, 100, 100); // Gray color
+    doc.text(`Report ID: #REP-${report.id.toString().padStart(3, '0')}`, 20, 50);
+    doc.text(`Author: ${report.author_name}`, 20, 60);
+    doc.text(`Date: ${new Date(report.created_at).toLocaleDateString()}`, 20, 70);
+    doc.text(`Category: ${report.category}`, 20, 80);
     
-    // Create metadata columns
-    const metadata = [
-        { label: 'Report ID', value: `#REP-${report.id.toString().padStart(3, '0')}` },
-        { label: 'Author', value: report.author_name },
-        { label: 'Date', value: new Date(report.created_at).toLocaleDateString() },
-        { label: 'Status', value: report.status.charAt(0).toUpperCase() + report.status.slice(1) },
-        { label: 'Category', value: report.category }
-    ];
-    
-    // Draw metadata in two columns
-    let yPosition = 50;
-    metadata.forEach((item, index) => {
-        const column = index % 2;
-        const xPosition = 15 + (column * 90);
-        
-        // Label
-        doc.setTextColor(108, 117, 125); // Gray
-        doc.text(`${item.label}:`, xPosition, yPosition);
-        
-        // Value
-        doc.setTextColor(33, 37, 41); // Dark gray
-        doc.text(item.value, xPosition + 25, yPosition);
-        
-        // Move to next row if we're in the second column
-        if (column === 1) yPosition += 7;
-    });
-    
-    // Add a divider line
-    doc.setDrawColor(222, 226, 230); // Light gray
-    doc.line(15, yPosition + 5, 195, yPosition + 5);
-    
-    // Add report description with proper formatting
-    doc.setFontSize(12);
-    doc.setTextColor(33, 37, 41);
-    const descriptionLines = doc.splitTextToSize(report.description, 180);
-    doc.text(descriptionLines, 15, yPosition + 15);
-    
-    // Add admin comments if they exist
-    if (report.admin_comments) {
-        doc.setFontSize(14);
-        doc.setTextColor(67, 97, 238); // Primary color
-        doc.text('Admin Comments', 15, yPosition + 15 + (descriptionLines.length * 7) + 10);
-        
-        doc.setFontSize(12);
-        doc.setTextColor(33, 37, 41);
-        const commentLines = doc.splitTextToSize(report.admin_comments, 180);
-        doc.text(commentLines, 15, yPosition + 15 + (descriptionLines.length * 7) + 20);
+    // Status badge
+    let statusColor;
+    if (report.status === 'approved') {
+        statusColor = [76, 201, 240]; // Success blue
+    } else if (report.status === 'pending') {
+        statusColor = [248, 150, 30]; // Warning orange
+    } else {
+        statusColor = [247, 37, 133]; // Danger pink
     }
     
-    // Add attachments section if there are attachments
+    doc.setFillColor(...statusColor);
+    doc.setDrawColor(...statusColor);
+    doc.roundedRect(150, 45, 40, 15, 3, 3, 'FD');
+    doc.setTextColor(255, 255, 255);
+    doc.text(report.status.charAt(0).toUpperCase() + report.status.slice(1), 170, 55, { align: 'center' });
+    
+    // Horizontal line
+    doc.setDrawColor(200, 200, 200);
+    doc.line(20, 85, 190, 85);
+    
+    // Report description
+    doc.setFontSize(12);
+    doc.setTextColor(50, 50, 50);
+    const descriptionLines = doc.splitTextToSize(report.description, 170);
+    doc.text(descriptionLines, 20, 100);
+    
+    // Admin comments (if exists)
+    if (report.admin_comments) {
+        doc.setFontSize(12);
+        doc.setTextColor(100, 100, 100);
+        doc.text('Admin Comments:', 20, doc.autoTable.previous.finalY + 15);
+        
+        doc.setFontSize(11);
+        doc.setTextColor(70, 70, 70);
+        const commentLines = doc.splitTextToSize(report.admin_comments, 170);
+        doc.text(commentLines, 20, doc.autoTable.previous.finalY + 25);
+    }
+    
+    // Attachments list
     if (report.attachments && report.attachments.length > 0) {
-        doc.setFontSize(14);
-        doc.setTextColor(67, 97, 238); // Primary color
-        doc.text('Attachments', 15, doc.internal.pageSize.height - 30);
+        doc.setFontSize(12);
+        doc.setTextColor(100, 100, 100);
+        doc.text('Attachments:', 20, doc.autoTable.previous.finalY + 15);
         
         doc.setFontSize(10);
-        doc.setTextColor(108, 117, 125); // Gray
         report.attachments.forEach((attachment, index) => {
-            doc.text(`${index + 1}. ${attachment.name} (${formatFileSize(attachment.size)})`, 
-                    15, doc.internal.pageSize.height - 20 + (index * 5));
+            const yPos = doc.autoTable.previous.finalY + 25 + (index * 7);
+            doc.setTextColor(67, 97, 238); // Primary color
+            doc.textWithLink(attachment.name, 20, yPos, { url: attachment.url });
+            doc.setTextColor(100, 100, 100);
+            doc.text(`(${formatFileSize(attachment.size)})`, 170, yPos, { align: 'right' });
         });
     }
     
-    // Add footer with page numbers
+    // Footer
     const pageCount = doc.internal.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
-        doc.setFontSize(10);
-        doc.setTextColor(108, 117, 125); // Gray
-        doc.text(`Page ${i} of ${pageCount}`, 180, doc.internal.pageSize.height - 10);
-        doc.text(new Date().toLocaleDateString(), 15, doc.internal.pageSize.height - 10);
+        doc.setFontSize(8);
+        doc.setTextColor(150, 150, 150);
+        doc.text(`Page ${i} of ${pageCount}`, 105, 285, { align: 'center' });
+        doc.text(`Generated by ReportHub on ${new Date().toLocaleDateString()}`, 105, 290, { align: 'center' });
     }
     
     return doc;
-}
-
-// Function to format file size
-function formatFileSize(bytes) {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
 // Function to download a report as PDF
 async function downloadReportAsPDF(reportId) {
     try {
         // Show loading state
-        showAlert('Generating PDF...', 'info');
+        const loadingToast = showToast('Generating PDF...', 'info');
         
-        // Fetch the report data
+        // Fetch report data
         const response = await fetch(`${API_BASE_URL}/reports/${reportId}`, {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -128,163 +103,170 @@ async function downloadReportAsPDF(reportId) {
         });
         
         if (!response.ok) {
-            throw new Error('Failed to fetch report');
+            throw new Error('Failed to fetch report data');
         }
         
         const report = await response.json();
         
-        // Generate the PDF
+        // Generate PDF
         const pdfDoc = await generateReportPDF(report);
         
-        // Save the PDF
-        pdfDoc.save(`Report_${reportId}.pdf`);
+        // Download the PDF
+        pdfDoc.save(`ReportHub-${report.title}-${report.id}.pdf`);
+        
+        // Close loading toast
+        loadingToast.close();
         
         // Show success message
-        showAlert('Report downloaded successfully', 'success');
+        showToast('PDF downloaded successfully', 'success');
     } catch (error) {
-        console.error('Error downloading report:', error);
-        showAlert('Failed to download report', 'danger');
+        console.error('Error downloading report as PDF:', error);
+        showToast('Failed to generate PDF', 'danger');
     }
 }
 
-// Function to download an attachment
-async function downloadAttachment(url) {
-    try {
-        // In a real implementation, this would download the file
-        // For this demo, we'll simulate it with the actual URL
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = url.split('/').pop();
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-    } catch (error) {
-        console.error('Error downloading attachment:', error);
-        showAlert('Failed to download attachment', 'danger');
-    }
+// Helper function to format file size
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i];
 }
+
+// Helper function to show toast messages
+function showToast(message, type) {
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type} fade-in`;
+    toast.innerHTML = `
+        <div class="toast-message">${message}</div>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        toast.classList.add('fade-out');
+        setTimeout(() => toast.remove(), 300);
+    }, 5000);
+    
+    return {
+        close: () => {
+            toast.classList.add('fade-out');
+            setTimeout(() => toast.remove(), 300);
+        }
+    };
+}
+
+// Add CSS for toast notifications
+const toastStyles = document.createElement('style');
+toastStyles.innerHTML = `
+.toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    color: white;
+    z-index: 10000;
+    transform: translateY(20px);
+    opacity: 0;
+    transition: all 0.3s ease;
+    max-width: 300px;
+}
+
+.toast.fade-in {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.toast.fade-out {
+    transform: translateY(-20px);
+    opacity: 0;
+}
+
+.toast-success {
+    background-color: var(--success-color);
+}
+
+.toast-danger {
+    background-color: var(--danger-color);
+}
+
+.toast-info {
+    background-color: var(--accent-color);
+}
+
+.toast-warning {
+    background-color: var(--warning-color);
+}
+`;
+document.head.appendChild(toastStyles);
 
 // Add event listeners for download buttons
 document.addEventListener('DOMContentLoaded', () => {
-    // Add download functionality to report view buttons
-    document.addEventListener('click', (e) => {
+    // Delegate download button clicks
+    document.addEventListener('click', async (e) => {
         if (e.target.closest('.download-report-btn')) {
             const btn = e.target.closest('.download-report-btn');
             const reportId = btn.getAttribute('data-id');
-            downloadReportAsPDF(reportId);
-        }
-        
-        if (e.target.closest('.download-attachment-btn')) {
-            const btn = e.target.closest('.download-attachment-btn');
-            const url = btn.getAttribute('data-url');
-            downloadAttachment(url);
+            await downloadReportAsPDF(reportId);
         }
     });
     
-    // Add download buttons to existing UI elements
-    addDownloadButtons();
+    // Update existing report buttons to include download functionality
+    const updateReportButtons = () => {
+        document.querySelectorAll('.view-report-btn').forEach(btn => {
+            const reportId = btn.getAttribute('data-id');
+            const actionsCell = btn.closest('td');
+            
+            // Check if download button already exists
+            if (!actionsCell.querySelector('.download-report-btn')) {
+                const downloadBtn = document.createElement('button');
+                downloadBtn.className = 'action-btn download-report-btn';
+                downloadBtn.setAttribute('data-id', reportId);
+                downloadBtn.title = 'Download';
+                downloadBtn.innerHTML = '<i class="fas fa-download"></i>';
+                
+                // Insert after view button
+                btn.parentNode.insertBefore(downloadBtn, btn.nextSibling);
+            }
+        });
+    };
+    
+    // Run initially and after any dynamic content loads
+    updateReportButtons();
+    
+    // If using a framework that dynamically loads content, you might need to call
+    // updateReportButtons() after content changes
 });
 
-// Function to add download buttons to the UI
-function addDownloadButtons() {
-    // Add download buttons to dashboard reports
-    const dashboardRows = document.querySelectorAll('#dashboard-reports-table-body tr');
-    dashboardRows.forEach(row => {
-        const viewBtn = row.querySelector('.view-report-btn');
-        if (viewBtn) {
-            const reportId = viewBtn.getAttribute('data-id');
-            const actionsCell = row.querySelector('td:last-child');
-            
-            // Check if download button already exists
-            if (!actionsCell.querySelector('.download-report-btn')) {
-                const downloadBtn = document.createElement('button');
-                downloadBtn.className = 'action-btn download-report-btn';
-                downloadBtn.setAttribute('data-id', reportId);
-                downloadBtn.setAttribute('title', 'Download PDF');
-                downloadBtn.innerHTML = '<i class="fas fa-download"></i>';
-                
-                // Insert before the view button
-                actionsCell.insertBefore(downloadBtn, viewBtn);
-            }
+// Add jsPDF library if not already loaded
+function loadJSPDFLibrary() {
+    return new Promise((resolve, reject) => {
+        if (window.jspdf) {
+            resolve();
+            return;
         }
-    });
-    
-    // Add download buttons to reports view
-    const reportRows = document.querySelectorAll('#reports-table-body tr');
-    reportRows.forEach(row => {
-        const viewBtn = row.querySelector('.view-report-btn');
-        if (viewBtn) {
-            const reportId = viewBtn.getAttribute('data-id');
-            const actionsCell = row.querySelector('td:last-child');
-            
-            // Check if download button already exists
-            if (!actionsCell.querySelector('.download-report-btn')) {
-                const downloadBtn = document.createElement('button');
-                downloadBtn.className = 'action-btn download-report-btn';
-                downloadBtn.setAttribute('data-id', reportId);
-                downloadBtn.setAttribute('title', 'Download PDF');
-                downloadBtn.innerHTML = '<i class="fas fa-download"></i>';
-                
-                // Insert after the view button
-                viewBtn.parentNode.insertBefore(downloadBtn, viewBtn.nextSibling);
-            }
-        }
-    });
-    
-    // Add download buttons to attachments in view report modal
-    const attachmentItems = document.querySelectorAll('#view-report-attachments .file-item');
-    attachmentItems.forEach(item => {
-        const downloadIcon = item.querySelector('.fa-download');
-        if (downloadIcon) {
-            downloadIcon.classList.add('download-attachment-btn');
-        }
+        
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
     });
 }
 
-// Function to show alert messages
-function showAlert(message, type) {
-    const alert = document.createElement('div');
-    alert.className = `alert alert-${type} fade-in`;
-    
-    let icon;
-    if (type === 'success') {
-        icon = 'fa-check-circle';
-    } else if (type === 'danger') {
-        icon = 'fa-exclamation-circle';
-    } else if (type === 'warning') {
-        icon = 'fa-exclamation-triangle';
-    } else {
-        icon = 'fa-info-circle';
+// Initialize the PDF library when the page loads
+window.addEventListener('load', async () => {
+    try {
+        await loadJSPDFLibrary();
+        console.log('jsPDF library loaded successfully');
+    } catch (error) {
+        console.error('Failed to load jsPDF library:', error);
+        showToast('Failed to load PDF generator', 'danger');
     }
-    
-    alert.innerHTML = `
-        <i class="fas ${icon}"></i>
-        <div class="alert-content">
-            <div class="alert-title">${type.charAt(0).toUpperCase() + type.slice(1)}</div>
-            <div class="alert-message">${message}</div>
-        </div>
-    `;
-    
-    // Insert at the top of the content area
-    const content = document.querySelector('.content');
-    if (content.firstChild) {
-        content.insertBefore(alert, content.firstChild);
-    } else {
-        content.appendChild(alert);
-    }
-    
-    // Remove after 5 seconds
-    setTimeout(() => {
-        alert.classList.add('hidden');
-        setTimeout(() => {
-            alert.remove();
-        }, 300);
-    }, 5000);
-}
-
-// Initialize the download functionality when the page loads
-if (document.readyState === 'complete' || document.readyState === 'interactive') {
-    setTimeout(addDownloadButtons, 1000);
-} else {
-    document.addEventListener('DOMContentLoaded', addDownloadButtons);
-}
+});
