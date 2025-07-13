@@ -28,7 +28,7 @@ async function generateReportPDF(report) {
         const doc = new jsPDF();
         
         // Add ReportHub logo (placeholder - in a real app, use your actual logo)
-        doc.addImage('logo.PNG');
+        doc.addImage('logo.jpg');
         
         // Report title
         doc.setFontSize(20);
