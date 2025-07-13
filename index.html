@@ -3198,14 +3198,19 @@
             await handleAddUser();
         });
 
+        // Add event listener for form submission
+document.getElementById('add-user-form').addEventListener('submit', async function(e) {
+    e.preventDefault(); // Prevent default form submission
+    await handleAddUser();
+});
 
-        async function handleAddUser() {
+async function handleAddUser() {
     const form = document.getElementById('add-user-form');
-    const fullName = form.user-fullname.value.trim();
-    const email = form.user-email.value.trim();
-    const role = form.user-role.value;
-    const password = form.user-password.value;
-    const confirmPassword = form.user-confirm-password.value;
+    const fullName = form.elements['user-fullname'].value.trim();
+    const email = form.elements['user-email'].value.trim();
+    const role = form.elements['user-role'].value;
+    const password = form.elements['user-password'].value;
+    const confirmPassword = form.elements['user-confirm-password'].value;
     
     // Get references to UI elements
     const submitUserText = document.getElementById('submit-user-text');
