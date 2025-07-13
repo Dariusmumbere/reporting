@@ -2379,6 +2379,11 @@
                 if (!userDropdownBtn.contains(e.target) && !userDropdownMenu.contains(e.target)) {
                     userDropdownMenu.classList.remove('active');
                 }
+                if (e.target.closest('.download-report-btn')) {
+                    const btn = e.target.closest('.download-report-btn');
+                    const reportId = btn.getAttribute('data-id');
+                    downloadReportAsPDF(reportId);
+                }
             });
             
             // Menu items for view switching
@@ -2740,56 +2745,56 @@
 
         // Render recent reports for dashboard
         function renderRecentReports(reports) {
-            dashboardReportsTableBody.innerHTML = '';
-            
-            // Sort by date (newest first) and take first 5
-            const recentReports = [...reports]
-                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-                .slice(0, 5);
-            
-            if (recentReports.length === 0) {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td colspan="5" class="text-center text-muted">No reports found</td>
-                `;
-                dashboardReportsTableBody.appendChild(row);
-                return;
-            }
-            
-            recentReports.forEach(report => {
-                const row = document.createElement('tr');
-                
-                // Determine status badge
-                let statusBadge;
-                if (report.status === 'approved') {
-                    statusBadge = '<span class="badge badge-success">Approved</span>';
-                } else if (report.status === 'pending') {
-                    statusBadge = '<span class="badge badge-warning">Pending</span>';
-                } else {
-                    statusBadge = '<span class="badge badge-danger">Rejected</span>';
-                }
-                
-                // Format date
-                const reportDate = new Date(report.created_at).toLocaleDateString();
-                
-                row.innerHTML = `
-                    <td>#REP-${report.id.toString().padStart(3, '0')}</td>
-                    <td>${report.title}</td>
-                    <td>${statusBadge}</td>
-                    <td>${reportDate}</td>
-                    <td>
-                        <button class="action-btn view-report-btn" data-id="${report.id}" title="View">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button class="action-btn" title="Download">
-                            <i class="fas fa-download"></i>
-                        </button>
-                    </td>
-                `;
-                
-                dashboardReportsTableBody.appendChild(row);
-            });
+    dashboardReportsTableBody.innerHTML = '';
+    
+    // Sort by date (newest first) and take first 5
+    const recentReports = [...reports]
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+        .slice(0, 5);
+    
+    if (recentReports.length === 0) {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td colspan="5" class="text-center text-muted">No reports found</td>
+        `;
+        dashboardReportsTableBody.appendChild(row);
+        return;
+    }
+    
+    recentReports.forEach(report => {
+        const row = document.createElement('tr');
+        
+        // Determine status badge
+        let statusBadge;
+        if (report.status === 'approved') {
+            statusBadge = '<span class="badge badge-success">Approved</span>';
+        } else if (report.status === 'pending') {
+            statusBadge = '<span class="badge badge-warning">Pending</span>';
+        } else {
+            statusBadge = '<span class="badge badge-danger">Rejected</span>';
         }
+        
+        // Format date
+        const reportDate = new Date(report.created_at).toLocaleDateString();
+        
+        row.innerHTML = `
+            <td>#REP-${report.id.toString().padStart(3, '0')}</td>
+            <td>${report.title}</td>
+            <td>${statusBadge}</td>
+            <td>${reportDate}</td>
+            <td>
+                <button class="action-btn view-report-btn" data-id="${report.id}" title="View">
+                    <i class="fas fa-eye"></i>
+                </button>
+                <button class="action-btn download-report-btn" data-id="${report.id}" title="Download PDF">
+                    <i class="fas fa-download"></i>
+                </button>
+            </td>
+        `;
+        
+        dashboardReportsTableBody.appendChild(row);
+    });
+}
 
         // Fetch reports from API
         function fetchReports() {
@@ -2870,67 +2875,69 @@
 
         // Render reports table
         function renderReportsTable(reports) {
-            reportsTableBody.innerHTML = '';
-            
-            if (reports.length === 0) {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td colspan="7" class="text-center text-muted">No reports found</td>
-                `;
-                reportsTableBody.appendChild(row);
-                return;
-            }
-            
-            reports.forEach(report => {
-                const row = document.createElement('tr');
-                
-                // Determine status badge
-                let statusBadge;
-                if (report.status === 'approved') {
-                    statusBadge = '<span class="badge badge-success">Approved</span>';
-                } else if (report.status === 'pending') {
-                    statusBadge = '<span class="badge badge-warning">Pending</span>';
-                } else {
-                    statusBadge = '<span class="badge badge-danger">Rejected</span>';
-                }
-                
-                // Format date
-                const reportDate = new Date(report.created_at).toLocaleDateString();
-                
-                // Count attachments
-                const attachmentCount = report.attachments ? report.attachments.length : 0;
-                const attachmentIcon = attachmentCount > 0 ? 
-                    `<i class="fas fa-paperclip"></i> ${attachmentCount}` : 
-                    '<span class="text-muted">None</span>';
-                
-                row.innerHTML = `
-                    <td>#REP-${report.id.toString().padStart(3, '0')}</td>
-                    <td>${report.title}</td>
-                    <td>${report.author_name}</td>
-                    <td>${statusBadge}</td>
-                    <td>${reportDate}</td>
-                    <td>${attachmentIcon}</td>
-                    <td>
-                        <button class="action-btn view-report-btn" data-id="${report.id}" title="View">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        ${currentUser.role === 'admin' || currentUser.id === report.author_id ? `
-                        <button class="action-btn edit-report-btn" data-id="${report.id}" title="Edit">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        ` : ''}
-                        ${currentUser.role === 'admin' ? `
-                        <button class="action-btn delete-report-btn delete" data-id="${report.id}" title="Delete">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                        ` : ''}
-                    </td>
-                `;
-                
-                reportsTableBody.appendChild(row);
-            });
+    reportsTableBody.innerHTML = '';
+    
+    if (reports.length === 0) {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td colspan="7" class="text-center text-muted">No reports found</td>
+        `;
+        reportsTableBody.appendChild(row);
+        return;
+    }
+    
+    reports.forEach(report => {
+        const row = document.createElement('tr');
+        
+        // Determine status badge
+        let statusBadge;
+        if (report.status === 'approved') {
+            statusBadge = '<span class="badge badge-success">Approved</span>';
+        } else if (report.status === 'pending') {
+            statusBadge = '<span class="badge badge-warning">Pending</span>';
+        } else {
+            statusBadge = '<span class="badge badge-danger">Rejected</span>';
         }
-
+        
+        // Format date
+        const reportDate = new Date(report.created_at).toLocaleDateString();
+        
+        // Count attachments
+        const attachmentCount = report.attachments ? report.attachments.length : 0;
+        const attachmentIcon = attachmentCount > 0 ? 
+            `<i class="fas fa-paperclip"></i> ${attachmentCount}` : 
+            '<span class="text-muted">None</span>';
+        
+        row.innerHTML = `
+            <td>#REP-${report.id.toString().padStart(3, '0')}</td>
+            <td>${report.title}</td>
+            <td>${report.author_name}</td>
+            <td>${statusBadge}</td>
+            <td>${reportDate}</td>
+            <td>${attachmentIcon}</td>
+            <td>
+                <button class="action-btn view-report-btn" data-id="${report.id}" title="View">
+                    <i class="fas fa-eye"></i>
+                </button>
+                <button class="action-btn download-report-btn" data-id="${report.id}" title="Download PDF">
+                    <i class="fas fa-download"></i>
+                </button>
+                ${currentUser.role === 'admin' || currentUser.id === report.author_id ? `
+                <button class="action-btn edit-report-btn" data-id="${report.id}" title="Edit">
+                    <i class="fas fa-edit"></i>
+                </button>
+                ` : ''}
+                ${currentUser.role === 'admin' ? `
+                <button class="action-btn delete-report-btn delete" data-id="${report.id}" title="Delete">
+                    <i class="fas fa-trash"></i>
+                </button>
+                ` : ''}
+            </td>
+        `;
+        
+        reportsTableBody.appendChild(row);
+    });
+}
         // Load users from API (admin only)
         function loadUsers() {
             // Show loading state
@@ -3293,116 +3300,127 @@ async function handleAddUser() {
 }
         // View report details
         function viewReport(reportId) {
-            fetch(`${API_BASE_URL}/reports/${reportId}`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to fetch report');
-                }
-                return response.json();
-            })
-            .then(report => {
-                selectedReportId = reportId;
-                
-                // Set report details
-                viewReportTitle.textContent = report.title;
-                viewReportAuthor.textContent = report.author_name;
-                viewReportDate.textContent = new Date(report.created_at).toLocaleDateString();
-                viewReportDescription.textContent = report.description;
-                viewReportCategory.textContent = report.category;
-                
-                // Set status
-                let statusBadge;
-                if (report.status === 'approved') {
-                    statusBadge = '<span class="badge badge-success">Approved</span>';
-                } else if (report.status === 'pending') {
-                    statusBadge = '<span class="badge badge-warning">Pending</span>';
-                } else {
-                    statusBadge = '<span class="badge badge-danger">Rejected</span>';
-                }
-                viewReportStatus.innerHTML = statusBadge;
-                
-                // Set status dropdown
-                reportStatusChange.value = report.status;
-                
-                // Set admin comments if any
-                adminComments.value = report.admin_comments || '';
-                
-                // Set attachments
-                viewReportAttachments.innerHTML = '';
-                if (report.attachments && report.attachments.length > 0) {
-                    report.attachments.forEach(attachment => {
-                        const fileItem = document.createElement('div');
-                        fileItem.className = 'file-item';
-                        
-                        // Get file icon based on type
-                        let fileIcon, fileColor;
-                        if (attachment.type.includes('image')) {
-                            fileIcon = 'fa-file-image';
-                            fileColor = '#e74c3c';
-                        } else if (attachment.type.includes('pdf')) {
-                            fileIcon = 'fa-file-pdf';
-                            fileColor = '#e74c3c';
-                        } else if (attachment.type.includes('word') || attachment.type.includes('document')) {
-                            fileIcon = 'fa-file-word';
-                            fileColor = '#2c7be5';
-                        } else if (attachment.type.includes('excel') || attachment.type.includes('spreadsheet')) {
-                            fileIcon = 'fa-file-excel';
-                            fileColor = '#2ecc71';
-                        } else {
-                            fileIcon = 'fa-file';
-                            fileColor = '#95a5a6';
-                        }
-                        
-                        // Format file size
-                        const fileSize = formatFileSize(attachment.size);
-                        
-                        fileItem.innerHTML = `
-                            <i class="fas ${fileIcon} file-icon" style="color: ${fileColor};"></i>
-                            <div class="file-info">
-                                <div class="file-name">${attachment.name}</div>
-                                <div class="file-size">${fileSize}</div>
-                            </div>
-                            <i class="fas fa-download file-icon" style="cursor: pointer;" data-url="${attachment.url}"></i>
-                        `;
-                        
-                        viewReportAttachments.appendChild(fileItem);
-                    });
-                    
-                    // Add event listeners to download buttons
-                    document.querySelectorAll('#view-report-attachments .fa-download').forEach(btn => {
-                        btn.addEventListener('click', (e) => {
-                            const url = e.currentTarget.getAttribute('data-url');
-                            downloadFile(url);
-                        });
-                    });
-                } else {
-                    const noFiles = document.createElement('div');
-                    noFiles.className = 'text-center text-muted';
-                    noFiles.textContent = 'No attachments';
-                    viewReportAttachments.appendChild(noFiles);
-                }
-                
-                // Show admin actions if user is admin
-                if (currentUser.role === 'admin') {
-                    adminReportActions.classList.remove('hidden');
-                    saveReportChanges.classList.remove('hidden');
-                } else {
-                    adminReportActions.classList.add('hidden');
-                    saveReportChanges.classList.add('hidden');
-                }
-                
-                // Show the modal
-                viewReportModal.classList.add('active');
-            })
-            .catch(error => {
-                console.error('Error viewing report:', error);
-                showAlert('Failed to load report details', 'danger');
-            });
+    fetch(`${API_BASE_URL}/reports/${reportId}`, {
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to fetch report');
+        }
+        return response.json();
+    })
+    .then(report => {
+        selectedReportId = reportId;
+        
+        // Set report details
+        viewReportTitle.textContent = report.title;
+        viewReportAuthor.textContent = report.author_name;
+        viewReportDate.textContent = new Date(report.created_at).toLocaleDateString();
+        viewReportDescription.textContent = report.description;
+        viewReportCategory.textContent = report.category;
+        
+        // Set status
+        let statusBadge;
+        if (report.status === 'approved') {
+            statusBadge = '<span class="badge badge-success">Approved</span>';
+        } else if (report.status === 'pending') {
+            statusBadge = '<span class="badge badge-warning">Pending</span>';
+        } else {
+            statusBadge = '<span class="badge badge-danger">Rejected</span>';
+        }
+        viewReportStatus.innerHTML = statusBadge;
+        
+        // Set status dropdown
+        reportStatusChange.value = report.status;
+        
+        // Set admin comments if any
+        adminComments.value = report.admin_comments || '';
+        
+        // Set attachments
+        viewReportAttachments.innerHTML = '';
+        if (report.attachments && report.attachments.length > 0) {
+            report.attachments.forEach(attachment => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                
+                // Get file icon based on type
+                let fileIcon, fileColor;
+                if (attachment.type.includes('image')) {
+                    fileIcon = 'fa-file-image';
+                    fileColor = '#e74c3c';
+                } else if (attachment.type.includes('pdf')) {
+                    fileIcon = 'fa-file-pdf';
+                    fileColor = '#e74c3c';
+                } else if (attachment.type.includes('word') || attachment.type.includes('document')) {
+                    fileIcon = 'fa-file-word';
+                    fileColor = '#2c7be5';
+                } else if (attachment.type.includes('excel') || attachment.type.includes('spreadsheet')) {
+                    fileIcon = 'fa-file-excel';
+                    fileColor = '#2ecc71';
+                } else {
+                    fileIcon = 'fa-file';
+                    fileColor = '#95a5a6';
+                }
+                
+                // Format file size
+                const fileSize = formatFileSize(attachment.size);
+                
+                fileItem.innerHTML = `
+                    <i class="fas ${fileIcon} file-icon" style="color: ${fileColor};"></i>
+                    <div class="file-info">
+                        <div class="file-name">${attachment.name}</div>
+                        <div class="file-size">${fileSize}</div>
+                    </div>
+                    <i class="fas fa-download file-icon" style="cursor: pointer;" data-url="${attachment.url}"></i>
+                `;
+                
+                viewReportAttachments.appendChild(fileItem);
+            });
+            
+            // Add event listeners to download buttons
+            document.querySelectorAll('#view-report-attachments .fa-download').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const url = e.currentTarget.getAttribute('data-url');
+                    downloadFile(url);
+                });
+            });
+        } else {
+            const noFiles = document.createElement('div');
+            noFiles.className = 'text-center text-muted';
+            noFiles.textContent = 'No attachments';
+            viewReportAttachments.appendChild(noFiles);
+        }
+        
+        // Add download button to modal footer
+        const downloadBtn = document.createElement('button');
+        downloadBtn.className = 'btn btn-outline';
+        downloadBtn.id = 'download-report-pdf-btn';
+        downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download PDF';
+        downloadBtn.addEventListener('click', () => downloadReportAsPDF(reportId));
+        
+        // Insert before the close button
+        const closeBtn = document.querySelector('#close-report-modal');
+        closeBtn.parentNode.insertBefore(downloadBtn, closeBtn);
+        
+        // Show admin actions if user is admin
+        if (currentUser.role === 'admin') {
+            adminReportActions.classList.remove('hidden');
+            saveReportChanges.classList.remove('hidden');
+        } else {
+            adminReportActions.classList.add('hidden');
+            saveReportChanges.classList.add('hidden');
+        }
+        
+        // Show the modal
+        viewReportModal.classList.add('active');
+    })
+    .catch(error => {
+        console.error('Error viewing report:', error);
+        showAlert('Failed to load report details', 'danger');
+    });
+}
 
         // Edit report
         function editReport(reportId) {
