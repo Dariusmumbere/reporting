@@ -1,4 +1,5 @@
 // download.js - Report PDF generation and download functionality
+const LOGO_URL = 'logo.jpg';
 
 // Function to load jsPDF library if not already loaded
 async function loadJSPDFLibrary() {
@@ -27,8 +28,27 @@ async function generateReportPDF(report) {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
         
-        // Add ReportHub logo (placeholder - in a real app, use your actual logo)
-        doc.addImage('logo.jpg');
+        // Add ReportHub logo
+        try {
+            // Load logo image
+            const logoImg = new Image();
+            logoImg.src = LOGO_URL;
+            
+            // Wait for logo to load
+            await new Promise((resolve, reject) => {
+                logoImg.onload = resolve;
+                logoImg.onerror = reject;
+            });
+            
+            // Add logo to PDF (adjust dimensions as needed)
+            doc.addImage(logoImg, 'JPEG', 20, 10, 40, 15);
+        } catch (logoError) {
+            console.warn('Failed to load logo, using fallback:', logoError);
+            // Fallback to text if logo fails
+            doc.setFontSize(12);
+            doc.setTextColor(40, 53, 147);
+            doc.text('ReportHub', 20, 20);
+        }
         
         // Report title
         doc.setFontSize(20);
@@ -113,6 +133,7 @@ async function generateReportPDF(report) {
         throw error;
     }
 }
+        
 
 // Function to download a report as PDF
 async function downloadReportAsPDF(reportId) {
