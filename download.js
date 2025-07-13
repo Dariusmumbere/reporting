@@ -1,4 +1,4 @@
-// download.js - Modern Report PDF Generation, Download, and Attachment Handling
+// download.js - Modern Report PDF Generation and Download Functionality
 
 // Global Configuration
 const CONFIG = {
@@ -23,128 +23,8 @@ const CONFIG = {
     CONTENT_WIDTH: 170,
     LINE_HEIGHT: 7,
     SECTION_SPACING: 15
-  },
-  ATTACHMENTS: {
-    MAX_SIZE: 10 * 1024 * 1024, // 10MB
-    ALLOWED_TYPES: [
-      'image/jpeg',
-      'image/png',
-      'application/pdf',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'application/vnd.ms-excel',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    ]
   }
 };
-
-// ======================
-// ATTACHMENT HANDLING
-// ======================
-
-/**
- * Downloads a file from a URL
- * @param {string} url - The file URL
- * @param {string} filename - The desired filename
- */
-async function downloadFile(url, filename) {
-  try {
-    // Create a temporary anchor element
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename || 'download';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    
-    // Revoke the object URL to free memory
-    setTimeout(() => {
-      URL.revokeObjectURL(url);
-    }, 100);
-  } catch (error) {
-    console.error('Error downloading file:', error);
-    throw error;
-  }
-}
-
-/**
- * Downloads an attachment from the API
- * @param {string} attachmentUrl - The attachment URL
- * @param {string} attachmentName - The original filename
- */
-async function downloadAttachment(attachmentUrl, attachmentName) {
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      throw new Error('No authentication token found');
-    }
-
-    showModernToast('Preparing download...', 'info', {
-      icon: '⏳',
-      autoClose: 2000
-    });
-
-    const response = await fetch(`${API_BASE_URL}${attachmentUrl}`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to download attachment: ${response.statusText}`);
-    }
-
-    const blob = await response.blob();
-    const url = URL.createObjectURL(blob);
-    
-    showModernToast('Download ready!', 'success', {
-      icon: '✓',
-      autoClose: 1500
-    });
-
-    setTimeout(() => {
-      downloadFile(url, attachmentName);
-    }, 500);
-  } catch (error) {
-    console.error('Error downloading attachment:', error);
-    showModernToast(`Failed to download: ${error.message}`, 'danger', {
-      icon: '✗',
-      autoClose: 5000
-    });
-    throw error;
-  }
-}
-
-/**
- * Sets up event listeners for attachment downloads
- */
-function setupAttachmentDownloadListeners() {
-  document.addEventListener('click', async (e) => {
-    if (e.target.closest('.download-attachment-btn')) {
-      e.preventDefault();
-      const btn = e.target.closest('.download-attachment-btn');
-      const url = btn.getAttribute('data-url');
-      const name = btn.getAttribute('data-name');
-      
-      // Add loading state
-      const originalHTML = btn.innerHTML;
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-      btn.disabled = true;
-      
-      try {
-        await downloadAttachment(url, name);
-      } finally {
-        // Restore original state
-        btn.innerHTML = originalHTML;
-        btn.disabled = false;
-      }
-    }
-  });
-}
-
-// ======================
-// PDF GENERATION & DOWNLOAD
-// ======================
 
 // Modern gradient generator
 function createGradient(doc, yPosition, height, color) {
@@ -577,17 +457,6 @@ function initializePDFFeatures() {
   });
 }
 
-// Initialize all features
-function initializeAllFeatures() {
-  // Initialize PDF features
-  initializePDFFeatures();
-  
-  // Initialize attachment download handlers
-  setupAttachmentDownloadListeners();
-  
-  console.log('All download and attachment features initialized');
-}
-
 // Modern CSS styles
 const modernStyles = `
 /* Modern Toast Notifications */
@@ -699,25 +568,6 @@ const modernStyles = `
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
-
-/* Attachment Download Buttons */
-.download-attachment-btn {
-  background: none;
-  border: none;
-  color: var(--primary-color);
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.download-attachment-btn:hover {
-  transform: scale(1.1);
-  color: var(--secondary-color);
-}
-
-.download-attachment-btn:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
 `;
 
 // Inject modern styles
@@ -727,7 +577,7 @@ document.head.appendChild(styleTag);
 
 // Initialize when DOM is ready
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initializeAllFeatures);
+  document.addEventListener('DOMContentLoaded', initializePDFFeatures);
 } else {
-  initializeAllFeatures();
+  initializePDFFeatures();
 }
