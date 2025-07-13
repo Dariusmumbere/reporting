@@ -2725,12 +2725,31 @@
 
         // Load dashboard data
         function loadDashboardData() {
-            fetchReports().then(reports => {
-                updateDashboardCounts(reports);
-                renderRecentReports(reports);
-            });
-        }
-
+    // Show loading state
+    dashboardReportsTableBody.innerHTML = `
+        <tr>
+            <td colspan="5" class="text-center">
+                <div class="d-flex justify-content-center py-4">
+                    <div class="spinner spinner-primary"></div>
+                </div>
+            </td>
+        </tr>
+    `;
+    
+    fetchReports()
+        .then(reports => {
+            updateDashboardCounts(reports);
+            renderRecentReports(reports);
+        })
+        .catch(error => {
+            console.error('Error loading dashboard data:', error);
+            dashboardReportsTableBody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center text-muted">Error loading reports</td>
+                </tr>
+            `;
+        });
+}
         // Update dashboard counts
         function updateDashboardCounts(reports) {
             const total = reports.length;
@@ -3501,52 +3520,58 @@ async function handleAddUser() {
 
         // Handle saving report changes (admin only)
         function handleSaveReportChanges() {
-            const status = reportStatusChange.value;
-            const comments = adminComments.value;
-            
-            // Show loading state
-            saveChangesText.textContent = 'Saving...';
-            saveChangesSpinner.classList.remove('hidden');
-            
-            const updateData = {
-                status: status,
-                admin_comments: comments
-            };
-            
-            fetch(`${API_BASE_URL}/reports/${selectedReportId}`, {
-                method: 'PATCH',
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(updateData)
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to update report');
-                }
-                return response.json();
-            })
-            .then(updatedReport => {
-                // Show success message
-                showAlert('Report updated successfully', 'success');
-                
-                // Close modal
-                viewReportModal.classList.remove('active');
-                
-                // Reload reports
-                loadReports();
-                loadDashboardData();
-            })
-            .catch(error => {
-                console.error('Error updating report:', error);
-                showAlert('Failed to update report', 'danger');
-            })
-            .finally(() => {
-                saveChangesText.textContent = 'Save Changes';
-                saveChangesSpinner.classList.add('hidden');
-            });
+    const status = reportStatusChange.value;
+    const comments = adminComments.value;
+    
+    // Show loading state
+    saveChangesText.textContent = 'Saving...';
+    saveChangesSpinner.classList.remove('hidden');
+    
+    const updateData = {
+        status: status,
+        admin_comments: comments
+    };
+    
+    fetch(`${API_BASE_URL}/reports/${selectedReportId}`, {
+        method: 'PATCH',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updateData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to update report');
         }
+        return response.json();
+    })
+    .then(updatedReport => {
+        // Show success message
+        showAlert('Report updated successfully', 'success');
+        
+        // Close modal
+        viewReportModal.classList.remove('active');
+        
+        // Reload reports and dashboard data
+        loadReports();
+        loadDashboardData();
+        
+        // Force a refresh of the current view
+        const activeView = document.querySelector('.view:not(.hidden)');
+        if (activeView.id === 'dashboard-view') {
+            loadDashboardData();
+        }
+    })
+    .catch(error => {
+        console.error('Error updating report:', error);
+        showAlert('Failed to update report', 'danger');
+    })
+    .finally(() => {
+        saveChangesText.textContent = 'Save Changes';
+        saveChangesSpinner.classList.add('hidden');
+    });
+}
 
         // Handle saving settings
         function handleSaveSettings() {
