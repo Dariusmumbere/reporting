@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="download.js"></script>
+    <script src="attachments.js" type="module"></script>
     <style>
         :root {
             --primary-color: #4361ee;
@@ -3373,10 +3374,13 @@ async function handleAddUser() {
                         <div class="file-name">${attachment.name}</div>
                         <div class="file-size">${fileSize}</div>
                     </div>
-                    <i class="fas fa-download file-icon" style="cursor: pointer;" data-url="${attachment.url}"></i>
+                    <button class="action-btn download-attachment-btn" 
+                            data-url="${attachment.url}" 
+                            data-name="${attachment.name}"
+                            title="Download">
+                        <i class="fas fa-download"></i>
+                    </button>
                 `;
-                
-                viewReportAttachments.appendChild(fileItem);
             });
             
             // Add event listeners to download buttons
@@ -3611,6 +3615,9 @@ async function handleAddUser() {
 
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
+        // Initialize attachments functionality
+        import { initAttachments } from './attachments.js';
+        initAttachments();
     </script>
 </body>
 </html>
