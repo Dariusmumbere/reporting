@@ -3193,7 +3193,8 @@
             });
         }
 
-        async function handleAddUser() {
+        async function handleAddUser(event) {
+            event.preventDefault();
             const fullName = document.getElementById('user-fullname').value;
             const email = document.getElementById('user-email').value;
             const role = document.getElementById('user-role').value;
