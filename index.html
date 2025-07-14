@@ -3404,7 +3404,7 @@ async function handleAddUser() {
         viewReportTitle.textContent = report.title;
         viewReportAuthor.textContent = report.author_name;
         viewReportDate.textContent = new Date(report.created_at).toLocaleDateString();
-        viewReportDescription.textContent = report.description;
+        viewReportDescription.innerHTML = report.description;
         viewReportCategory.textContent = report.category;
 
         // Set status badge
