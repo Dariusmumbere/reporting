@@ -3,14 +3,14 @@
 // Global Configuration
 const CONFIG = {
   DESIGN: {
-    PRIMARY_COLOR: [67, 97, 238],    // #4361ee
-    SECONDARY_COLOR: [63, 55, 201],  // #3f37c9
-    ACCENT_COLOR: [247, 37, 133],    // #f72585
-    LIGHT_GRAY: [245, 245, 245],     // #f5f5f5
-    DARK_GRAY: [100, 100, 100],      // #646464
-    SUCCESS_COLOR: [76, 201, 240],   // #4cc9f0
-    WARNING_COLOR: [248, 150, 30],   // #f8961e
-    DANGER_COLOR: [247, 37, 133]     // #f72585
+    PRIMARY_COLOR: [40, 53, 147],
+    SECONDARY_COLOR: [76, 201, 240],
+    ACCENT_COLOR: [247, 37, 133],
+    LIGHT_GRAY: [245, 245, 245],
+    DARK_GRAY: [100, 100, 100],
+    SUCCESS_COLOR: [46, 204, 113],
+    WARNING_COLOR: [248, 150, 30],
+    DANGER_COLOR: [231, 76, 60]
   },
   LOGO: {
     URL: 'logo.jpg',
@@ -72,16 +72,16 @@ async function loadImage(url) {
       
       // Gradient background
       const gradient = ctx.createLinearGradient(0, 0, 200, 100);
-      gradient.addColorStop(0, 'rgba(67, 97, 238, 0.1)');
-      gradient.addColorStop(1, 'rgba(63, 55, 201, 0.1)');
+      gradient.addColorStop(0, 'rgba(40, 53, 147, 0.1)');
+      gradient.addColorStop(1, 'rgba(76, 201, 240, 0.1)');
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, 200, 100);
       
       // Text
       ctx.font = '16px Arial';
-      ctx.fillStyle = 'rgba(67, 97, 238, 0.5)';
+      ctx.fillStyle = 'rgba(40, 53, 147, 0.5)';
       ctx.textAlign = 'center';
-      ctx.fillText('ReportHub', 100, 60);
+      ctx.fillText('Company Logo', 100, 60);
       
       resolve(canvas);
     };
@@ -149,6 +149,41 @@ function createSectionDivider(doc, yPos, title = '') {
   return yPos + 10;
 }
 
+// Function to convert HTML to plain text while preserving some basic formatting
+function htmlToPlainText(html) {
+  // Create a temporary div element
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = html;
+  
+  // Replace common HTML elements with their text equivalents
+  tempDiv.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach(el => {
+    el.outerHTML = '\n\n' + el.textContent.toUpperCase() + '\n\n';
+  });
+  
+  tempDiv.querySelectorAll('p').forEach(el => {
+    el.outerHTML = '\n' + el.textContent + '\n';
+  });
+  
+  tempDiv.querySelectorAll('li').forEach(el => {
+    el.outerHTML = '• ' + el.textContent + '\n';
+  });
+  
+  tempDiv.querySelectorAll('br').forEach(el => {
+    el.outerHTML = '\n';
+  });
+  
+  tempDiv.querySelectorAll('strong, b').forEach(el => {
+    el.outerHTML = el.textContent.toUpperCase();
+  });
+  
+  // Get the text content and clean up multiple newlines
+  let text = tempDiv.textContent;
+  text = text.replace(/\n\s*\n\s*\n/g, '\n\n'); // Replace 3+ newlines with 2
+  text = text.trim();
+  
+  return text;
+}
+
 // Generate Modern PDF Report
 async function generateReportPDF(report) {
   try {
@@ -178,9 +213,6 @@ async function generateReportPDF(report) {
       );
     } catch (error) {
       console.warn('Logo not loaded, using text fallback:', error.message);
-      doc.setFontSize(10);
-      doc.setTextColor(150, 150, 150);
-      doc.text('ReportHub', doc.internal.pageSize.getWidth() - CONFIG.LAYOUT.MARGIN, 25, { align: 'right' });
     }
     
     // Report Metadata in modern card layout
@@ -230,16 +262,28 @@ async function generateReportPDF(report) {
     doc.setFontSize(11);
     doc.setTextColor(50, 50, 50);
     
-    // Convert HTML description to plain text for PDF
-    const descriptionText = report.description
-      .replace(/<[^>]*>/g, '') // Remove HTML tags
-      .replace(/&nbsp;/g, ' ') // Replace non-breaking spaces
-      .replace(/\s+/g, ' ')    // Collapse multiple spaces
-      .trim();
+    // Convert HTML description to plain text with basic formatting
+    const plainTextDescription = htmlToPlainText(report.description);
     
-    const descLines = doc.splitTextToSize(descriptionText, CONFIG.LAYOUT.CONTENT_WIDTH);
-    doc.text(descLines, CONFIG.LAYOUT.MARGIN, currentY);
-    currentY += (descLines.length * CONFIG.LAYOUT.LINE_HEIGHT) + CONFIG.LAYOUT.SECTION_SPACING;
+    // Split the text into lines that fit the content width
+    const descLines = doc.splitTextToSize(plainTextDescription, CONFIG.LAYOUT.CONTENT_WIDTH);
+    
+    // Add each line to the PDF
+    descLines.forEach(line => {
+      // Skip empty lines that might be from HTML conversion
+      if (line.trim() === '') return;
+      
+      // Check if we need a new page
+      if (currentY > doc.internal.pageSize.height - 20) {
+        doc.addPage();
+        currentY = 20;
+      }
+      
+      doc.text(line, CONFIG.LAYOUT.MARGIN, currentY);
+      currentY += CONFIG.LAYOUT.LINE_HEIGHT;
+    });
+    
+    currentY += CONFIG.LAYOUT.SECTION_SPACING;
     
     // Admin Comments (if exists)
     if (report.admin_comments) {
@@ -260,7 +304,31 @@ async function generateReportPDF(report) {
       doc.setFontSize(10);
       doc.setTextColor(70, 70, 70);
       const commentLines = doc.splitTextToSize(report.admin_comments, CONFIG.LAYOUT.CONTENT_WIDTH - 10);
-      doc.text(commentLines, CONFIG.LAYOUT.MARGIN + 5, currentY + 7);
+      
+      // Add each comment line
+      let commentY = currentY + 7;
+      commentLines.forEach(line => {
+        // Check if we need a new page
+        if (commentY > doc.internal.pageSize.height - 20) {
+          doc.addPage();
+          commentY = 20;
+          // Redraw the comment card background on the new page
+          doc.setFillColor(253, 245, 230);
+          doc.roundedRect(
+            CONFIG.LAYOUT.MARGIN, 
+            commentY - 7, 
+            CONFIG.LAYOUT.CONTENT_WIDTH, 
+            30, 
+            3, 
+            3, 
+            'F'
+          );
+        }
+        
+        doc.text(line, CONFIG.LAYOUT.MARGIN + 5, commentY);
+        commentY += CONFIG.LAYOUT.LINE_HEIGHT;
+      });
+      
       currentY += 35 + (commentLines.length * CONFIG.LAYOUT.LINE_HEIGHT);
     }
     
@@ -270,6 +338,12 @@ async function generateReportPDF(report) {
       
       doc.setFontSize(10);
       report.attachments.forEach((attachment, index) => {
+        // Check if we need a new page
+        if (currentY > doc.internal.pageSize.height - 20) {
+          doc.addPage();
+          currentY = 20;
+        }
+        
         // Attachment card
         doc.setFillColor(240, 248, 255);
         doc.roundedRect(
@@ -282,13 +356,9 @@ async function generateReportPDF(report) {
           'F'
         );
         
-        // File name
+        // File name with icon
         doc.setTextColor(...CONFIG.DESIGN.PRIMARY_COLOR);
-        doc.text(
-          `📄 ${attachment.name}`, 
-          CONFIG.LAYOUT.MARGIN + 5, 
-          currentY + 7
-        );
+        doc.text(`📄 ${attachment.name}`, CONFIG.LAYOUT.MARGIN + 5, currentY + 7);
         
         // File size
         doc.setTextColor(...CONFIG.DESIGN.DARK_GRAY);
@@ -349,10 +419,6 @@ async function downloadReportAsPDF(reportId) {
     if (!response.ok) throw new Error('Failed to fetch report');
     
     const report = await response.json();
-    
-    // Ensure jsPDF is loaded
-    await loadJSPDFLibrary();
-    
     const pdfDoc = await generateReportPDF(report);
     
     // Sanitize filename
@@ -495,11 +561,11 @@ const modernStyles = `
 }
 
 .modern-toast-success {
-  background-color: rgba(76, 201, 240, 0.95);
+  background-color: rgba(46, 204, 113, 0.95);
 }
 
 .modern-toast-danger {
-  background-color: rgba(247, 37, 133, 0.95);
+  background-color: rgba(231, 76, 60, 0.95);
 }
 
 .modern-toast-info {
