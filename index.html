@@ -3442,6 +3442,7 @@ async function handleAddUser() {
                 const fileItem = document.createElement('div');
                 fileItem.className = 'file-item';
 
+                // Determine file icon based on type
                 let fileIcon, fileColor;
                 if (attachment.type.includes('image')) {
                     fileIcon = 'fa-file-image';
@@ -3469,7 +3470,7 @@ async function handleAddUser() {
                         <div class="file-size">${fileSize}</div>
                     </div>
                     <button class="action-btn download-attachment-btn" 
-                            data-url="${attachment.url}" 
+                            data-url="${API_BASE_URL}/download/${attachment.url.split('/').pop()}" 
                             data-name="${attachment.name}"
                             title="Download">
                         <i class="fas fa-download"></i>
@@ -3480,10 +3481,11 @@ async function handleAddUser() {
             });
 
             // Add event listeners to download buttons
-            document.querySelectorAll('#view-report-attachments .fa-download').forEach(btn => {
+            document.querySelectorAll('.download-attachment-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const url = e.currentTarget.getAttribute('data-url');
-                    downloadFile(url);
+                    const fileName = e.currentTarget.getAttribute('data-name');
+                    downloadFile(url, fileName);
                 });
             });
         } else {
@@ -3520,8 +3522,6 @@ async function handleAddUser() {
         showAlert('Failed to load report details', 'danger');
     });
 }
-
-
         // Edit report
         function editReport(reportId) {
             showAlert('Edit functionality would be implemented here', 'info');
@@ -3682,6 +3682,32 @@ function updateReportStatusInUI(reportId, newStatus) {
     // Update the counts in the dashboard
     if (document.getElementById('dashboard-view') && !document.getElementById('dashboard-view').classList.contains('hidden')) {
         loadDashboardData();
+    }
+}
+async function downloadFile(url, fileName) {
+    try {
+        const response = await fetch(url, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to download file');
+        }
+        
+        const blob = await response.blob();
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = fileName || 'download';
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(downloadUrl);
+        a.remove();
+    } catch (error) {
+        console.error('Error downloading file:', error);
+        showAlert('Failed to download file', 'danger');
     }
 }
 
