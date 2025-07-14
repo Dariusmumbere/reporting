@@ -6,10 +6,9 @@
     <title>ReportHub | Professional Reporting System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="download.js"></script>
-    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    
     <style>
         :root {
             --primary-color: #4361ee;
@@ -1590,87 +1589,6 @@
         ::-webkit-scrollbar-thumb:hover {
             background: var(--primary-dark);
         }
-                /* Rich Text Editor Styles */
-        .editor-container {
-            height: 400px;
-            margin-bottom: 1.5rem;
-            background-color: var(--bg-primary);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius);
-        }
-        
-        .ql-toolbar {
-            border-top-left-radius: var(--radius);
-            border-top-right-radius: var(--radius);
-            background-color: var(--bg-tertiary);
-            border-bottom: 1px solid var(--border-color);
-        }
-        
-        .ql-container {
-            border-bottom-left-radius: var(--radius);
-            border-bottom-right-radius: var(--radius);
-            font-family: inherit;
-        }
-        
-        .ql-editor {
-            min-height: 350px;
-            font-size: 0.875rem;
-            color: var(--text-primary);
-        }
-        
-        .ql-snow .ql-picker {
-            color: var(--text-primary);
-        }
-        
-        .ql-snow .ql-stroke {
-            stroke: var(--text-primary);
-        }
-        
-        .ql-snow .ql-fill {
-            fill: var(--text-primary);
-        }
-        
-        .ql-snow .ql-picker-options {
-            background-color: var(--bg-primary);
-            border-color: var(--border-color);
-        }
-        
-        /* Table styles in editor */
-        .ql-editor table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 10px 0;
-        }
-        
-        .ql-editor table td {
-            border: 1px solid var(--border-color);
-            padding: 8px;
-        }
-        
-        /* Font size dropdown */
-        .ql-snow .ql-picker.ql-size .ql-picker-label::before,
-        .ql-snow .ql-picker.ql-size .ql-picker-item::before {
-            content: attr(data-value) !important;
-        }
-        
-        /* Toolbar customization */
-        .ql-toolbar button:hover,
-        .ql-toolbar button:focus,
-        .ql-toolbar button.ql-active {
-            color: var(--primary-color);
-        }
-        
-        .ql-toolbar button:hover .ql-stroke,
-        .ql-toolbar button:focus .ql-stroke,
-        .ql-toolbar button.ql-active .ql-stroke {
-            stroke: var(--primary-color);
-        }
-        
-        .ql-toolbar button:hover .ql-fill,
-        .ql-toolbar button:focus .ql-fill,
-        .ql-toolbar button.ql-active .ql-fill {
-            fill: var(--primary-color);
-        }
   
     </style>
 </head>
@@ -2112,63 +2030,60 @@
         </div>
 
         <!-- Create Report Modal -->
-    <div class="modal" id="create-report-modal">
-        <div class="modal-content" style="max-width: 800px;">
-            <div class="modal-header">
-                <h3 class="modal-title">Create New Report</h3>
-                <button class="modal-close" id="close-create-report-modal">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="create-report-form">
-                    <div class="form-group">
-                        <label for="report-title" class="form-label">Report Title</label>
-                        <input type="text" id="report-title" class="form-control" placeholder="Enter report title" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="report-category" class="form-label">Category</label>
-                        <select id="report-category" class="form-control form-select" required>
-                            <option value="">Select a category</option>
-                            <option value="financial">Financial</option>
-                            <option value="marketing">Marketing</option>
-                            <option value="operations">Operations</option>
-                            <option value="hr">Human Resources</option>
-                            <option value="it">Information Technology</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Report Content</label>
-                        <div id="report-editor" class="editor-container">
-                            <!-- Quill editor will be initialized here -->
+        <div class="modal" id="create-report-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Create New Report</h3>
+                    <button class="modal-close" id="close-create-report-modal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="create-report-form">
+                        <div class="form-group">
+                            <label for="report-title" class="form-label">Report Title</label>
+                            <input type="text" id="report-title" class="form-control" placeholder="Enter report title" required>
                         </div>
-                        <input type="hidden" id="report-content">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Attachments</label>
-                        <div class="file-upload">
-                            <input type="file" id="report-attachments" class="file-upload-input" multiple>
-                            <label for="report-attachments" class="file-upload-label">
-                                <i class="fas fa-cloud-upload-alt"></i>
-                                <div class="file-upload-text">
-                                    <strong>Click to upload</strong> or drag and drop
-                                    <div style="font-size: 0.75rem; margin-top: 0.25rem;">PDF, DOCX, XLSX, JPG, PNG (Max 10MB each)</div>
-                                </div>
-                            </label>
+                        <div class="form-group">
+                            <label for="report-description" class="form-label">Description</label>
+                            <textarea id="report-description" class="form-control form-textarea" placeholder="Enter report description" required></textarea>
                         </div>
-                        <div class="file-list" id="report-attachments-list"></div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-outline" id="cancel-create-report">Cancel</button>
-                <button class="btn btn-primary" id="submit-create-report">
-                    <span id="submit-report-text">Submit Report</span>
-                    <span class="spinner hidden" id="submit-report-spinner"></span>
-                </button>
+                        <div class="form-group">
+                            <label for="report-category" class="form-label">Category</label>
+                            <select id="report-category" class="form-control form-select" required>
+                                <option value="">Select a category</option>
+                                <option value="financial">Financial</option>
+                                <option value="marketing">Marketing</option>
+                                <option value="operations">Operations</option>
+                                <option value="hr">Human Resources</option>
+                                <option value="it">Information Technology</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Attachments</label>
+                            <div class="file-upload">
+                                <input type="file" id="report-attachments" class="file-upload-input" multiple>
+                                <label for="report-attachments" class="file-upload-label">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <div class="file-upload-text">
+                                        <strong>Click to upload</strong> or drag and drop
+                                        <div style="font-size: 0.75rem; margin-top: 0.25rem;">PDF, DOCX, XLSX, JPG, PNG (Max 10MB each)</div>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="file-list" id="report-attachments-list"></div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline" id="cancel-create-report">Cancel</button>
+                    <button class="btn btn-primary" id="submit-create-report">
+                        <span id="submit-report-text">Submit Report</span>
+                        <span class="spinner hidden" id="submit-report-spinner"></span>
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
 
         <!-- Add User Modal (Admin only) -->
 <div class="modal" id="add-user-modal">
@@ -2218,82 +2133,83 @@
 </div>
 
         <!-- View Report Modal -->
-    <div class="modal" id="view-report-modal">
-        <div class="modal-content" style="max-width: 800px;">
-            <div class="modal-header">
-                <h3 class="modal-title">Report Details</h3>
-                <button class="modal-close" id="close-view-report-modal">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="card" style="margin-bottom: 1.5rem;">
-                    <div class="card-body">
-                        <h2 id="view-report-title" style="margin-bottom: 1rem;">Quarterly Financial Report</h2>
-                        <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem;">
-                            <div>
-                                <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Author</div>
-                                <div id="view-report-author">John Doe</div>
+        <div class="modal" id="view-report-modal">
+            <div class="modal-content" style="max-width: 800px;">
+                <div class="modal-header">
+                    <h3 class="modal-title">Report Details</h3>
+                    <button class="modal-close" id="close-view-report-modal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="card" style="margin-bottom: 1.5rem;">
+                        <div class="card-body">
+                            <h2 id="view-report-title" style="margin-bottom: 1rem;">Quarterly Financial Report</h2>
+                            <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem;">
+                                <div>
+                                    <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Author</div>
+                                    <div id="view-report-author">John Doe</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Date</div>
+                                    <div id="view-report-date">2023-10-15</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Status</div>
+                                    <div id="view-report-status"><span class="badge badge-success">Approved</span></div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Category</div>
+                                    <div id="view-report-category">Financial</div>
+                                </div>
                             </div>
                             <div>
-                                <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Date</div>
-                                <div id="view-report-date">2023-10-15</div>
-                            </div>
-                            <div>
-                                <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Status</div>
-                                <div id="view-report-status"><span class="badge badge-success">Approved</span></div>
-                            </div>
-                            <div>
-                                <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Category</div>
-                                <div id="view-report-category">Financial</div>
-                            </div>
-                        </div>
-                        <div>
-                            <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Content</div>
-                            <div id="view-report-content" style="line-height: 1.7; padding: 1rem; background-color: var(--bg-secondary); border-radius: var(--radius);">
-                                <!-- Report content will be rendered here -->
+                                <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Description</div>
+                                <div id="view-report-description" style="line-height: 1.7;">
+                                    This report contains the financial performance of the company for the third quarter of 2023. It includes revenue, expenses, profit margins, and comparisons with previous quarters.
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">Attachments</h2>
-                    </div>
-                    <div class="card-body">
-                        <div class="file-list" id="view-report-attachments">
-                            <div class="text-center text-muted">No attachments</div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Attachments</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="file-list" id="view-report-attachments">
+                                <div class="text-center text-muted">No attachments</div>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="card hidden" id="admin-report-actions" style="margin-top: 1.5rem;">
-                    <div class="card-header">
-                        <h2 class="card-title">Admin Actions</h2>
-                    </div>
-                    <div class="card-body">
-                        <div class="form-group">
-                            <label for="report-status-change" class="form-label">Change Status</label>
-                            <select id="report-status-change" class="form-control form-select">
-                                <option value="pending">Pending</option>
-                                <option value="approved">Approved</option>
-                                <option value="rejected">Rejected</option>
-                            </select>
+                    <div class="card hidden" id="admin-report-actions" style="margin-top: 1.5rem;">
+                        <div class="card-header">
+                            <h2 class="card-title">Admin Actions</h2>
                         </div>
-                        <div class="form-group">
-                            <label for="admin-comments" class="form-label">Comments</label>
-                            <textarea id="admin-comments" class="form-control form-textarea" placeholder="Enter your comments"></textarea>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label for="report-status-change" class="form-label">Change Status</label>
+                                <select id="report-status-change" class="form-control form-select">
+                                    <option value="pending">Pending</option>
+                                    <option value="approved">Approved</option>
+                                    <option value="rejected">Rejected</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="admin-comments" class="form-label">Comments</label>
+                                <textarea id="admin-comments" class="form-control form-textarea" placeholder="Enter your comments"></textarea>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-outline" id="close-report-modal">Close</button>
-                <button class="btn btn-primary hidden" id="save-report-changes">
-                    <span id="save-changes-text">Save Changes</span>
-                    <span class="spinner hidden" id="save-changes-spinner"></span>
-                </button>
+                <div class="modal-footer">
+                    <button class="btn btn-outline" id="close-report-modal">Close</button>
+                    <button class="btn btn-primary hidden" id="save-report-changes">
+                        <span id="save-changes-text">Save Changes</span>
+                        <span class="spinner hidden" id="save-changes-spinner"></span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -3242,102 +3158,80 @@
             
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
-        // Initialize Quill editor
-        const quill = new Quill('#report-editor', {
-            modules: {
-                toolbar: [
-                    [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-                    ['bold', 'italic', 'underline', 'strike'],
-                    [{ 'color': [] }, { 'background': [] }],
-                    [{ 'font': [] }],
-                    [{ 'align': [] }],
-                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                    [{ 'script': 'sub'}, { 'script': 'super' }],
-                    ['blockquote', 'code-block'],
-                    ['link', 'image', 'video'],
-                    ['clean'],
-                    ['table']
-                ]
-            },
-            placeholder: 'Write your report content here...',
-            theme: 'snow'
-        });
-
-        // When form is submitted, get the HTML content from Quill
-        document.getElementById('create-report-form').addEventListener('submit', function(e) {
-            const content = document.querySelector('#report-editor .ql-editor').innerHTML;
-            document.getElementById('report-content').value = content;
-        });
 
         // Handle create report submission
-        async function handleCreateReport() {
-    const title = document.getElementById('report-title').value;
-    const category = document.getElementById('report-category').value;
-    const content = document.querySelector('#report-editor .ql-editor').innerHTML;
-    const files = reportAttachments.files;
-    
-    if (!title || !category || !content) {
-        showAlert('Please fill in all required fields', 'danger');
-        return;
-    }
-    
-    // Show loading state
-    submitReportText.textContent = 'Submitting...';
-    submitReportSpinner.classList.remove('hidden');
-    
-    try {
-        // Create form data
-        const formData = new FormData();
-        formData.append('title', title);
-        formData.append('category', category);
-        formData.append('description', content); // Changed from 'content' to 'description' to match backend
-        
-        // Add attachments if any
-        for (let i = 0; i < files.length; i++) {
-            formData.append('attachments', files[i]);
+        function handleCreateReport() {
+            const title = document.getElementById('report-title').value;
+            const description = document.getElementById('report-description').value;
+            const category = document.getElementById('report-category').value;
+            const files = reportAttachments.files;
+            
+            if (!title || !description || !category) {
+                showAlert('Please fill in all required fields', 'danger');
+                return;
+            }
+            
+            // Show loading state
+            submitReportText.textContent = 'Submitting...';
+            submitReportSpinner.classList.remove('hidden');
+            
+            // Create form data
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('description', description);
+            formData.append('category', category);
+            
+            // Add attachments if any
+            for (let i = 0; i < files.length; i++) {
+                formData.append('attachments', files[i]);
+            }
+            
+            fetch(`${API_BASE_URL}/reports`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.detail || 'Failed to create report');
+                    });
+                }
+                return response.json();
+            })
+            .then(report => {
+                // Show success message
+                showAlert('Report created successfully', 'success');
+                
+                // Close modal and reset form
+                createReportModal.classList.remove('active');
+                createReportForm.reset();
+                reportAttachmentsList.innerHTML = '';
+                
+                // Reload reports
+                loadReports();
+                loadDashboardData();
+            })
+            .catch(error => {
+                showAlert(error.message, 'danger');
+            })
+            .finally(() => {
+                submitReportText.textContent = 'Submit Report';
+                submitReportSpinner.classList.add('hidden');
+            });
         }
-        
-        const response = await fetch(`${API_BASE_URL}/reports`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-                // Don't set Content-Type header for FormData - let the browser set it
-            },
-            body: formData
-        });
-        
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.detail || 'Failed to create report');
-        }
-        
-        const report = await response.json();
-        
-        // Show success message
-        showAlert('Report created successfully', 'success');
-        
-        // Close modal and reset form
-        createReportModal.classList.remove('active');
-        createReportForm.reset();
-        quill.setContents([]); // Clear editor
-        reportAttachmentsList.innerHTML = '';
-        
-        // Reload reports
-        loadReports();
-        loadDashboardData();
-    } catch (error) {
-        console.error('Error creating report:', error);
-        showAlert(error.message, 'danger');
-    } finally {
-        submitReportText.textContent = 'Submit Report';
-        submitReportSpinner.classList.add('hidden');
-    }
-}
-        // Add event listener for form submission
         document.getElementById('add-user-form').addEventListener('submit', async function(e) {
             e.preventDefault(); // Prevent default form submission
             await handleAddUser();
         });
+
+        // Add event listener for form submission
+document.getElementById('add-user-form').addEventListener('submit', async function(e) {
+    e.preventDefault(); // Prevent default form submission
+    await handleAddUser();
+});
 
 async function handleAddUser() {
     const form = document.getElementById('add-user-form');
@@ -3425,133 +3319,142 @@ async function handleAddUser() {
     }
 }
         // View report details
-        async function viewReport(reportId) {
-            try {
-                const response = await fetch(`${API_BASE_URL}/reports/${reportId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
-                });
-                
-                if (!response.ok) {
-                    throw new Error('Failed to fetch report');
-                }
-                
-                const report = await response.json();
-                selectedReportId = reportId;
-
-                // Set report details
-                viewReportTitle.textContent = report.title;
-                viewReportAuthor.textContent = report.author_name;
-                viewReportDate.textContent = new Date(report.created_at).toLocaleDateString();
-                viewReportCategory.textContent = report.category;
-                
-                // Set content (sanitized HTML)
-                const contentDiv = document.getElementById('view-report-content');
-                contentDiv.innerHTML = report.content || '<p>No content available</p>';
-
-                // Set status badge
-                let statusBadge;
-                if (report.status === 'approved') {
-                    statusBadge = '<span class="badge badge-success">Approved</span>';
-                } else if (report.status === 'pending') {
-                    statusBadge = '<span class="badge badge-warning">Pending</span>';
-                } else {
-                    statusBadge = '<span class="badge badge-danger">Rejected</span>';
-                }
-                viewReportStatus.innerHTML = statusBadge;
-
-                // Set status dropdown and admin comments
-                reportStatusChange.value = report.status;
-                adminComments.value = report.admin_comments || '';
-
-                // Initially disable save button
-                saveReportChanges.disabled = true;
-
-                // Enable save button if status changes
-                reportStatusChange.addEventListener('change', () => {
-                    saveReportChanges.disabled = false;
-                });
-
-                // Enable save button if comments change
-                adminComments.addEventListener('input', () => {
-                    saveReportChanges.disabled = false;
-                });
-
-                // Set attachments
-                viewReportAttachments.innerHTML = '';
-                if (report.attachments && report.attachments.length > 0) {
-                    report.attachments.forEach(attachment => {
-                        const fileItem = document.createElement('div');
-                        fileItem.className = 'file-item';
-
-                        let fileIcon, fileColor;
-                        if (attachment.type.includes('image')) {
-                            fileIcon = 'fa-file-image';
-                            fileColor = '#e74c3c';
-                        } else if (attachment.type.includes('pdf')) {
-                            fileIcon = 'fa-file-pdf';
-                            fileColor = '#e74c3c';
-                        } else if (attachment.type.includes('word') || attachment.type.includes('document')) {
-                            fileIcon = 'fa-file-word';
-                            fileColor = '#2c7be5';
-                        } else if (attachment.type.includes('excel') || attachment.type.includes('spreadsheet')) {
-                            fileIcon = 'fa-file-excel';
-                            fileColor = '#2ecc71';
-                        } else {
-                            fileIcon = 'fa-file';
-                            fileColor = '#95a5a6';
-                        }
-
-                        const fileSize = formatFileSize(attachment.size);
-
-                        fileItem.innerHTML = `
-                            <i class="fas ${fileIcon} file-icon" style="color: ${fileColor};"></i>
-                            <div class="file-info">
-                                <div class="file-name">${attachment.name}</div>
-                                <div class="file-size">${fileSize}</div>
-                            </div>
-                            <button class="action-btn download-attachment-btn" 
-                                    data-url="${attachment.url}" 
-                                    data-name="${attachment.name}"
-                                    title="Download">
-                                <i class="fas fa-download"></i>
-                            </button>
-                        `;
-
-                        viewReportAttachments.appendChild(fileItem);
-                    });
-
-                    // Add event listeners to download buttons
-                    document.querySelectorAll('#view-report-attachments .fa-download').forEach(btn => {
-                        btn.addEventListener('click', (e) => {
-                            const url = e.currentTarget.getAttribute('data-url');
-                            downloadFile(url);
-                        });
-                    });
-                } else {
-                    const noFiles = document.createElement('div');
-                    noFiles.className = 'text-center text-muted';
-                    noFiles.textContent = 'No attachments';
-                    viewReportAttachments.appendChild(noFiles);
-                }
-
-                // Show admin actions based on role
-                if (currentUser.role === 'admin') {
-                    adminReportActions.classList.remove('hidden');
-                    saveReportChanges.classList.remove('hidden');
-                } else {
-                    adminReportActions.classList.add('hidden');
-                    saveReportChanges.classList.add('hidden');
-                }
-
-                // Show the modal
-                viewReportModal.classList.add('active');
-            } catch (error) {
-                console.error('Error viewing report:', error);
-                showAlert('Failed to load report details', 'danger');
-            }
+        function viewReport(reportId) {
+    fetch(`${API_BASE_URL}/reports/${reportId}`, {
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to fetch report');
+        }
+        return response.json();
+    })
+    .then(report => {
+        selectedReportId = reportId;
+
+        // Set report details
+        viewReportTitle.textContent = report.title;
+        viewReportAuthor.textContent = report.author_name;
+        viewReportDate.textContent = new Date(report.created_at).toLocaleDateString();
+        viewReportDescription.textContent = report.description;
+        viewReportCategory.textContent = report.category;
+
+        // Set status badge
+        let statusBadge;
+        if (report.status === 'approved') {
+            statusBadge = '<span class="badge badge-success">Approved</span>';
+        } else if (report.status === 'pending') {
+            statusBadge = '<span class="badge badge-warning">Pending</span>';
+        } else {
+            statusBadge = '<span class="badge badge-danger">Rejected</span>';
+        }
+        viewReportStatus.innerHTML = statusBadge;
+
+        // Set status dropdown and admin comments
+        reportStatusChange.value = report.status;
+        adminComments.value = report.admin_comments || '';
+
+        // Initially disable save button
+        saveReportChanges.disabled = true;
+
+        // Enable save button if status changes
+        reportStatusChange.addEventListener('change', (e) => {
+            saveReportChanges.disabled = false;
+        });
+
+        // Enable save button if comments change
+        adminComments.addEventListener('input', (e) => {
+            saveReportChanges.disabled = false;
+        });
+
+        // Set attachments
+        viewReportAttachments.innerHTML = '';
+        if (report.attachments && report.attachments.length > 0) {
+            report.attachments.forEach(attachment => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+
+                let fileIcon, fileColor;
+                if (attachment.type.includes('image')) {
+                    fileIcon = 'fa-file-image';
+                    fileColor = '#e74c3c';
+                } else if (attachment.type.includes('pdf')) {
+                    fileIcon = 'fa-file-pdf';
+                    fileColor = '#e74c3c';
+                } else if (attachment.type.includes('word') || attachment.type.includes('document')) {
+                    fileIcon = 'fa-file-word';
+                    fileColor = '#2c7be5';
+                } else if (attachment.type.includes('excel') || attachment.type.includes('spreadsheet')) {
+                    fileIcon = 'fa-file-excel';
+                    fileColor = '#2ecc71';
+                } else {
+                    fileIcon = 'fa-file';
+                    fileColor = '#95a5a6';
+                }
+
+                const fileSize = formatFileSize(attachment.size);
+
+                fileItem.innerHTML = `
+                    <i class="fas ${fileIcon} file-icon" style="color: ${fileColor};"></i>
+                    <div class="file-info">
+                        <div class="file-name">${attachment.name}</div>
+                        <div class="file-size">${fileSize}</div>
+                    </div>
+                    <button class="action-btn download-attachment-btn" 
+                            data-url="${attachment.url}" 
+                            data-name="${attachment.name}"
+                            title="Download">
+                        <i class="fas fa-download"></i>
+                    </button>
+                `;
+
+                viewReportAttachments.appendChild(fileItem);
+            });
+
+            // Add event listeners to download buttons
+            document.querySelectorAll('#view-report-attachments .fa-download').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const url = e.currentTarget.getAttribute('data-url');
+                    downloadFile(url);
+                });
+            });
+        } else {
+            const noFiles = document.createElement('div');
+            noFiles.className = 'text-center text-muted';
+            noFiles.textContent = 'No attachments';
+            viewReportAttachments.appendChild(noFiles);
+        }
+
+        // Add download PDF button
+        const downloadBtn = document.createElement('button');
+        downloadBtn.className = 'btn btn-outline';
+        downloadBtn.id = 'download-report-pdf-btn';
+        downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download PDF';
+        downloadBtn.addEventListener('click', () => downloadReportAsPDF(reportId));
+
+        const closeBtn = document.querySelector('#close-report-modal');
+        closeBtn.parentNode.insertBefore(downloadBtn, closeBtn);
+
+        // Show admin actions based on role
+        if (currentUser.role === 'admin') {
+            adminReportActions.classList.remove('hidden');
+            saveReportChanges.classList.remove('hidden');
+        } else {
+            adminReportActions.classList.add('hidden');
+            saveReportChanges.classList.add('hidden');
+        }
+
+        // Show the modal
+        viewReportModal.classList.add('active');
+    })
+    .catch(error => {
+        console.error('Error viewing report:', error);
+        showAlert('Failed to load report details', 'danger');
+    });
+}
+
 
         // Edit report
         function editReport(reportId) {
@@ -3780,11 +3683,10 @@ function updateReportStatusInUI(reportId, newStatus) {
                 }, 300);
             }, 5000);
         }
-        
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
+        // Initialize attachments functionality
         
     </script>
-        
 </body>
 </html>
