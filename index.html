@@ -3333,15 +3333,15 @@ async function handleAddUser() {
     })
     .then(report => {
         selectedReportId = reportId;
-        
+
         // Set report details
         viewReportTitle.textContent = report.title;
         viewReportAuthor.textContent = report.author_name;
         viewReportDate.textContent = new Date(report.created_at).toLocaleDateString();
         viewReportDescription.textContent = report.description;
         viewReportCategory.textContent = report.category;
-        
-        // Set status
+
+        // Set status badge
         let statusBadge;
         if (report.status === 'approved') {
             statusBadge = '<span class="badge badge-success">Approved</span>';
@@ -3351,21 +3351,31 @@ async function handleAddUser() {
             statusBadge = '<span class="badge badge-danger">Rejected</span>';
         }
         viewReportStatus.innerHTML = statusBadge;
-        
-        // Set status dropdown
+
+        // Set status dropdown and admin comments
         reportStatusChange.value = report.status;
-        
-        // Set admin comments if any
         adminComments.value = report.admin_comments || '';
-        
+
+        // Initially disable save button
+        saveReportChanges.disabled = true;
+
+        // Enable save button if status changes
+        reportStatusChange.addEventListener('change', (e) => {
+            saveReportChanges.disabled = false;
+        });
+
+        // Enable save button if comments change
+        adminComments.addEventListener('input', (e) => {
+            saveReportChanges.disabled = false;
+        });
+
         // Set attachments
         viewReportAttachments.innerHTML = '';
         if (report.attachments && report.attachments.length > 0) {
             report.attachments.forEach(attachment => {
                 const fileItem = document.createElement('div');
                 fileItem.className = 'file-item';
-                
-                // Get file icon based on type
+
                 let fileIcon, fileColor;
                 if (attachment.type.includes('image')) {
                     fileIcon = 'fa-file-image';
@@ -3383,10 +3393,9 @@ async function handleAddUser() {
                     fileIcon = 'fa-file';
                     fileColor = '#95a5a6';
                 }
-                
-                // Format file size
+
                 const fileSize = formatFileSize(attachment.size);
-                
+
                 fileItem.innerHTML = `
                     <i class="fas ${fileIcon} file-icon" style="color: ${fileColor};"></i>
                     <div class="file-info">
@@ -3400,8 +3409,10 @@ async function handleAddUser() {
                         <i class="fas fa-download"></i>
                     </button>
                 `;
+
+                viewReportAttachments.appendChild(fileItem);
             });
-            
+
             // Add event listeners to download buttons
             document.querySelectorAll('#view-report-attachments .fa-download').forEach(btn => {
                 btn.addEventListener('click', (e) => {
@@ -3415,19 +3426,18 @@ async function handleAddUser() {
             noFiles.textContent = 'No attachments';
             viewReportAttachments.appendChild(noFiles);
         }
-        
-        // Add download button to modal footer
+
+        // Add download PDF button
         const downloadBtn = document.createElement('button');
         downloadBtn.className = 'btn btn-outline';
         downloadBtn.id = 'download-report-pdf-btn';
         downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download PDF';
         downloadBtn.addEventListener('click', () => downloadReportAsPDF(reportId));
-        
-        // Insert before the close button
+
         const closeBtn = document.querySelector('#close-report-modal');
         closeBtn.parentNode.insertBefore(downloadBtn, closeBtn);
-        
-        // Show admin actions if user is admin
+
+        // Show admin actions based on role
         if (currentUser.role === 'admin') {
             adminReportActions.classList.remove('hidden');
             saveReportChanges.classList.remove('hidden');
@@ -3435,7 +3445,7 @@ async function handleAddUser() {
             adminReportActions.classList.add('hidden');
             saveReportChanges.classList.add('hidden');
         }
-        
+
         // Show the modal
         viewReportModal.classList.add('active');
     })
@@ -3444,6 +3454,7 @@ async function handleAddUser() {
         showAlert('Failed to load report details', 'danger');
     });
 }
+
 
         // Edit report
         function editReport(reportId) {
@@ -3519,7 +3530,7 @@ async function handleAddUser() {
         }
 
         // Handle saving report changes (admin only)
-        function handleSaveReportChanges() {
+        async function handleSaveReportChanges() {
     const status = reportStatusChange.value;
     const comments = adminComments.value;
     
@@ -3527,50 +3538,85 @@ async function handleAddUser() {
     saveChangesText.textContent = 'Saving...';
     saveChangesSpinner.classList.remove('hidden');
     
-    const updateData = {
-        status: status,
-        admin_comments: comments
-    };
-    
-    fetch(`${API_BASE_URL}/reports/${selectedReportId}`, {
-        method: 'PATCH',
-        headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(updateData)
-    })
-    .then(response => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/reports/${selectedReportId}/status`, {
+            method: 'PATCH',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                status: status,
+                admin_comments: comments
+            })
+        });
+
         if (!response.ok) {
-            throw new Error('Failed to update report');
+            const errorData = await response.json();
+            throw new Error(errorData.detail || 'Failed to update report status');
         }
-        return response.json();
-    })
-    .then(updatedReport => {
+
+        const updatedReport = await response.json();
+        
         // Show success message
-        showAlert('Report updated successfully', 'success');
+        showAlert('Report status updated successfully', 'success');
         
         // Close modal
         viewReportModal.classList.remove('active');
         
+        // Update the UI with the new status
+        updateReportStatusInUI(selectedReportId, status);
+        
         // Reload reports and dashboard data
         loadReports();
         loadDashboardData();
-        
-        // Force a refresh of the current view
-        const activeView = document.querySelector('.view:not(.hidden)');
-        if (activeView.id === 'dashboard-view') {
-            loadDashboardData();
-        }
-    })
-    .catch(error => {
-        console.error('Error updating report:', error);
-        showAlert('Failed to update report', 'danger');
-    })
-    .finally(() => {
+    } catch (error) {
+        console.error('Error updating report status:', error);
+        showAlert(error.message || 'Failed to update report status', 'danger');
+    } finally {
         saveChangesText.textContent = 'Save Changes';
         saveChangesSpinner.classList.add('hidden');
-    });
+    }
+}
+function updateReportStatusInUI(reportId, newStatus) {
+    // Update in the reports table
+    const reportRow = document.querySelector(`.view-report-btn[data-id="${reportId}"]`)?.closest('tr');
+    if (reportRow) {
+        const statusCell = reportRow.querySelector('td:nth-child(4)');
+        if (statusCell) {
+            let statusBadge;
+            if (newStatus === 'approved') {
+                statusBadge = '<span class="badge badge-success">Approved</span>';
+            } else if (newStatus === 'pending') {
+                statusBadge = '<span class="badge badge-warning">Pending</span>';
+            } else {
+                statusBadge = '<span class="badge badge-danger">Rejected</span>';
+            }
+            statusCell.innerHTML = statusBadge;
+        }
+    }
+
+    // Update in the dashboard table if visible
+    const dashboardRow = document.querySelector(`#dashboard-reports-table-body .view-report-btn[data-id="${reportId}"]`)?.closest('tr');
+    if (dashboardRow) {
+        const statusCell = dashboardRow.querySelector('td:nth-child(3)');
+        if (statusCell) {
+            let statusBadge;
+            if (newStatus === 'approved') {
+                statusBadge = '<span class="badge badge-success">Approved</span>';
+            } else if (newStatus === 'pending') {
+                statusBadge = '<span class="badge badge-warning">Pending</span>';
+            } else {
+                statusBadge = '<span class="badge badge-danger">Rejected</span>';
+            }
+            statusCell.innerHTML = statusBadge;
+        }
+    }
+
+    // Update the counts in the dashboard
+    if (document.getElementById('dashboard-view') && !document.getElementById('dashboard-view').classList.contains('hidden')) {
+        loadDashboardData();
+    }
 }
 
         // Handle saving settings
