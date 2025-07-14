@@ -6,6 +6,8 @@
     <title>ReportHub | Professional Reporting System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="download.js"></script>
     
@@ -1589,6 +1591,69 @@
         ::-webkit-scrollbar-thumb:hover {
             background: var(--primary-dark);
         }
+        .ql-toolbar {
+    border-top-left-radius: var(--radius);
+    border-top-right-radius: var(--radius);
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color) !important;
+}
+
+.ql-container {
+    border-bottom-left-radius: var(--radius);
+    border-bottom-right-radius: var(--radius);
+    border: 1px solid var(--border-color) !important;
+    border-top: none !important;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: inherit;
+}
+
+.ql-editor {
+    min-height: 150px;
+    font-size: 0.875rem;
+}
+
+.ql-snow .ql-stroke {
+    stroke: var(--text-primary);
+}
+
+.ql-snow .ql-fill {
+    fill: var(--text-primary);
+}
+
+.ql-snow .ql-picker {
+    color: var(--text-primary);
+}
+
+.ql-snow .ql-picker-options {
+    background-color: var(--bg-primary);
+    border-color: var(--border-color) !important;
+}
+
+.ql-snow .ql-picker-label {
+    border-color: var(--border-color);
+}
+
+.ql-snow .ql-tooltip {
+    background-color: var(--bg-primary);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+    box-shadow: var(--shadow);
+}
+
+.ql-snow .ql-tooltip input[type=text] {
+    background-color: var(--bg-secondary);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+.ql-snow .ql-tooltip a.ql-action::after {
+    color: var(--primary-color);
+}
+
+.ql-snow .ql-tooltip a.ql-remove::before {
+    color: var(--danger-color);
+}
   
     </style>
 </head>
@@ -2046,7 +2111,8 @@
                         </div>
                         <div class="form-group">
                             <label for="report-description" class="form-label">Description</label>
-                            <textarea id="report-description" class="form-control form-textarea" placeholder="Enter report description" required></textarea>
+                            <div id="report-description-editor" style="height: 200px;"></div>
+                            <input type="hidden" id="report-description" name="report-description">
                         </div>
                         <div class="form-group">
                             <label for="report-category" class="form-label">Category</label>
@@ -3686,6 +3752,48 @@ function updateReportStatusInUI(reportId, newStatus) {
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
         // Initialize attachments functionality
+        let quill;
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize Quill editor when the create report modal is opened
+    document.getElementById('create-report-btn').addEventListener('click', initQuillEditor);
+    document.getElementById('new-report-btn').addEventListener('click', initQuillEditor);
+    
+    function initQuillEditor() {
+        // Check if Quill is already initialized
+        if (quill) return;
+        
+        // Initialize Quill editor
+        quill = new Quill('#report-description-editor', {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    [{ 'header': [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    ['link', 'image'],
+                    ['clean']
+                ]
+            },
+            placeholder: 'Enter report description...'
+        });
+        
+        // Update hidden input with HTML content when editor changes
+        quill.on('text-change', function() {
+            document.getElementById('report-description').value = quill.root.innerHTML;
+        });
+    }
+    
+    // Reset Quill editor when modal is closed
+    document.getElementById('close-create-report-modal').addEventListener('click', resetQuillEditor);
+    document.getElementById('cancel-create-report').addEventListener('click', resetQuillEditor);
+    
+    function resetQuillEditor() {
+        if (quill) {
+            quill.root.innerHTML = '';
+            document.getElementById('report-description').value = '';
+        }
+    }
+});
         
     </script>
 </body>
