@@ -3271,67 +3271,68 @@
 
         // Handle create report submission
         async function handleCreateReport() {
-            const title = document.getElementById('report-title').value;
-            const category = document.getElementById('report-category').value;
-            const content = document.querySelector('#report-editor .ql-editor').innerHTML;
-            const files = reportAttachments.files;
-            
-            if (!title || !category || !content) {
-                showAlert('Please fill in all required fields', 'danger');
-                return;
-            }
-            
-            // Show loading state
-            submitReportText.textContent = 'Submitting...';
-            submitReportSpinner.classList.remove('hidden');
-            
-            try {
-                // Create form data
-                const formData = new FormData();
-                formData.append('title', title);
-                formData.append('category', category);
-                formData.append('content', content);
-                
-                // Add attachments if any
-                for (let i = 0; i < files.length; i++) {
-                    formData.append('attachments', files[i]);
-                }
-                
-                const response = await fetch(`${API_BASE_URL}/reports`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    },
-                    body: formData
-                });
-                
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.detail || 'Failed to create report');
-                }
-                
-                const report = await response.json();
-                
-                // Show success message
-                showAlert('Report created successfully', 'success');
-                
-                // Close modal and reset form
-                createReportModal.classList.remove('active');
-                createReportForm.reset();
-                quill.setContents([]); // Clear editor
-                reportAttachmentsList.innerHTML = '';
-                
-                // Reload reports
-                loadReports();
-                loadDashboardData();
-            } catch (error) {
-                console.error('Error creating report:', error);
-                showAlert(error.message, 'danger');
-            } finally {
-                submitReportText.textContent = 'Submit Report';
-                submitReportSpinner.classList.add('hidden');
-            }
+    const title = document.getElementById('report-title').value;
+    const category = document.getElementById('report-category').value;
+    const content = document.querySelector('#report-editor .ql-editor').innerHTML;
+    const files = reportAttachments.files;
+    
+    if (!title || !category || !content) {
+        showAlert('Please fill in all required fields', 'danger');
+        return;
+    }
+    
+    // Show loading state
+    submitReportText.textContent = 'Submitting...';
+    submitReportSpinner.classList.remove('hidden');
+    
+    try {
+        // Create form data
+        const formData = new FormData();
+        formData.append('title', title);
+        formData.append('category', category);
+        formData.append('description', content); // Changed from 'content' to 'description' to match backend
+        
+        // Add attachments if any
+        for (let i = 0; i < files.length; i++) {
+            formData.append('attachments', files[i]);
         }
+        
+        const response = await fetch(`${API_BASE_URL}/reports`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                // Don't set Content-Type header for FormData - let the browser set it
+            },
+            body: formData
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.detail || 'Failed to create report');
+        }
+        
+        const report = await response.json();
+        
+        // Show success message
+        showAlert('Report created successfully', 'success');
+        
+        // Close modal and reset form
+        createReportModal.classList.remove('active');
+        createReportForm.reset();
+        quill.setContents([]); // Clear editor
+        reportAttachmentsList.innerHTML = '';
+        
+        // Reload reports
+        loadReports();
+        loadDashboardData();
+    } catch (error) {
+        console.error('Error creating report:', error);
+        showAlert(error.message, 'danger');
+    } finally {
+        submitReportText.textContent = 'Submit Report';
+        submitReportSpinner.classList.add('hidden');
+    }
+}
         // Add event listener for form submission
         document.getElementById('add-user-form').addEventListener('submit', async function(e) {
             e.preventDefault(); // Prevent default form submission
