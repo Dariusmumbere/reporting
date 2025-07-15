@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // First, check if this is the first user in the system
             const isFirstUser = await checkFirstUser();
             
-            // If this is the first user, show organization name field
+            // If this is the first user, show organization name field if not already shown
             if (isFirstUser && !orgName) {
                 signupBtnText.textContent = 'Create Account';
                 signupSpinner.classList.add('hidden');
@@ -68,26 +68,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             
-            // Prepare user data
-            const userData = {
-                name: name,
-                email: email,
-                password: password,
-                role: isFirstUser ? 'admin' : 'staff'
-            };
+            // Prepare form data
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('email', email);
+            formData.append('password', password);
             
-            // If this is the first user, include organization name
+            // Include organization name if this is the first user
             if (isFirstUser && orgName) {
-                userData.organization = orgName;
+                formData.append('organization', orgName);
+            } else if (orgName) {
+                // For subsequent users, include organization name if provided
+                formData.append('organization', orgName);
             }
             
             // Create the user
             const response = await fetch(`${API_BASE_URL}/auth/signup`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(userData)
+                body: formData
             });
             
             if (!response.ok) {
@@ -99,7 +97,24 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Store the token and user data
             localStorage.setItem('token', data.access_token);
-            localStorage.setItem('orgName', data.organization || '');
+            
+            // Store organization name if available
+            if (data.organization) {
+                localStorage.setItem('orgName', data.organization);
+            }
+            
+            // Get user info
+            const userResponse = await fetch(`${API_BASE_URL}/auth/me`, {
+                headers: {
+                    'Authorization': `Bearer ${data.access_token}`
+                }
+            });
+            
+            if (!userResponse.ok) {
+                throw new Error('Failed to get user info');
+            }
+            
+            const userData = await userResponse.json();
             
             // Show welcome message with organization name if available
             if (data.organization) {
@@ -109,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             // Redirect to app
-            currentUser = data.user;
+            currentUser = userData;
             setupUIForUser();
             loginView.classList.add('hidden');
             appView.classList.remove('hidden');
@@ -150,3 +165,44 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
+
+// Global function to show alert (used in other scripts)
+function showAlert(message, type) {
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type} fade-in`;
+    
+    let icon;
+    if (type === 'success') {
+        icon = 'fa-check-circle';
+    } else if (type === 'danger') {
+        icon = 'fa-exclamation-circle';
+    } else if (type === 'warning') {
+        icon = 'fa-exclamation-triangle';
+    } else {
+        icon = 'fa-info-circle';
+    }
+    
+    alert.innerHTML = `
+        <i class="fas ${icon}"></i>
+        <div class="alert-content">
+            <div class="alert-title">${type.charAt(0).toUpperCase() + type.slice(1)}</div>
+            <div class="alert-message">${message}</div>
+        </div>
+    `;
+    
+    // Insert at the top of the content area
+    const content = document.querySelector('.content');
+    if (content.firstChild) {
+        content.insertBefore(alert, content.firstChild);
+    } else {
+        content.appendChild(alert);
+    }
+    
+    // Remove after 5 seconds
+    setTimeout(() => {
+        alert.classList.add('hidden');
+        setTimeout(() => {
+            alert.remove();
+        }, 300);
+    }, 5000);
+}
