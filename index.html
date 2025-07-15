@@ -1654,6 +1654,13 @@
 .ql-snow .ql-tooltip a.ql-remove::before {
     color: var(--danger-color);
 }
+#signup-form {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+#org-name-group {
+    transition: all 0.3s ease;
+}
   
     </style>
 </head>
@@ -1716,10 +1723,46 @@
                         </button>
                     </form>
                     <div class="login-footer">
-                        <p>Don't have an account? <a href="#" id="show-signup">Sign up</a></p>
+                        Don't have an account? <a href="#" id="show-signup">Sign up</a>
                     </div>
                 </div>
             </div>
+            <form id="signup-form" class="hidden">
+    <div class="alert alert-danger hidden" id="signup-error">
+        <i class="fas fa-exclamation-circle"></i>
+        <div class="alert-content">
+            <div class="alert-title">Signup failed</div>
+            <p class="alert-message" id="signup-error-message">Error during signup</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="signup-name" class="form-label">Full Name</label>
+        <input type="text" id="signup-name" class="form-control" placeholder="Enter your full name" required>
+    </div>
+    <div class="form-group">
+        <label for="signup-email" class="form-label">Email Address</label>
+        <input type="email" id="signup-email" class="form-control" placeholder="Enter your email" required>
+    </div>
+    <div class="form-group">
+        <label for="signup-password" class="form-label">Password</label>
+        <input type="password" id="signup-password" class="form-control" placeholder="Create a password" required minlength="8">
+    </div>
+    <div class="form-group">
+        <label for="signup-confirm-password" class="form-label">Confirm Password</label>
+        <input type="password" id="signup-confirm-password" class="form-control" placeholder="Confirm your password" required minlength="8">
+    </div>
+    <div class="form-group" id="org-name-group" style="display: none;">
+        <label for="org-name" class="form-label">Organization/School/Team Name</label>
+        <input type="text" id="org-name" class="form-control" placeholder="Enter your organization name">
+    </div>
+    <button type="submit" class="btn btn-primary login-btn" id="signup-btn">
+        <span id="signup-btn-text">Create Account</span>
+        <span class="spinner hidden" id="signup-spinner"></span>
+    </button>
+    <div class="login-footer">
+        Already have an account? <a href="#" id="show-login">Sign in</a>
+    </div>
+</form>
         </div>
 
         <!-- Main App View (hidden initially) -->
@@ -3815,6 +3858,5 @@ document.addEventListener('DOMContentLoaded', () => {
 });
         
     </script>
-    <script src="signup.js"></script>
 </body>
 </html>
