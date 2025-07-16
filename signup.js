@@ -77,9 +77,6 @@ document.addEventListener('DOMContentLoaded', () => {
             // Include organization name if this is the first user
             if (isFirstUser && orgName) {
                 formData.append('organization', orgName);
-            } else if (orgName) {
-                // For subsequent users, include organization name if provided
-                formData.append('organization', orgName);
             }
             
             // Create the user
@@ -97,13 +94,18 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Store the token and user data
             localStorage.setItem('token', data.access_token);
-            
-            // Store organization name if available
             if (data.organization) {
                 localStorage.setItem('orgName', data.organization);
             }
             
-            // Get user info
+            // Show welcome message with organization name if available
+            if (data.organization) {
+                showAlert(`Welcome to ${data.organization}!`, 'success');
+            } else {
+                showAlert('Account created successfully!', 'success');
+            }
+            
+            // Get user info to complete the login
             const userResponse = await fetch(`${API_BASE_URL}/auth/me`, {
                 headers: {
                     'Authorization': `Bearer ${data.access_token}`
@@ -115,13 +117,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             const userData = await userResponse.json();
-            
-            // Show welcome message with organization name if available
-            if (data.organization) {
-                showAlert(`Welcome to ${data.organization}!`, 'success');
-            } else {
-                showAlert('Account created successfully!', 'success');
-            }
             
             // Redirect to app
             currentUser = userData;
@@ -164,45 +159,47 @@ document.addEventListener('DOMContentLoaded', () => {
             return false;
         }
     }
-});
-
-// Global function to show alert (used in other scripts)
-function showAlert(message, type) {
-    const alert = document.createElement('div');
-    alert.className = `alert alert-${type} fade-in`;
     
-    let icon;
-    if (type === 'success') {
-        icon = 'fa-check-circle';
-    } else if (type === 'danger') {
-        icon = 'fa-exclamation-circle';
-    } else if (type === 'warning') {
-        icon = 'fa-exclamation-triangle';
-    } else {
-        icon = 'fa-info-circle';
-    }
-    
-    alert.innerHTML = `
-        <i class="fas ${icon}"></i>
-        <div class="alert-content">
-            <div class="alert-title">${type.charAt(0).toUpperCase() + type.slice(1)}</div>
-            <div class="alert-message">${message}</div>
-        </div>
-    `;
-    
-    // Insert at the top of the content area
-    const content = document.querySelector('.content');
-    if (content.firstChild) {
-        content.insertBefore(alert, content.firstChild);
-    } else {
-        content.appendChild(alert);
-    }
-    
-    // Remove after 5 seconds
-    setTimeout(() => {
-        alert.classList.add('hidden');
+    // Helper function to show alert
+    function showAlert(message, type) {
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${type} fade-in`;
+        
+        let icon;
+        if (type === 'success') {
+            icon = 'fa-check-circle';
+        } else if (type === 'danger') {
+            icon = 'fa-exclamation-circle';
+        } else if (type === 'warning') {
+            icon = 'fa-exclamation-triangle';
+        } else {
+            icon = 'fa-info-circle';
+        }
+        
+        alert.innerHTML = `
+            <i class="fas ${icon}"></i>
+            <div class="alert-content">
+                <div class="alert-title">${type.charAt(0).toUpperCase() + type.slice(1)}</div>
+                <div class="alert-message">${message}</div>
+            </div>
+        `;
+        
+        // Insert at the top of the content area
+        const content = document.querySelector('.content');
+        if (content) {
+            if (content.firstChild) {
+                content.insertBefore(alert, content.firstChild);
+            } else {
+                content.appendChild(alert);
+            }
+        }
+        
+        // Remove after 5 seconds
         setTimeout(() => {
-            alert.remove();
-        }, 300);
-    }, 5000);
-}
+            alert.classList.add('hidden');
+            setTimeout(() => {
+                alert.remove();
+            }, 300);
+        }, 5000);
+    }
+});
