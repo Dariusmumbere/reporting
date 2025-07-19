@@ -10,45 +10,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const signupError = document.getElementById('signup-error');
     const signupErrorMessage = document.getElementById('signup-error-message');
     const orgNameGroup = document.getElementById('org-name-group');
-    const orgNameInput = document.getElementById('org-name');
-    
-    // API Configuration
-    const API_BASE_URL = 'https://reporting-api-uvze.onrender.com';
-    
-    // State Management
-    let currentUser = null;
-    const loginView = document.getElementById('login-view');
-    const appView = document.getElementById('app-view');
-    
-    // Initialize - hide org name field by default
-    orgNameGroup.style.display = 'none';
-    if (orgNameInput) orgNameInput.required = false;
     
     // Toggle between login and signup forms
-    showSignupLink?.addEventListener('click', async (e) => {
+    showSignupLink?.addEventListener('click', (e) => {
         e.preventDefault();
-        
-        // Check if this is the first user when switching to signup form
-        try {
-            const isFirstUser = await checkFirstUser();
-            if (isFirstUser) {
-                orgNameGroup.style.display = 'block';
-                if (orgNameInput) orgNameInput.required = true;
-            }
-        } catch (error) {
-            console.error('Error checking first user:', error);
-        }
-        
         loginForm.classList.add('hidden');
         signupForm.classList.remove('hidden');
+        // Reset form and hide org name field when showing signup form
+        signupForm.reset();
+        orgNameGroup.style.display = 'none';
     });
     
     showLoginLink?.addEventListener('click', (e) => {
         e.preventDefault();
         signupForm.classList.add('hidden');
         loginForm.classList.remove('hidden');
-        orgNameGroup.style.display = 'none';
-        if (orgNameInput) orgNameInput.required = false;
     });
     
     // Handle signup form submission
@@ -59,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const email = document.getElementById('signup-email').value.trim();
         const password = document.getElementById('signup-password').value;
         const confirmPassword = document.getElementById('signup-confirm-password').value;
-        const orgName = orgNameInput?.value.trim();
+        const orgName = document.getElementById('org-name')?.value.trim();
         
         // Validate inputs
         if (!name || !email || !password || !confirmPassword) {
@@ -77,38 +53,57 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            showSignupError('Please enter a valid email address');
+            return;
+        }
+        
         // Show loading state
         signupBtnText.textContent = 'Creating account...';
         signupSpinner.classList.remove('hidden');
         signupError.classList.add('hidden');
         
         try {
-            // Check again if this is the first user (in case page was refreshed)
+            // First, check if this is the first user in the system
             const isFirstUser = await checkFirstUser();
             
-            // If this is the first user and no org name provided
-            if (isFirstUser && (!orgNameInput || !orgName)) {
-                showSignupError('Organization name is required');
-                signupBtnText.textContent = 'Create Account';
-                signupSpinner.classList.add('hidden');
-                orgNameGroup.style.display = 'block';
-                if (orgNameInput) orgNameInput.required = true;
-                return;
+            // If this is the first user, show organization name field if not already filled
+            if (isFirstUser) {
+                if (!orgName) {
+                    signupBtnText.textContent = 'Create Account';
+                    signupSpinner.classList.add('hidden');
+                    orgNameGroup.style.display = 'block';
+                    document.getElementById('org-name').required = true;
+                    return;
+                }
+                
+                // Validate organization name
+                if (orgName.length < 3) {
+                    throw new Error('Organization name must be at least 3 characters');
+                }
             }
             
-            // Prepare form data
-            const formData = new FormData();
-            formData.append('name', name);
-            formData.append('email', email);
-            formData.append('password', password);
+            // Prepare user data
+            const userData = {
+                name: name,
+                email: email,
+                password: password
+            };
+            
+            // If this is the first user, include organization name
             if (isFirstUser && orgName) {
-                formData.append('organization_name', orgName);
+                userData.organization_name = orgName;
             }
             
             // Create the user
             const response = await fetch(`${API_BASE_URL}/auth/signup`, {
                 method: 'POST',
-                body: formData
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams(userData)
             });
             
             if (!response.ok) {
@@ -118,13 +113,20 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const data = await response.json();
             
-            // Store the token and organization name
+            // Store the token and user data
             localStorage.setItem('token', data.access_token);
             if (data.organization) {
                 localStorage.setItem('orgName', data.organization);
             }
             
-            // Get user info
+            // Show welcome message with organization name if available
+            if (data.organization) {
+                showAlert(`Welcome to ${data.organization}!`, 'success');
+            } else {
+                showAlert('Account created successfully!', 'success');
+            }
+            
+            // Get user info and redirect to app
             const userResponse = await fetch(`${API_BASE_URL}/auth/me`, {
                 headers: {
                     'Authorization': `Bearer ${data.access_token}`
@@ -136,19 +138,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             currentUser = await userResponse.json();
-            
-            // Show welcome message
-            const welcomeOrgName = data.organization || localStorage.getItem('orgName');
-            if (welcomeOrgName) {
-                showAlert(`Welcome to ${welcomeOrgName}!`, 'success');
-            } else {
-                showAlert('Account created successfully!', 'success');
-            }
-            
-            // Redirect to app
             setupUIForUser();
             loginView.classList.add('hidden');
             appView.classList.remove('hidden');
+            
+            // Load initial data
+            loadInitialData();
             
         } catch (error) {
             console.error('Signup error:', error);
@@ -183,42 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // Setup UI based on user role
-    function setupUIForUser() {
-        if (!currentUser) return;
-        
-        // Set user info in the UI
-        const userNameElements = document.querySelectorAll('#user-name, #user-dropdown-name');
-        const userRoleElements = document.querySelectorAll('#user-role');
-        const userAvatarElements = document.querySelectorAll('#user-avatar, #user-dropdown-avatar');
-        const userEmailElements = document.querySelectorAll('#user-dropdown-email');
-        
-        const initials = currentUser.name ? currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
-        
-        userNameElements.forEach(el => el.textContent = currentUser.name || 'User');
-        userRoleElements.forEach(el => el.textContent = currentUser.role === 'admin' ? 'Administrator' : 'Staff Member');
-        userAvatarElements.forEach(el => el.textContent = initials);
-        userEmailElements.forEach(el => el.textContent = currentUser.email);
-        
-        // Show organization name in the UI if available
-        const orgName = localStorage.getItem('orgName');
-        if (orgName) {
-            const orgNameElements = document.querySelectorAll('.organization-name');
-            orgNameElements.forEach(el => {
-                if (el) el.textContent = orgName;
-            });
-        }
-        
-        // Show/hide admin menu
-        const adminMenu = document.getElementById('admin-menu');
-        if (currentUser.role === 'admin') {
-            adminMenu?.classList.remove('hidden');
-        } else {
-            adminMenu?.classList.add('hidden');
-        }
-    }
-    
-    // Show alert message
+    // Show alert message (compatible with existing UI)
     function showAlert(message, type) {
         const alert = document.createElement('div');
         alert.className = `alert alert-${type} fade-in`;
@@ -250,6 +210,9 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 content.appendChild(alert);
             }
+        } else {
+            // If content area doesn't exist yet (login page), show in signup form
+            signupForm.insertBefore(alert, signupForm.firstChild);
         }
         
         // Remove after 5 seconds
