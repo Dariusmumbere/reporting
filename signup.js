@@ -11,6 +11,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const signupErrorMessage = document.getElementById('signup-error-message');
     const orgNameGroup = document.getElementById('org-name-group');
     
+    // API Configuration
+    const API_BASE_URL = 'https://reporting-api-uvze.onrender.com';
+    
+    // State Management
+    let currentUser = null;
+    const loginView = document.getElementById('login-view');
+    const appView = document.getElementById('app-view');
+    
     // Toggle between login and signup forms
     showSignupLink?.addEventListener('click', (e) => {
         e.preventDefault();
@@ -50,15 +58,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         
-        // Check password complexity
-        if (!/[A-Z]/.test(password) || 
-            !/[a-z]/.test(password) || 
-            !/[0-9]/.test(password) || 
-            !/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
-            showSignupError('Password must contain uppercase, lowercase, number, and special character');
-            return;
-        }
-        
         // Show loading state
         signupBtnText.textContent = 'Creating account...';
         signupSpinner.classList.remove('hidden');
@@ -77,21 +76,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             
-            // Prepare form data for signup
-            const formData = new FormData();
-            formData.append('name', name);
-            formData.append('email', email);
-            formData.append('password', password);
+            // Prepare user data
+            const userData = {
+                name: name,
+                email: email,
+                password: password
+            };
             
             // If this is the first user, include organization name
             if (isFirstUser && orgName) {
-                formData.append('organization_name', orgName);
+                userData.organization_name = orgName;
             }
             
             // Create the user
             const response = await fetch(`${API_BASE_URL}/auth/signup`, {
                 method: 'POST',
-                body: formData
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams(userData)
             });
             
             if (!response.ok) {
@@ -118,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error('Failed to get user info');
             }
             
-            const userData = await userResponse.json();
+            currentUser = await userResponse.json();
             
             // Show welcome message with organization name if available
             if (data.organization) {
@@ -127,16 +130,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 showAlert('Account created successfully!', 'success');
             }
             
-            // Set current user and update UI
-            currentUser = userData;
+            // Redirect to app
             setupUIForUser();
-            
-            // Hide login view and show app view
             loginView.classList.add('hidden');
             appView.classList.remove('hidden');
-            
-            // Load initial data
-            loadInitialData();
             
         } catch (error) {
             console.error('Signup error:', error);
@@ -168,6 +165,32 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Error checking first user:', error);
             return false;
+        }
+    }
+    
+    // Setup UI based on user role
+    function setupUIForUser() {
+        if (!currentUser) return;
+        
+        // Set user info in the UI
+        const userNameElements = document.querySelectorAll('#user-name, #user-dropdown-name');
+        const userRoleElements = document.querySelectorAll('#user-role');
+        const userAvatarElements = document.querySelectorAll('#user-avatar, #user-dropdown-avatar');
+        const userEmailElements = document.querySelectorAll('#user-dropdown-email');
+        
+        const initials = currentUser.name ? currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'U';
+        
+        userNameElements.forEach(el => el.textContent = currentUser.name || 'User');
+        userRoleElements.forEach(el => el.textContent = currentUser.role === 'admin' ? 'Administrator' : 'Staff Member');
+        userAvatarElements.forEach(el => el.textContent = initials);
+        userEmailElements.forEach(el => el.textContent = currentUser.email);
+        
+        // Show/hide admin menu
+        const adminMenu = document.getElementById('admin-menu');
+        if (currentUser.role === 'admin') {
+            adminMenu?.classList.remove('hidden');
+        } else {
+            adminMenu?.classList.add('hidden');
         }
     }
     
@@ -203,14 +226,6 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 content.appendChild(alert);
             }
-        } else {
-            // If we're not in the app view yet, show in the login container
-            const loginContainer = document.querySelector('.login-right');
-            if (loginContainer.firstChild) {
-                loginContainer.insertBefore(alert, loginContainer.firstChild);
-            } else {
-                loginContainer.appendChild(alert);
-            }
         }
         
         // Remove after 5 seconds
@@ -222,45 +237,3 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 5000);
     }
 });
-
-// Global variables referenced in the signup script
-const API_BASE_URL = 'https://reporting-api-uvze.onrender.com';
-let currentUser = null;
-const loginView = document.getElementById('login-view');
-const appView = document.getElementById('app-view');
-
-// These functions would be defined in your main app.js
-function setupUIForUser() {
-    // Implementation from your existing app
-    if (!currentUser) return;
-    
-    const initials = currentUser.name ? currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'U';
-    const userName = document.getElementById('user-name');
-    const userRole = document.getElementById('user-role');
-    const userAvatar = document.getElementById('user-avatar');
-    
-    if (userName) userName.textContent = currentUser.name || 'User';
-    if (userRole) userRole.textContent = currentUser.role === 'admin' ? 'Administrator' : 'Staff Member';
-    if (userAvatar) userAvatar.textContent = initials;
-    
-    // Show/hide admin menu
-    const adminMenu = document.getElementById('admin-menu');
-    if (adminMenu) {
-        if (currentUser.role === 'admin') {
-            adminMenu.classList.remove('hidden');
-        } else {
-            adminMenu.classList.add('hidden');
-        }
-    }
-}
-
-function loadInitialData() {
-    // Implementation from your existing app
-    // This would load dashboard data, reports, etc.
-    if (typeof loadDashboardData === 'function') {
-        loadDashboardData();
-    }
-    if (currentUser?.role === 'admin' && typeof loadUsers === 'function') {
-        loadUsers();
-    }
-}
