@@ -10,15 +10,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const signupError = document.getElementById('signup-error');
     const signupErrorMessage = document.getElementById('signup-error-message');
     const orgNameGroup = document.getElementById('org-name-group');
+    const orgNameInput = document.getElementById('org-name');
     
     // Toggle between login and signup forms
     showSignupLink?.addEventListener('click', (e) => {
         e.preventDefault();
         loginForm.classList.add('hidden');
         signupForm.classList.remove('hidden');
-        // Reset form and hide org name field when showing signup form
         signupForm.reset();
         orgNameGroup.style.display = 'none';
+        orgNameInput.required = false;
     });
     
     showLoginLink?.addEventListener('click', (e) => {
@@ -35,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const email = document.getElementById('signup-email').value.trim();
         const password = document.getElementById('signup-password').value;
         const confirmPassword = document.getElementById('signup-confirm-password').value;
-        const orgName = document.getElementById('org-name')?.value.trim();
+        const orgName = orgNameInput?.value.trim();
         
         // Validate inputs
         if (!name || !email || !password || !confirmPassword) {
@@ -69,13 +70,14 @@ document.addEventListener('DOMContentLoaded', () => {
             // First, check if this is the first user in the system
             const isFirstUser = await checkFirstUser();
             
-            // If this is the first user, show organization name field if not already filled
+            // If this is the first user, we need organization name
             if (isFirstUser) {
                 if (!orgName) {
+                    // Show organization field and return
                     signupBtnText.textContent = 'Create Account';
                     signupSpinner.classList.add('hidden');
                     orgNameGroup.style.display = 'block';
-                    document.getElementById('org-name').required = true;
+                    orgNameInput.required = true;
                     return;
                 }
                 
@@ -85,16 +87,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             
-            // Prepare user data
-            const userData = {
-                name: name,
-                email: email,
-                password: password
-            };
+            // Prepare form data
+            const formData = new URLSearchParams();
+            formData.append('name', name);
+            formData.append('email', email);
+            formData.append('password', password);
             
-            // If this is the first user, include organization name
+            // Only include organization_name if this is the first user
             if (isFirstUser && orgName) {
-                userData.organization_name = orgName;
+                formData.append('organization_name', orgName);
             }
             
             // Create the user
@@ -103,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: new URLSearchParams(userData)
+                body: formData
             });
             
             if (!response.ok) {
@@ -113,20 +114,19 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const data = await response.json();
             
-            // Store the token and user data
+            // Store the token and organization name
             localStorage.setItem('token', data.access_token);
             if (data.organization) {
                 localStorage.setItem('orgName', data.organization);
             }
             
-            // Show welcome message with organization name if available
-            if (data.organization) {
-                showAlert(`Welcome to ${data.organization}!`, 'success');
-            } else {
-                showAlert('Account created successfully!', 'success');
-            }
+            // Show welcome message
+            const welcomeMessage = data.organization 
+                ? `Welcome to ${data.organization}!` 
+                : 'Account created successfully!';
+            showAlert(welcomeMessage, 'success');
             
-            // Get user info and redirect to app
+            // Get user info
             const userResponse = await fetch(`${API_BASE_URL}/auth/me`, {
                 headers: {
                     'Authorization': `Bearer ${data.access_token}`
@@ -139,10 +139,10 @@ document.addEventListener('DOMContentLoaded', () => {
             
             currentUser = await userResponse.json();
             setupUIForUser();
+            
+            // Redirect to app
             loginView.classList.add('hidden');
             appView.classList.remove('hidden');
-            
-            // Load initial data
             loadInitialData();
             
         } catch (error) {
@@ -176,51 +176,5 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Error checking first user:', error);
             return false;
         }
-    }
-    
-    // Show alert message (compatible with existing UI)
-    function showAlert(message, type) {
-        const alert = document.createElement('div');
-        alert.className = `alert alert-${type} fade-in`;
-        
-        let icon;
-        if (type === 'success') {
-            icon = 'fa-check-circle';
-        } else if (type === 'danger') {
-            icon = 'fa-exclamation-circle';
-        } else if (type === 'warning') {
-            icon = 'fa-exclamation-triangle';
-        } else {
-            icon = 'fa-info-circle';
-        }
-        
-        alert.innerHTML = `
-            <i class="fas ${icon}"></i>
-            <div class="alert-content">
-                <div class="alert-title">${type.charAt(0).toUpperCase() + type.slice(1)}</div>
-                <div class="alert-message">${message}</div>
-            </div>
-        `;
-        
-        // Insert at the top of the content area
-        const content = document.querySelector('.content');
-        if (content) {
-            if (content.firstChild) {
-                content.insertBefore(alert, content.firstChild);
-            } else {
-                content.appendChild(alert);
-            }
-        } else {
-            // If content area doesn't exist yet (login page), show in signup form
-            signupForm.insertBefore(alert, signupForm.firstChild);
-        }
-        
-        // Remove after 5 seconds
-        setTimeout(() => {
-            alert.classList.add('hidden');
-            setTimeout(() => {
-                alert.remove();
-            }, 300);
-        }, 5000);
     }
 });
