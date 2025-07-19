@@ -71,9 +71,6 @@ document.addEventListener('DOMContentLoaded', () => {
         signupError.classList.add('hidden');
         
         try {
-            // Check if this is the first user in the system
-            const isFirstUser = await checkFirstUser();
-            
             // Prepare form data
             const formData = new URLSearchParams();
             formData.append('name', name);
@@ -102,24 +99,23 @@ document.addEventListener('DOMContentLoaded', () => {
             // Show success message
             showAlert('Account created successfully!', 'success');
             
-            // Get user info
-            const userResponse = await fetch(`${API_BASE_URL}/auth/me`, {
-                headers: {
-                    'Authorization': `Bearer ${data.access_token}`
-                }
-            });
-            
-            if (!userResponse.ok) {
-                throw new Error('Failed to get user info');
-            }
-            
-            currentUser = await userResponse.json();
-            
-            // If this is the first user, show organization registration modal
-            if (isFirstUser) {
+            // Check if organization needs to be created (first user)
+            if (!data.organization) {
+                // Show organization registration modal
                 orgRegistrationModal.classList.add('active');
             } else {
                 // For regular users, proceed to app
+                const userResponse = await fetch(`${API_BASE_URL}/auth/me`, {
+                    headers: {
+                        'Authorization': `Bearer ${data.access_token}`
+                    }
+                });
+                
+                if (!userResponse.ok) {
+                    throw new Error('Failed to get user info');
+                }
+                
+                currentUser = await userResponse.json();
                 setupUIForUser();
                 loginView.classList.add('hidden');
                 appView.classList.remove('hidden');
@@ -171,8 +167,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(errorData.detail || 'Failed to register organization');
             }
             
-            const data = await response.json();
-            
             // Store organization name
             localStorage.setItem('orgName', orgName);
             
@@ -213,20 +207,5 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             signupError.classList.add('hidden');
         }, 5000);
-    }
-    
-    // Check if this is the first user in the system
-    async function checkFirstUser() {
-        try {
-            const response = await fetch(`${API_BASE_URL}/auth/first-user`);
-            if (!response.ok) {
-                throw new Error('Failed to check first user status');
-            }
-            const data = await response.json();
-            return data.is_first_user;
-        } catch (error) {
-            console.error('Error checking first user:', error);
-            return false;
-        }
     }
 });
