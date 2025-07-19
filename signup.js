@@ -9,8 +9,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const signupSpinner = document.getElementById('signup-spinner');
     const signupError = document.getElementById('signup-error');
     const signupErrorMessage = document.getElementById('signup-error-message');
-    const orgNameGroup = document.getElementById('org-name-group');
-    const orgNameInput = document.getElementById('org-name');
+    
+    // Organization registration modal elements
+    const orgRegistrationModal = document.getElementById('org-registration-modal');
+    const orgRegistrationForm = document.getElementById('org-registration-form');
+    const organizationNameInput = document.getElementById('organization-name');
+    const submitOrgBtn = document.getElementById('submit-org-registration');
+    const submitOrgText = document.getElementById('submit-org-text');
+    const submitOrgSpinner = document.getElementById('submit-org-spinner');
     
     // Toggle between login and signup forms
     showSignupLink?.addEventListener('click', (e) => {
@@ -18,8 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loginForm.classList.add('hidden');
         signupForm.classList.remove('hidden');
         signupForm.reset();
-        orgNameGroup.style.display = 'none';
-        orgNameInput.required = false;
+        signupError.classList.add('hidden');
     });
     
     showLoginLink?.addEventListener('click', (e) => {
@@ -36,7 +41,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const email = document.getElementById('signup-email').value.trim();
         const password = document.getElementById('signup-password').value;
         const confirmPassword = document.getElementById('signup-confirm-password').value;
-        const orgName = orgNameInput?.value.trim();
         
         // Validate inputs
         if (!name || !email || !password || !confirmPassword) {
@@ -67,36 +71,14 @@ document.addEventListener('DOMContentLoaded', () => {
         signupError.classList.add('hidden');
         
         try {
-            // First, check if this is the first user in the system
+            // Check if this is the first user in the system
             const isFirstUser = await checkFirstUser();
-            
-            // If this is the first user, we need organization name
-            if (isFirstUser) {
-                if (!orgName) {
-                    // Show organization field and return
-                    signupBtnText.textContent = 'Create Account';
-                    signupSpinner.classList.add('hidden');
-                    orgNameGroup.style.display = 'block';
-                    orgNameInput.required = true;
-                    return;
-                }
-                
-                // Validate organization name
-                if (orgName.length < 3) {
-                    throw new Error('Organization name must be at least 3 characters');
-                }
-            }
             
             // Prepare form data
             const formData = new URLSearchParams();
             formData.append('name', name);
             formData.append('email', email);
             formData.append('password', password);
-            
-            // Only include organization_name if this is the first user
-            if (isFirstUser && orgName) {
-                formData.append('organization_name', orgName);
-            }
             
             // Create the user
             const response = await fetch(`${API_BASE_URL}/auth/signup`, {
@@ -114,17 +96,11 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const data = await response.json();
             
-            // Store the token and organization name
+            // Store the token
             localStorage.setItem('token', data.access_token);
-            if (data.organization) {
-                localStorage.setItem('orgName', data.organization);
-            }
             
-            // Show welcome message
-            const welcomeMessage = data.organization 
-                ? `Welcome to ${data.organization}!` 
-                : 'Account created successfully!';
-            showAlert(welcomeMessage, 'success');
+            // Show success message
+            showAlert('Account created successfully!', 'success');
             
             // Get user info
             const userResponse = await fetch(`${API_BASE_URL}/auth/me`, {
@@ -138,12 +114,17 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             currentUser = await userResponse.json();
-            setupUIForUser();
             
-            // Redirect to app
-            loginView.classList.add('hidden');
-            appView.classList.remove('hidden');
-            loadInitialData();
+            // If this is the first user, show organization registration modal
+            if (isFirstUser) {
+                orgRegistrationModal.classList.add('active');
+            } else {
+                // For regular users, proceed to app
+                setupUIForUser();
+                loginView.classList.add('hidden');
+                appView.classList.remove('hidden');
+                loadInitialData();
+            }
             
         } catch (error) {
             console.error('Signup error:', error);
@@ -151,6 +132,77 @@ document.addEventListener('DOMContentLoaded', () => {
         } finally {
             signupBtnText.textContent = 'Create Account';
             signupSpinner.classList.add('hidden');
+        }
+    });
+    
+    // Handle organization registration
+    submitOrgBtn?.addEventListener('click', async () => {
+        const orgName = organizationNameInput.value.trim();
+        
+        if (!orgName) {
+            showAlert('Please enter an organization name', 'danger');
+            return;
+        }
+        
+        if (orgName.length < 3) {
+            showAlert('Organization name must be at least 3 characters', 'danger');
+            return;
+        }
+        
+        // Show loading state
+        submitOrgText.textContent = 'Registering...';
+        submitOrgSpinner.classList.remove('hidden');
+        
+        try {
+            // Update organization name
+            const response = await fetch(`${API_BASE_URL}/users/update-organization`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    organization_name: orgName
+                })
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Failed to register organization');
+            }
+            
+            const data = await response.json();
+            
+            // Store organization name
+            localStorage.setItem('orgName', orgName);
+            
+            // Close modal and proceed to app
+            orgRegistrationModal.classList.remove('active');
+            showAlert(`Welcome to ${orgName}!`, 'success');
+            
+            // Refresh user data
+            const userResponse = await fetch(`${API_BASE_URL}/auth/me`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            
+            if (!userResponse.ok) {
+                throw new Error('Failed to get user info');
+            }
+            
+            currentUser = await userResponse.json();
+            setupUIForUser();
+            loginView.classList.add('hidden');
+            appView.classList.remove('hidden');
+            loadInitialData();
+            
+        } catch (error) {
+            console.error('Organization registration error:', error);
+            showAlert(error.message || 'Failed to register organization', 'danger');
+        } finally {
+            submitOrgText.textContent = 'Register Organization';
+            submitOrgSpinner.classList.add('hidden');
         }
     });
     
