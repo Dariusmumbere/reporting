@@ -41,6 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const email = document.getElementById('signup-email').value.trim();
         const password = document.getElementById('signup-password').value;
         const confirmPassword = document.getElementById('signup-confirm-password').value;
+        const orgName = document.getElementById('org-name')?.value.trim();
         
         // Validate inputs
         if (!name || !email || !password || !confirmPassword) {
@@ -80,9 +81,12 @@ document.addEventListener('DOMContentLoaded', () => {
             formData.append('email', email);
             formData.append('password', password);
             
-            // If first user, append empty organization name (will be set later)
+            // If this is the first user, include organization name
             if (isFirstUser) {
-                formData.append('organization_name', '');
+                if (!orgName) {
+                    throw new Error('Organization name is required for the first user');
+                }
+                formData.append('organization_name', orgName);
             }
             
             // Create the user
@@ -118,12 +122,8 @@ document.addEventListener('DOMContentLoaded', () => {
             currentUser = await userResponse.json();
             
             // If this is the first user, show organization registration modal
-            if (isFirstUser) {
-                // Show the modal
+            if (isFirstUser && !data.organization) {
                 orgRegistrationModal.classList.add('active');
-                
-                // Focus on the organization name input
-                organizationNameInput.focus();
             } else {
                 // For regular users, proceed to app
                 setupUIForUser();
@@ -142,7 +142,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     // Handle organization registration
-    submitOrgBtn?.addEventListener('click', async () => {
+    submitOrgBtn?.addEventListener('click', async (e) => {
+        e.preventDefault();
         const orgName = organizationNameInput.value.trim();
         
         if (!orgName) {
@@ -235,53 +236,28 @@ document.addEventListener('DOMContentLoaded', () => {
             return false;
         }
     }
-    
-    // Show alert message
-    function showAlert(message, type) {
-        const alert = document.createElement('div');
-        alert.className = `alert alert-${type} fade-in`;
-        
-        let icon;
-        if (type === 'success') {
-            icon = 'fa-check-circle';
-        } else if (type === 'danger') {
-            icon = 'fa-exclamation-circle';
-        } else if (type === 'warning') {
-            icon = 'fa-exclamation-triangle';
-        } else {
-            icon = 'fa-info-circle';
-        }
-        
-        alert.innerHTML = `
-            <i class="fas ${icon}"></i>
-            <div class="alert-content">
-                <div class="alert-title">${type.charAt(0).toUpperCase() + type.slice(1)}</div>
-                <div class="alert-message">${message}</div>
-            </div>
-        `;
-        
-        // Insert at the top of the content area
-        const content = document.querySelector('.content');
-        if (content) {
-            if (content.firstChild) {
-                content.insertBefore(alert, content.firstChild);
+
+    // Show organization name field for first user
+    async function checkAndShowOrgField() {
+        try {
+            const isFirstUser = await checkFirstUser();
+            const orgNameGroup = document.getElementById('org-name-group');
+            
+            if (isFirstUser) {
+                orgNameGroup.style.display = 'block';
             } else {
-                content.appendChild(alert);
+                orgNameGroup.style.display = 'none';
             }
-        } else {
-            // If content area doesn't exist yet (login/signup page), append to login container
-            const loginContainer = document.querySelector('.login-container');
-            if (loginContainer) {
-                loginContainer.appendChild(alert);
-            }
+        } catch (error) {
+            console.error('Error checking first user status:', error);
         }
-        
-        // Remove after 5 seconds
-        setTimeout(() => {
-            alert.classList.add('hidden');
-            setTimeout(() => {
-                alert.remove();
-            }, 300);
-        }, 5000);
+    }
+
+    // Check and show organization field when signup form is shown
+    showSignupLink?.addEventListener('click', checkAndShowOrgField);
+    
+    // Initial check if we're already on the signup form
+    if (!signupForm.classList.contains('hidden')) {
+        checkAndShowOrgField();
     }
 });
