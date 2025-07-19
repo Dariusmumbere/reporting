@@ -75,23 +75,25 @@ document.addEventListener('DOMContentLoaded', () => {
             // Check if this is the first user in the system
             const isFirstUser = await checkFirstUser();
             
+            if (isFirstUser && !orgName) {
+                throw new Error('Organization name is required for the first user');
+            }
+            
             // Prepare form data
-            const formData = new FormData();
+            const formData = new URLSearchParams();
             formData.append('name', name);
             formData.append('email', email);
             formData.append('password', password);
-            
-            // If this is the first user, include organization name
-            if (isFirstUser) {
-                if (!orgName) {
-                    throw new Error('Organization name is required for the first user');
-                }
+            if (isFirstUser && orgName) {
                 formData.append('organization_name', orgName);
             }
             
             // Create the user
             const response = await fetch(`${API_BASE_URL}/auth/signup`, {
                 method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
                 body: formData
             });
             
@@ -121,9 +123,12 @@ document.addEventListener('DOMContentLoaded', () => {
             
             currentUser = await userResponse.json();
             
-            // If this is the first user, show organization registration modal
-            if (isFirstUser && !data.organization) {
-                orgRegistrationModal.classList.add('active');
+            // For first user, they will be admin and organization is already created
+            if (isFirstUser) {
+                setupUIForUser();
+                loginView.classList.add('hidden');
+                appView.classList.remove('hidden');
+                loadInitialData();
             } else {
                 // For regular users, proceed to app
                 setupUIForUser();
@@ -142,8 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     // Handle organization registration
-    submitOrgBtn?.addEventListener('click', async (e) => {
-        e.preventDefault();
+    submitOrgBtn?.addEventListener('click', async () => {
         const orgName = organizationNameInput.value.trim();
         
         if (!orgName) {
@@ -236,28 +240,17 @@ document.addEventListener('DOMContentLoaded', () => {
             return false;
         }
     }
-
-    // Show organization name field for first user
-    async function checkAndShowOrgField() {
-        try {
-            const isFirstUser = await checkFirstUser();
-            const orgNameGroup = document.getElementById('org-name-group');
-            
-            if (isFirstUser) {
-                orgNameGroup.style.display = 'block';
-            } else {
-                orgNameGroup.style.display = 'none';
-            }
-        } catch (error) {
-            console.error('Error checking first user status:', error);
+    
+    // Show organization name field if this is the first user
+    async function initSignupForm() {
+        const isFirstUser = await checkFirstUser();
+        const orgNameGroup = document.getElementById('org-name-group');
+        
+        if (isFirstUser && orgNameGroup) {
+            orgNameGroup.style.display = 'block';
         }
     }
-
-    // Check and show organization field when signup form is shown
-    showSignupLink?.addEventListener('click', checkAndShowOrgField);
     
-    // Initial check if we're already on the signup form
-    if (!signupForm.classList.contains('hidden')) {
-        checkAndShowOrgField();
-    }
+    // Initialize the signup form
+    initSignupForm();
 });
