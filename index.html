@@ -129,6 +129,10 @@
                         <i class="fas fa-file-alt"></i>
                         <span>Reports</span>
                     </a>
+                    <a href="#" class="menu-item" data-view="chat">
+                        <i class="fas fa-comments"></i>
+                        <span>Chat</span>
+                    </a>
                     <div id="admin-menu" class="hidden">
                         <div class="menu-category">Administration</div>
                         <a href="#" class="menu-item" data-view="users">
@@ -690,6 +694,56 @@
             </div>
         </div>
     </div>
+    <!-- Add this with the other view divs -->
+<div class="view hidden" id="chat-view">
+    <div class="page-header">
+        <h1 class="page-title">Organization Chat</h1>
+    </div>
+
+    <div class="chat-container">
+        <div class="chat-sidebar">
+            <div class="chat-search">
+                <input type="text" placeholder="Search users..." id="chat-search">
+                <i class="fas fa-search"></i>
+            </div>
+            <div class="chat-users" id="chat-users-list">
+                <!-- Users will be loaded here -->
+                <div class="text-center py-4">
+                    <div class="spinner spinner-primary"></div>
+                </div>
+            </div>
+        </div>
+        <div class="chat-main">
+            <div class="chat-header">
+                <div class="chat-user-info">
+                    <div class="chat-user-avatar">S</div>
+                    <div class="chat-user-details">
+                        <div class="chat-user-name">Select a user to chat</div>
+                        <div class="chat-user-status">Online</div>
+                    </div>
+                </div>
+            </div>
+            <div class="chat-messages" id="chat-messages">
+                <!-- Messages will appear here -->
+                <div class="chat-empty-state">
+                    <i class="fas fa-comments"></i>
+                    <p>Select a conversation to start chatting</p>
+                </div>
+            </div>
+            <div class="chat-input-container hidden" id="chat-input-container">
+                <div class="chat-input-toolbar">
+                    <button class="chat-toolbar-btn"><i class="fas fa-smile"></i></button>
+                </div>
+                <div class="chat-input-wrapper">
+                    <textarea id="chat-message-input" placeholder="Type a message..." rows="1"></textarea>
+                    <button id="chat-send-btn" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
     <script>
         // API Configuration
@@ -706,6 +760,10 @@
         let currentUsersPage = 1;
         const reportsPerPage = 10;
         const usersPerPage = 10;
+        let chatSocket = null;
+        let currentChatUserId = null;
+        let chatUsers = [];
+        let chatMessages = {};
 
         // DOM Elements
         const loginView = document.getElementById('login-view');
@@ -807,6 +865,7 @@
             setupSidebar();
             setupEventListeners();
             checkAuth();
+            setupChatEventListeners();
         }
 
         // Apply the current theme
@@ -1357,6 +1416,7 @@
     } else {
         adminMenu.classList.add('hidden');
     }
+    initWebSocket();
 }
         // Switch between views
         function switchView(viewId) {
@@ -2403,6 +2463,339 @@
                 document.getElementById('report-description').value = '';
             }
         }
+        // Add this new function to setup chat event listeners
+function setupChatEventListeners() {
+    // Chat search
+    document.getElementById('chat-search')?.addEventListener('input', debounce(() => {
+        filterChatUsers();
+    }, 300));
+
+    // Send message button
+    document.getElementById('chat-send-btn')?.addEventListener('click', sendChatMessage);
+
+    // Send message on Enter key
+    document.getElementById('chat-message-input')?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendChatMessage();
+        }
+    });
+
+    // Auto-resize textarea
+    document.getElementById('chat-message-input')?.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+    });
+}
+
+// Add this function to initialize WebSocket connection
+function initWebSocket() {
+    if (!currentUser || chatSocket) return;
+
+    const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+    const host = window.location.host;
+    const wsUrl = `${protocol}${host}/ws/chat`;
+
+    chatSocket = new WebSocket(wsUrl);
+
+    chatSocket.onopen = () => {
+        console.log('WebSocket connected');
+        // Authenticate with the server
+        chatSocket.send(JSON.stringify({
+            type: 'auth',
+            token: localStorage.getItem('token')
+        }));
+    };
+
+    chatSocket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        handleWebSocketMessage(data);
+    };
+
+    chatSocket.onclose = () => {
+        console.log('WebSocket disconnected');
+        // Try to reconnect after 5 seconds
+        setTimeout(initWebSocket, 5000);
+    };
+
+    chatSocket.onerror = (error) => {
+        console.error('WebSocket error:', error);
+    };
+}
+
+// Add this function to handle incoming WebSocket messages
+function handleWebSocketMessage(data) {
+    switch (data.type) {
+        case 'auth_response':
+            if (data.success) {
+                loadChatUsers();
+            } else {
+                console.error('WebSocket authentication failed:', data.message);
+            }
+            break;
+            
+        case 'user_list':
+            chatUsers = data.users;
+            renderChatUsers(chatUsers);
+            break;
+            
+        case 'message':
+            handleIncomingMessage(data);
+            break;
+            
+        case 'message_history':
+            handleMessageHistory(data);
+            break;
+            
+        case 'user_status':
+            updateUserStatus(data.user_id, data.status);
+            break;
+            
+        default:
+            console.log('Unknown message type:', data.type);
+    }
+}
+
+// Add this function to load chat users
+function loadChatUsers() {
+    fetch(`${API_BASE_URL}/chat/users`, {
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    })
+    .then(response => response.json())
+    .then(users => {
+        chatUsers = users;
+        renderChatUsers(users);
+    })
+    .catch(error => {
+        console.error('Error loading chat users:', error);
+    });
+}
+
+// Add this function to render chat users
+function renderChatUsers(users) {
+    const usersList = document.getElementById('chat-users-list');
+    if (!usersList) return;
+
+    usersList.innerHTML = '';
+    
+    if (users.length === 0) {
+        usersList.innerHTML = '<div class="text-center py-4 text-muted">No users available</div>';
+        return;
+    }
+
+    users.forEach(user => {
+        const userEl = document.createElement('div');
+        userEl.className = `chat-user ${user.id === currentChatUserId ? 'active' : ''}`;
+        userEl.dataset.userId = user.id;
+        
+        const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
+        
+        userEl.innerHTML = `
+            <div class="chat-user-avatar">${initials}</div>
+            <div class="chat-user-details">
+                <div class="chat-user-name">${user.name}</div>
+                <div class="chat-user-status ${user.status === 'online' ? 'online' : 'offline'}">
+                    ${user.status === 'online' ? 'Online' : 'Offline'}
+                </div>
+                ${user.unread_count > 0 ? `<div class="chat-user-unread">${user.unread_count}</div>` : ''}
+            </div>
+        `;
+        
+        userEl.addEventListener('click', () => startChatWithUser(user.id));
+        usersList.appendChild(userEl);
+    });
+}
+
+// Add this function to filter chat users
+function filterChatUsers() {
+    const searchTerm = document.getElementById('chat-search').value.toLowerCase();
+    if (!searchTerm) {
+        renderChatUsers(chatUsers);
+        return;
+    }
+    
+    const filteredUsers = chatUsers.filter(user => 
+        user.name.toLowerCase().includes(searchTerm) || 
+        user.email.toLowerCase().includes(searchTerm)
+    );
+    
+    renderChatUsers(filteredUsers);
+}
+
+// Add this function to start a chat with a user
+function startChatWithUser(userId) {
+    currentChatUserId = userId;
+    
+    // Update UI to show active user
+    document.querySelectorAll('.chat-user').forEach(el => {
+        el.classList.toggle('active', el.dataset.userId === userId.toString());
+    });
+    
+    // Update chat header
+    const user = chatUsers.find(u => u.id === userId);
+    if (user) {
+        const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
+        document.querySelector('.chat-header .chat-user-avatar').textContent = initials;
+        document.querySelector('.chat-header .chat-user-name').textContent = user.name;
+        document.querySelector('.chat-header .chat-user-status').textContent = 
+            user.status === 'online' ? 'Online' : 'Offline';
+        document.querySelector('.chat-header .chat-user-status').className = 
+            `chat-user-status ${user.status === 'online' ? 'online' : 'offline'}`;
+    }
+    
+    // Show input area
+    document.getElementById('chat-input-container').classList.remove('hidden');
+    
+    // Clear unread count for this user
+    if (user && user.unread_count > 0) {
+        chatSocket.send(JSON.stringify({
+            type: 'mark_read',
+            sender_id: userId
+        }));
+    }
+    
+    // Load message history
+    loadMessageHistory(userId);
+}
+
+// Add this function to load message history
+function loadMessageHistory(userId) {
+    fetch(`${API_BASE_URL}/chat/messages/${userId}`, {
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    })
+    .then(response => response.json())
+    .then(messages => {
+        chatMessages[userId] = messages;
+        renderMessages(messages);
+    })
+    .catch(error => {
+        console.error('Error loading message history:', error);
+    });
+}
+
+// Add this function to render messages
+function renderMessages(messages) {
+    const messagesContainer = document.getElementById('chat-messages');
+    messagesContainer.innerHTML = '';
+    
+    if (messages.length === 0) {
+        messagesContainer.innerHTML = `
+            <div class="chat-empty-state">
+                <i class="fas fa-comments"></i>
+                <p>No messages yet. Start the conversation!</p>
+            </div>
+        `;
+        return;
+    }
+    
+    messages.forEach(message => {
+        const isMe = message.sender_id === currentUser.id;
+        const messageEl = document.createElement('div');
+        messageEl.className = `chat-message ${isMe ? 'sent' : 'received'}`;
+        
+        messageEl.innerHTML = `
+            <div class="chat-message-content">
+                <div class="chat-message-text">${message.content}</div>
+                <div class="chat-message-time">
+                    ${new Date(message.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                    ${isMe ? '<i class="fas fa-check-double"></i>' : ''}
+                </div>
+            </div>
+        `;
+        
+        messagesContainer.appendChild(messageEl);
+    });
+    
+    // Scroll to bottom
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+// Add this function to handle incoming messages
+function handleIncomingMessage(data) {
+    const message = data.message;
+    
+    // Add to message history
+    if (!chatMessages[message.sender_id]) {
+        chatMessages[message.sender_id] = [];
+    }
+    chatMessages[message.sender_id].push(message);
+    
+    // If this is the current chat, render the message
+    if (currentChatUserId === message.sender_id) {
+        renderMessages(chatMessages[message.sender_id]);
+    } else {
+        // Update unread count in the user list
+        const user = chatUsers.find(u => u.id === message.sender_id);
+        if (user) {
+            user.unread_count = (user.unread_count || 0) + 1;
+            renderChatUsers(chatUsers);
+        }
+    }
+}
+
+// Add this function to handle message history
+function handleMessageHistory(data) {
+    chatMessages[data.user_id] = data.messages;
+    if (currentChatUserId === data.user_id) {
+        renderMessages(data.messages);
+    }
+}
+
+// Add this function to update user status
+function updateUserStatus(userId, status) {
+    const user = chatUsers.find(u => u.id === userId);
+    if (user) {
+        user.status = status;
+        renderChatUsers(chatUsers);
+        
+        // Update header if this is the current chat
+        if (currentChatUserId === userId) {
+            document.querySelector('.chat-header .chat-user-status').textContent = 
+                status === 'online' ? 'Online' : 'Offline';
+            document.querySelector('.chat-header .chat-user-status').className = 
+                `chat-user-status ${status === 'online' ? 'online' : 'offline'}`;
+        }
+    }
+}
+
+// Add this function to send a message
+function sendChatMessage() {
+    const input = document.getElementById('chat-message-input');
+    const message = input.value.trim();
+    
+    if (!message || !currentChatUserId) return;
+    
+    // Send via WebSocket
+    chatSocket.send(JSON.stringify({
+        type: 'message',
+        recipient_id: currentChatUserId,
+        content: message
+    }));
+    
+    // Add to local message history immediately (optimistic update)
+    const newMessage = {
+        id: Date.now(), // Temporary ID until we get the real one from server
+        sender_id: currentUser.id,
+        recipient_id: currentChatUserId,
+        content: message,
+        timestamp: new Date().toISOString(),
+        status: 'sent'
+    };
+    
+    if (!chatMessages[currentChatUserId]) {
+        chatMessages[currentChatUserId] = [];
+    }
+    chatMessages[currentChatUserId].push(newMessage);
+    renderMessages(chatMessages[currentChatUserId]);
+    
+    // Clear input
+    input.value = '';
+    input.style.height = 'auto';
+}
 
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
