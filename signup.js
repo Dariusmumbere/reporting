@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const signupError = document.getElementById('signup-error');
     const signupErrorMessage = document.getElementById('signup-error-message');
     const orgNameGroup = document.getElementById('org-name-group');
+    const orgNameInput = document.getElementById('org-name');
     
     // API Configuration
     const API_BASE_URL = 'https://reporting-api-uvze.onrender.com';
@@ -19,9 +20,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginView = document.getElementById('login-view');
     const appView = document.getElementById('app-view');
     
+    // Initialize - hide org name field by default
+    orgNameGroup.style.display = 'none';
+    if (orgNameInput) orgNameInput.required = false;
+    
     // Toggle between login and signup forms
-    showSignupLink?.addEventListener('click', (e) => {
+    showSignupLink?.addEventListener('click', async (e) => {
         e.preventDefault();
+        
+        // Check if this is the first user when switching to signup form
+        try {
+            const isFirstUser = await checkFirstUser();
+            if (isFirstUser) {
+                orgNameGroup.style.display = 'block';
+                if (orgNameInput) orgNameInput.required = true;
+            }
+        } catch (error) {
+            console.error('Error checking first user:', error);
+        }
+        
         loginForm.classList.add('hidden');
         signupForm.classList.remove('hidden');
     });
@@ -30,6 +47,8 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         signupForm.classList.add('hidden');
         loginForm.classList.remove('hidden');
+        orgNameGroup.style.display = 'none';
+        if (orgNameInput) orgNameInput.required = false;
     });
     
     // Handle signup form submission
@@ -40,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const email = document.getElementById('signup-email').value.trim();
         const password = document.getElementById('signup-password').value;
         const confirmPassword = document.getElementById('signup-confirm-password').value;
-        const orgName = document.getElementById('org-name')?.value.trim();
+        const orgName = orgNameInput?.value.trim();
         
         // Validate inputs
         if (!name || !email || !password || !confirmPassword) {
@@ -64,15 +83,16 @@ document.addEventListener('DOMContentLoaded', () => {
         signupError.classList.add('hidden');
         
         try {
-            // First, check if this is the first user in the system
+            // Check again if this is the first user (in case page was refreshed)
             const isFirstUser = await checkFirstUser();
             
-            // If this is the first user, show organization name field if not already shown
-            if (isFirstUser && !orgName) {
+            // If this is the first user and no org name provided
+            if (isFirstUser && (!orgNameInput || !orgName)) {
+                showSignupError('Organization name is required');
                 signupBtnText.textContent = 'Create Account';
                 signupSpinner.classList.add('hidden');
                 orgNameGroup.style.display = 'block';
-                document.getElementById('org-name').required = true;
+                if (orgNameInput) orgNameInput.required = true;
                 return;
             }
             
@@ -117,17 +137,12 @@ document.addEventListener('DOMContentLoaded', () => {
             
             currentUser = await userResponse.json();
             
-            // Show welcome message with the actual organization name from the response
-            if (data.organization) {
-                showAlert(`Welcome to ${data.organization}!`, 'success');
+            // Show welcome message
+            const welcomeOrgName = data.organization || localStorage.getItem('orgName');
+            if (welcomeOrgName) {
+                showAlert(`Welcome to ${welcomeOrgName}!`, 'success');
             } else {
-                // If no organization name was returned, try to get it from localStorage
-                const storedOrgName = localStorage.getItem('orgName');
-                if (storedOrgName) {
-                    showAlert(`Welcome to ${storedOrgName}!`, 'success');
-                } else {
-                    showAlert('Account created successfully!', 'success');
-                }
+                showAlert('Account created successfully!', 'success');
             }
             
             // Redirect to app
@@ -178,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const userAvatarElements = document.querySelectorAll('#user-avatar, #user-dropdown-avatar');
         const userEmailElements = document.querySelectorAll('#user-dropdown-email');
         
-        const initials = currentUser.name ? currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'U';
+        const initials = currentUser.name ? currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
         
         userNameElements.forEach(el => el.textContent = currentUser.name || 'User');
         userRoleElements.forEach(el => el.textContent = currentUser.role === 'admin' ? 'Administrator' : 'Staff Member');
@@ -189,7 +204,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const orgName = localStorage.getItem('orgName');
         if (orgName) {
             const orgNameElements = document.querySelectorAll('.organization-name');
-            orgNameElements.forEach(el => el.textContent = orgName);
+            orgNameElements.forEach(el => {
+                if (el) el.textContent = orgName;
+            });
         }
         
         // Show/hide admin menu
