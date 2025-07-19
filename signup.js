@@ -76,25 +76,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             
-            // Prepare user data
-            const userData = {
-                name: name,
-                email: email,
-                password: password
-            };
-            
-            // If this is the first user, include organization name
+            // Prepare form data
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('email', email);
+            formData.append('password', password);
             if (isFirstUser && orgName) {
-                userData.organization_name = orgName;
+                formData.append('organization_name', orgName);
             }
             
             // Create the user
             const response = await fetch(`${API_BASE_URL}/auth/signup`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: new URLSearchParams(userData)
+                body: formData
             });
             
             if (!response.ok) {
@@ -104,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const data = await response.json();
             
-            // Store the token and user data
+            // Store the token and organization name
             localStorage.setItem('token', data.access_token);
             if (data.organization) {
                 localStorage.setItem('orgName', data.organization);
@@ -123,11 +117,17 @@ document.addEventListener('DOMContentLoaded', () => {
             
             currentUser = await userResponse.json();
             
-            // Show welcome message with organization name if available
+            // Show welcome message with the actual organization name from the response
             if (data.organization) {
                 showAlert(`Welcome to ${data.organization}!`, 'success');
             } else {
-                showAlert('Account created successfully!', 'success');
+                // If no organization name was returned, try to get it from localStorage
+                const storedOrgName = localStorage.getItem('orgName');
+                if (storedOrgName) {
+                    showAlert(`Welcome to ${storedOrgName}!`, 'success');
+                } else {
+                    showAlert('Account created successfully!', 'success');
+                }
             }
             
             // Redirect to app
@@ -184,6 +184,13 @@ document.addEventListener('DOMContentLoaded', () => {
         userRoleElements.forEach(el => el.textContent = currentUser.role === 'admin' ? 'Administrator' : 'Staff Member');
         userAvatarElements.forEach(el => el.textContent = initials);
         userEmailElements.forEach(el => el.textContent = currentUser.email);
+        
+        // Show organization name in the UI if available
+        const orgName = localStorage.getItem('orgName');
+        if (orgName) {
+            const orgNameElements = document.querySelectorAll('.organization-name');
+            orgNameElements.forEach(el => el.textContent = orgName);
+        }
         
         // Show/hide admin menu
         const adminMenu = document.getElementById('admin-menu');
