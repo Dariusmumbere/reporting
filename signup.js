@@ -11,9 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const signupErrorMessage = document.getElementById('signup-error-message');
     const orgNameGroup = document.getElementById('org-name-group');
     
-    // API Configuration
-    const API_BASE_URL = 'https://reporting-api-uvze.onrender.com';
-    
     // Toggle between login and signup forms
     showSignupLink?.addEventListener('click', (e) => {
         e.preventDefault();
@@ -80,13 +77,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             
-            // Prepare user data for signup
+            // Prepare form data for signup
             const formData = new FormData();
             formData.append('name', name);
             formData.append('email', email);
             formData.append('password', password);
             
-            // Include organization name if this is the first user
+            // If this is the first user, include organization name
             if (isFirstUser && orgName) {
                 formData.append('organization_name', orgName);
             }
@@ -110,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.setItem('orgName', data.organization);
             }
             
-            // Get the user info
+            // Get user info
             const userResponse = await fetch(`${API_BASE_URL}/auth/me`, {
                 headers: {
                     'Authorization': `Bearer ${data.access_token}`
@@ -118,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             
             if (!userResponse.ok) {
-                throw new Error('Failed to fetch user info');
+                throw new Error('Failed to get user info');
             }
             
             const userData = await userResponse.json();
@@ -130,8 +127,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 showAlert('Account created successfully!', 'success');
             }
             
-            // Redirect to app
-            window.location.href = '/'; // Or your app's main page
+            // Set current user and update UI
+            currentUser = userData;
+            setupUIForUser();
+            
+            // Hide login view and show app view
+            loginView.classList.add('hidden');
+            appView.classList.remove('hidden');
+            
+            // Load initial data
+            loadInitialData();
             
         } catch (error) {
             console.error('Signup error:', error);
@@ -166,7 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // Helper function to show alerts (similar to your existing showAlert function)
+    // Show alert message
     function showAlert(message, type) {
         const alert = document.createElement('div');
         alert.className = `alert alert-${type} fade-in`;
@@ -190,12 +195,22 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         `;
         
-        // Insert at the top of the login container
-        const loginContainer = document.querySelector('.login-container');
-        if (loginContainer.firstChild) {
-            loginContainer.insertBefore(alert, loginContainer.firstChild);
+        // Insert at the top of the content area
+        const content = document.querySelector('.content');
+        if (content) {
+            if (content.firstChild) {
+                content.insertBefore(alert, content.firstChild);
+            } else {
+                content.appendChild(alert);
+            }
         } else {
-            loginContainer.appendChild(alert);
+            // If we're not in the app view yet, show in the login container
+            const loginContainer = document.querySelector('.login-right');
+            if (loginContainer.firstChild) {
+                loginContainer.insertBefore(alert, loginContainer.firstChild);
+            } else {
+                loginContainer.appendChild(alert);
+            }
         }
         
         // Remove after 5 seconds
@@ -207,3 +222,45 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 5000);
     }
 });
+
+// Global variables referenced in the signup script
+const API_BASE_URL = 'https://reporting-api-uvze.onrender.com';
+let currentUser = null;
+const loginView = document.getElementById('login-view');
+const appView = document.getElementById('app-view');
+
+// These functions would be defined in your main app.js
+function setupUIForUser() {
+    // Implementation from your existing app
+    if (!currentUser) return;
+    
+    const initials = currentUser.name ? currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'U';
+    const userName = document.getElementById('user-name');
+    const userRole = document.getElementById('user-role');
+    const userAvatar = document.getElementById('user-avatar');
+    
+    if (userName) userName.textContent = currentUser.name || 'User';
+    if (userRole) userRole.textContent = currentUser.role === 'admin' ? 'Administrator' : 'Staff Member';
+    if (userAvatar) userAvatar.textContent = initials;
+    
+    // Show/hide admin menu
+    const adminMenu = document.getElementById('admin-menu');
+    if (adminMenu) {
+        if (currentUser.role === 'admin') {
+            adminMenu.classList.remove('hidden');
+        } else {
+            adminMenu.classList.add('hidden');
+        }
+    }
+}
+
+function loadInitialData() {
+    // Implementation from your existing app
+    // This would load dashboard data, reports, etc.
+    if (typeof loadDashboardData === 'function') {
+        loadDashboardData();
+    }
+    if (currentUser?.role === 'admin' && typeof loadUsers === 'function') {
+        loadUsers();
+    }
+}
