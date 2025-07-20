@@ -1815,7 +1815,7 @@ function renderChatUsers(users) {
             <div class="chat-user-info">
                 <div class="chat-user-name">
                     ${user.name}
-                    ${user.role === 'admin' ? '<span class="admin-badge">Admin</span>' : ''}
+                    ${user.role === 'admin' ? '<span class="admin-badge"><i class="fas fa-check-circle"></i></span>' : ''}
                 </div>
                 <div class="chat-user-last-message">${user.last_message || ''}</div>
             </div>
@@ -1842,16 +1842,15 @@ function renderChatUsers(users) {
     
     // Set chat header
     const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
-    chatHeaderName.innerHTML = `${user.name}${user.role === 'admin' ? '<span class="admin-badge">Admin</span>' : ''}`;
+    chatHeaderName.innerHTML = `${user.name} ${user.role === 'admin' ? '<span class="admin-badge"><i class="fas fa-check-circle"></i></span>' : ''}`;
     chatHeaderAvatar.textContent = initials;
     chatHeaderStatusDot.className = 'chat-header-status-dot';
     chatHeaderStatusDot.classList.add(user.status);
     chatHeaderStatusText.textContent = user.status === 'online' ? 'Online' : 'Offline';
     
-    // Load messages
+    // Rest of the function remains the same...
     loadChatMessages(user.id);
     
-    // Mark messages as read
     if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
         chatSocket.send(JSON.stringify({
             type: 'mark_read',
@@ -1859,7 +1858,6 @@ function renderChatUsers(users) {
         }));
     }
     
-    // Reset unread count for this user
     updateUnreadCount(user.id, -user.unread_count);
 }
         // Load chat messages
