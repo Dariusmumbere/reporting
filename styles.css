@@ -1647,3 +1647,13 @@
 #org-name-group {
     transition: all 0.3s ease;
 }
+.admin-badge {
+        background-color: var(--primary-color);
+        color: white;
+        font-size: 0.6rem;
+        padding: 0.2rem 0.4rem;
+        border-radius: 0.5rem;
+        margin-left: 0.5rem;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
