@@ -1647,13 +1647,16 @@
 #org-name-group {
     transition: all 0.3s ease;
 }
+/* Add this to your existing CSS */
 .admin-badge {
-        background-color: var(--primary-color);
-        color: white;
-        font-size: 0.6rem;
-        padding: 0.2rem 0.4rem;
-        border-radius: 0.5rem;
-        margin-left: 0.5rem;
-        font-weight: bold;
-        text-transform: uppercase;
-    }
+    color: #1d9bf0;
+    font-size: 0.75rem;
+    margin-left: 0.25rem;
+    display: inline-flex;
+    align-items: center;
+}
+
+.chat-user-name {
+    display: flex;
+    align-items: center;
+}
