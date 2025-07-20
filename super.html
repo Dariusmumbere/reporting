@@ -1436,1139 +1436,1181 @@
     <div class="toast-container" id="toast-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script>
-        // API Configuration
-        const API_BASE_URL = 'https://reporting-api-uvze.onrender.com';
-        let authToken = localStorage.getItem('authToken');
+<script>
+    // API Configuration
+    const API_BASE_URL = 'https://reporting-api-uvze.onrender.com';
+    let authToken = localStorage.getItem('authToken');
+    
+    // Axios instance with auth header
+    const api = axios.create({
+        baseURL: API_BASE_URL,
+        headers: {
+            'Authorization': `Bearer ${authToken}`,
+            'Content-Type': 'application/json'
+        }
+    });
+
+    // Global state
+    let currentUser = null;
+    let organizations = [];
+    let users = [];
+    let reports = [];
+    let currentPage = {
+        orgs: 1,
+        users: 1,
+        reports: 1,
+        orgsFull: 1
+    };
+    let totalPages = {
+        orgs: 1,
+        users: 1,
+        reports: 1,
+        orgsFull: 1
+    };
+
+    // DOM Elements
+    const sidebar = document.getElementById('sidebar');
+    const toggleSidebarBtn = document.getElementById('toggle-sidebar');
+    const mainContent = document.querySelector('.main');
+    const contentSections = {
+        dashboard: document.getElementById('dashboard-content'),
+        organizations: document.getElementById('organizations-content'),
+        users: document.getElementById('users-content'),
+        reports: document.getElementById('reports-content'),
+        settings: document.getElementById('settings-content')
+    };
+    const navLinks = {
+        dashboard: document.getElementById('dashboard-link'),
+        organizations: document.getElementById('organizations-link'),
+        users: document.getElementById('users-link'),
+        reports: document.getElementById('reports-link'),
+        settings: document.getElementById('settings-link')
+    };
+    const logoutBtn = document.getElementById('logout-btn');
+    const refreshBtn = document.getElementById('refresh-btn');
+
+    // Stats elements
+    const totalOrgsElement = document.getElementById('total-organizations');
+    const totalUsersElement = document.getElementById('total-users');
+    const totalReportsElement = document.getElementById('total-reports');
+    const pendingReportsElement = document.getElementById('pending-reports');
+
+    // Tables
+    const recentOrgsTable = document.getElementById('recent-orgs-table').getElementsByTagName('tbody')[0];
+    const orgsTable = document.getElementById('organizations-table').getElementsByTagName('tbody')[0];
+    const usersTable = document.getElementById('users-table').getElementsByTagName('tbody')[0];
+    const reportsTable = document.getElementById('reports-table').getElementsByTagName('tbody')[0];
+
+    // Pagination elements
+    const prevOrgsPageBtn = document.getElementById('prev-orgs-page');
+    const nextOrgsPageBtn = document.getElementById('next-orgs-page');
+    const orgsPageInfo = document.getElementById('orgs-page-info');
+    const prevOrgsFullPageBtn = document.getElementById('prev-orgs-full-page');
+    const nextOrgsFullPageBtn = document.getElementById('next-orgs-full-page');
+    const orgsFullPageInfo = document.getElementById('orgs-full-page-info');
+    const prevUsersPageBtn = document.getElementById('prev-users-page');
+    const nextUsersPageBtn = document.getElementById('next-users-page');
+    const usersPageInfo = document.getElementById('users-page-info');
+    const prevReportsPageBtn = document.getElementById('prev-reports-page');
+    const nextReportsPageBtn = document.getElementById('next-reports-page');
+    const reportsPageInfo = document.getElementById('reports-page-info');
+
+    // Modals
+    const addOrgModal = document.getElementById('add-org-modal');
+    const closeOrgModalBtn = document.getElementById('close-org-modal');
+    const cancelOrgModalBtn = document.getElementById('cancel-org-modal');
+    const saveOrgModalBtn = document.getElementById('save-org-modal');
+    const addOrgForm = document.getElementById('add-org-form');
+    
+    const addUserModal = document.getElementById('add-user-modal');
+    const closeUserModalBtn = document.getElementById('close-user-modal');
+    const cancelUserModalBtn = document.getElementById('cancel-user-modal');
+    const saveUserModalBtn = document.getElementById('save-user-modal');
+    const addUserForm = document.getElementById('add-user-form');
+    const userOrganizationSelect = document.getElementById('user-organization');
+    
+    const viewReportModal = document.getElementById('view-report-modal');
+    const closeReportModalBtn = document.getElementById('close-report-modal');
+    const closeReportBtn = document.getElementById('close-report-btn');
+    const updateReportBtn = document.getElementById('update-report-btn');
+
+    // Toast container
+    const toastContainer = document.getElementById('toast-container');
+
+    // Utility Functions
+    function showToast(type, title, message) {
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
         
-        // Axios instance with auth header
-        const api = axios.create({
-            baseURL: API_BASE_URL,
-            headers: {
-                'Authorization': `Bearer ${authToken}`,
-                'Content-Type': 'application/json'
-            }
+        let icon;
+        switch(type) {
+            case 'success':
+                icon = 'fas fa-check-circle';
+                break;
+            case 'error':
+                icon = 'fas fa-exclamation-circle';
+                break;
+            case 'warning':
+                icon = 'fas fa-exclamation-triangle';
+                break;
+            case 'info':
+                icon = 'fas fa-info-circle';
+                break;
+            default:
+                icon = 'fas fa-info-circle';
+        }
+        
+        toast.innerHTML = `
+            <i class="${icon}"></i>
+            <div class="toast-content">
+                <h5>${title}</h5>
+                <p>${message}</p>
+            </div>
+            <button class="toast-close">&times;</button>
+        `;
+        
+        toastContainer.appendChild(toast);
+        
+        // Show toast
+        setTimeout(() => {
+            toast.classList.add('show');
+        }, 100);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                toast.remove();
+            }, 300);
+        }, 5000);
+        
+        // Close button
+        toast.querySelector('.toast-close').addEventListener('click', () => {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                toast.remove();
+            }, 300);
         });
+    }
 
-        // Global state
-        let currentUser = null;
-        let organizations = [];
-        let users = [];
-        let reports = [];
-        let currentPage = {
-            orgs: 1,
-            users: 1,
-            reports: 1,
-            orgsFull: 1
-        };
-        let totalPages = {
-            orgs: 1,
-            users: 1,
-            reports: 1,
-            orgsFull: 1
-        };
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+    }
 
-        // DOM Elements
-        const sidebar = document.getElementById('sidebar');
-        const toggleSidebarBtn = document.getElementById('toggle-sidebar');
-        const mainContent = document.querySelector('.main');
-        const contentSections = {
-            dashboard: document.getElementById('dashboard-content'),
-            organizations: document.getElementById('organizations-content'),
-            users: document.getElementById('users-content'),
-            reports: document.getElementById('reports-content'),
-            settings: document.getElementById('settings-content')
-        };
-        const navLinks = {
-            dashboard: document.getElementById('dashboard-link'),
-            organizations: document.getElementById('organizations-link'),
-            users: document.getElementById('users-link'),
-            reports: document.getElementById('reports-link'),
-            settings: document.getElementById('settings-link')
-        };
-        const logoutBtn = document.getElementById('logout-btn');
-        const refreshBtn = document.getElementById('refresh-btn');
+    function showLoading(button) {
+        button.disabled = true;
+        button.innerHTML = `<span class="spinner"></span>${button.textContent.trim()}`;
+    }
 
-        // Stats elements
-        const totalOrgsElement = document.getElementById('total-organizations');
-        const totalUsersElement = document.getElementById('total-users');
-        const totalReportsElement = document.getElementById('total-reports');
-        const pendingReportsElement = document.getElementById('pending-reports');
+    function hideLoading(button, originalText) {
+        button.disabled = false;
+        button.textContent = originalText;
+    }
 
-        // Tables
-        const recentOrgsTable = document.getElementById('recent-orgs-table').getElementsByTagName('tbody')[0];
-        const orgsTable = document.getElementById('organizations-table').getElementsByTagName('tbody')[0];
-        const usersTable = document.getElementById('users-table').getElementsByTagName('tbody')[0];
-        const reportsTable = document.getElementById('reports-table').getElementsByTagName('tbody')[0];
-
-        // Pagination elements
-        const prevOrgsPageBtn = document.getElementById('prev-orgs-page');
-        const nextOrgsPageBtn = document.getElementById('next-orgs-page');
-        const orgsPageInfo = document.getElementById('orgs-page-info');
-        const prevOrgsFullPageBtn = document.getElementById('prev-orgs-full-page');
-        const nextOrgsFullPageBtn = document.getElementById('next-orgs-full-page');
-        const orgsFullPageInfo = document.getElementById('orgs-full-page-info');
-        const prevUsersPageBtn = document.getElementById('prev-users-page');
-        const nextUsersPageBtn = document.getElementById('next-users-page');
-        const usersPageInfo = document.getElementById('users-page-info');
-        const prevReportsPageBtn = document.getElementById('prev-reports-page');
-        const nextReportsPageBtn = document.getElementById('next-reports-page');
-        const reportsPageInfo = document.getElementById('reports-page-info');
-
-        // Modals
-        const addOrgModal = document.getElementById('add-org-modal');
-        const closeOrgModalBtn = document.getElementById('close-org-modal');
-        const cancelOrgModalBtn = document.getElementById('cancel-org-modal');
-        const saveOrgModalBtn = document.getElementById('save-org-modal');
-        const addOrgForm = document.getElementById('add-org-form');
+    function showSection(section) {
+        // Hide all sections
+        Object.values(contentSections).forEach(sec => {
+            sec.style.display = 'none';
+        });
         
-        const addUserModal = document.getElementById('add-user-modal');
-        const closeUserModalBtn = document.getElementById('close-user-modal');
-        const cancelUserModalBtn = document.getElementById('cancel-user-modal');
-        const saveUserModalBtn = document.getElementById('save-user-modal');
-        const addUserForm = document.getElementById('add-user-form');
-        const userOrganizationSelect = document.getElementById('user-organization');
+        // Remove active class from all nav links
+        Object.values(navLinks).forEach(link => {
+            link.classList.remove('active');
+        });
         
-        const viewReportModal = document.getElementById('view-report-modal');
-        const closeReportModalBtn = document.getElementById('close-report-modal');
-        const closeReportBtn = document.getElementById('close-report-btn');
-        const updateReportBtn = document.getElementById('update-report-btn');
+        // Show selected section
+        contentSections[section].style.display = 'block';
+        navLinks[section].classList.add('active');
+        
+        // Load data for the section if needed
+        if (section === 'organizations') {
+            loadOrganizations(currentPage.orgsFull);
+        } else if (section === 'users') {
+            loadUsers(currentPage.users);
+        } else if (section === 'reports') {
+            loadReports(currentPage.reports);
+        }
+    }
 
-        // Toast container
-        const toastContainer = document.getElementById('toast-container');
-
-        // Utility Functions
-        function showToast(type, title, message) {
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
+    // API Functions
+    async function fetchCurrentUser() {
+        try {
+            const response = await api.get('/auth/me');
+            currentUser = response.data;
             
-            let icon;
-            switch(type) {
-                case 'success':
-                    icon = 'fas fa-check-circle';
-                    break;
-                case 'error':
-                    icon = 'fas fa-exclamation-circle';
-                    break;
-                case 'warning':
-                    icon = 'fas fa-exclamation-triangle';
-                    break;
-                case 'info':
-                    icon = 'fas fa-info-circle';
-                    break;
-                default:
-                    icon = 'fas fa-info-circle';
+            // Update UI with user info
+            document.getElementById('user-name').textContent = currentUser.name;
+            document.getElementById('user-role').textContent = currentUser.role === 'super_admin' ? 'Super Admin' : 
+                                                              currentUser.role === 'admin' ? 'Admin' : 'Staff';
+            document.getElementById('user-avatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.name)}&background=4361ee&color=fff`;
+            document.getElementById('user-avatar-small').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.name)}&background=4361ee&color=fff`;
+            
+            // Setup UI based on user role
+            setupUIForUserRole();
+            
+            return currentUser;
+        } catch (error) {
+            console.error('Error fetching current user:', error);
+            if (error.response && error.response.status === 401) {
+                // Token expired or invalid, redirect to login
+                localStorage.removeItem('authToken');
+                window.location.href = 'login.html';
             }
-            
-            toast.innerHTML = `
-                <i class="${icon}"></i>
-                <div class="toast-content">
-                    <h5>${title}</h5>
-                    <p>${message}</p>
-                </div>
-                <button class="toast-close">&times;</button>
-            `;
-            
-            toastContainer.appendChild(toast);
-            
-            // Show toast
-            setTimeout(() => {
-                toast.classList.add('show');
-            }, 100);
-            
-            // Auto-remove after 5 seconds
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => {
-                    toast.remove();
-                }, 300);
-            }, 5000);
-            
-            // Close button
-            toast.querySelector('.toast-close').addEventListener('click', () => {
-                toast.classList.remove('show');
-                setTimeout(() => {
-                    toast.remove();
-                }, 300);
-            });
+            return null;
         }
+    }
 
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-        }
-
-        function showLoading(button) {
-            button.disabled = true;
-            button.innerHTML = `<span class="spinner"></span>${button.textContent.trim()}`;
-        }
-
-        function hideLoading(button, originalText) {
-            button.disabled = false;
-            button.textContent = originalText;
-        }
-
-        function showSection(section) {
-            // Hide all sections
-            Object.values(contentSections).forEach(sec => {
-                sec.style.display = 'none';
-            });
-            
-            // Remove active class from all nav links
-            Object.values(navLinks).forEach(link => {
-                link.classList.remove('active');
-            });
-            
-            // Show selected section
-            contentSections[section].style.display = 'block';
-            navLinks[section].classList.add('active');
-            
-            // Load data for the section if needed
-            if (section === 'organizations') {
-                loadOrganizations(currentPage.orgsFull);
-            } else if (section === 'users') {
-                loadUsers(currentPage.users);
-            } else if (section === 'reports') {
-                loadReports(currentPage.reports);
+    function setupUIForUserRole() {
+        const isSuperAdmin = currentUser && currentUser.role === 'super_admin';
+        
+        // Show/hide super admin features
+        document.getElementById('add-org-btn').style.display = isSuperAdmin ? 'flex' : 'none';
+        document.getElementById('view-all-orgs').style.display = isSuperAdmin ? 'block' : 'none';
+        
+        // Update table columns based on role
+        if (isSuperAdmin) {
+            // Add organization column to users table if not already present
+            if (!document.querySelector('#users-table thead th:nth-child(3)').textContent.includes('Organization')) {
+                const orgHeader = document.createElement('th');
+                orgHeader.textContent = 'Organization';
+                document.querySelector('#users-table thead tr').insertBefore(orgHeader, document.querySelector('#users-table thead th:nth-child(3)'));
             }
         }
+    }
 
-        // API Functions
-        async function fetchCurrentUser() {
-            try {
-                const response = await api.get('/auth/me');
-                currentUser = response.data;
-                
-                // Update UI with user info
-                document.getElementById('user-name').textContent = currentUser.name;
-                document.getElementById('user-role').textContent = currentUser.role === 'admin' ? 'Admin' : 'Staff';
-                document.getElementById('user-avatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.name)}&background=4361ee&color=fff`;
-                document.getElementById('user-avatar-small').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.name)}&background=4361ee&color=fff`;
-                
-                return currentUser;
-            } catch (error) {
-                console.error('Error fetching current user:', error);
-                if (error.response && error.response.status === 401) {
-                    // Token expired or invalid, redirect to login
-                    localStorage.removeItem('authToken');
-                    window.location.href = 'login.html';
-                }
-                return null;
-            }
+    async function fetchStats() {
+        try {
+            // Fetch organizations count
+            const orgsResponse = await api.get(currentUser.role === 'super_admin' ? '/super-admin/organizations' : '/organizations');
+            const totalOrgs = orgsResponse.data.length;
+            totalOrgsElement.textContent = totalOrgs;
+            
+            // Fetch users count
+            const usersResponse = await api.get(currentUser.role === 'super_admin' ? '/super-admin/users' : '/users');
+            const totalUsers = usersResponse.data.length;
+            totalUsersElement.textContent = totalUsers;
+            
+            // Fetch reports count and pending reports
+            const reportsResponse = await api.get(currentUser.role === 'super_admin' ? '/super-admin/reports' : '/reports');
+            const totalReports = reportsResponse.data.length;
+            const pendingReports = reportsResponse.data.filter(r => r.status === 'pending').length;
+            
+            totalReportsElement.textContent = totalReports;
+            pendingReportsElement.textContent = pendingReports;
+            
+            return {
+                totalOrgs,
+                totalUsers,
+                totalReports,
+                pendingReports
+            };
+        } catch (error) {
+            console.error('Error fetching stats:', error);
+            showToast('error', 'Error', 'Failed to load statistics');
+            return null;
         }
+    }
 
-        async function fetchStats() {
-            try {
-                // Fetch organizations count
-                const orgsResponse = await api.get('/organizations');
-                const totalOrgs = orgsResponse.data.length;
-                totalOrgsElement.textContent = totalOrgs;
-                
-                // Fetch users count
-                const usersResponse = await api.get('/users');
-                const totalUsers = usersResponse.data.length;
-                totalUsersElement.textContent = totalUsers;
-                
-                // Fetch reports count and pending reports
-                const reportsResponse = await api.get('/reports');
-                const totalReports = reportsResponse.data.length;
-                const pendingReports = reportsResponse.data.filter(r => r.status === 'pending').length;
-                
-                totalReportsElement.textContent = totalReports;
-                pendingReportsElement.textContent = pendingReports;
-                
-                return {
-                    totalOrgs,
-                    totalUsers,
-                    totalReports,
-                    pendingReports
-                };
-            } catch (error) {
-                console.error('Error fetching stats:', error);
-                showToast('error', 'Error', 'Failed to load statistics');
-                return null;
-            }
-        }
-
-        async function loadOrganizations(page = 1, limit = 5) {
-            try {
-                showLoading(document.querySelector('#organizations-content .card-header-actions button'));
-                
-                const response = await api.get(`/organizations?skip=${(page - 1) * limit}&limit=${limit}`);
-                organizations = response.data;
-                
-                // Clear table
-                recentOrgsTable.innerHTML = '';
-                
-                if (organizations.length === 0) {
+    async function loadOrganizations(page = 1, limit = 5) {
+        try {
+            showLoading(document.querySelector('#organizations-content .card-header-actions button'));
+            
+            const endpoint = currentUser.role === 'super_admin' ? '/super-admin/organizations' : '/organizations';
+            const response = await api.get(`${endpoint}?skip=${(page - 1) * limit}&limit=${limit}`);
+            organizations = response.data;
+            
+            // Clear table
+            recentOrgsTable.innerHTML = '';
+            
+            if (organizations.length === 0) {
+                const row = recentOrgsTable.insertRow();
+                const cell = row.insertCell();
+                cell.colSpan = 6;
+                cell.className = 'empty-state';
+                cell.innerHTML = `
+                    <i class="fas fa-building"></i>
+                    <h4>No Organizations Found</h4>
+                    <p>There are no organizations registered yet.</p>
+                `;
+            } else {
+                // Populate table
+                organizations.forEach(org => {
                     const row = recentOrgsTable.insertRow();
-                    const cell = row.insertCell();
-                    cell.colSpan = 6;
-                    cell.className = 'empty-state';
-                    cell.innerHTML = `
-                        <i class="fas fa-building"></i>
-                        <h4>No Organizations Found</h4>
-                        <p>There are no organizations registered yet.</p>
+                    
+                    // Organization name
+                    const nameCell = row.insertCell();
+                    nameCell.textContent = org.name;
+                    
+                    // Created at
+                    const createdAtCell = row.insertCell();
+                    createdAtCell.textContent = formatDate(org.created_at);
+                    
+                    // Users count (placeholder - would need API endpoint for this)
+                    const usersCell = row.insertCell();
+                    usersCell.textContent = org.users ? org.users.length : 0;
+                    
+                    // Reports count (placeholder - would need API endpoint for this)
+                    const reportsCell = row.insertCell();
+                    reportsCell.textContent = org.reports ? org.reports.length : 0;
+                    
+                    // Status (placeholder)
+                    const statusCell = row.insertCell();
+                    statusCell.innerHTML = '<span class="status-badge approved">Active</span>';
+                    
+                    // Actions
+                    const actionsCell = row.insertCell();
+                    actionsCell.className = 'actions-cell';
+                    actionsCell.innerHTML = `
+                        <button class="view-org" data-id="${org.id}"><i class="fas fa-eye"></i></button>
+                        ${currentUser.role === 'super_admin' ? `
+                        <button class="edit-org" data-id="${org.id}"><i class="fas fa-edit"></i></button>
+                        <button class="delete-org" data-id="${org.id}"><i class="fas fa-trash"></i></button>
+                        ` : ''}
                     `;
-                } else {
-                    // Populate table
-                    organizations.forEach(org => {
-                        const row = recentOrgsTable.insertRow();
-                        
-                        // Organization name
-                        const nameCell = row.insertCell();
-                        nameCell.textContent = org.name;
-                        
-                        // Created at
-                        const createdAtCell = row.insertCell();
-                        createdAtCell.textContent = formatDate(org.created_at);
-                        
-                        // Users count (placeholder - would need API endpoint for this)
-                        const usersCell = row.insertCell();
-                        usersCell.textContent = '0';
-                        
-                        // Reports count (placeholder - would need API endpoint for this)
-                        const reportsCell = row.insertCell();
-                        reportsCell.textContent = '0';
-                        
-                        // Status (placeholder)
-                        const statusCell = row.insertCell();
-                        statusCell.innerHTML = '<span class="status-badge approved">Active</span>';
-                        
-                        // Actions
-                        const actionsCell = row.insertCell();
-                        actionsCell.className = 'actions-cell';
-                        actionsCell.innerHTML = `
-                            <button class="view-org" data-id="${org.id}"><i class="fas fa-eye"></i></button>
-                            <button class="edit-org" data-id="${org.id}"><i class="fas fa-edit"></i></button>
-                            <button class="delete-org" data-id="${org.id}"><i class="fas fa-trash"></i></button>
-                        `;
-                    });
-                }
-                
-                // Update pagination
-                totalPages.orgs = Math.ceil(response.headers['x-total-count'] / limit) || 1;
-                orgsPageInfo.textContent = `Page ${page} of ${totalPages.orgs}`;
-                
-                prevOrgsPageBtn.disabled = page === 1;
-                nextOrgsPageBtn.disabled = page === totalPages.orgs;
-                
-                // Store current page
-                currentPage.orgs = page;
-                
-                hideLoading(document.querySelector('#organizations-content .card-header-actions button'), '');
-            } catch (error) {
-                console.error('Error loading organizations:', error);
-                showToast('error', 'Error', 'Failed to load organizations');
-                hideLoading(document.querySelector('#organizations-content .card-header-actions button'), '');
+                });
             }
+            
+            // Update pagination
+            totalPages.orgs = Math.ceil(response.headers['x-total-count'] / limit) || 1;
+            orgsPageInfo.textContent = `Page ${page} of ${totalPages.orgs}`;
+            
+            prevOrgsPageBtn.disabled = page === 1;
+            nextOrgsPageBtn.disabled = page === totalPages.orgs;
+            
+            // Store current page
+            currentPage.orgs = page;
+            
+            hideLoading(document.querySelector('#organizations-content .card-header-actions button'), '');
+        } catch (error) {
+            console.error('Error loading organizations:', error);
+            showToast('error', 'Error', 'Failed to load organizations');
+            hideLoading(document.querySelector('#organizations-content .card-header-actions button'), '');
         }
+    }
 
-        async function loadFullOrganizations(page = 1, limit = 10) {
-            try {
-                showLoading(document.querySelector('#organizations-content .card-header-actions button'));
-                
-                const response = await api.get(`/organizations?skip=${(page - 1) * limit}&limit=${limit}`);
-                organizations = response.data;
-                
-                // Clear table
-                orgsTable.innerHTML = '';
-                
-                if (organizations.length === 0) {
+    async function loadFullOrganizations(page = 1, limit = 10) {
+        try {
+            showLoading(document.querySelector('#organizations-content .card-header-actions button'));
+            
+            const endpoint = currentUser.role === 'super_admin' ? '/super-admin/organizations' : '/organizations';
+            const response = await api.get(`${endpoint}?skip=${(page - 1) * limit}&limit=${limit}`);
+            organizations = response.data;
+            
+            // Clear table
+            orgsTable.innerHTML = '';
+            
+            if (organizations.length === 0) {
+                const row = orgsTable.insertRow();
+                const cell = row.insertCell();
+                cell.colSpan = 6;
+                cell.className = 'empty-state';
+                cell.innerHTML = `
+                    <i class="fas fa-building"></i>
+                    <h4>No Organizations Found</h4>
+                    <p>There are no organizations registered yet.</p>
+                `;
+            } else {
+                // Populate table
+                organizations.forEach(org => {
                     const row = orgsTable.insertRow();
-                    const cell = row.insertCell();
-                    cell.colSpan = 6;
-                    cell.className = 'empty-state';
-                    cell.innerHTML = `
-                        <i class="fas fa-building"></i>
-                        <h4>No Organizations Found</h4>
-                        <p>There are no organizations registered yet.</p>
+                    
+                    // ID
+                    const idCell = row.insertCell();
+                    idCell.textContent = org.id;
+                    
+                    // Name
+                    const nameCell = row.insertCell();
+                    nameCell.textContent = org.name;
+                    
+                    // Created at
+                    const createdAtCell = row.insertCell();
+                    createdAtCell.textContent = formatDate(org.created_at);
+                    
+                    // Users count
+                    const usersCell = row.insertCell();
+                    usersCell.textContent = org.users ? org.users.length : 0;
+                    
+                    // Reports count
+                    const reportsCell = row.insertCell();
+                    reportsCell.textContent = org.reports ? org.reports.length : 0;
+                    
+                    // Actions
+                    const actionsCell = row.insertCell();
+                    actionsCell.className = 'actions-cell';
+                    actionsCell.innerHTML = `
+                        <button class="view-org" data-id="${org.id}"><i class="fas fa-eye"></i></button>
+                        ${currentUser.role === 'super_admin' ? `
+                        <button class="edit-org" data-id="${org.id}"><i class="fas fa-edit"></i></button>
+                        <button class="delete-org" data-id="${org.id}"><i class="fas fa-trash"></i></button>
+                        ` : ''}
                     `;
-                } else {
-                    // Populate table
-                    organizations.forEach(org => {
-                        const row = orgsTable.insertRow();
-                        
-                        // ID
-                        const idCell = row.insertCell();
-                        idCell.textContent = org.id;
-                        
-                        // Name
-                        const nameCell = row.insertCell();
-                        nameCell.textContent = org.name;
-                        
-                        // Created at
-                        const createdAtCell = row.insertCell();
-                        createdAtCell.textContent = formatDate(org.created_at);
-                        
-                        // Users count (placeholder)
-                        const usersCell = row.insertCell();
-                        usersCell.textContent = '0';
-                        
-                        // Reports count (placeholder)
-                        const reportsCell = row.insertCell();
-                        reportsCell.textContent = '0';
-                        
-                        // Actions
-                        const actionsCell = row.insertCell();
-                        actionsCell.className = 'actions-cell';
-                        actionsCell.innerHTML = `
-                            <button class="view-org" data-id="${org.id}"><i class="fas fa-eye"></i></button>
-                            <button class="edit-org" data-id="${org.id}"><i class="fas fa-edit"></i></button>
-                            <button class="delete-org" data-id="${org.id}"><i class="fas fa-trash"></i></button>
-                        `;
-                    });
-                }
-                
-                // Update pagination
-                totalPages.orgsFull = Math.ceil(response.headers['x-total-count'] / limit) || 1;
-                orgsFullPageInfo.textContent = `Page ${page} of ${totalPages.orgsFull}`;
-                
-                prevOrgsFullPageBtn.disabled = page === 1;
-                nextOrgsFullPageBtn.disabled = page === totalPages.orgsFull;
-                
-                // Store current page
-                currentPage.orgsFull = page;
-                
-                hideLoading(document.querySelector('#organizations-content .card-header-actions button'), '');
-            } catch (error) {
-                console.error('Error loading organizations:', error);
-                showToast('error', 'Error', 'Failed to load organizations');
-                hideLoading(document.querySelector('#organizations-content .card-header-actions button'), '');
+                });
             }
+            
+            // Update pagination
+            totalPages.orgsFull = Math.ceil(response.headers['x-total-count'] / limit) || 1;
+            orgsFullPageInfo.textContent = `Page ${page} of ${totalPages.orgsFull}`;
+            
+            prevOrgsFullPageBtn.disabled = page === 1;
+            nextOrgsFullPageBtn.disabled = page === totalPages.orgsFull;
+            
+            // Store current page
+            currentPage.orgsFull = page;
+            
+            hideLoading(document.querySelector('#organizations-content .card-header-actions button'), '');
+        } catch (error) {
+            console.error('Error loading organizations:', error);
+            showToast('error', 'Error', 'Failed to load organizations');
+            hideLoading(document.querySelector('#organizations-content .card-header-actions button'), '');
         }
+    }
 
-        async function loadUsers(page = 1, limit = 10) {
-            try {
-                showLoading(document.querySelector('#users-content .card-header-actions button'));
-                
-                const response = await api.get(`/users?skip=${(page - 1) * limit}&limit=${limit}`);
-                users = response.data;
-                
-                // Clear table
-                usersTable.innerHTML = '';
-                
-                if (users.length === 0) {
+    async function loadUsers(page = 1, limit = 10) {
+        try {
+            showLoading(document.querySelector('#users-content .card-header-actions button'));
+            
+            const endpoint = currentUser.role === 'super_admin' ? '/super-admin/users' : '/users';
+            const response = await api.get(`${endpoint}?skip=${(page - 1) * limit}&limit=${limit}`);
+            users = response.data;
+            
+            // Clear table
+            usersTable.innerHTML = '';
+            
+            if (users.length === 0) {
+                const row = usersTable.insertRow();
+                const cell = row.insertCell();
+                cell.colSpan = currentUser.role === 'super_admin' ? 7 : 6;
+                cell.className = 'empty-state';
+                cell.innerHTML = `
+                    <i class="fas fa-users"></i>
+                    <h4>No Users Found</h4>
+                    <p>There are no users registered yet.</p>
+                `;
+            } else {
+                // Populate table
+                users.forEach(user => {
                     const row = usersTable.insertRow();
-                    const cell = row.insertCell();
-                    cell.colSpan = 7;
-                    cell.className = 'empty-state';
-                    cell.innerHTML = `
-                        <i class="fas fa-users"></i>
-                        <h4>No Users Found</h4>
-                        <p>There are no users registered yet.</p>
+                    
+                    // User info
+                    const userCell = row.insertCell();
+                    userCell.className = 'user-cell';
+                    userCell.innerHTML = `
+                        <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=4361ee&color=fff" alt="${user.name}" class="avatar">
+                        <div class="user-cell-info">
+                            <h5>${user.name}</h5>
+                            <p>${user.role.charAt(0).toUpperCase() + user.role.slice(1)}</p>
+                        </div>
                     `;
-                } else {
-                    // Populate table
-                    users.forEach(user => {
-                        const row = usersTable.insertRow();
-                        
-                        // User info
-                        const userCell = row.insertCell();
-                        userCell.className = 'user-cell';
-                        userCell.innerHTML = `
-                            <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=4361ee&color=fff" alt="${user.name}" class="avatar">
-                            <div class="user-cell-info">
-                                <h5>${user.name}</h5>
-                                <p>${user.role}</p>
-                            </div>
-                        `;
-                        
-                        // Email
-                        const emailCell = row.insertCell();
-                        emailCell.textContent = user.email;
-                        
-                        // Organization
+                    
+                    // Email
+                    const emailCell = row.insertCell();
+                    emailCell.textContent = user.email;
+                    
+                    // Organization (only for super admin)
+                    if (currentUser.role === 'super_admin') {
                         const orgCell = row.insertCell();
                         orgCell.textContent = user.organization_name || 'N/A';
-                        
-                        // Role
-                        const roleCell = row.insertCell();
-                        roleCell.textContent = user.role.charAt(0).toUpperCase() + user.role.slice(1);
-                        
-                        // Status
-                        const statusCell = row.insertCell();
-                        statusCell.innerHTML = user.is_active ? 
-                            '<span class="status-badge approved">Active</span>' : 
-                            '<span class="status-badge rejected">Inactive</span>';
-                        
-                        // Last active
-                        const lastActiveCell = row.insertCell();
-                        lastActiveCell.textContent = user.last_active ? formatDate(user.last_active) : 'Never';
-                        
-                        // Actions
-                        const actionsCell = row.insertCell();
-                        actionsCell.className = 'actions-cell';
-                        actionsCell.innerHTML = `
-                            <button class="edit-user" data-id="${user.id}"><i class="fas fa-edit"></i></button>
-                            <button class="delete-user" data-id="${user.id}"><i class="fas fa-trash"></i></button>
-                        `;
-                    });
-                }
-                
-                // Update pagination
-                totalPages.users = Math.ceil(response.headers['x-total-count'] / limit) || 1;
-                usersPageInfo.textContent = `Page ${page} of ${totalPages.users}`;
-                
-                prevUsersPageBtn.disabled = page === 1;
-                nextUsersPageBtn.disabled = page === totalPages.users;
-                
-                // Store current page
-                currentPage.users = page;
-                
-                hideLoading(document.querySelector('#users-content .card-header-actions button'), '');
-            } catch (error) {
-                console.error('Error loading users:', error);
-                showToast('error', 'Error', 'Failed to load users');
-                hideLoading(document.querySelector('#users-content .card-header-actions button'), '');
-            }
-        }
-
-        async function loadReports(page = 1, limit = 10, statusFilter = 'all') {
-            try {
-                showLoading(document.querySelector('#reports-content .card-header-actions button'));
-                
-                let url = `/reports?skip=${(page - 1) * limit}&limit=${limit}`;
-                if (statusFilter !== 'all') {
-                    url += `&status=${statusFilter}`;
-                }
-                
-                const response = await api.get(url);
-                reports = response.data;
-                
-                // Clear table
-                reportsTable.innerHTML = '';
-                
-                if (reports.length === 0) {
-                    const row = reportsTable.insertRow();
-                    const cell = row.insertCell();
-                    cell.colSpan = 7;
-                    cell.className = 'empty-state';
-                    cell.innerHTML = `
-                        <i class="fas fa-file-alt"></i>
-                        <h4>No Reports Found</h4>
-                        <p>There are no reports submitted yet.</p>
+                    }
+                    
+                    // Role
+                    const roleCell = row.insertCell();
+                    roleCell.textContent = user.role.charAt(0).toUpperCase() + user.role.slice(1);
+                    
+                    // Status
+                    const statusCell = row.insertCell();
+                    statusCell.innerHTML = user.is_active ? 
+                        '<span class="status-badge approved">Active</span>' : 
+                        '<span class="status-badge rejected">Inactive</span>';
+                    
+                    // Last active
+                    const lastActiveCell = row.insertCell();
+                    lastActiveCell.textContent = user.last_active ? formatDate(user.last_active) : 'Never';
+                    
+                    // Actions
+                    const actionsCell = row.insertCell();
+                    actionsCell.className = 'actions-cell';
+                    actionsCell.innerHTML = `
+                        <button class="edit-user" data-id="${user.id}"><i class="fas fa-edit"></i></button>
+                        ${currentUser.role === 'super_admin' || (currentUser.role === 'admin' && currentUser.organization_id === user.organization_id) ? `
+                        <button class="delete-user" data-id="${user.id}"><i class="fas fa-trash"></i></button>
+                        ` : ''}
                     `;
-                } else {
-                    // Populate table
-                    reports.forEach(report => {
-                        const row = reportsTable.insertRow();
-                        
-                        // Title
-                        const titleCell = row.insertCell();
-                        titleCell.textContent = report.title;
-                        
-                        // Category
-                        const categoryCell = row.insertCell();
-                        categoryCell.textContent = report.category;
-                        
-                        // Author
-                        const authorCell = row.insertCell();
-                        authorCell.textContent = report.author_name;
-                        
-                        // Organization
+                });
+            }
+            
+            // Update pagination
+            totalPages.users = Math.ceil(response.headers['x-total-count'] / limit) || 1;
+            usersPageInfo.textContent = `Page ${page} of ${totalPages.users}`;
+            
+            prevUsersPageBtn.disabled = page === 1;
+            nextUsersPageBtn.disabled = page === totalPages.users;
+            
+            // Store current page
+            currentPage.users = page;
+            
+            hideLoading(document.querySelector('#users-content .card-header-actions button'), '');
+        } catch (error) {
+            console.error('Error loading users:', error);
+            showToast('error', 'Error', 'Failed to load users');
+            hideLoading(document.querySelector('#users-content .card-header-actions button'), '');
+        }
+    }
+
+    async function loadReports(page = 1, limit = 10, statusFilter = 'all') {
+        try {
+            showLoading(document.querySelector('#reports-content .card-header-actions button'));
+            
+            let endpoint = currentUser.role === 'super_admin' ? '/super-admin/reports' : '/reports';
+            let url = `${endpoint}?skip=${(page - 1) * limit}&limit=${limit}`;
+            if (statusFilter !== 'all') {
+                url += `&status=${statusFilter}`;
+            }
+            
+            const response = await api.get(url);
+            reports = response.data;
+            
+            // Clear table
+            reportsTable.innerHTML = '';
+            
+            if (reports.length === 0) {
+                const row = reportsTable.insertRow();
+                const cell = row.insertCell();
+                cell.colSpan = 7;
+                cell.className = 'empty-state';
+                cell.innerHTML = `
+                    <i class="fas fa-file-alt"></i>
+                    <h4>No Reports Found</h4>
+                    <p>There are no reports submitted yet.</p>
+                `;
+            } else {
+                // Populate table
+                reports.forEach(report => {
+                    const row = reportsTable.insertRow();
+                    
+                    // Title
+                    const titleCell = row.insertCell();
+                    titleCell.textContent = report.title;
+                    
+                    // Category
+                    const categoryCell = row.insertCell();
+                    categoryCell.textContent = report.category;
+                    
+                    // Author
+                    const authorCell = row.insertCell();
+                    authorCell.textContent = report.author_name;
+                    
+                    // Organization (only for super admin)
+                    if (currentUser.role === 'super_admin') {
                         const orgCell = row.insertCell();
                         orgCell.textContent = report.organization_name;
-                        
-                        // Created at
-                        const createdAtCell = row.insertCell();
-                        createdAtCell.textContent = formatDate(report.created_at);
-                        
-                        // Status
-                        const statusCell = row.insertCell();
-                        let statusClass = '';
-                        if (report.status === 'pending') {
-                            statusClass = 'pending';
-                        } else if (report.status === 'approved') {
-                            statusClass = 'approved';
-                        } else if (report.status === 'rejected') {
-                            statusClass = 'rejected';
-                        }
-                        statusCell.innerHTML = `<span class="status-badge ${statusClass}">${report.status.charAt(0).toUpperCase() + report.status.slice(1)}</span>`;
-                        
-                        // Actions
-                        const actionsCell = row.insertCell();
-                        actionsCell.className = 'actions-cell';
-                        actionsCell.innerHTML = `
-                            <button class="view-report" data-id="${report.id}"><i class="fas fa-eye"></i></button>
-                            <button class="delete-report" data-id="${report.id}"><i class="fas fa-trash"></i></button>
-                        `;
-                    });
-                }
-                
-                // Update pagination
-                totalPages.reports = Math.ceil(response.headers['x-total-count'] / limit) || 1;
-                reportsPageInfo.textContent = `Page ${page} of ${totalPages.reports}`;
-                
-                prevReportsPageBtn.disabled = page === 1;
-                nextReportsPageBtn.disabled = page === totalPages.reports;
-                
-                // Store current page
-                currentPage.reports = page;
-                
-                hideLoading(document.querySelector('#reports-content .card-header-actions button'), '');
-            } catch (error) {
-                console.error('Error loading reports:', error);
-                showToast('error', 'Error', 'Failed to load reports');
-                hideLoading(document.querySelector('#reports-content .card-header-actions button'), '');
-            }
-        }
-
-        async function addOrganization(orgData) {
-            try {
-                showLoading(saveOrgModalBtn);
-                
-                // First create the organization
-                const orgResponse = await api.post('/organizations', {
-                    name: orgData.name
+                    }
+                    
+                    // Created at
+                    const createdAtCell = row.insertCell();
+                    createdAtCell.textContent = formatDate(report.created_at);
+                    
+                    // Status
+                    const statusCell = row.insertCell();
+                    let statusClass = '';
+                    if (report.status === 'pending') {
+                        statusClass = 'pending';
+                    } else if (report.status === 'approved') {
+                        statusClass = 'approved';
+                    } else if (report.status === 'rejected') {
+                        statusClass = 'rejected';
+                    }
+                    statusCell.innerHTML = `<span class="status-badge ${statusClass}">${report.status.charAt(0).toUpperCase() + report.status.slice(1)}</span>`;
+                    
+                    // Actions
+                    const actionsCell = row.insertCell();
+                    actionsCell.className = 'actions-cell';
+                    actionsCell.innerHTML = `
+                        <button class="view-report" data-id="${report.id}"><i class="fas fa-eye"></i></button>
+                        ${currentUser.role === 'super_admin' || (currentUser.role === 'admin' && currentUser.organization_id === report.organization_id) ? `
+                        <button class="delete-report" data-id="${report.id}"><i class="fas fa-trash"></i></button>
+                        ` : ''}
+                    `;
                 });
-                
-                // Then create the admin user
-                const userResponse = await api.post('/users', {
-                    name: orgData.adminName,
-                    email: orgData.adminEmail,
-                    password: orgData.adminPassword,
-                    role: 'admin',
-                    organization_id: orgResponse.data.id
-                });
-                
-                showToast('success', 'Success', 'Organization and admin user created successfully');
-                closeModal(addOrgModal);
-                
-                // Refresh organizations list
-                loadOrganizations(currentPage.orgs);
-                loadFullOrganizations(currentPage.orgsFull);
-                
-                hideLoading(saveOrgModalBtn, 'Save Organization');
-            } catch (error) {
-                console.error('Error adding organization:', error);
-                showToast('error', 'Error', 'Failed to create organization');
-                hideLoading(saveOrgModalBtn, 'Save Organization');
-            }
-        }
-
-        async function addUser(userData) {
-            try {
-                showLoading(saveUserModalBtn);
-                
-                await api.post('/users', {
-                    name: userData.name,
-                    email: userData.email,
-                    password: userData.password,
-                    role: userData.role,
-                    organization_id: userData.organizationId
-                });
-                
-                showToast('success', 'Success', 'User created successfully');
-                closeModal(addUserModal);
-                
-                // Refresh users list
-                loadUsers(currentPage.users);
-                
-                hideLoading(saveUserModalBtn, 'Save User');
-            } catch (error) {
-                console.error('Error adding user:', error);
-                showToast('error', 'Error', 'Failed to create user');
-                hideLoading(saveUserModalBtn, 'Save User');
-            }
-        }
-
-        async function viewReport(reportId) {
-            try {
-                const response = await api.get(`/reports/${reportId}`);
-                const report = response.data;
-                
-                // Populate modal
-                document.getElementById('report-modal-title').textContent = report.title;
-                document.getElementById('report-title').textContent = report.title;
-                document.getElementById('report-category').textContent = report.category;
-                document.getElementById('report-description').textContent = report.description;
-                document.getElementById('report-author').textContent = report.author_name;
-                document.getElementById('report-organization').textContent = report.organization_name;
-                document.getElementById('report-created-at').textContent = formatDate(report.created_at);
-                document.getElementById('report-status').textContent = report.status.charAt(0).toUpperCase() + report.status.slice(1);
-                document.getElementById('report-comments').textContent = report.admin_comments || 'N/A';
-                
-                // Attachments
-                const attachmentsContainer = document.getElementById('report-attachments');
-                attachmentsContainer.innerHTML = '';
-                
-                if (report.attachments && report.attachments.length > 0) {
-                    report.attachments.forEach(attachment => {
-                        const attachmentElement = document.createElement('div');
-                        attachmentElement.className = 'attachment';
-                        attachmentElement.style.marginBottom = '0.5rem';
-                        
-                        const link = document.createElement('a');
-                        link.href = `${API_BASE_URL}${attachment.url}`;
-                        link.target = '_blank';
-                        link.textContent = attachment.name;
-                        link.style.display = 'inline-flex';
-                        link.style.alignItems = 'center';
-                        link.style.color = 'var(--primary)';
-                        link.style.textDecoration = 'none';
-                        
-                        const icon = document.createElement('i');
-                        icon.className = 'fas fa-paperclip';
-                        icon.style.marginRight = '0.5rem';
-                        
-                        link.prepend(icon);
-                        attachmentElement.appendChild(link);
-                        
-                        attachmentsContainer.appendChild(attachmentElement);
-                    });
-                } else {
-                    attachmentsContainer.textContent = 'No attachments';
-                }
-                
-                // Show status controls only for admins
-                if (currentUser && currentUser.role === 'admin') {
-                    document.getElementById('report-status-controls').style.display = 'block';
-                    document.getElementById('report-comments-controls').style.display = 'block';
-                    document.getElementById('report-status-select').value = report.status;
-                    document.getElementById('report-comments-input').value = report.admin_comments || '';
-                    document.getElementById('update-report-btn').style.display = 'inline-block';
-                } else {
-                    document.getElementById('report-status-controls').style.display = 'none';
-                    document.getElementById('report-comments-controls').style.display = 'none';
-                    document.getElementById('update-report-btn').style.display = 'none';
-                }
-                
-                // Show modal
-                openModal(viewReportModal);
-            } catch (error) {
-                console.error('Error viewing report:', error);
-                showToast('error', 'Error', 'Failed to load report details');
-            }
-        }
-
-        async function updateReportStatus(reportId, status, comments) {
-            try {
-                showLoading(updateReportBtn);
-                
-                await api.patch(`/reports/${reportId}/status`, {
-                    status: status,
-                    admin_comments: comments
-                });
-                
-                showToast('success', 'Success', 'Report status updated successfully');
-                
-                // Refresh reports list
-                loadReports(currentPage.reports);
-                
-                // Update the report view
-                const reportStatus = document.getElementById('report-status');
-                reportStatus.textContent = status.charAt(0).toUpperCase() + status.slice(1);
-                
-                const reportComments = document.getElementById('report-comments');
-                reportComments.textContent = comments || 'N/A';
-                
-                hideLoading(updateReportBtn, 'Update Status');
-            } catch (error) {
-                console.error('Error updating report status:', error);
-                showToast('error', 'Error', 'Failed to update report status');
-                hideLoading(updateReportBtn, 'Update Status');
-            }
-        }
-
-        async function deleteOrganization(orgId) {
-            if (!confirm('Are you sure you want to delete this organization? This action cannot be undone.')) {
-                return;
             }
             
-            try {
-                // In a real implementation, you would need to handle cascading deletes
-                // (users, reports, etc. belonging to this organization)
-                await api.delete(`/organizations/${orgId}`);
-                
-                showToast('success', 'Success', 'Organization deleted successfully');
-                
-                // Refresh organizations list
-                loadOrganizations(currentPage.orgs);
-                loadFullOrganizations(currentPage.orgsFull);
-            } catch (error) {
-                console.error('Error deleting organization:', error);
-                showToast('error', 'Error', 'Failed to delete organization');
-            }
+            // Update pagination
+            totalPages.reports = Math.ceil(response.headers['x-total-count'] / limit) || 1;
+            reportsPageInfo.textContent = `Page ${page} of ${totalPages.reports}`;
+            
+            prevReportsPageBtn.disabled = page === 1;
+            nextReportsPageBtn.disabled = page === totalPages.reports;
+            
+            // Store current page
+            currentPage.reports = page;
+            
+            hideLoading(document.querySelector('#reports-content .card-header-actions button'), '');
+        } catch (error) {
+            console.error('Error loading reports:', error);
+            showToast('error', 'Error', 'Failed to load reports');
+            hideLoading(document.querySelector('#reports-content .card-header-actions button'), '');
         }
+    }
 
-        async function deleteUser(userId) {
-            if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
-                return;
+    async function addOrganization(orgData) {
+        try {
+            showLoading(saveOrgModalBtn);
+            
+            // First create the organization
+            const endpoint = currentUser.role === 'super_admin' ? '/super-admin/organizations' : '/organizations';
+            const orgResponse = await api.post(endpoint, {
+                name: orgData.name
+            });
+            
+            // Then create the admin user
+            await api.post('/users', {
+                name: orgData.adminName,
+                email: orgData.adminEmail,
+                password: orgData.adminPassword,
+                role: 'admin',
+                organization_id: orgResponse.data.id
+            });
+            
+            showToast('success', 'Success', 'Organization and admin user created successfully');
+            closeModal(addOrgModal);
+            
+            // Refresh organizations list
+            loadOrganizations(currentPage.orgs);
+            loadFullOrganizations(currentPage.orgsFull);
+            
+            hideLoading(saveOrgModalBtn, 'Save Organization');
+        } catch (error) {
+            console.error('Error adding organization:', error);
+            showToast('error', 'Error', 'Failed to create organization');
+            hideLoading(saveOrgModalBtn, 'Save Organization');
+        }
+    }
+
+    async function addUser(userData) {
+        try {
+            showLoading(saveUserModalBtn);
+            
+            await api.post('/users', {
+                name: userData.name,
+                email: userData.email,
+                password: userData.password,
+                role: userData.role,
+                organization_id: userData.organizationId
+            });
+            
+            showToast('success', 'Success', 'User created successfully');
+            closeModal(addUserModal);
+            
+            // Refresh users list
+            loadUsers(currentPage.users);
+            
+            hideLoading(saveUserModalBtn, 'Save User');
+        } catch (error) {
+            console.error('Error adding user:', error);
+            showToast('error', 'Error', 'Failed to create user');
+            hideLoading(saveUserModalBtn, 'Save User');
+        }
+    }
+
+    async function viewReport(reportId) {
+        try {
+            const endpoint = currentUser.role === 'super_admin' ? '/super-admin/reports' : '/reports';
+            const response = await api.get(`${endpoint}/${reportId}`);
+            const report = response.data;
+            
+            // Populate modal
+            document.getElementById('report-modal-title').textContent = report.title;
+            document.getElementById('report-title').textContent = report.title;
+            document.getElementById('report-category').textContent = report.category;
+            document.getElementById('report-description').textContent = report.description;
+            document.getElementById('report-author').textContent = report.author_name;
+            document.getElementById('report-organization').textContent = report.organization_name;
+            document.getElementById('report-created-at').textContent = formatDate(report.created_at);
+            document.getElementById('report-status').textContent = report.status.charAt(0).toUpperCase() + report.status.slice(1);
+            document.getElementById('report-comments').textContent = report.admin_comments || 'N/A';
+            
+            // Attachments
+            const attachmentsContainer = document.getElementById('report-attachments');
+            attachmentsContainer.innerHTML = '';
+            
+            if (report.attachments && report.attachments.length > 0) {
+                report.attachments.forEach(attachment => {
+                    const attachmentElement = document.createElement('div');
+                    attachmentElement.className = 'attachment';
+                    attachmentElement.style.marginBottom = '0.5rem';
+                    
+                    const link = document.createElement('a');
+                    link.href = `${API_BASE_URL}${attachment.url}`;
+                    link.target = '_blank';
+                    link.textContent = attachment.name;
+                    link.style.display = 'inline-flex';
+                    link.style.alignItems = 'center';
+                    link.style.color = 'var(--primary)';
+                    link.style.textDecoration = 'none';
+                    
+                    const icon = document.createElement('i');
+                    icon.className = 'fas fa-paperclip';
+                    icon.style.marginRight = '0.5rem';
+                    
+                    link.prepend(icon);
+                    attachmentElement.appendChild(link);
+                    
+                    attachmentsContainer.appendChild(attachmentElement);
+                });
+            } else {
+                attachmentsContainer.textContent = 'No attachments';
             }
             
-            try {
-                await api.delete(`/users/${userId}`);
-                
-                showToast('success', 'Success', 'User deleted successfully');
-                
-                // Refresh users list
-                loadUsers(currentPage.users);
-            } catch (error) {
-                console.error('Error deleting user:', error);
-                showToast('error', 'Error', 'Failed to delete user');
-            }
-        }
-
-        async function deleteReport(reportId) {
-            if (!confirm('Are you sure you want to delete this report? This action cannot be undone.')) {
-                return;
+            // Show status controls only for admins
+            if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'super_admin')) {
+                document.getElementById('report-status-controls').style.display = 'block';
+                document.getElementById('report-comments-controls').style.display = 'block';
+                document.getElementById('report-status-select').value = report.status;
+                document.getElementById('report-comments-input').value = report.admin_comments || '';
+                document.getElementById('update-report-btn').style.display = 'inline-block';
+            } else {
+                document.getElementById('report-status-controls').style.display = 'none';
+                document.getElementById('report-comments-controls').style.display = 'none';
+                document.getElementById('update-report-btn').style.display = 'none';
             }
             
-            try {
-                await api.delete(`/reports/${reportId}`);
-                
-                showToast('success', 'Success', 'Report deleted successfully');
-                
-                // Refresh reports list
-                loadReports(currentPage.reports);
-                
-                // Close modal if open
-                closeModal(viewReportModal);
-            } catch (error) {
-                console.error('Error deleting report:', error);
-                showToast('error', 'Error', 'Failed to delete report');
-            }
+            // Show modal
+            openModal(viewReportModal);
+        } catch (error) {
+            console.error('Error viewing report:', error);
+            showToast('error', 'Error', 'Failed to load report details');
         }
+    }
 
-        async function loadOrganizationsForSelect() {
-            try {
-                const response = await api.get('/organizations');
-                const orgs = response.data;
-                
-                // Clear and populate select
-                userOrganizationSelect.innerHTML = '';
-                
-                if (orgs.length === 0) {
+    async function updateReportStatus(reportId, status, comments) {
+        try {
+            showLoading(updateReportBtn);
+            
+            const endpoint = currentUser.role === 'super_admin' ? '/super-admin/reports' : '/reports';
+            await api.patch(`${endpoint}/${reportId}/status`, {
+                status: status,
+                admin_comments: comments
+            });
+            
+            showToast('success', 'Success', 'Report status updated successfully');
+            
+            // Refresh reports list
+            loadReports(currentPage.reports);
+            
+            // Update the report view
+            const reportStatus = document.getElementById('report-status');
+            reportStatus.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+            
+            const reportComments = document.getElementById('report-comments');
+            reportComments.textContent = comments || 'N/A';
+            
+            hideLoading(updateReportBtn, 'Update Status');
+        } catch (error) {
+            console.error('Error updating report status:', error);
+            showToast('error', 'Error', 'Failed to update report status');
+            hideLoading(updateReportBtn, 'Update Status');
+        }
+    }
+
+    async function deleteOrganization(orgId) {
+        if (!confirm('Are you sure you want to delete this organization? This will also delete all associated users and reports.')) {
+            return;
+        }
+        
+        try {
+            const endpoint = currentUser.role === 'super_admin' ? '/super-admin/organizations' : '/organizations';
+            await api.delete(`${endpoint}/${orgId}`);
+            
+            showToast('success', 'Success', 'Organization deleted successfully');
+            
+            // Refresh organizations list
+            loadOrganizations(currentPage.orgs);
+            loadFullOrganizations(currentPage.orgsFull);
+        } catch (error) {
+            console.error('Error deleting organization:', error);
+            showToast('error', 'Error', 'Failed to delete organization');
+        }
+    }
+
+    async function deleteUser(userId) {
+        if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+            return;
+        }
+        
+        try {
+            await api.delete(`/users/${userId}`);
+            
+            showToast('success', 'Success', 'User deleted successfully');
+            
+            // Refresh users list
+            loadUsers(currentPage.users);
+        } catch (error) {
+            console.error('Error deleting user:', error);
+            showToast('error', 'Error', 'Failed to delete user');
+        }
+    }
+
+    async function deleteReport(reportId) {
+        if (!confirm('Are you sure you want to delete this report? This action cannot be undone.')) {
+            return;
+        }
+        
+        try {
+            const endpoint = currentUser.role === 'super_admin' ? '/super-admin/reports' : '/reports';
+            await api.delete(`${endpoint}/${reportId}`);
+            
+            showToast('success', 'Success', 'Report deleted successfully');
+            
+            // Refresh reports list
+            loadReports(currentPage.reports);
+            
+            // Close modal if open
+            closeModal(viewReportModal);
+        } catch (error) {
+            console.error('Error deleting report:', error);
+            showToast('error', 'Error', 'Failed to delete report');
+        }
+    }
+
+    async function loadOrganizationsForSelect() {
+        try {
+            const endpoint = currentUser.role === 'super_admin' ? '/super-admin/organizations' : '/organizations';
+            const response = await api.get(endpoint);
+            const orgs = response.data;
+            
+            // Clear and populate select
+            userOrganizationSelect.innerHTML = '';
+            
+            if (orgs.length === 0) {
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = 'No organizations available';
+                userOrganizationSelect.appendChild(option);
+                userOrganizationSelect.disabled = true;
+            } else {
+                orgs.forEach(org => {
                     const option = document.createElement('option');
-                    option.value = '';
-                    option.textContent = 'No organizations available';
+                    option.value = org.id;
+                    option.textContent = org.name;
                     userOrganizationSelect.appendChild(option);
-                    userOrganizationSelect.disabled = true;
-                } else {
-                    orgs.forEach(org => {
-                        const option = document.createElement('option');
-                        option.value = org.id;
-                        option.textContent = org.name;
-                        userOrganizationSelect.appendChild(option);
-                    });
-                    userOrganizationSelect.disabled = false;
-                }
-            } catch (error) {
-                console.error('Error loading organizations for select:', error);
-                showToast('error', 'Error', 'Failed to load organizations');
+                });
+                userOrganizationSelect.disabled = false;
             }
+        } catch (error) {
+            console.error('Error loading organizations for select:', error);
+            showToast('error', 'Error', 'Failed to load organizations');
         }
+    }
 
-        // Modal Functions
-        function openModal(modal) {
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
+    // Modal Functions
+    function openModal(modal) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal(modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    // Event Listeners
+    document.addEventListener('DOMContentLoaded', async () => {
+        // Check authentication
+        if (!authToken) {
+            window.location.href = 'login.html';
+            return;
         }
-
-        function closeModal(modal) {
-            modal.classList.remove('active');
-            document.body.style.overflow = '';
+        
+        // Fetch current user
+        const user = await fetchCurrentUser();
+        if (!user) {
+            localStorage.removeItem('authToken');
+            window.location.href = 'login.html';
+            return;
         }
+        
+        // Load initial data
+        fetchStats();
+        loadOrganizations();
+        
+        // Set up event listeners
+        setupEventListeners();
+    });
 
-        // Event Listeners
-        document.addEventListener('DOMContentLoaded', async () => {
-            // Check authentication
-            if (!authToken) {
-                window.location.href = 'login.html';
-                return;
-            }
-            
-            // Fetch current user
-            const user = await fetchCurrentUser();
-            if (!user) {
-                localStorage.removeItem('authToken');
-                window.location.href = 'login.html';
-                return;
-            }
-            
-            // Load initial data
-            fetchStats();
-            loadOrganizations();
-            
-            // Set up event listeners
-            setupEventListeners();
+    function setupEventListeners() {
+        // Sidebar toggle
+        toggleSidebarBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
         });
-
-        function setupEventListeners() {
-            // Sidebar toggle
-            toggleSidebarBtn.addEventListener('click', () => {
-                sidebar.classList.toggle('active');
+        
+        // Navigation links
+        navLinks.dashboard.addEventListener('click', (e) => {
+            e.preventDefault();
+            showSection('dashboard');
+        });
+        
+        navLinks.organizations.addEventListener('click', (e) => {
+            e.preventDefault();
+            showSection('organizations');
+        });
+        
+        navLinks.users.addEventListener('click', (e) => {
+            e.preventDefault();
+            showSection('users');
+        });
+        
+        navLinks.reports.addEventListener('click', (e) => {
+            e.preventDefault();
+            showSection('reports');
+        });
+        
+        navLinks.settings.addEventListener('click', (e) => {
+            e.preventDefault();
+            showSection('settings');
+        });
+        
+        // Logout
+        logoutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('authToken');
+            window.location.href = 'login.html';
+        });
+        
+        // Refresh buttons
+        refreshBtn.addEventListener('click', () => {
+            fetchStats();
+            loadOrganizations(currentPage.orgs);
+        });
+        
+        document.getElementById('refresh-orgs').addEventListener('click', () => {
+            loadFullOrganizations(currentPage.orgsFull);
+        });
+        
+        document.getElementById('refresh-users').addEventListener('click', () => {
+            loadUsers(currentPage.users);
+        });
+        
+        document.getElementById('refresh-reports').addEventListener('click', () => {
+            const filter = document.getElementById('report-filter').value;
+            loadReports(currentPage.reports, 10, filter);
+        });
+        
+        // Pagination
+        prevOrgsPageBtn.addEventListener('click', () => {
+            if (currentPage.orgs > 1) {
+                loadOrganizations(currentPage.orgs - 1);
+            }
+        });
+        
+        nextOrgsPageBtn.addEventListener('click', () => {
+            if (currentPage.orgs < totalPages.orgs) {
+                loadOrganizations(currentPage.orgs + 1);
+            }
+        });
+        
+        prevOrgsFullPageBtn.addEventListener('click', () => {
+            if (currentPage.orgsFull > 1) {
+                loadFullOrganizations(currentPage.orgsFull - 1);
+            }
+        });
+        
+        nextOrgsFullPageBtn.addEventListener('click', () => {
+            if (currentPage.orgsFull < totalPages.orgsFull) {
+                loadFullOrganizations(currentPage.orgsFull + 1);
+            }
+        });
+        
+        prevUsersPageBtn.addEventListener('click', () => {
+            if (currentPage.users > 1) {
+                loadUsers(currentPage.users - 1);
+            }
+        });
+        
+        nextUsersPageBtn.addEventListener('click', () => {
+            if (currentPage.users < totalPages.users) {
+                loadUsers(currentPage.users + 1);
+            }
+        });
+        
+        prevReportsPageBtn.addEventListener('click', () => {
+            if (currentPage.reports > 1) {
+                loadReports(currentPage.reports - 1);
+            }
+        });
+        
+        nextReportsPageBtn.addEventListener('click', () => {
+            if (currentPage.reports < totalPages.reports) {
+                loadReports(currentPage.reports + 1);
+            }
+        });
+        
+        // Report filter
+        document.getElementById('report-filter').addEventListener('change', (e) => {
+            loadReports(1, 10, e.target.value);
+        });
+        
+        // Add organization
+        document.getElementById('add-org-btn').addEventListener('click', () => {
+            addOrgForm.reset();
+            openModal(addOrgModal);
+        });
+        
+        closeOrgModalBtn.addEventListener('click', () => closeModal(addOrgModal));
+        cancelOrgModalBtn.addEventListener('click', () => closeModal(addOrgModal));
+        
+        saveOrgModalBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            const orgName = document.getElementById('org-name').value.trim();
+            const adminName = document.getElementById('org-admin-name').value.trim();
+            const adminEmail = document.getElementById('org-admin-email').value.trim();
+            const adminPassword = document.getElementById('org-admin-password').value;
+            
+            if (!orgName || !adminName || !adminEmail || !adminPassword) {
+                showToast('error', 'Error', 'Please fill in all fields');
+                return;
+            }
+            
+            if (adminPassword.length < 8) {
+                showToast('error', 'Error', 'Password must be at least 8 characters long');
+                return;
+            }
+            
+            addOrganization({
+                name: orgName,
+                adminName: adminName,
+                adminEmail: adminEmail,
+                adminPassword: adminPassword
             });
+        });
+        
+        // Add user
+        document.getElementById('add-user-btn').addEventListener('click', async () => {
+            addUserForm.reset();
+            await loadOrganizationsForSelect();
+            openModal(addUserModal);
+        });
+        
+        closeUserModalBtn.addEventListener('click', () => closeModal(addUserModal));
+        cancelUserModalBtn.addEventListener('click', () => closeModal(addUserModal));
+        
+        saveUserModalBtn.addEventListener('click', (e) => {
+            e.preventDefault();
             
-            // Navigation links
-            navLinks.dashboard.addEventListener('click', (e) => {
-                e.preventDefault();
-                showSection('dashboard');
+            const userName = document.getElementById('user-name').value.trim();
+            const userEmail = document.getElementById('user-email').value.trim();
+            const userPassword = document.getElementById('user-password').value;
+            const userRole = document.getElementById('user-role').value;
+            const userOrganization = document.getElementById('user-organization').value;
+            
+            if (!userName || !userEmail || !userPassword || !userRole || !userOrganization) {
+                showToast('error', 'Error', 'Please fill in all fields');
+                return;
+            }
+            
+            if (userPassword.length < 8) {
+                showToast('error', 'Error', 'Password must be at least 8 characters long');
+                return;
+            }
+            
+            addUser({
+                name: userName,
+                email: userEmail,
+                password: userPassword,
+                role: userRole,
+                organizationId: userOrganization
             });
+        });
+        
+        // View report modal
+        closeReportModalBtn.addEventListener('click', () => closeModal(viewReportModal));
+        closeReportBtn.addEventListener('click', () => closeModal(viewReportModal));
+        
+        updateReportBtn.addEventListener('click', () => {
+            const reportId = updateReportBtn.dataset.reportId;
+            const status = document.getElementById('report-status-select').value;
+            const comments = document.getElementById('report-comments-input').value;
             
-            navLinks.organizations.addEventListener('click', (e) => {
-                e.preventDefault();
-                showSection('organizations');
-            });
+            if (!reportId) {
+                showToast('error', 'Error', 'No report selected');
+                return;
+            }
             
-            navLinks.users.addEventListener('click', (e) => {
-                e.preventDefault();
-                showSection('users');
-            });
+            updateReportStatus(reportId, status, comments);
+        });
+        
+        // Dynamic event listeners for tables (using event delegation)
+        document.addEventListener('click', (e) => {
+            // View organization
+            if (e.target.closest('.view-org')) {
+                const orgId = e.target.closest('.view-org').dataset.id;
+                // In a real implementation, you would show a modal with org details
+                showToast('info', 'Info', `View organization ${orgId}`);
+            }
             
-            navLinks.reports.addEventListener('click', (e) => {
-                e.preventDefault();
-                showSection('reports');
-            });
+            // Edit organization
+            if (e.target.closest('.edit-org')) {
+                const orgId = e.target.closest('.edit-org').dataset.id;
+                // In a real implementation, you would show an edit modal
+                showToast('info', 'Info', `Edit organization ${orgId}`);
+            }
             
-            navLinks.settings.addEventListener('click', (e) => {
-                e.preventDefault();
-                showSection('settings');
-            });
+            // Delete organization
+            if (e.target.closest('.delete-org')) {
+                const orgId = e.target.closest('.delete-org').dataset.id;
+                deleteOrganization(orgId);
+            }
             
-            // Logout
-            logoutBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                localStorage.removeItem('authToken');
-                window.location.href = 'login.html';
-            });
+            // Edit user
+            if (e.target.closest('.edit-user')) {
+                const userId = e.target.closest('.edit-user').dataset.id;
+                // In a real implementation, you would show an edit modal
+                showToast('info', 'Info', `Edit user ${userId}`);
+            }
             
-            // Refresh buttons
-            refreshBtn.addEventListener('click', () => {
-                fetchStats();
-                loadOrganizations(currentPage.orgs);
-            });
+            // Delete user
+            if (e.target.closest('.delete-user')) {
+                const userId = e.target.closest('.delete-user').dataset.id;
+                deleteUser(userId);
+            }
             
-            document.getElementById('refresh-orgs').addEventListener('click', () => {
-                loadFullOrganizations(currentPage.orgsFull);
-            });
+            // View report
+            if (e.target.closest('.view-report')) {
+                const reportId = e.target.closest('.view-report').dataset.id;
+                updateReportBtn.dataset.reportId = reportId;
+                viewReport(reportId);
+            }
             
-            document.getElementById('refresh-users').addEventListener('click', () => {
-                loadUsers(currentPage.users);
-            });
-            
-            document.getElementById('refresh-reports').addEventListener('click', () => {
-                const filter = document.getElementById('report-filter').value;
-                loadReports(currentPage.reports, 10, filter);
-            });
-            
-            // Pagination
-            prevOrgsPageBtn.addEventListener('click', () => {
-                if (currentPage.orgs > 1) {
-                    loadOrganizations(currentPage.orgs - 1);
-                }
-            });
-            
-            nextOrgsPageBtn.addEventListener('click', () => {
-                if (currentPage.orgs < totalPages.orgs) {
-                    loadOrganizations(currentPage.orgs + 1);
-                }
-            });
-            
-            prevOrgsFullPageBtn.addEventListener('click', () => {
-                if (currentPage.orgsFull > 1) {
-                    loadFullOrganizations(currentPage.orgsFull - 1);
-                }
-            });
-            
-            nextOrgsFullPageBtn.addEventListener('click', () => {
-                if (currentPage.orgsFull < totalPages.orgsFull) {
-                    loadFullOrganizations(currentPage.orgsFull + 1);
-                }
-            });
-            
-            prevUsersPageBtn.addEventListener('click', () => {
-                if (currentPage.users > 1) {
-                    loadUsers(currentPage.users - 1);
-                }
-            });
-            
-            nextUsersPageBtn.addEventListener('click', () => {
-                if (currentPage.users < totalPages.users) {
-                    loadUsers(currentPage.users + 1);
-                }
-            });
-            
-            prevReportsPageBtn.addEventListener('click', () => {
-                if (currentPage.reports > 1) {
-                    loadReports(currentPage.reports - 1);
-                }
-            });
-            
-            nextReportsPageBtn.addEventListener('click', () => {
-                if (currentPage.reports < totalPages.reports) {
-                    loadReports(currentPage.reports + 1);
-                }
-            });
-            
-            // Report filter
-            document.getElementById('report-filter').addEventListener('change', (e) => {
-                loadReports(1, 10, e.target.value);
-            });
-            
-            // Add organization
-            document.getElementById('add-org-btn').addEventListener('click', () => {
-                addOrgForm.reset();
-                openModal(addOrgModal);
-            });
-            
-            closeOrgModalBtn.addEventListener('click', () => closeModal(addOrgModal));
-            cancelOrgModalBtn.addEventListener('click', () => closeModal(addOrgModal));
-            
-            saveOrgModalBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                
-                const orgName = document.getElementById('org-name').value.trim();
-                const adminName = document.getElementById('org-admin-name').value.trim();
-                const adminEmail = document.getElementById('org-admin-email').value.trim();
-                const adminPassword = document.getElementById('org-admin-password').value;
-                
-                if (!orgName || !adminName || !adminEmail || !adminPassword) {
-                    showToast('error', 'Error', 'Please fill in all fields');
-                    return;
-                }
-                
-                if (adminPassword.length < 8) {
-                    showToast('error', 'Error', 'Password must be at least 8 characters long');
-                    return;
-                }
-                
-                addOrganization({
-                    name: orgName,
-                    adminName: adminName,
-                    adminEmail: adminEmail,
-                    adminPassword: adminPassword
-                });
-            });
-            
-            // Add user
-            document.getElementById('add-user-btn').addEventListener('click', async () => {
-                addUserForm.reset();
-                await loadOrganizationsForSelect();
-                openModal(addUserModal);
-            });
-            
-            closeUserModalBtn.addEventListener('click', () => closeModal(addUserModal));
-            cancelUserModalBtn.addEventListener('click', () => closeModal(addUserModal));
-            
-            saveUserModalBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                
-                const userName = document.getElementById('user-name').value.trim();
-                const userEmail = document.getElementById('user-email').value.trim();
-                const userPassword = document.getElementById('user-password').value;
-                const userRole = document.getElementById('user-role').value;
-                const userOrganization = document.getElementById('user-organization').value;
-                
-                if (!userName || !userEmail || !userPassword || !userRole || !userOrganization) {
-                    showToast('error', 'Error', 'Please fill in all fields');
-                    return;
-                }
-                
-                if (userPassword.length < 8) {
-                    showToast('error', 'Error', 'Password must be at least 8 characters long');
-                    return;
-                }
-                
-                addUser({
-                    name: userName,
-                    email: userEmail,
-                    password: userPassword,
-                    role: userRole,
-                    organizationId: userOrganization
-                });
-            });
-            
-            // View report modal
-            closeReportModalBtn.addEventListener('click', () => closeModal(viewReportModal));
-            closeReportBtn.addEventListener('click', () => closeModal(viewReportModal));
-            
-            updateReportBtn.addEventListener('click', () => {
-                const reportId = updateReportBtn.dataset.reportId;
-                const status = document.getElementById('report-status-select').value;
-                const comments = document.getElementById('report-comments-input').value;
-                
-                if (!reportId) {
-                    showToast('error', 'Error', 'No report selected');
-                    return;
-                }
-                
-                updateReportStatus(reportId, status, comments);
-            });
-            
-            // Dynamic event listeners for tables (using event delegation)
-            document.addEventListener('click', (e) => {
-                // View organization
-                if (e.target.closest('.view-org')) {
-                    const orgId = e.target.closest('.view-org').dataset.id;
-                    // In a real implementation, you would show a modal with org details
-                    showToast('info', 'Info', `View organization ${orgId}`);
-                }
-                
-                // Edit organization
-                if (e.target.closest('.edit-org')) {
-                    const orgId = e.target.closest('.edit-org').dataset.id;
-                    // In a real implementation, you would show an edit modal
-                    showToast('info', 'Info', `Edit organization ${orgId}`);
-                }
-                
-                // Delete organization
-                if (e.target.closest('.delete-org')) {
-                    const orgId = e.target.closest('.delete-org').dataset.id;
-                    deleteOrganization(orgId);
-                }
-                
-                // Edit user
-                if (e.target.closest('.edit-user')) {
-                    const userId = e.target.closest('.edit-user').dataset.id;
-                    // In a real implementation, you would show an edit modal
-                    showToast('info', 'Info', `Edit user ${userId}`);
-                }
-                
-                // Delete user
-                if (e.target.closest('.delete-user')) {
-                    const userId = e.target.closest('.delete-user').dataset.id;
-                    deleteUser(userId);
-                }
-                
-                // View report
-                if (e.target.closest('.view-report')) {
-                    const reportId = e.target.closest('.view-report').dataset.id;
-                    updateReportBtn.dataset.reportId = reportId;
-                    viewReport(reportId);
-                }
-                
-                // Delete report
-                if (e.target.closest('.delete-report')) {
-                    const reportId = e.target.closest('.delete-report').dataset.id;
-                    deleteReport(reportId);
-                }
-            });
-            
-            // View all organizations
-            document.getElementById('view-all-orgs').addEventListener('click', (e) => {
-                e.preventDefault();
-                showSection('organizations');
-            });
-            
-            // Export buttons
-            document.getElementById('export-users').addEventListener('click', () => {
-                showToast('info', 'Info', 'Exporting users data...');
-                // In a real implementation, you would generate and download a CSV/Excel file
-            });
-            
-            document.getElementById('export-reports').addEventListener('click', () => {
-                showToast('info', 'Info', 'Exporting reports data...');
-                // In a real implementation, you would generate and download a CSV/Excel file
-            });
-            
-            // Save settings
-            document.getElementById('save-settings').addEventListener('click', () => {
-                showToast('success', 'Success', 'Settings saved successfully');
-                // In a real implementation, you would send these to the server
-            });
-        }
-    </script>
+            // Delete report
+            if (e.target.closest('.delete-report')) {
+                const reportId = e.target.closest('.delete-report').dataset.id;
+                deleteReport(reportId);
+            }
+        });
+        
+        // View all organizations
+        document.getElementById('view-all-orgs').addEventListener('click', (e) => {
+            e.preventDefault();
+            showSection('organizations');
+        });
+        
+        // Export buttons
+        document.getElementById('export-users').addEventListener('click', () => {
+            showToast('info', 'Info', 'Exporting users data...');
+            // In a real implementation, you would generate and download a CSV/Excel file
+        });
+        
+        document.getElementById('export-reports').addEventListener('click', () => {
+            showToast('info', 'Info', 'Exporting reports data...');
+            // In a real implementation, you would generate and download a CSV/Excel file
+        });
+        
+        // Save settings
+        document.getElementById('save-settings').addEventListener('click', () => {
+            showToast('success', 'Success', 'Settings saved successfully');
+            // In a real implementation, you would send these to the server
+        });
+    }
+</script>
 </body>
 </html>
