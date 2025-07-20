@@ -1795,72 +1795,73 @@
         }
 
         // Render chat users list
-        function renderChatUsers(users) {
-            chatUsersList.innerHTML = '';
-            
-            if (users.length === 0) {
-                chatUsersList.innerHTML = '<div class="text-center text-muted py-4">No users available</div>';
-                return;
-            }
-            
-            users.forEach(user => {
-                const userElement = document.createElement('div');
-                userElement.className = `chat-user ${activeChatUserId === user.id ? 'active' : ''}`;
-                userElement.setAttribute('data-id', user.id);
-                
-                const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
-                
-                userElement.innerHTML = `
-                    <div class="chat-user-avatar">${initials}</div>
-                    <div class="chat-user-info">
-                        <div class="chat-user-name">${user.name}</div>
-                        <div class="chat-user-last-message">${user.last_message || ''}</div>
-                    </div>
-                    <div class="chat-user-status">
-                        <div class="chat-user-time">${user.last_active_time || ''}</div>
-                        ${user.unread_count > 0 ? `<div class="chat-user-unread">${user.unread_count}</div>` : '<div class="chat-user-status-dot ${user.status}"></div>'}
-                    </div>
-                `;
-                
-                userElement.addEventListener('click', () => {
-                    openChat(user);
-                });
-                
-                chatUsersList.appendChild(userElement);
-            });
-        }
-
+function renderChatUsers(users) {
+    chatUsersList.innerHTML = '';
+    
+    if (users.length === 0) {
+        chatUsersList.innerHTML = '<div class="text-center text-muted py-4">No users available</div>';
+        return;
+    }
+    
+    users.forEach(user => {
+        const userElement = document.createElement('div');
+        userElement.className = `chat-user ${activeChatUserId === user.id ? 'active' : ''}`;
+        userElement.setAttribute('data-id', user.id);
+        
+        const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
+        
+        userElement.innerHTML = `
+            <div class="chat-user-avatar">${initials}</div>
+            <div class="chat-user-info">
+                <div class="chat-user-name">
+                    ${user.name}
+                    ${user.role === 'admin' ? '<span class="admin-badge">Admin</span>' : ''}
+                </div>
+                <div class="chat-user-last-message">${user.last_message || ''}</div>
+            </div>
+            <div class="chat-user-status">
+                <div class="chat-user-time">${user.last_active_time || ''}</div>
+                ${user.unread_count > 0 ? `<div class="chat-user-unread">${user.unread_count}</div>` : '<div class="chat-user-status-dot ${user.status}"></div>'}
+            </div>
+        `;
+        
+        userElement.addEventListener('click', () => {
+            openChat(user);
+        });
+        
+        chatUsersList.appendChild(userElement);
+    });
+}
         // Open chat with a user
         function openChat(user) {
-            activeChatUserId = user.id;
-            
-            // Update UI
-            chatEmptyState.classList.add('hidden');
-            activeChat.classList.remove('hidden');
-            
-            // Set chat header
-            const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
-            chatHeaderName.textContent = user.name;
-            chatHeaderAvatar.textContent = initials;
-            chatHeaderStatusDot.className = 'chat-header-status-dot';
-            chatHeaderStatusDot.classList.add(user.status);
-            chatHeaderStatusText.textContent = user.status === 'online' ? 'Online' : 'Offline';
-            
-            // Load messages
-            loadChatMessages(user.id);
-            
-            // Mark messages as read
-            if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
-                chatSocket.send(JSON.stringify({
-                    type: 'mark_read',
-                    sender_id: user.id
-                }));
-            }
-            
-            // Reset unread count for this user
-            updateUnreadCount(user.id, -user.unread_count);
-        }
-
+    activeChatUserId = user.id;
+    
+    // Update UI
+    chatEmptyState.classList.add('hidden');
+    activeChat.classList.remove('hidden');
+    
+    // Set chat header
+    const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
+    chatHeaderName.innerHTML = `${user.name}${user.role === 'admin' ? '<span class="admin-badge">Admin</span>' : ''}`;
+    chatHeaderAvatar.textContent = initials;
+    chatHeaderStatusDot.className = 'chat-header-status-dot';
+    chatHeaderStatusDot.classList.add(user.status);
+    chatHeaderStatusText.textContent = user.status === 'online' ? 'Online' : 'Offline';
+    
+    // Load messages
+    loadChatMessages(user.id);
+    
+    // Mark messages as read
+    if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+        chatSocket.send(JSON.stringify({
+            type: 'mark_read',
+            sender_id: user.id
+        }));
+    }
+    
+    // Reset unread count for this user
+    updateUnreadCount(user.id, -user.unread_count);
+}
         // Load chat messages
         function loadChatMessages(userId) {
             chatMessages.innerHTML = '';
