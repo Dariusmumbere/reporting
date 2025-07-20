@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReportHub | Admin Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-light: #eef2ff;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --info: #4895ef;
+            --dark: #1a1a2e;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --gray-light: #e9ecef;
+            --white: #ffffff;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --radius: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f7fb;
+            color: var(--dark);
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        .login-container {
+            background: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 400px;
+            padding: 2rem;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .login-header h1 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .login-header p {
+            color: var(--gray);
+        }
+
+        .login-logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--primary-light);
+            border-radius: 50%;
+            color: var(--primary);
+            font-size: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--gray-light);
+            border-radius: var(--radius);
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+            outline: none;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 1rem;
+            width: 100%;
+            border: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary);
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--white);
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 1100;
+        }
+
+        .toast {
+            background-color: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            max-width: 350px;
+            transform: translateX(400px);
+            transition: all 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast i {
+            font-size: 1.25rem;
+            margin-right: 0.75rem;
+        }
+
+        .toast.error i {
+            color: var(--danger);
+        }
+
+        .toast-content h5 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin: 0 0 0.25rem;
+        }
+
+        .toast-content p {
+            font-size: 0.75rem;
+            color: var(--gray);
+            margin: 0;
+        }
+
+        .forgot-password {
+            text-align: right;
+            margin-top: -1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .forgot-password a {
+            color: var(--gray);
+            font-size: 0.875rem;
+            text-decoration: none;
+        }
+
+        .forgot-password a:hover {
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <div class="login-logo">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h1>Admin Portal</h1>
+            <p>Sign in to access the super admin dashboard</p>
+        </div>
+
+        <form id="login-form">
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" class="form-control" placeholder="admin@example.com" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" class="form-control" placeholder="••••••••" required>
+            </div>
+
+            <div class="forgot-password">
+                <a href="#">Forgot password?</a>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="login-btn">
+                Sign In
+            </button>
+        </form>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        // API Configuration
+        const API_BASE_URL = 'https://reporting-api-uvze.onrender.com';
+        
+        // DOM Elements
+        const loginForm = document.getElementById('login-form');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const loginBtn = document.getElementById('login-btn');
+        const toastContainer = document.getElementById('toast-container');
+
+        // Show toast notification
+        function showToast(type, title, message) {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            let icon;
+            switch(type) {
+                case 'error':
+                    icon = 'fas fa-exclamation-circle';
+                    break;
+                case 'success':
+                    icon = 'fas fa-check-circle';
+                    break;
+                default:
+                    icon = 'fas fa-info-circle';
+            }
+            
+            toast.innerHTML = `
+                <i class="${icon}"></i>
+                <div class="toast-content">
+                    <h5>${title}</h5>
+                    <p>${message}</p>
+                </div>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            // Show toast
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 100);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 5000);
+        }
+
+        // Show loading state on button
+        function showLoading(button) {
+            button.disabled = true;
+            button.innerHTML = `<span class="spinner"></span>Signing In...`;
+        }
+
+        // Hide loading state on button
+        function hideLoading(button) {
+            button.disabled = false;
+            button.textContent = 'Sign In';
+        }
+
+        // Handle form submission
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+            
+            if (!email || !password) {
+                showToast('error', 'Error', 'Please fill in all fields');
+                return;
+            }
+            
+            try {
+                showLoading(loginBtn);
+                
+                // Send login request
+                const response = await axios.post(`${API_BASE_URL}/auth/login`, {
+                    username: email,
+                    password: password,
+                    grant_type: 'password'
+                }, {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                });
+                
+                // Store the access token
+                const accessToken = response.data.access_token;
+                localStorage.setItem('authToken', accessToken);
+                
+                // Redirect to super admin dashboard
+                window.location.href = 'super.html';
+                
+            } catch (error) {
+                console.error('Login failed:', error);
+                
+                let errorMessage = 'Login failed. Please try again.';
+                if (error.response) {
+                    if (error.response.status === 401) {
+                        errorMessage = 'Invalid email or password';
+                    } else if (error.response.data && error.response.data.detail) {
+                        errorMessage = error.response.data.detail;
+                    }
+                }
+                
+                showToast('error', 'Error', errorMessage);
+            } finally {
+                hideLoading(loginBtn);
+            }
+        });
+
+        // Check if user is already logged in
+        document.addEventListener('DOMContentLoaded', () => {
+            const authToken = localStorage.getItem('authToken');
+            if (authToken) {
+                // Verify token is still valid
+                axios.get(`${API_BASE_URL}/auth/me`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                })
+                .then(() => {
+                    // Token is valid, redirect to dashboard
+                    window.location.href = 'super.html';
+                })
+                .catch(() => {
+                    // Token is invalid, clear it and stay on login page
+                    localStorage.removeItem('authToken');
+                });
+            }
+        });
+    </script>
+</body>
+</html>
