@@ -3722,26 +3722,29 @@ copyInviteLinkBtn?.addEventListener('click', () => {
     }, 2000);
 });
 
-// Share via email
 shareEmailBtn?.addEventListener('click', () => {
-    const subject = 'Join me on ReportHub - Professional Reporting Platform';
-    const body = `Hi there,
+    const subject = 'Join me on ReportHub – Simplify Your Team’s Reporting';
+    
+    const body = `Hello,
 
-I'd like to invite you to join ReportHub, our professional reporting platform. With ReportHub, you can:
+I’d like to invite you to use **ReportHub**, a collaborative reporting platform that helps teams:
 
-- Create and manage reports with your team
-- Collaborate in real-time with built-in messaging
-- Track report status and approvals
-- Access comprehensive analytics
+- Create and manage reports together
+- Collaborate in real-time with team messaging
+- Track progress, approvals, and deadlines
+- Access insightful analytics
 
-Sign up using this link: ${inviteLinkInput.value}
+**Join us using this link:**  
+${inviteLinkInput.value}
 
-Looking forward to collaborating with you!
+Let’s simplify reporting and boost our team’s efficiency.
 
-Best regards,
-${currentUser?.name || 'Your colleague'}`;
+Best regards,  
+${currentUser?.name || 'Your Colleague'}`;
 
-    window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+    window.open(gmailUrl, '_blank');
 });
 
 // Share via WhatsApp
