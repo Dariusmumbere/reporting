@@ -29,7 +29,6 @@
     --sidebar-collapsed-width: 80px;
     --navbar-height: 64px;
 }
-
 [data-theme="dark"] {
     --primary-color: #4895ef;
     --primary-dark: #3f37c9;
