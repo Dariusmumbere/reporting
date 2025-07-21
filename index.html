@@ -12,6 +12,140 @@
     <script src="download.js"></script>
     <link rel="stylesheet" href="styles.css">
     <style>
+        /* Invite Organization Modal Styles */
+.invite-content {
+    padding: 1rem;
+}
+
+.invite-hero {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, var(--primary-light), var(--primary-lighter));
+    border-radius: 0.5rem;
+}
+
+.invite-icon {
+    font-size: 2.5rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.invite-hero h3 {
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.invite-hero p {
+    color: var(--text-secondary);
+    margin-bottom: 0;
+}
+
+.invite-link-container {
+    margin-bottom: 2rem;
+}
+
+.input-group {
+    display: flex;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+.input-group .form-control {
+    border: none;
+    border-radius: 0;
+    flex: 1;
+    padding: 0.75rem 1rem;
+    background-color: var(--background-color);
+}
+
+.input-group .btn {
+    border-radius: 0;
+    border-left: 1px solid var(--border-color);
+    padding: 0 1.5rem;
+    white-space: nowrap;
+}
+
+.invite-features {
+    margin-bottom: 2rem;
+}
+
+.invite-features h4 {
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.invite-features ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.invite-features li {
+    padding: 0.5rem 0;
+    display: flex;
+    align-items: center;
+    color: var(--text-primary);
+}
+
+.invite-features li i {
+    margin-right: 0.75rem;
+    color: var(--success-color);
+}
+
+.social-share h4 {
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.social-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.75rem;
+}
+
+.social-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    border: none;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.social-btn i {
+    font-size: 1.1rem;
+}
+
+.social-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.social-btn.email {
+    background-color: #f0f5ff;
+    color: #3d7eff;
+}
+
+.social-btn.whatsapp {
+    background-color: #e5f7f0;
+    color: #25D366;
+}
+
+.social-btn.linkedin {
+    background-color: #e8f0fe;
+    color: #0A66C2;
+}
+
+.social-btn.twitter {
+    background-color: #e8f4fd;
+    color: #1DA1F2;
+}
         /* Add admin badge styles */
         .admin-badge {
             display: inline-block;
@@ -584,6 +718,10 @@
                         <i class="fas fa-comments"></i>
                         <span>Messages</span>
                         <span class="menu-item-badge hidden" id="unread-messages-count">0</span>
+                    </a>
+                    <a href="#" class="menu-item" id="invite-org-item">
+                        <i class="fas fa-user-plus"></i>
+                        <span>Invite Organization</span>
                     </a>
                     <div id="admin-menu" class="hidden">
                         <div class="menu-category">Administration</div>
@@ -1183,6 +1321,67 @@
                 </div>
             </div>
         </div>
+        <!-- Invite Organization Modal -->
+<div class="modal" id="invite-org-modal">
+    <div class="modal-content" style="max-width: 600px;">
+        <div class="modal-header">
+            <h3 class="modal-title">Invite to ReportHub</h3>
+            <button class="modal-close" id="close-invite-org-modal">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="invite-content">
+                <div class="invite-hero">
+                    <div class="invite-icon">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                    <h3>Share ReportHub with your organization</h3>
+                    <p>Collaborate with your team using our professional reporting platform</p>
+                </div>
+                
+                <div class="invite-link-container">
+                    <label class="form-label">Invitation Link</label>
+                    <div class="input-group">
+                        <input type="text" id="invite-link" class="form-control" readonly value="https://reporthub.com/signup?ref=org-invite">
+                        <button class="btn btn-outline" id="copy-invite-link">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="invite-features">
+                    <h4>Why your organization will love ReportHub:</h4>
+                    <ul>
+                        <li><i class="fas fa-check-circle"></i> Secure, role-based access control</li>
+                        <li><i class="fas fa-check-circle"></i> Real-time collaboration and messaging</li>
+                        <li><i class="fas fa-check-circle"></i> Comprehensive reporting dashboard</li>
+                        <li><i class="fas fa-check-circle"></i> Document attachments and versioning</li>
+                        <li><i class="fas fa-check-circle"></i> Automated report generation</li>
+                    </ul>
+                </div>
+                
+                <div class="social-share">
+                    <h4>Share via:</h4>
+                    <div class="social-buttons">
+                        <button class="social-btn email" id="share-email">
+                            <i class="fas fa-envelope"></i> Email
+                        </button>
+                        <button class="social-btn whatsapp" id="share-whatsapp">
+                            <i class="fab fa-whatsapp"></i> WhatsApp
+                        </button>
+                        <button class="social-btn linkedin" id="share-linkedin">
+                            <i class="fab fa-linkedin"></i> LinkedIn
+                        </button>
+                        <button class="social-btn twitter" id="share-twitter">
+                            <i class="fab fa-twitter"></i> Twitter
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
         <!-- Organization Registration Modal -->
         <div class="modal" id="org-registration-modal">
@@ -1352,6 +1551,18 @@
         const otpError = document.getElementById('otp-error');
         const otpErrorMessage = document.getElementById('otp-error-message');
         const resendOtpLink = document.getElementById('resend-otp');
+
+        //Invite DOM elements
+        const inviteOrgItem = document.getElementById('invite-org-item');
+        const inviteOrgModal = document.getElementById('invite-org-modal');
+        const closeInviteOrgModal = document.getElementById('close-invite-org-modal');
+        const inviteLinkInput = document.getElementById('invite-link');
+        const copyInviteLinkBtn = document.getElementById('copy-invite-link');
+        const shareEmailBtn = document.getElementById('share-email');
+        const shareWhatsappBtn = document.getElementById('share-whatsapp');
+        const shareLinkedinBtn = document.getElementById('share-linkedin');
+        const shareTwitterBtn = document.getElementById('share-twitter');
+
 
         // Initialize the application
         function init() {
@@ -3481,6 +3692,77 @@ async function handleAddUser() {
                 document.getElementById('report-description').value = '';
             }
         }
+        // Add event listeners for invite organization
+inviteOrgItem?.addEventListener('click', (e) => {
+    e.preventDefault();
+    inviteOrgModal.classList.add('active');
+    
+    // Generate personalized invite link if user is logged in
+    if (currentUser) {
+        const inviteLink = `https://reporthub.com/signup?ref=${currentUser.id}`;
+        inviteLinkInput.value = inviteLink;
+    }
+});
+
+closeInviteOrgModal?.addEventListener('click', () => {
+    inviteOrgModal.classList.remove('active');
+});
+
+// Copy invite link
+copyInviteLinkBtn?.addEventListener('click', () => {
+    inviteLinkInput.select();
+    document.execCommand('copy');
+    
+    // Show tooltip
+    const originalText = copyInviteLinkBtn.innerHTML;
+    copyInviteLinkBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+    
+    setTimeout(() => {
+        copyInviteLinkBtn.innerHTML = originalText;
+    }, 2000);
+});
+
+// Share via email
+shareEmailBtn?.addEventListener('click', () => {
+    const subject = 'Join me on ReportHub - Professional Reporting Platform';
+    const body = `Hi there,
+
+I'd like to invite you to join ReportHub, our professional reporting platform. With ReportHub, you can:
+
+- Create and manage reports with your team
+- Collaborate in real-time with built-in messaging
+- Track report status and approvals
+- Access comprehensive analytics
+
+Sign up using this link: ${inviteLinkInput.value}
+
+Looking forward to collaborating with you!
+
+Best regards,
+${currentUser?.name || 'Your colleague'}`;
+
+    window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
+});
+
+// Share via WhatsApp
+shareWhatsappBtn?.addEventListener('click', () => {
+    const text = `Join me on ReportHub - Professional Reporting Platform! Sign up here: ${inviteLinkInput.value}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`);
+});
+
+// Share via LinkedIn
+shareLinkedinBtn?.addEventListener('click', () => {
+    const url = inviteLinkInput.value;
+    const title = 'ReportHub - Professional Reporting Platform';
+    const summary = 'Join me on ReportHub, the modern reporting platform for teams. Create, collaborate, and track reports in one place.';
+    window.open(`https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}&summary=${encodeURIComponent(summary)}`);
+});
+
+// Share via Twitter
+shareTwitterBtn?.addEventListener('click', () => {
+    const text = `Join me on ReportHub - the professional reporting platform! ${inviteLinkInput.value}`;
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`);
+});
 
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
