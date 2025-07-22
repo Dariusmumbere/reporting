@@ -2728,7 +2728,7 @@ function setupUIForUser() {
     const sidebarHeader = document.querySelector('.sidebar-header h2');
     if (sidebarHeader) {
         if (currentUser.organization_name) {
-            sidebarHeader.textContent = `${currentUser.organization_name} - ReportHub`;
+            sidebarHeader.textContent = `${currentUser.organization_name}`;
         } else {
             sidebarHeader.textContent = 'ReportHub';
         }
