@@ -2123,44 +2123,7 @@ a:hover {
 [data-theme="dark"] .chat-messages:hover::-webkit-scrollbar-thumb {
   background-color: rgba(255, 255, 255, 0.4);
 }
-/* Main Chat Container - Makes messages scrollable */
-.chat-container {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: hidden; /* Contains everything */
-}
 
-/* Messages Wrapper - The scrollable area */
-.chat-messages-wrapper {
-  flex: 1;
-  overflow-y: auto; /* Makes this area scrollable */
-  min-height: 0; /* Crucial for flex scrolling */
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-/* Custom Scrollbar Styling */
-.chat-messages-wrapper::-webkit-scrollbar {
-  width: 8px;
-}
-
-.chat-messages-wrapper::-webkit-scrollbar-track {
-  background: var(--border-color);
-  border-radius: 4px;
-}
-
-.chat-messages-wrapper::-webkit-scrollbar-thumb {
-  background: var(--primary-color);
-  border-radius: 4px;
-}
-
-/* Dark Mode Scrollbar */
-[data-theme="dark"] .chat-messages-wrapper::-webkit-scrollbar-thumb {
-  background: var(--accent-color);
-}
 
 
 
