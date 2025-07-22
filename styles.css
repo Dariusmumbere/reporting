@@ -1840,11 +1840,13 @@ a:hover {
 @media (max-width: 768px) {
   .chat-container {
     height: calc(100vh - 60px);
+    overflow-y: auto;
   }
   
   .chat-users-container {
     width: 100%;
     border-right: none;
+    overflow-y: auto;
   }
   
   .chat-empty-state {
@@ -1979,7 +1981,7 @@ a:hover {
   flex-direction: column;
   height: 100%;
   position: relative;
-  overflow: hidden;
+  overflow-y: auto;
 }
 
 /* Messages Area - Scrollable */
@@ -2025,7 +2027,7 @@ a:hover {
 .chat-messages-wrapper {
   flex: 1;
   min-height: 0;
-  overflow: hidden;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
 }
@@ -2042,6 +2044,7 @@ a:hover {
 @media (max-width: 768px) {
   .chat-messages {
     padding-bottom: 0.5rem;
+    overflow-y: auto;
   }
   
   .chat-input-container {
@@ -2103,12 +2106,9 @@ a:hover {
 /* Smooth scrolling behavior */
 .chat-messages {
   scroll-behavior: smooth;
-}
-
-/* Scrollbar appears only when needed */
-.chat-messages {
   overflow-y: auto;
 }
+
 
 /* Keep scrollbar visible during interactions */
 .chat-messages:active::-webkit-scrollbar-thumb,
@@ -2162,73 +2162,8 @@ a:hover {
   background: var(--accent-color);
 }
 
-/* Fixed Input Area */
-.chat-input-container {
-  padding: 1rem;
-  border-top: 1px solid var(--border-color);
-  background: var(--card-bg);
-  position: sticky;
-  bottom: 0;
-}
 
-/* Header Styling */
-.chat-header {
-  padding: 1rem;
-  border-bottom: 1px solid var(--border-color);
-  background: var(--card-bg);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-/* Chat Input Wrapper */
-.chat-input-wrapper {
-  flex: 1;
-  max-height: 120px;
-  overflow-y: auto;
-  border: 1px solid var(--border-color);
-  border-radius: 1.5rem;
-  background-color: var(--background-color);
-  padding: 0.5rem;
-}
 
-/* Chat Input Textarea */
-.chat-input {
-  width: 100%;
-  min-height: 40px;
-  max-height: 100px;
-  border: none;
-  outline: none;
-  resize: none;
-  background-color: transparent;
-  color: var(--text-primary);
-  line-height: 1.4;
-  font-family: var(--font-base);
-  font-size: var(--text-sm);
-  padding: 0.25rem 0.5rem;
-}
 
-/* Scrollbar styling for the input wrapper */
-.chat-input-wrapper::-webkit-scrollbar {
-  width: 6px;
-}
 
-.chat-input-wrapper::-webkit-scrollbar-track {
-  background: transparent;
-  border-radius: 3px;
-}
 
-.chat-input-wrapper::-webkit-scrollbar-thumb {
-  background: var(--text-tertiary);
-  border-radius: 3px;
-}
-
-.chat-input-wrapper::-webkit-scrollbar-thumb:hover {
-  background: var(--text-secondary);
-}
-
-/* Adjust the form layout */
-.chat-input-form {
-  display: flex;
-  gap: 0.75rem;
-  align-items: flex-end;
-}
