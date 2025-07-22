@@ -1872,3 +1872,91 @@ a:hover {
     display: none;
   }
 }
+/* Search Bar Styles */
+.search-bar {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+}
+
+.search-bar input {
+  width: 100%;
+  padding: 0.625rem 1rem 0.625rem 2.75rem;
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  background-color: var(--background-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+}
+
+.search-bar input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+}
+
+.search-bar i {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-tertiary);
+  transition: color var(--transition-fast);
+}
+
+.search-bar input:focus + i {
+  color: var(--primary-color);
+}
+
+/* Dark mode adjustments */
+[data-theme="dark"] .search-bar input {
+  background-color: var(--card-bg);
+}
+
+/* Search bar in navbar */
+.navbar .search-bar {
+  max-width: 280px;
+}
+
+.navbar .search-bar input {
+  background-color: var(--card-bg);
+  border-radius: var(--radius-full);
+  padding-left: 2.5rem;
+}
+
+/* Search bar in cards */
+.card .search-bar {
+  max-width: 240px;
+}
+
+.card .search-bar input {
+  background-color: var(--background-color);
+  border-radius: var(--radius);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .navbar .search-bar {
+    display: none;
+  }
+  
+  .search-bar {
+    max-width: 100%;
+  }
+}
+
+/* Search bar with button */
+.search-bar-with-button {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.search-bar-with-button .search-bar {
+  flex: 1;
+}
+
+.search-bar-with-button .btn {
+  flex-shrink: 0;
+}
