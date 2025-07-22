@@ -1994,6 +1994,18 @@
             // Scroll to bottom of messages
             scrollChatToBottom();
         }
+        chatInput.addEventListener('input', function() {
+  // Enable/disable send button
+  chatSendBtn.disabled = chatInput.value.trim() === '';
+  
+  // Auto-resize textarea
+  this.style.height = 'auto';
+  this.style.height = (this.scrollHeight) + 'px';
+  
+  // Scroll to bottom of the wrapper
+  const wrapper = this.closest('.chat-input-wrapper');
+  wrapper.scrollTop = wrapper.scrollHeight;
+});
 
         // Update user status (online/offline)
         function updateUserStatus(userId, status) {
