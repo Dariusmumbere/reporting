@@ -357,6 +357,19 @@ a:hover {
   background-color: rgba(67, 97, 238, 0.1);
   color: var(--primary-color);
 }
+.menu-item:hover {
+    text-decoration: none;
+}
+
+/* Remove focus underline */
+.menu-item:focus {
+    text-decoration: none;
+}
+
+/* Remove active underline */
+.menu-item.active {
+    text-decoration: none;
+}
 
 /* Cards */
 .card {
