@@ -2167,3 +2167,55 @@ a:hover {
   top: 0;
   z-index: 10;
 }
+/* Chat Input Wrapper */
+.chat-input-wrapper {
+  flex: 1;
+  max-height: 120px;
+  overflow-y: auto;
+  border: 1px solid var(--border-color);
+  border-radius: 1.5rem;
+  background-color: var(--background-color);
+  padding: 0.5rem;
+}
+
+/* Chat Input Textarea */
+.chat-input {
+  width: 100%;
+  min-height: 40px;
+  max-height: 100px;
+  border: none;
+  outline: none;
+  resize: none;
+  background-color: transparent;
+  color: var(--text-primary);
+  line-height: 1.4;
+  font-family: var(--font-base);
+  font-size: var(--text-sm);
+  padding: 0.25rem 0.5rem;
+}
+
+/* Scrollbar styling for the input wrapper */
+.chat-input-wrapper::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-input-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 3px;
+}
+
+.chat-input-wrapper::-webkit-scrollbar-thumb {
+  background: var(--text-tertiary);
+  border-radius: 3px;
+}
+
+.chat-input-wrapper::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+/* Adjust the form layout */
+.chat-input-form {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-end;
+}
