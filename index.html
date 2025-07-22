@@ -2599,72 +2599,79 @@
         }
 
         // Handle organization registration
-        async function handleOrgRegistration() {
-            const orgName = organizationNameInput.value.trim();
-            
-            if (!orgName) {
-                showAlert('Please enter an organization name', 'danger');
-                return;
-            }
-            
-            if (orgName.length < 3) {
-                showAlert('Organization name must be at least 3 characters', 'danger');
-                return;
-            }
-            
-            // Show loading state
-            submitOrgText.textContent = 'Registering...';
-            submitOrgSpinner.classList.remove('hidden');
-            
-            try {
-                const response = await fetch(`${API_BASE_URL}/auth/register-organization`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        name: orgName
-                    })
-                });
-                
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.detail || 'Failed to register organization');
-                }
-                
-                // Close modal and proceed to app
-                orgRegistrationModal.classList.remove('active');
-                showAlert(`Welcome to ${orgName}!`, 'success');
-                
-                // Get updated user info
-                const userResponse = await fetch(`${API_BASE_URL}/auth/me`, {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
-                });
-                
-                if (!userResponse.ok) {
-                    throw new Error('Failed to get user info');
-                }
-                
-                currentUser = await userResponse.json();
-                setupUIForUser();
-                loginView.classList.add('hidden');
-                appView.classList.remove('hidden');
-                loadInitialData();
-                
-                // Initialize chat connection
-                initChatConnection();
-                
-            } catch (error) {
-                console.error('Organization registration error:', error);
-                showAlert(error.message || 'Failed to register organization', 'danger');
-            } finally {
-                submitOrgText.textContent = 'Register Organization';
-                submitOrgSpinner.classList.add('hidden');
-            }
+async function handleOrgRegistration() {
+    const orgName = organizationNameInput.value.trim();
+    
+    if (!orgName) {
+        showAlert('Please enter an organization name', 'danger');
+        return;
+    }
+    
+    if (orgName.length < 3) {
+        showAlert('Organization name must be at least 3 characters', 'danger');
+        return;
+    }
+    
+    // Show loading state
+    submitOrgText.textContent = 'Registering...';
+    submitOrgSpinner.classList.remove('hidden');
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/auth/register-organization`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                name: orgName
+            })
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || 'Failed to register organization');
         }
+        
+        // Close modal and proceed to app
+        orgRegistrationModal.classList.remove('active');
+        showAlert(`Welcome to ${orgName}!`, 'success');
+        
+        // Get updated user info
+        const userResponse = await fetch(`${API_BASE_URL}/auth/me`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        
+        if (!userResponse.ok) {
+            throw new Error('Failed to get user info');
+        }
+        
+        currentUser = await userResponse.json();
+        setupUIForUser();
+        
+        // Update the sidebar header to show organization name
+        const sidebarHeader = document.querySelector('.sidebar-header h2');
+        if (sidebarHeader) {
+            sidebarHeader.textContent = `${orgName} - ReportHub`;
+        }
+        
+        loginView.classList.add('hidden');
+        appView.classList.remove('hidden');
+        loadInitialData();
+        
+        // Initialize chat connection
+        initChatConnection();
+        
+    } catch (error) {
+        console.error('Organization registration error:', error);
+        showAlert(error.message || 'Failed to register organization', 'danger');
+    } finally {
+        submitOrgText.textContent = 'Register Organization';
+        submitOrgSpinner.classList.add('hidden');
+    }
+}
 
         // Check if this is the first user in the system
         async function checkFirstUser() {
@@ -2705,31 +2712,35 @@
         }
 
         // Setup UI based on user role
-        function setupUIForUser() {
-            if (!currentUser) return;
-            
-            // Set user info
-            const initials = currentUser.name ? currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'U';
-            userName.textContent = currentUser.name || 'User';
-            userRole.textContent = currentUser.role === 'admin' ? 'Administrator' : 'Staff Member';
-            userAvatar.textContent = initials;
-            userDropdownAvatar.textContent = initials;
-            userDropdownName.textContent = currentUser.name || 'User';
-            userDropdownEmail.textContent = currentUser.email;
-            
-            // Show organization name if available
-            const orgNameElement = document.getElementById('organization-name');
-            if (orgNameElement) {
-                orgNameElement.textContent = currentUser.organization_name || 'No organization';
-            }
-            
-            // Show/hide admin menu
-            if (currentUser.role === 'admin') {
-                adminMenu.classList.remove('hidden');
-            } else {
-                adminMenu.classList.add('hidden');
-            }
+function setupUIForUser() {
+    if (!currentUser) return;
+    
+    // Set user info
+    const initials = currentUser.name ? currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'U';
+    userName.textContent = currentUser.name || 'User';
+    userRole.textContent = currentUser.role === 'admin' ? 'Administrator' : 'Staff Member';
+    userAvatar.textContent = initials;
+    userDropdownAvatar.textContent = initials;
+    userDropdownName.textContent = currentUser.name || 'User';
+    userDropdownEmail.textContent = currentUser.email;
+    
+    // Update sidebar header with organization name
+    const sidebarHeader = document.querySelector('.sidebar-header h2');
+    if (sidebarHeader) {
+        if (currentUser.organization_name) {
+            sidebarHeader.textContent = `${currentUser.organization_name} - ReportHub`;
+        } else {
+            sidebarHeader.textContent = 'ReportHub';
         }
+    }
+    
+    // Show/hide admin menu
+    if (currentUser.role === 'admin') {
+        adminMenu.classList.remove('hidden');
+    } else {
+        adminMenu.classList.add('hidden');
+    }
+}
 
         // Switch between views
         function switchView(viewId) {
