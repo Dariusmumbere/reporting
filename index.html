@@ -12,6 +12,99 @@
     <script src="download.js"></script>
     <link rel="stylesheet" href="styles.css">
     <style>
+        /* Voice Recording UI Styles */
+.voice-recording-ui {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    right: 0;
+    background-color: var(--card-bg);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.recording-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--danger-color);
+}
+
+.pulse-animation {
+    width: 12px;
+    height: 12px;
+    background-color: var(--danger-color);
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+    }
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+    }
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+    }
+}
+
+.recording-timer {
+    font-family: monospace;
+    font-size: 1rem;
+}
+
+.chat-action-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-right: 0.5rem;
+}
+
+.chat-action-btn:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+/* Audio message styling */
+.message-audio {
+    width: 250px;
+    max-width: 100%;
+    background-color: var(--primary-light);
+    border-radius: 1rem;
+    padding: 0.75rem 1rem;
+}
+
+.message-audio audio {
+    width: 100%;
+    outline: none;
+}
+
+.message-audio .audio-duration {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
 .chat-messages {
     flex: 1;
     overflow-y: auto;
@@ -1207,15 +1300,26 @@
                                         </div>
                                         
                                         <div class="chat-input-container">
-                                            <form class="chat-input-form" id="chat-input-form">
-                                                <div class="chat-input-wrapper">
-                                                    <textarea class="chat-input" id="chat-input" placeholder="Type a message..." rows="1"></textarea>
-                                                </div>
-                                                <button type="submit" class="chat-send-btn" id="chat-send-btn" disabled>
-                                                  <i class="fas fa-paper-plane"></i>
-                                                </button>
-                                              </form>
-                                        </div>
+    <form class="chat-input-form" id="chat-input-form">
+        <div class="chat-input-wrapper">
+            <textarea class="chat-input" id="chat-input" placeholder="Type a message..." rows="1"></textarea>
+        </div>
+        <button type="button" class="chat-action-btn" id="voice-record-btn" title="Record Voice Message">
+            <i class="fas fa-microphone"></i>
+        </button>
+        <button type="submit" class="chat-send-btn" id="chat-send-btn" disabled>
+            <i class="fas fa-paper-plane"></i>
+        </button>
+    </form>
+    <div class="voice-recording-ui hidden" id="voice-recording-ui">
+        <div class="recording-indicator">
+            <div class="pulse-animation"></div>
+            <span>Recording...</span>
+        </div>
+        <div class="recording-timer">00:00</div>
+        <button class="btn btn-danger btn-sm" id="stop-recording-btn">Stop</button>
+    </div>
+</div>
                                     </div>
                                 </div>
                             </div>
@@ -1625,6 +1729,11 @@
         let currentUsersPage = 1;
         const reportsPerPage = 10;
         const usersPerPage = 10;
+        let mediaRecorder;
+        let audioChunks = [];
+        let recordingTimer;
+        let recordingStartTime;
+
         
         // Chat state
         let chatSocket = null;
@@ -2302,38 +2411,72 @@
 
         // Add a message to the chat UI
         function addMessageToChat(message, type) {
-            const messageElement = document.createElement('div');
-            messageElement.className = `message message-${type} message-animate`;
-            
-            // Check if sender is admin
-            const sender = chatUsers.find(u => u.id === message.sender_id);
-            const isAdmin = sender && sender.role === 'admin';
-            
-            messageElement.innerHTML = `
-                <div>${message.content}</div>
-                <div class="message-time">
-                    ${formatTime(message.timestamp)}
-                    ${type === 'sent' ? `
-                    <span class="message-status ${message.status}">
-                        ${message.status === 'sending' ? '<i class="fas fa-clock"></i>' : 
-                          message.status === 'delivered' ? '<i class="fas fa-check"></i>' : 
-                          message.status === 'read' ? '<i class="fas fa-check-double"></i>' : ''}
-                    </span>
-                    ` : ''}
-                    ${isAdmin ? '<span class="admin-badge"><i class="fas fa-check-circle"></i></span>' : ''}
+    const messageElement = document.createElement('div');
+    messageElement.className = `message message-${type} message-animate`;
+    
+    // Check if sender is admin
+    const sender = chatUsers.find(u => u.id === message.sender_id);
+    const isAdmin = sender && sender.role === 'admin';
+    
+    // Check if this is an audio message
+    if (message.audio_url) {
+        messageElement.innerHTML = `
+            <div class="message-audio">
+                <audio controls>
+                    <source src="${message.audio_url}" type="audio/wav">
+                    Your browser does not support the audio element.
+                </audio>
+                <div class="audio-duration">
+                    <i class="fas fa-microphone"></i>
+                    ${formatDuration(message.duration || 0)}
                 </div>
-            `;
-            
-            chatMessages.appendChild(messageElement);
-            
-            // If this is a temporary message (optimistic UI), we'll update its status later
-            if (message.status === 'sending') {
-                // This will be updated when we get the real message from the server
-                return messageElement;
-            }
-            
-            return null;
-        }
+            </div>
+            <div class="message-time">
+                ${formatTime(message.timestamp)}
+                ${type === 'sent' ? `
+                <span class="message-status ${message.status}">
+                    ${message.status === 'sending' ? '<i class="fas fa-clock"></i>' : 
+                      message.status === 'delivered' ? '<i class="fas fa-check"></i>' : 
+                      message.status === 'read' ? '<i class="fas fa-check-double"></i>' : ''}
+                </span>
+                ` : ''}
+                ${isAdmin ? '<span class="admin-badge"><i class="fas fa-check-circle"></i></span>' : ''}
+            </div>
+        `;
+    } else {
+        // Regular text message
+        messageElement.innerHTML = `
+            <div>${message.content}</div>
+            <div class="message-time">
+                ${formatTime(message.timestamp)}
+                ${type === 'sent' ? `
+                <span class="message-status ${message.status}">
+                    ${message.status === 'sending' ? '<i class="fas fa-clock"></i>' : 
+                      message.status === 'delivered' ? '<i class="fas fa-check"></i>' : 
+                      message.status === 'read' ? '<i class="fas fa-check-double"></i>' : ''}
+                </span>
+                ` : ''}
+                ${isAdmin ? '<span class="admin-badge"><i class="fas fa-check-circle"></i></span>' : ''}
+            </div>
+        `;
+    }
+    
+    chatMessages.appendChild(messageElement);
+    
+    // If this is a temporary message (optimistic UI), we'll update its status later
+    if (message.status === 'sending') {
+        return messageElement;
+    }
+    
+    return null;
+}
+
+// Helper function to format duration (seconds to MM:SS)
+function formatDuration(seconds) {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+}
 
         // Format time for chat messages
         function formatTime(timestamp) {
@@ -3991,6 +4134,136 @@ shareTwitterBtn?.addEventListener('click', () => {
     const text = `Join me on ReportHub - the professional reporting platform! ${inviteLinkInput.value}`;
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`);
 });
+        document.getElementById('voice-record-btn')?.addEventListener('click', toggleVoiceRecording);
+document.getElementById('stop-recording-btn')?.addEventListener('click', stopVoiceRecording);
+
+// Toggle voice recording
+function toggleVoiceRecording() {
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+        stopVoiceRecording();
+    } else {
+        startVoiceRecording();
+    }
+}
+
+// Start voice recording
+async function startVoiceRecording() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        
+        // Reset chunks
+        audioChunks = [];
+        
+        // Setup event handlers
+        mediaRecorder.ondataavailable = (event) => {
+            audioChunks.push(event.data);
+        };
+        
+        mediaRecorder.onstop = async () => {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+            await sendVoiceMessage(audioBlob);
+            
+            // Stop all tracks in the stream
+            stream.getTracks().forEach(track => track.stop());
+        };
+        
+        // Start recording
+        mediaRecorder.start();
+        
+        // Show recording UI
+        document.getElementById('voice-recording-ui').classList.remove('hidden');
+        document.getElementById('chat-input-form').classList.add('hidden');
+        
+        // Start timer
+        recordingStartTime = Date.now();
+        updateRecordingTimer();
+        recordingTimer = setInterval(updateRecordingTimer, 1000);
+        
+    } catch (error) {
+        console.error('Error starting voice recording:', error);
+        showAlert('Microphone access denied or not available', 'danger');
+    }
+}
+
+// Update recording timer
+function updateRecordingTimer() {
+    const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
+    const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+    const seconds = (elapsed % 60).toString().padStart(2, '0');
+    document.querySelector('.recording-timer').textContent = `${minutes}:${seconds}`;
+    
+    // Limit recording to 5 minutes
+    if (elapsed >= 300) {
+        stopVoiceRecording();
+    }
+}
+
+// Stop voice recording
+function stopVoiceRecording() {
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+        clearInterval(recordingTimer);
+        document.getElementById('voice-recording-ui').classList.add('hidden');
+        document.getElementById('chat-input-form').classList.remove('hidden');
+    }
+}
+
+// Send voice message to server
+async function sendVoiceMessage(audioBlob) {
+    if (!activeChatUserId) return;
+    
+    // Create a FormData object to send the file
+    const formData = new FormData();
+    formData.append('audio', audioBlob, 'voice-message.wav');
+    formData.append('recipient_id', activeChatUserId);
+    
+    try {
+        // Show loading state
+        const voiceBtn = document.getElementById('voice-record-btn');
+        voiceBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        voiceBtn.disabled = true;
+        
+        // Send to server
+        const response = await fetch(`${API_BASE_URL}/chat/upload-voice`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: formData
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to upload voice message');
+        }
+        
+        const data = await response.json();
+        
+        // Create a temporary message (optimistic UI)
+        const tempMessage = {
+            id: Date.now(), // Temporary ID
+            sender_id: currentUser.id,
+            recipient_id: activeChatUserId,
+            content: '[Voice message]',
+            audio_url: data.audio_url,
+            duration: data.duration,
+            timestamp: new Date().toISOString(),
+            status: 'sending'
+        };
+        
+        // Add to chat
+        addMessageToChat(tempMessage, 'sent');
+        
+    } catch (error) {
+        console.error('Error sending voice message:', error);
+        showAlert('Failed to send voice message', 'danger');
+    } finally {
+        // Reset voice button
+        const voiceBtn = document.getElementById('voice-record-btn');
+        voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+        voiceBtn.disabled = false;
+    }
+}
 
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
