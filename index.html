@@ -2420,29 +2420,29 @@
     
     // Check if this is an audio message
     if (message.audio_url) {
-        messageElement.innerHTML = `
-            <div class="message-audio">
-                <audio controls>
-                    <source src="${message.audio_url}" type="audio/wav">
-                    Your browser does not support the audio element.
-                </audio>
-                <div class="audio-duration">
-                    <i class="fas fa-microphone"></i>
-                    ${formatDuration(message.duration || 0)}
-                </div>
+    messageElement.innerHTML = `
+        <div class="message-audio">
+            <audio controls>
+                <source src="${message.audio_url}" type="audio/wav">
+                Your browser does not support the audio element.
+            </audio>
+            <div class="audio-duration">
+                <i class="fas fa-microphone"></i>
+                ${formatDuration(message.duration || 0)}
             </div>
-            <div class="message-time">
-                ${formatTime(message.timestamp)}
-                ${type === 'sent' ? `
-                <span class="message-status ${message.status}">
-                    ${message.status === 'sending' ? '<i class="fas fa-clock"></i>' : 
-                      message.status === 'delivered' ? '<i class="fas fa-check"></i>' : 
-                      message.status === 'read' ? '<i class="fas fa-check-double"></i>' : ''}
-                </span>
-                ` : ''}
-                ${isAdmin ? '<span class="admin-badge"><i class="fas fa-check-circle"></i></span>' : ''}
-            </div>
-        `;
+        </div>
+        <div class="message-time">
+            ${formatTime(message.timestamp)}
+            ${type === 'sent' ? `
+            <span class="message-status ${message.status}">
+                ${message.status === 'sending' ? '<i class="fas fa-clock"></i>' : 
+                  message.status === 'delivered' ? '<i class="fas fa-check"></i>' : 
+                  message.status === 'read' ? '<i class="fas fa-check-double"></i>' : ''}
+            </span>
+            ` : ''}
+            ${isAdmin ? '<span class="admin-badge"><i class="fas fa-check-circle"></i></span>' : ''}
+        </div>
+    `;
     } else {
         // Regular text message
         messageElement.innerHTML = `
@@ -4150,7 +4150,8 @@ function toggleVoiceRecording() {
 async function startVoiceRecording() {
     try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        mediaRecorder = new MediaRecorder(stream);
+        const options = { mimeType: 'audio/wav' };
+        mediaRecorder = new MediaRecorder(stream, options);
         
         // Reset chunks
         audioChunks = [];
@@ -4185,7 +4186,6 @@ async function startVoiceRecording() {
         showAlert('Microphone access denied or not available', 'danger');
     }
 }
-
 // Update recording timer
 function updateRecordingTimer() {
     const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
