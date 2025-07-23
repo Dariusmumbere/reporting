@@ -4147,10 +4147,22 @@ function toggleVoiceRecording() {
 }
 
 // Start voice recording
+// Start voice recording
 async function startVoiceRecording() {
     try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const options = { mimeType: 'audio/wav' };
+        
+        // Check supported mime types and use the first supported one
+        const options = {};
+        if (MediaRecorder.isTypeSupported('audio/webm')) {
+            options.mimeType = 'audio/webm';
+        } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+            options.mimeType = 'audio/mp4';
+        } else {
+            // Default to whatever the browser supports
+            console.warn('No preferred audio format supported, using browser default');
+        }
+        
         mediaRecorder = new MediaRecorder(stream, options);
         
         // Reset chunks
@@ -4162,7 +4174,7 @@ async function startVoiceRecording() {
         };
         
         mediaRecorder.onstop = async () => {
-            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+            const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
             await sendVoiceMessage(audioBlob);
             
             // Stop all tracks in the stream
