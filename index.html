@@ -1733,6 +1733,7 @@
         let audioChunks = [];
         let recordingTimer;
         let recordingStartTime;
+        let recordingState = null;
 
         
         // Chat state
@@ -4145,44 +4146,25 @@ function toggleVoiceRecording() {
         startVoiceRecording();
     }
 }
-
-// Start voice recording
 // Start voice recording
 async function startVoiceRecording() {
     try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         
-        // Check supported mime types and use the first supported one
-        const options = {};
-        if (MediaRecorder.isTypeSupported('audio/webm')) {
-            options.mimeType = 'audio/webm';
-        } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
-            options.mimeType = 'audio/mp4';
-        } else {
-            // Default to whatever the browser supports
-            console.warn('No preferred audio format supported, using browser default');
-        }
+        // Use AudioContext to process the audio
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const source = audioContext.createMediaStreamSource(stream);
         
-        mediaRecorder = new MediaRecorder(stream, options);
+        // Create a script processor to handle the audio data
+        const processor = audioContext.createScriptProcessor(4096, 1, 1);
+        source.connect(processor);
+        processor.connect(audioContext.destination);
         
-        // Reset chunks
-        audioChunks = [];
-        
-        // Setup event handlers
-        mediaRecorder.ondataavailable = (event) => {
-            audioChunks.push(event.data);
+        // Store audio data
+        const audioChunks = [];
+        processor.onaudioprocess = (e) => {
+            audioChunks.push(e.inputBuffer.getChannelData(0));
         };
-        
-        mediaRecorder.onstop = async () => {
-            const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
-            await sendVoiceMessage(audioBlob);
-            
-            // Stop all tracks in the stream
-            stream.getTracks().forEach(track => track.stop());
-        };
-        
-        // Start recording
-        mediaRecorder.start();
         
         // Show recording UI
         document.getElementById('voice-recording-ui').classList.remove('hidden');
@@ -4192,6 +4174,15 @@ async function startVoiceRecording() {
         recordingStartTime = Date.now();
         updateRecordingTimer();
         recordingTimer = setInterval(updateRecordingTimer, 1000);
+        
+        // Store references for cleanup
+        recordingState = {
+            stream,
+            audioContext,
+            processor,
+            audioChunks,
+            sampleRate: audioContext.sampleRate
+        };
         
     } catch (error) {
         console.error('Error starting voice recording:', error);
@@ -4213,12 +4204,32 @@ function updateRecordingTimer() {
 
 // Stop voice recording
 function stopVoiceRecording() {
-    if (mediaRecorder && mediaRecorder.state === 'recording') {
-        mediaRecorder.stop();
-        clearInterval(recordingTimer);
-        document.getElementById('voice-recording-ui').classList.add('hidden');
-        document.getElementById('chat-input-form').classList.remove('hidden');
-    }
+    if (!recordingState) return;
+    
+    clearInterval(recordingTimer);
+    
+    // Disconnect audio nodes
+    recordingState.processor.disconnect();
+    recordingState.source.disconnect();
+    
+    // Stop all tracks in the stream
+    recordingState.stream.getTracks().forEach(track => track.stop());
+    
+    // Encode as WAV
+    const wavBlob = encodeAudioToWAV(
+        recordingState.audioChunks,
+        recordingState.sampleRate
+    );
+    
+    // Send the WAV file
+    sendVoiceMessage(wavBlob);
+    
+    // Clean up
+    recordingState = null;
+    
+    // Hide recording UI
+    document.getElementById('voice-recording-ui').classList.add('hidden');
+    document.getElementById('chat-input-form').classList.remove('hidden');
 }
 
 // Send voice message to server
@@ -4276,10 +4287,70 @@ async function sendVoiceMessage(audioBlob) {
         voiceBtn.disabled = false;
     }
 }
+function encodeAudioToWAV(audioChunks, sampleRate) {
+    const mergeBuffers = (chunks) => {
+        const length = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
+        const result = new Float32Array(length);
+        let offset = 0;
+        chunks.forEach(chunk => {
+            result.set(chunk, offset);
+            offset += chunk.length;
+        });
+        return result;
+    };
+    
+    const samples = mergeBuffers(audioChunks);
+    const buffer = new ArrayBuffer(44 + samples.length * 2);
+    const view = new DataView(buffer);
+    
+    // RIFF identifier
+    writeString(view, 0, 'RIFF');
+    // RIFF chunk length
+    view.setUint32(4, 36 + samples.length * 2, true);
+    // RIFF type
+    writeString(view, 8, 'WAVE');
+    // Format chunk identifier
+    writeString(view, 12, 'fmt ');
+    // Format chunk length
+    view.setUint32(16, 16, true);
+    // Sample format (raw)
+    view.setUint16(20, 1, true);
+    // Channel count
+    view.setUint16(22, 1, true);
+    // Sample rate
+    view.setUint32(24, sampleRate, true);
+    // Byte rate (sample rate * block align)
+    view.setUint32(28, sampleRate * 2, true);
+    // Block align (channel count * bytes per sample)
+    view.setUint16(32, 2, true);
+    // Bits per sample
+    view.setUint16(34, 16, true);
+    // Data chunk identifier
+    writeString(view, 36, 'data');
+    // Data chunk length
+    view.setUint32(40, samples.length * 2, true);
+    
+    // Write the PCM samples
+    floatTo16BitPCM(view, 44, samples);
+    
+    return new Blob([view], { type: 'audio/wav' });
+}
+
+function writeString(view, offset, string) {
+    for (let i = 0; i < string.length; i++) {
+        view.setUint8(offset + i, string.charCodeAt(i));
+    }
+}
+
+function floatTo16BitPCM(view, offset, input) {
+    for (let i = 0; i < input.length; i++, offset += 2) {
+        const s = Math.max(-1, Math.min(1, input[i]));
+        view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+    }
+}
 
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
     </script>
-    <script src="voice.js"></script>
 </body>
 </html>
