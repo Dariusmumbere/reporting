@@ -4338,38 +4338,35 @@ function addVoiceMessageToChat(message, type) {
 
 // Add this function to handle play/pause of voice messages
 function togglePlayPause(button) {
-    const messageElement = button.closest('.message');
+    const messageElement = button.closest('.voice-message'); // Fixed selector
+    if (!messageElement) {
+        console.error('Voice message container not found');
+        return;
+    }
+
     const audioElement = messageElement.querySelector('audio');
-    
-    if (!audioElement) {
-        console.error('Audio element not found');
+    if (!audioElement || !audioElement.src) {
+        console.error('Audio element is missing or has no source');
         return;
     }
-    
-    // Check if audio has a source
-    if (!audioElement.src) {
-        console.error('Audio element has no source');
-        return;
-    }
-    
-    // Load the audio first if not already loaded
+
+    // Ensure audio is loaded
     if (audioElement.readyState === 0) {
         audioElement.load();
     }
-    
-    // Handle play/pause
+
     if (audioElement.paused) {
-        // Pause all other audio elements first
-        document.querySelectorAll('.message audio').forEach(audio => {
+        // Pause all other audio elements
+        document.querySelectorAll('.voice-message audio').forEach(audio => {
             if (audio !== audioElement && !audio.paused) {
                 audio.pause();
-                const otherButton = audio.closest('.message').querySelector('.play-pause-btn');
+                const otherButton = audio.closest('.voice-message')?.querySelector('.play-pause-btn');
                 if (otherButton) {
                     otherButton.innerHTML = '<i class="fas fa-play"></i>';
                 }
             }
         });
-        
+
         audioElement.play()
             .then(() => {
                 button.innerHTML = '<i class="fas fa-pause"></i>';
@@ -4378,8 +4375,8 @@ function togglePlayPause(button) {
                 console.error('Error playing audio:', error);
                 showAlert('Failed to play audio message', 'danger');
             });
-        
-        audioElement.onended = function() {
+
+        audioElement.onended = function () {
             button.innerHTML = '<i class="fas fa-play"></i>';
         };
     } else {
@@ -4387,6 +4384,7 @@ function togglePlayPause(button) {
         button.innerHTML = '<i class="fas fa-play"></i>';
     }
 }
+
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
     </script>
