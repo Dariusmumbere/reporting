@@ -2473,24 +2473,25 @@ function addMessageToChat(message, type) {
     const isAudioMessage = message.content && message.content.endsWith('.wav');
     
     if (isAudioMessage) {
-        // Handle audio message
         messageElement.innerHTML = `
-            <div class="voice-message-controls">
-                <button class="play-pause-btn" onclick="togglePlayPause(this)">
-                    <i class="fas fa-play"></i>
-                </button>
-                <audio src="${API_BASE_URL}${message.content}" preload="none"></audio>
-                <span class="voice-message-duration">00:00</span>
-            </div>
-            <div class="message-time">
-                ${formatTime(message.timestamp)}
-                ${type === 'sent' ? `
-                <span class="message-status ${message.status}">
-                    ${message.status === 'sending' ? '<i class="fas fa-clock"></i>' : 
-                      message.status === 'delivered' ? '<i class="fas fa-check"></i>' : 
-                      message.status === 'read' ? '<i class="fas fa-check-double"></i>' : ''}
-                </span>
-                ` : ''}
+            <div class="voice-message ${type}">
+                <div class="voice-message-controls">
+                    <button class="play-pause-btn" onclick="togglePlayPause(this)">
+                        <i class="fas fa-play"></i>
+                    </button>
+                    <audio src="${API_BASE_URL}${message.content}" preload="none"></audio>
+                    <span class="voice-message-duration">00:00</span>
+                </div>
+                <div class="message-time">
+                    ${formatTime(message.timestamp)}
+                    ${type === 'sent' ? `
+                    <span class="message-status ${message.status}">
+                        ${message.status === 'sending' ? '<i class="fas fa-clock"></i>' : 
+                          message.status === 'delivered' ? '<i class="fas fa-check"></i>' : 
+                          message.status === 'read' ? '<i class="fas fa-check-double"></i>' : ''}
+                    </span>
+                    ` : ''}
+                </div>
             </div>
         `;
         
@@ -2532,6 +2533,7 @@ function addMessageToChat(message, type) {
     
     return null;
 }
+        
         // Format time for chat messages
         function formatTime(timestamp) {
             const date = new Date(timestamp);
@@ -4338,15 +4340,16 @@ function addVoiceMessageToChat(message, type) {
 
 // Add this function to handle play/pause of voice messages
 function togglePlayPause(button) {
-    const messageElement = button.closest('.voice-message'); // Fixed selector
+    // Find the closest voice message container
+    const messageElement = button.closest('.message');
     if (!messageElement) {
         console.error('Voice message container not found');
         return;
     }
 
     const audioElement = messageElement.querySelector('audio');
-    if (!audioElement || !audioElement.src) {
-        console.error('Audio element is missing or has no source');
+    if (!audioElement) {
+        console.error('Audio element not found');
         return;
     }
 
@@ -4357,10 +4360,10 @@ function togglePlayPause(button) {
 
     if (audioElement.paused) {
         // Pause all other audio elements
-        document.querySelectorAll('.voice-message audio').forEach(audio => {
+        document.querySelectorAll('.message audio').forEach(audio => {
             if (audio !== audioElement && !audio.paused) {
                 audio.pause();
-                const otherButton = audio.closest('.voice-message')?.querySelector('.play-pause-btn');
+                const otherButton = audio.closest('.message')?.querySelector('.play-pause-btn');
                 if (otherButton) {
                     otherButton.innerHTML = '<i class="fas fa-play"></i>';
                 }
@@ -4376,7 +4379,7 @@ function togglePlayPause(button) {
                 showAlert('Failed to play audio message', 'danger');
             });
 
-        audioElement.onended = function () {
+        audioElement.onended = function() {
             button.innerHTML = '<i class="fas fa-play"></i>';
         };
     } else {
