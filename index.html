@@ -4300,19 +4300,17 @@ function addVoiceMessageToChat(message, type) {
     const messageElement = document.createElement('div');
     messageElement.className = `voice-message ${type}`;
     
-    // Format duration (assuming message.duration is in seconds)
-    const minutes = Math.floor(message.duration / 60).toString().padStart(2, '0');
-    const seconds = Math.floor(message.duration % 60).toString().padStart(2, '0');
-    const durationText = `${minutes}:${seconds}`;
+    // Make sure the audio URL is properly constructed
+    const audioUrl = `${API_BASE_URL}${message.audio_url}`;
     
     messageElement.innerHTML = `
         <div class="voice-message-controls">
             <button class="play-pause-btn" onclick="togglePlayPause(this)">
                 <i class="fas fa-play"></i>
             </button>
-            <div class="voice-message-duration">${durationText}</div>
+            <div class="voice-message-duration">00:00</div>
         </div>
-        <audio src="${message.audio_url}" preload="none"></audio>
+        <audio src="${audioUrl}" preload="none"></audio>
         <div class="message-time">
             ${formatTime(message.timestamp)}
             ${type === 'sent' ? `
@@ -4325,17 +4323,41 @@ function addVoiceMessageToChat(message, type) {
         </div>
     `;
     
+    // Set up duration when metadata loads
+    const audioElement = messageElement.querySelector('audio');
+    audioElement.addEventListener('loadedmetadata', function() {
+        const duration = Math.floor(audioElement.duration);
+        const minutes = Math.floor(duration / 60).toString().padStart(2, '0');
+        const seconds = (duration % 60).toString().padStart(2, '0');
+        messageElement.querySelector('.voice-message-duration').textContent = `${minutes}:${seconds}`;
+    });
+    
     chatMessages.appendChild(messageElement);
     scrollChatToBottom();
 }
 
 // Add this function to handle play/pause of voice messages
-// Add this function to handle play/pause of voice messages
 function togglePlayPause(button) {
-    const audioElement = button.closest('.message').querySelector('audio');
+    const messageElement = button.closest('.message');
+    const audioElement = messageElement.querySelector('audio');
     
-    if (!audioElement) return;
+    if (!audioElement) {
+        console.error('Audio element not found');
+        return;
+    }
     
+    // Check if audio has a source
+    if (!audioElement.src) {
+        console.error('Audio element has no source');
+        return;
+    }
+    
+    // Load the audio first if not already loaded
+    if (audioElement.readyState === 0) {
+        audioElement.load();
+    }
+    
+    // Handle play/pause
     if (audioElement.paused) {
         // Pause all other audio elements first
         document.querySelectorAll('.message audio').forEach(audio => {
@@ -4348,8 +4370,14 @@ function togglePlayPause(button) {
             }
         });
         
-        audioElement.play();
-        button.innerHTML = '<i class="fas fa-pause"></i>';
+        audioElement.play()
+            .then(() => {
+                button.innerHTML = '<i class="fas fa-pause"></i>';
+            })
+            .catch(error => {
+                console.error('Error playing audio:', error);
+                showAlert('Failed to play audio message', 'danger');
+            });
         
         audioElement.onended = function() {
             button.innerHTML = '<i class="fas fa-play"></i>';
@@ -4359,7 +4387,6 @@ function togglePlayPause(button) {
         button.innerHTML = '<i class="fas fa-play"></i>';
     }
 }
-
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
     </script>
