@@ -2654,7 +2654,7 @@ function addMessageToChat(message, type) {
         
         // Try to get duration from metadata
         audioElement.addEventListener('loadedmetadata', function() {
-            if (!isNaN(audioElement.duration) {
+            if (!isNaN(audioElement.duration)) {
                 duration = audioElement.duration;
                 durationDisplay.textContent = formatDuration(duration);
             }
@@ -2713,11 +2713,16 @@ function addMessageToChat(message, type) {
     return messageElement;
 }
 
-        function formatDuration(seconds) {
+function formatDuration(seconds) {
     if (isNaN(seconds)) return "00:00";
     const minutes = Math.floor(seconds / 60).toString().padStart(2, '0');
     const secs = Math.floor(seconds % 60).toString().padStart(2, '0');
     return `${minutes}:${secs}`;
+}
+
+function formatTime(timestamp) {
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
         // Scroll chat to bottom
         function scrollChatToBottom() {
@@ -4567,10 +4572,6 @@ function togglePlayPause(button) {
                 button.innerHTML = '<i class="fas fa-play"></i>';
             }
         }
-        function formatTime(timestamp) {
-    const date = new Date(timestamp);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-}
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
     </script>
