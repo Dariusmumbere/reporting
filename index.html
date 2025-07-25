@@ -2664,74 +2664,75 @@ function addMessageToChat(message, type) {
         
         // Create voice message element
         messageElement.innerHTML = `
-            <div class="voice-message-container ${type}">
-                <div class="voice-message-controls">
-                    <button class="play-pause-btn" onclick="togglePlayPause(this)">
-                        <i class="fas fa-play"></i>
-                    </button>
-                    <div class="voice-progress">
-                        <div class="voice-progress-bar"></div>
-                    </div>
-                    <div class="voice-duration">00:00</div>
-                    <audio src="${API_BASE_URL}${audioUrl}" preload="metadata"></audio>
-                </div>
-            </div>
-            <div class="message-time">
-                ${formatTime(message.timestamp)}
-                ${type === 'sent' ? `
-                <span class="message-status ${message.status}">
-                    ${message.status === 'sending' ? '<i class="fas fa-clock"></i>' : 
-                      message.status === 'delivered' ? '<i class="fas fa-check"></i>' : 
-                      message.status === 'read' ? '<i class="fas fa-check-double"></i>' : ''}
-                </span>
-                ` : ''}
-            </div>
-        `;
+  <div class="voice-message-container ${type}">
+    <div class="voice-message-controls">
+      <button class="play-pause-btn" onclick="togglePlayPause(this)">
+        <i class="fas fa-play"></i>
+      </button>
+      <div class="voice-progress">
+        <div class="voice-progress-bar"></div>
+      </div>
+      <div class="voice-duration">00:00</div>
+      <audio src="${API_BASE_URL}${audioUrl}" preload="metadata"></audio>
+    </div>
+    <div class="message-time">
+      ${formatTime(message.timestamp)}
+      ${type === 'sent' ? `
+      <span class="message-status ${message.status}">
+        ${message.status === 'sending' ? '<i class="fas fa-clock"></i>' : 
+          message.status === 'delivered' ? '<i class="fas fa-check"></i>' : 
+          message.status === 'read' ? '<i class="fas fa-check-double"></i>' : ''}
+      </span>
+      ` : ''}
+    </div>
+  </div>
+`;
         
         // Set up audio element
-        const audioElement = messageElement.querySelector('audio');
-        const progressBar = messageElement.querySelector('.voice-progress-bar');
-        const durationDisplay = messageElement.querySelector('.voice-duration');
-        
-        // Fallback duration in case metadata loading fails
-        let duration = 0;
-        
-        // Try to get duration from metadata
-        audioElement.addEventListener('loadedmetadata', function() {
-            if (!isNaN(audioElement.duration)) {
-                duration = audioElement.duration;
-                durationDisplay.textContent = formatDuration(duration);
-            }
-        });
-        
-        // Fallback if metadata doesn't load
-        setTimeout(() => {
-            if (duration === 0) {
-                durationDisplay.textContent = "00:00";
-            }
-        }, 1000);
-        
-        audioElement.addEventListener('timeupdate', function() {
-            if (!isNaN(audioElement.duration)) {
-                const progress = (audioElement.currentTime / audioElement.duration) * 100;
-                progressBar.style.width = `${progress}%`;
-                
-                // Update current time display
-                const currentTime = Math.floor(audioElement.currentTime);
-                durationDisplay.textContent = formatDuration(currentTime);
-            }
-        });
-        
-        audioElement.addEventListener('ended', function() {
-            const btn = messageElement.querySelector('.play-pause-btn');
-            btn.innerHTML = '<i class="fas fa-play"></i>';
-            progressBar.style.width = '0%';
-            if (!isNaN(duration)) {
-                durationDisplay.textContent = formatDuration(duration);
-            } else {
-                durationDisplay.textContent = "00:00";
-            }
-        });
+        // Set up audio element
+const audioElement = messageElement.querySelector('audio');
+const progressBar = messageElement.querySelector('.voice-progress-bar');
+const durationDisplay = messageElement.querySelector('.voice-duration');
+
+// Fallback duration in case metadata loading fails
+let duration = 0;
+
+// Try to get duration from metadata
+audioElement.addEventListener('loadedmetadata', function() {
+  if (!isNaN(audioElement.duration)) {
+    duration = audioElement.duration;
+    durationDisplay.textContent = formatDuration(duration);
+  }
+});
+
+// Fallback if metadata doesn't load
+setTimeout(() => {
+  if (duration === 0) {
+    durationDisplay.textContent = "00:00";
+  }
+}, 1000);
+
+audioElement.addEventListener('timeupdate', function() {
+  if (!isNaN(audioElement.duration)) {
+    const progress = (audioElement.currentTime / audioElement.duration) * 100;
+    progressBar.style.width = `${progress}%`;
+    
+    // Update current time display
+    const currentTime = Math.floor(audioElement.currentTime);
+    durationDisplay.textContent = formatDuration(currentTime);
+  }
+});
+
+audioElement.addEventListener('ended', function() {
+  const btn = messageElement.querySelector('.play-pause-btn');
+  btn.innerHTML = '<i class="fas fa-play"></i>';
+  progressBar.style.width = '0%';
+  if (!isNaN(duration)) {
+    durationDisplay.textContent = formatDuration(duration);
+  } else {
+    durationDisplay.textContent = "00:00";
+  }
+});
     } else {
         // Handle text message
         const sender = chatUsers.find(u => u.id === message.sender_id);
@@ -2758,12 +2759,12 @@ function addMessageToChat(message, type) {
 }
 
 function formatDuration(seconds) {
-    if (isNaN(seconds)) return "00:00";
-    const minutes = Math.floor(seconds / 60).toString().padStart(2, '0');
-    const secs = Math.floor(seconds % 60).toString().padStart(2, '0');
-    return `${minutes}:${secs}`;
+  if (isNaN(seconds)) return "00:00";
+  const minutes = Math.floor(seconds / 60).toString().padStart(2, '0');
+  const secs = Math.floor(seconds % 60).toString().padStart(2, '0');
+  return `${minutes}:${secs}`;
 }
-
+        
 function formatTime(timestamp) {
     const date = new Date(timestamp);
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -4575,47 +4576,47 @@ function addVoiceMessageToChat(message, type) {
 
 // Add this function to handle play/pause of voice messages
 function togglePlayPause(button) {
-            const messageElement = button.closest('.message');
-            if (!messageElement) {
-                console.error('Message container not found');
-                return;
-            }
+  const messageElement = button.closest('.voice-message-container');
+  if (!messageElement) {
+    console.error('Message container not found');
+    return;
+  }
 
-            const audioElement = messageElement.querySelector('audio');
-            if (!audioElement) {
-                console.error('Audio element not found');
-                return;
-            }
+  const audioElement = messageElement.querySelector('audio');
+  if (!audioElement) {
+    console.error('Audio element not found');
+    return;
+  }
 
-            // Pause all other audio elements
-            document.querySelectorAll('.message audio').forEach(audio => {
-                if (audio !== audioElement && !audio.paused) {
-                    audio.pause();
-                    const otherButton = audio.closest('.message')?.querySelector('.play-pause-btn');
-                    if (otherButton) {
-                        otherButton.innerHTML = '<i class="fas fa-play"></i>';
-                        const progressBar = audio.closest('.message')?.querySelector('.voice-progress-bar');
-                        if (progressBar) {
-                            progressBar.style.width = '0%';
-                        }
-                    }
-                }
-            });
-
-            if (audioElement.paused) {
-                audioElement.play()
-                    .then(() => {
-                        button.innerHTML = '<i class="fas fa-pause"></i>';
-                    })
-                    .catch(error => {
-                        console.error('Error playing audio:', error);
-                        showAlert('Failed to play audio message', 'danger');
-                    });
-            } else {
-                audioElement.pause();
-                button.innerHTML = '<i class="fas fa-play"></i>';
-            }
+  // Pause all other audio elements
+  document.querySelectorAll('.voice-message-container audio').forEach(audio => {
+    if (audio !== audioElement && !audio.paused) {
+      audio.pause();
+      const otherButton = audio.closest('.voice-message-container')?.querySelector('.play-pause-btn');
+      if (otherButton) {
+        otherButton.innerHTML = '<i class="fas fa-play"></i>';
+        const progressBar = audio.closest('.voice-message-container')?.querySelector('.voice-progress-bar');
+        if (progressBar) {
+          progressBar.style.width = '0%';
         }
+      }
+    }
+  });
+
+  if (audioElement.paused) {
+    audioElement.play()
+      .then(() => {
+        button.innerHTML = '<i class="fas fa-pause"></i>';
+      })
+      .catch(error => {
+        console.error('Error playing audio:', error);
+        showAlert('Failed to play audio message', 'danger');
+      });
+  } else {
+    audioElement.pause();
+    button.innerHTML = '<i class="fas fa-play"></i>';
+  }
+}
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
     </script>
