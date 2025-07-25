@@ -4302,9 +4302,8 @@ async function startVoiceRecording() {
             const audioElement = document.getElementById('recorded-audio');
             audioElement.src = audioUrl;
             
-            // Show preview and hide recording controls
-            document.getElementById('recording-preview').classList.remove('hidden');
-            document.getElementById('recording-controls').classList.add('hidden');
+            document.getElementById('recording-controls').classList.remove('hidden');
+            document.getElementById('recording-indicator').classList.add('hidden');
             
             // Stop all tracks in the stream
             stream.getTracks().forEach(track => track.stop());
@@ -4315,8 +4314,6 @@ async function startVoiceRecording() {
         updateRecordingTime();
         
         document.getElementById('voice-recorder').classList.remove('hidden');
-        document.getElementById('recording-controls').classList.remove('hidden');
-        document.getElementById('recording-preview').classList.add('hidden');
         document.getElementById('voice-record-btn').classList.add('hidden');
         
     } catch (error) {
