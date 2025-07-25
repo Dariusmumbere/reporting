@@ -4462,6 +4462,12 @@ function togglePlayPause(button) {
         button.innerHTML = '<i class="fas fa-play"></i>';
     }
 }
+function stopVoiceRecording() {
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+        clearTimeout(recordingTimer);
+    }
+}
 
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
