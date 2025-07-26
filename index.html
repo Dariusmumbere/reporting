@@ -3893,7 +3893,8 @@ document.getElementById('org-logo').addEventListener('change', function(e) {
             });
         }
 async function handleAddUser(e) {
-    e.preventDefault(); 
+    e.preventDefault(); // This prevents the form from submitting traditionally
+    
     const form = document.getElementById('add-user-form');
     const fullName = form.elements['user-fullname'].value.trim();
     const email = form.elements['user-email'].value.trim();
@@ -3901,26 +3902,23 @@ async function handleAddUser(e) {
     const password = form.elements['user-password'].value;
     const confirmPassword = form.elements['user-confirm-password'].value;
     
-    // Validate all fields are filled
+    // Validation (same as before)
     if (!fullName || !email || !role || !password || !confirmPassword) {
         showAlert('Please fill in all required fields', 'danger');
         return;
     }
     
-    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
         showAlert('Please enter a valid email address', 'danger');
         return;
     }
     
-    // Validate password match
     if (password !== confirmPassword) {
         showAlert('Passwords do not match', 'danger');
         return;
     }
     
-    // Validate password complexity
     if (password.length < 8 || 
         !/[A-Z]/.test(password) || 
         !/[a-z]/.test(password) || 
@@ -3933,80 +3931,43 @@ async function handleAddUser(e) {
     // Show loading state
     submitUserText.textContent = 'Adding...';
     submitUserSpinner.classList.remove('hidden');
+    submitAddUser.disabled = true;
     
-    // Retry configuration
-    const maxRetries = 3;
-    let retryCount = 0;
-    let lastError = null;
-    
-    while (retryCount < maxRetries) {
-        try {
-            const userData = {
-                name: fullName,
-                email: email,
-                role: role,
-                password: password
-            };
-            
-            const response = await fetch(`${API_BASE_URL}/users`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(userData)
-            });
-            
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.detail || 'Failed to add user');
-            }
-            
-            // Show success message
-            showAlert('User added successfully', 'success');
-            
-            // Close modal and reset form
-            addUserModal.classList.remove('active');
-            form.reset();
-            
-            // Reload users
-            loadUsers();
-            
-            // Success - exit the retry loop
-            return;
-            
-        } catch (error) {
-            console.error(`Attempt ${retryCount + 1} failed:`, error);
-            lastError = error;
-            
-            // Only retry for network errors or server errors (5xx)
-            if (error instanceof TypeError || 
-                (error.message.includes('Failed to fetch') || 
-                 (error.message.includes('Server Error') && retryCount < maxRetries - 1))) {
-                
-                retryCount++;
-                const delay = Math.pow(2, retryCount) * 1000; // Exponential backoff
-                
-                // Show retry message to user
-                submitUserText.textContent = `Retrying (${retryCount}/${maxRetries})...`;
-                
-                // Wait before retrying
-                await new Promise(resolve => setTimeout(resolve, delay));
-                continue;
-            }
-            
-            // For other errors, break the loop
-            break;
+    try {
+        const userData = {
+            name: fullName,
+            email: email,
+            role: role,
+            password: password
+        };
+        
+        const response = await fetch(`${API_BASE_URL}/users`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(userData)
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || 'Failed to add user');
         }
+        
+        showAlert('User added successfully', 'success');
+        addUserModal.classList.remove('active');
+        form.reset();
+        loadUsers();
+        
+    } catch (error) {
+        console.error('Error adding user:', error);
+        showAlert(error.message || 'An error occurred while adding user', 'danger');
+    } finally {
+        submitUserText.textContent = 'Add User';
+        submitUserSpinner.classList.add('hidden');
+        submitAddUser.disabled = false;
     }
-    
-    // If we get here, all retries failed
-    console.error('Error adding user after retries:', lastError);
-    showAlert(lastError.message || 'An error occurred while adding user', 'danger');
-    
-    // Reset button state
-    submitUserText.textContent = 'Add User';
-    submitUserSpinner.classList.add('hidden');
 }
         // View report details
         function viewReport(reportId) {
