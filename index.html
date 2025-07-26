@@ -2290,7 +2290,7 @@
             });
             
             // Submit add user form
-            submitAddUser.addEventListener('click', handleAddUser);
+            addUserForm.addEventListener('submit', handleAddUser);
             
             // Close view report modal
             closeViewReportModal.addEventListener('click', () => {
@@ -3892,7 +3892,8 @@ document.getElementById('org-logo').addEventListener('change', function(e) {
                 submitReportSpinner.classList.add('hidden');
             });
         }
-async function handleAddUser() {
+async function handleAddUser(e) {
+    e.preventDefault(); 
     const form = document.getElementById('add-user-form');
     const fullName = form.elements['user-fullname'].value.trim();
     const email = form.elements['user-email'].value.trim();
