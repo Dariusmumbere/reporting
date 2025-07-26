@@ -3933,28 +3933,28 @@ async function handleAddUser() {
     submitUserText.textContent = 'Adding...';
     submitUserSpinner.classList.remove('hidden');
     
-    const userData = {
-        name: fullName,
-        email: email,
-        role: role,
-        password: password
-    };
-    
     // Retry configuration
     const maxRetries = 3;
     let retryCount = 0;
-    let success = false;
+    let lastError = null;
     
-    while (retryCount < maxRetries && !success) {
+    while (retryCount < maxRetries) {
         try {
-            const response = await fetchWithRetry(`${API_BASE_URL}/users`, {
+            const userData = {
+                name: fullName,
+                email: email,
+                role: role,
+                password: password
+            };
+            
+            const response = await fetch(`${API_BASE_URL}/users`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(userData)
-            }, maxRetries);
+            });
             
             if (!response.ok) {
                 const errorData = await response.json();
@@ -3971,60 +3971,41 @@ async function handleAddUser() {
             // Reload users
             loadUsers();
             
-            success = true;
-        } catch (error) {
-            retryCount++;
-            
-            if (retryCount < maxRetries) {
-                console.warn(`Attempt ${retryCount} failed. Retrying...`, error);
-                await new Promise(resolve => setTimeout(resolve, 1000 * retryCount)); // Exponential backoff
-            } else {
-                console.error('Error adding user after retries:', error);
-                showAlert(error.message || 'An error occurred while adding user', 'danger');
-            }
-        }
-    }
-    
-    submitUserText.textContent = 'Add User';
-    submitUserSpinner.classList.add('hidden');
-}
-
-// Helper function for fetch with retry
-async function fetchWithRetry(url, options, maxRetries = 3) {
-    let lastError;
-    
-    for (let i = 0; i < maxRetries; i++) {
-        try {
-            const response = await fetch(url, options);
-            
-            // If the response is successful, return it
-            if (response.ok) {
-                return response;
-            }
-            
-            // If we got a 5xx error, throw to trigger retry
-            if (response.status >= 500) {
-                throw new Error(`Server error: ${response.status}`);
-            }
-            
-            // For 4xx errors, don't retry
-            return response;
+            // Success - exit the retry loop
+            return;
             
         } catch (error) {
+            console.error(`Attempt ${retryCount + 1} failed:`, error);
             lastError = error;
             
-            // Only retry if we have retries left and it's not the last attempt
-            if (i < maxRetries - 1) {
-                // Exponential backoff: wait longer between each retry
-                await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+            // Only retry for network errors or server errors (5xx)
+            if (error instanceof TypeError || 
+                (error.message.includes('Failed to fetch') || 
+                 (error.message.includes('Server Error') && retryCount < maxRetries - 1))) {
+                
+                retryCount++;
+                const delay = Math.pow(2, retryCount) * 1000; // Exponential backoff
+                
+                // Show retry message to user
+                submitUserText.textContent = `Retrying (${retryCount}/${maxRetries})...`;
+                
+                // Wait before retrying
+                await new Promise(resolve => setTimeout(resolve, delay));
                 continue;
             }
             
-            throw lastError;
+            // For other errors, break the loop
+            break;
         }
     }
     
-    throw lastError;
+    // If we get here, all retries failed
+    console.error('Error adding user after retries:', lastError);
+    showAlert(lastError.message || 'An error occurred while adding user', 'danger');
+    
+    // Reset button state
+    submitUserText.textContent = 'Add User';
+    submitUserSpinner.classList.add('hidden');
 }
         // View report details
         function viewReport(reportId) {
