@@ -1218,11 +1218,17 @@
             <!-- Sidebar -->
             <div class="sidebar" id="sidebar">
                 <div class="sidebar-header">
-                    <h2>ReportHub</h2>
-                    <button class="sidebar-toggle" id="collapse-sidebar">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                </div>
+    <div class="d-flex align-items-center gap-2">
+        <div id="sidebar-org-logo" style="width: 32px; height: 32px; border-radius: 4px; overflow: hidden; background-color: #f5f5f5; display: flex; align-items: center; justify-content: center;">
+            <img id="sidebar-org-logo-img" src="" style="max-width: 100%; max-height: 100%; display: none;">
+            <i class="fas fa-building" style="font-size: 1rem; color: #ccc;"></i>
+        </div>
+        <h2 id="sidebar-org-name">ReportHub</h2>
+    </div>
+    <button class="sidebar-toggle" id="collapse-sidebar">
+        <i class="fas fa-chevron-left"></i>
+    </button>
+</div>
                 <div class="sidebar-menu">
                     <div class="menu-category">Main</div>
                     <a href="#" class="menu-item active" data-view="dashboard">
@@ -1620,60 +1626,84 @@
 
                     <!-- Settings View (Admin only) -->
                     <div class="view hidden" id="settings-view">
-                        <div class="page-header">
-                            <h1 class="page-title">System Settings</h1>
-                        </div>
+    <div class="page-header">
+        <h1 class="page-title">System Settings</h1>
+    </div>
 
-                        <div class="card">
-                            <div class="card-header">
-                                <h2 class="card-title">General Settings</h2>
-                            </div>
-                            <div class="card-body">
-                                <form id="settings-form">
-                                    <div class="form-group">
-                                        <label for="system-name" class="form-label">System Name</label>
-                                        <input type="text" id="system-name" class="form-control" value="ReportHub">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="timezone" class="form-label">Timezone</label>
-                                        <select id="timezone" class="form-control form-select">
-                                            <option value="UTC">UTC</option>
-                                            <option value="EST" selected>Eastern Standard Time (EST)</option>
-                                            <option value="PST">Pacific Standard Time (PST)</option>
-                                            <option value="CST">Central Standard Time (CST)</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="date-format" class="form-label">Date Format</label>
-                                        <select id="date-format" class="form-control form-select">
-                                            <option value="YYYY-MM-DD">YYYY-MM-DD</option>
-                                            <option value="MM/DD/YYYY" selected>MM/DD/YYYY</option>
-                                            <option value="DD/MM/YYYY">DD/MM/YYYY</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">System Logo</label>
-                                        <div class="file-upload">
-                                            <input type="file" id="system-logo" class="file-upload-input" accept="image/*">
-                                            <label for="system-logo" class="file-upload-label">
-                                                <i class="fas fa-cloud-upload-alt"></i>
-                                                <div class="file-upload-text">
-                                                    <strong>Click to upload</strong> or drag and drop
-                                                    <div style="font-size: 0.75rem; margin-top: 0.25rem;">SVG, PNG, JPG (Max 2MB)</div>
-                                                </div>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <div class="d-flex justify-content-end">
-                                            <button type="submit" class="btn btn-primary" id="save-settings-btn">
-                                                <i class="fas fa-save"></i> Save Changes
-                                            </button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Organization Settings</h2>
+        </div>
+        <div class="card-body">
+            <form id="org-settings-form">
+                <div class="form-group">
+                    <label for="org-name" class="form-label">Organization Name</label>
+                    <input type="text" id="org-name" class="form-control" placeholder="Enter organization name">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Organization Logo</label>
+                    <div class="d-flex align-items-center gap-3">
+                        <div id="org-logo-preview" style="width: 80px; height: 80px; border-radius: 4px; overflow: hidden; background-color: #f5f5f5; display: flex; align-items: center; justify-content: center;">
+                            <img id="org-logo-img" src="" style="max-width: 100%; max-height: 100%; display: none;">
+                            <i class="fas fa-building" style="font-size: 2rem; color: #ccc;" id="org-logo-placeholder"></i>
                         </div>
+                        <div class="file-upload">
+                            <input type="file" id="org-logo" class="file-upload-input" accept="image/*">
+                            <label for="org-logo" class="file-upload-label">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <div class="file-upload-text">
+                                    <strong>Change Logo</strong>
+                                    <div style="font-size: 0.75rem; margin-top: 0.25rem;">PNG, JPG (Max 2MB)</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary" id="save-org-settings-btn">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-header">
+            <h2 class="card-title">General Settings</h2>
+        </div>
+        <div class="card-body">
+            <form id="settings-form">
+                <div class="form-group">
+                    <label for="timezone" class="form-label">Timezone</label>
+                    <select id="timezone" class="form-control form-select">
+                        <option value="UTC">UTC</option>
+                        <option value="EST" selected>Eastern Standard Time (EST)</option>
+                        <option value="PST">Pacific Standard Time (PST)</option>
+                        <option value="CST">Central Standard Time (CST)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="date-format" class="form-label">Date Format</label>
+                    <select id="date-format" class="form-control form-select">
+                        <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                        <option value="MM/DD/YYYY" selected>MM/DD/YYYY</option>
+                        <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary" id="save-settings-btn">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
                     </div>
                 </div>
             </div>
@@ -3297,22 +3327,14 @@ function setupUIForUser() {
     } else {
         adminMenu.classList.add('hidden');
     }
+    updateSidebarOrganizationInfo();
 }
 
         // Switch between views
         function switchView(viewId) {
-            views.forEach(view => {
-                if (view.id === `${viewId}-view`) {
-                    view.classList.remove('hidden');
-                } else {
-                    view.classList.add('hidden');
-                }
-            });
-            
-            // Close sidebar on mobile
-            if (window.innerWidth < 768) {
-                sidebar.classList.remove('active');
-            }
+    views.forEach(view => {
+        if (view.id === `${viewId}-view`) {
+            view.classList.remove('hidden');
             
             // Load data for the view if needed
             if (viewId === 'reports') {
@@ -3323,8 +3345,42 @@ function setupUIForUser() {
                 loadDashboardData();
             } else if (viewId === 'chat') {
                 loadChatUsers();
+            } else if (viewId === 'settings') {
+                loadOrganizationSettings();
             }
+        } else {
+            view.classList.add('hidden');
         }
+    });
+    
+    // Close sidebar on mobile
+    if (window.innerWidth < 768) {
+        sidebar.classList.remove('active');
+    }
+}
+
+// Add logo preview functionality
+document.getElementById('org-logo').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    if (!file.type.startsWith('image/')) {
+        showAlert('Please select an image file', 'danger');
+        e.target.value = '';
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        const logoPreview = document.getElementById('org-logo-img');
+        const logoPlaceholder = document.getElementById('org-logo-placeholder');
+        
+        logoPreview.src = event.target.result;
+        logoPreview.style.display = 'block';
+        logoPlaceholder.style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+});
 
         // Load initial data for the dashboard
         function loadInitialData() {
@@ -4617,6 +4673,138 @@ function togglePlayPause(button) {
     button.innerHTML = '<i class="fas fa-play"></i>';
   }
 }
+async function loadOrganizationSettings() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/organization`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to load organization settings');
+        }
+        
+        const orgData = await response.json();
+        
+        // Update form fields
+        document.getElementById('org-name').value = orgData.name || '';
+        
+        // Update logo preview
+        const logoPreview = document.getElementById('org-logo-img');
+        const logoPlaceholder = document.getElementById('org-logo-placeholder');
+        
+        if (orgData.logo_url) {
+            logoPreview.src = `${API_BASE_URL}${orgData.logo_url}`;
+            logoPreview.style.display = 'block';
+            logoPlaceholder.style.display = 'none';
+        } else {
+            logoPreview.style.display = 'none';
+            logoPlaceholder.style.display = 'block';
+        }
+        
+    } catch (error) {
+        console.error('Error loading organization settings:', error);
+        showAlert('Failed to load organization settings', 'danger');
+    }
+}
+
+async function saveOrganizationSettings() {
+    const name = document.getElementById('org-name').value.trim();
+    const logoInput = document.getElementById('org-logo');
+    const logoFile = logoInput.files[0];
+    
+    const formData = new FormData();
+    if (name) formData.append('name', name);
+    if (logoFile) formData.append('logo', logoFile);
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/organization`, {
+            method: 'PATCH',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: formData
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || 'Failed to update organization settings');
+        }
+        
+        showAlert('Organization settings updated successfully', 'success');
+        
+        // Reload organization data
+        await loadOrganizationSettings();
+        
+        // Update the sidebar header with new organization name and logo
+        updateSidebarOrganizationInfo();
+        
+        // Clear file input
+        logoInput.value = '';
+        
+    } catch (error) {
+        console.error('Error saving organization settings:', error);
+        showAlert(error.message || 'Failed to update organization settings', 'danger');
+    }
+}
+
+function updateSidebarOrganizationInfo() {
+    // This will be called after successful update to refresh the sidebar
+    const sidebarHeader = document.querySelector('.sidebar-header h2');
+    if (sidebarHeader) {
+        const orgName = document.getElementById('org-name').value.trim();
+        if (orgName) {
+            sidebarHeader.textContent = orgName;
+        }
+    }
+    
+    // You can also update the logo in the sidebar if you have one
+}
+
+// Add event listeners
+document.getElementById('org-settings-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    saveOrganizationSettings();
+});
+async function updateSidebarOrganizationInfo() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/organization`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        
+        if (!response.ok) return;
+        
+        const orgData = await response.json();
+        
+        // Update sidebar organization name
+        const orgNameElement = document.getElementById('sidebar-org-name');
+        if (orgNameElement) {
+            orgNameElement.textContent = orgData.name || 'ReportHub';
+        }
+        
+        // Update sidebar logo
+        const logoImg = document.getElementById('sidebar-org-logo-img');
+        const logoContainer = document.getElementById('sidebar-org-logo');
+        
+        if (orgData.logo_url) {
+            logoImg.src = `${API_BASE_URL}${orgData.logo_url}`;
+            logoImg.style.display = 'block';
+            // Hide the building icon
+            logoContainer.querySelector('i').style.display = 'none';
+        } else {
+            logoImg.style.display = 'none';
+            // Show the building icon
+            logoContainer.querySelector('i').style.display = 'block';
+        }
+        
+    } catch (error) {
+        console.error('Error updating sidebar organization info:', error);
+    }
+}
+
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
     </script>
