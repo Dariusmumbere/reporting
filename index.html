@@ -3893,86 +3893,139 @@ document.getElementById('org-logo').addEventListener('change', function(e) {
             });
         }
 async function handleAddUser() {
-            const form = document.getElementById('add-user-form');
-            const fullName = form.elements['user-fullname'].value.trim();
-            const email = form.elements['user-email'].value.trim();
-            const role = form.elements['user-role'].value;
-            const password = form.elements['user-password'].value;
-            const confirmPassword = form.elements['user-confirm-password'].value;
+    const form = document.getElementById('add-user-form');
+    const fullName = form.elements['user-fullname'].value.trim();
+    const email = form.elements['user-email'].value.trim();
+    const role = form.elements['user-role'].value;
+    const password = form.elements['user-password'].value;
+    const confirmPassword = form.elements['user-confirm-password'].value;
+    
+    // Validate all fields are filled
+    if (!fullName || !email || !role || !password || !confirmPassword) {
+        showAlert('Please fill in all required fields', 'danger');
+        return;
+    }
+    
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        showAlert('Please enter a valid email address', 'danger');
+        return;
+    }
+    
+    // Validate password match
+    if (password !== confirmPassword) {
+        showAlert('Passwords do not match', 'danger');
+        return;
+    }
+    
+    // Validate password complexity
+    if (password.length < 8 || 
+        !/[A-Z]/.test(password) || 
+        !/[a-z]/.test(password) || 
+        !/[0-9]/.test(password) || 
+        !/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+        showAlert('Password must be at least 8 characters long and contain uppercase, lowercase, number, and special character', 'danger');
+        return;
+    }
+    
+    // Show loading state
+    submitUserText.textContent = 'Adding...';
+    submitUserSpinner.classList.remove('hidden');
+    
+    const userData = {
+        name: fullName,
+        email: email,
+        role: role,
+        password: password
+    };
+    
+    // Retry configuration
+    const maxRetries = 3;
+    let retryCount = 0;
+    let success = false;
+    
+    while (retryCount < maxRetries && !success) {
+        try {
+            const response = await fetchWithRetry(`${API_BASE_URL}/users`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(userData)
+            }, maxRetries);
             
-            // Validate all fields are filled
-            if (!fullName || !email || !role || !password || !confirmPassword) {
-                showAlert('Please fill in all required fields', 'danger');
-                return;
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Failed to add user');
             }
             
-            // Validate email format
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                showAlert('Please enter a valid email address', 'danger');
-                return;
-            }
+            // Show success message
+            showAlert('User added successfully', 'success');
             
-            // Validate password match
-            if (password !== confirmPassword) {
-                showAlert('Passwords do not match', 'danger');
-                return;
-            }
+            // Close modal and reset form
+            addUserModal.classList.remove('active');
+            form.reset();
             
-            // Validate password complexity
-            if (password.length < 8 || 
-                !/[A-Z]/.test(password) || 
-                !/[a-z]/.test(password) || 
-                !/[0-9]/.test(password) || 
-                !/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
-                showAlert('Password must be at least 8 characters long and contain uppercase, lowercase, number, and special character', 'danger');
-                return;
-            }
+            // Reload users
+            loadUsers();
             
-            // Show loading state
-            submitUserText.textContent = 'Adding...';
-            submitUserSpinner.classList.remove('hidden');
+            success = true;
+        } catch (error) {
+            retryCount++;
             
-            try {
-                const userData = {
-                    name: fullName,
-                    email: email,
-                    role: role,
-                    password: password
-                };
-                
-                const response = await fetch(`${API_BASE_URL}/users`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(userData)
-                });
-                
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.detail || 'Failed to add user');
-                }
-                
-                // Show success message
-                showAlert('User added successfully', 'success');
-                
-                // Close modal and reset form
-                addUserModal.classList.remove('active');
-                form.reset();
-                
-                // Reload users
-                loadUsers();
-            } catch (error) {
-                console.error('Error adding user:', error);
+            if (retryCount < maxRetries) {
+                console.warn(`Attempt ${retryCount} failed. Retrying...`, error);
+                await new Promise(resolve => setTimeout(resolve, 1000 * retryCount)); // Exponential backoff
+            } else {
+                console.error('Error adding user after retries:', error);
                 showAlert(error.message || 'An error occurred while adding user', 'danger');
-            } finally {
-                submitUserText.textContent = 'Add User';
-                submitUserSpinner.classList.add('hidden');
             }
         }
+    }
+    
+    submitUserText.textContent = 'Add User';
+    submitUserSpinner.classList.add('hidden');
+}
 
+// Helper function for fetch with retry
+async function fetchWithRetry(url, options, maxRetries = 3) {
+    let lastError;
+    
+    for (let i = 0; i < maxRetries; i++) {
+        try {
+            const response = await fetch(url, options);
+            
+            // If the response is successful, return it
+            if (response.ok) {
+                return response;
+            }
+            
+            // If we got a 5xx error, throw to trigger retry
+            if (response.status >= 500) {
+                throw new Error(`Server error: ${response.status}`);
+            }
+            
+            // For 4xx errors, don't retry
+            return response;
+            
+        } catch (error) {
+            lastError = error;
+            
+            // Only retry if we have retries left and it's not the last attempt
+            if (i < maxRetries - 1) {
+                // Exponential backoff: wait longer between each retry
+                await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+                continue;
+            }
+            
+            throw lastError;
+        }
+    }
+    
+    throw lastError;
+}
         // View report details
         function viewReport(reportId) {
             fetch(`${API_BASE_URL}/reports/${reportId}`, {
