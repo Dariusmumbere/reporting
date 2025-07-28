@@ -4702,19 +4702,24 @@ async function handleAddUser(e) {
         reportStatusChange.value = report.status;
         adminComments.value = report.admin_comments || '';
 
+        // Remove any existing template fields section
+        const existingFieldsSection = document.querySelector('#view-report-modal .template-fields-section');
+        if (existingFieldsSection) {
+            existingFieldsSection.remove();
+        }
+
         // Display template fields if they exist
-        const fieldsContainer = document.createElement('div');
-        fieldsContainer.className = 'template-fields-view';
-        
-        if (report.template_fields) {
+        if (report.template_fields && Object.keys(report.template_fields).length > 0) {
             const fieldsSection = document.createElement('div');
-            fieldsSection.className = 'card mt-3';
+            fieldsSection.className = 'card mt-3 template-fields-section';
             fieldsSection.innerHTML = `
                 <div class="card-header">
                     <h3 class="card-title">Form Data</h3>
                 </div>
-                <div class="card-body" id="template-fields-view">
-                    <!-- Template fields will be rendered here -->
+                <div class="card-body">
+                    <div class="template-fields-view" id="template-fields-view">
+                        <!-- Template fields will be rendered here -->
+                    </div>
                 </div>
             `;
             
@@ -4735,10 +4740,13 @@ async function handleAddUser(e) {
                 const value = document.createElement('div');
                 value.className = 'form-field-value';
                 
+                // Handle different field value types
                 if (Array.isArray(fieldValue)) {
                     value.textContent = fieldValue.join(', ');
-                } else if (typeof fieldValue === 'object') {
+                } else if (typeof fieldValue === 'object' && fieldValue !== null) {
                     value.textContent = JSON.stringify(fieldValue, null, 2);
+                } else if (typeof fieldValue === 'boolean') {
+                    value.textContent = fieldValue ? 'Yes' : 'No';
                 } else {
                     value.textContent = fieldValue;
                 }
@@ -4752,7 +4760,6 @@ async function handleAddUser(e) {
             const descriptionCard = document.querySelector('#view-report-modal .card');
             descriptionCard.parentNode.insertBefore(fieldsSection, descriptionCard.nextSibling);
         }
-
         // Set attachments
         viewReportAttachments.innerHTML = '';
         if (report.attachments && report.attachments.length > 0) {
