@@ -4463,6 +4463,11 @@ document.getElementById('org-logo').addEventListener('change', function(e) {
 
         // Handle create report submission
         function handleCreateReport() {
+    // Ensure Quill content is captured
+    if (quill) {
+        document.getElementById('report-description').value = quill.root.innerHTML;
+    }
+    
     const title = document.getElementById('report-title').value;
     const description = document.getElementById('report-description').value;
     const category = document.getElementById('report-category').value;
@@ -5066,29 +5071,35 @@ async function handleAddUser(e) {
         document.getElementById('new-report-btn').addEventListener('click', initQuillEditor);
         
         function initQuillEditor() {
-            // Check if Quill is already initialized
-            if (quill) return;
-            
-            // Initialize Quill editor
-            quill = new Quill('#report-description-editor', {
-                theme: 'snow',
-                modules: {
-                    toolbar: [
-                        [{ 'header': [1, 2, 3, false] }],
-                        ['bold', 'italic', 'underline', 'strike'],
-                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                        ['link', 'image'],
-                        ['clean']
-                    ]
-                },
-                placeholder: 'Enter report description...'
-            });
-            
-            // Update hidden input with HTML content when editor changes
-            quill.on('text-change', function() {
-                document.getElementById('report-description').value = quill.root.innerHTML;
-            });
-        }
+    // Check if Quill is already initialized
+    if (quill) return;
+    
+    // Initialize Quill editor
+    const editorContainer = document.getElementById('report-description-editor');
+    if (!editorContainer) return;
+    
+    // Clear any existing content
+    editorContainer.innerHTML = '';
+    
+    quill = new Quill(editorContainer, {
+        theme: 'snow',
+        modules: {
+            toolbar: [
+                [{ 'header': [1, 2, 3, false] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                ['link', 'image'],
+                ['clean']
+            ]
+        },
+        placeholder: 'Enter report description...'
+    });
+    
+    // Update hidden input with HTML content when editor changes
+    quill.on('text-change', function() {
+        document.getElementById('report-description').value = quill.root.innerHTML;
+    });
+}
         
         // Reset Quill editor when modal is closed
         document.getElementById('close-create-report-modal').addEventListener('click', resetQuillEditor);
@@ -6135,9 +6146,14 @@ function createReportFromTemplate(template) {
         document.getElementById('report-category').value = template.category;
     }
     
-    // Create form fields based on template
-    const descriptionEditor = document.getElementById('report-description-editor');
-    descriptionEditor.innerHTML = '';
+    // Initialize Quill editor if not already done
+    if (!quill) {
+        initQuillEditor();
+    } else {
+        // Clear existing content
+        quill.root.innerHTML = '';
+        document.getElementById('report-description').value = '';
+    }
     
     // Create a container for dynamic fields
     const fieldsContainer = document.createElement('div');
@@ -6150,8 +6166,9 @@ function createReportFromTemplate(template) {
         fieldsContainer.appendChild(fieldElement);
     });
     
-    // Insert fields container after description editor
-    descriptionEditor.parentNode.insertBefore(fieldsContainer, descriptionEditor.nextSibling);
+    // Insert fields container after the description editor's parent
+    const descriptionEditorParent = document.getElementById('report-description-editor').parentNode;
+    descriptionEditorParent.parentNode.insertBefore(fieldsContainer, descriptionEditorParent.nextSibling);
     
     // Show create report modal
     document.getElementById('create-report-modal').classList.add('active');
