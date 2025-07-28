@@ -4274,11 +4274,13 @@ async function handleAddUser(e) {
 
         async function downloadFile(url, fileName) {
             try {
-                const response = await fetch(url, {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
-                });
+                const response = await fetch(`${API_BASE_URL}/download/${url.split('/').pop()}`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        const data = await response.json();
+        window.open(data.url, '_blank');
                 
                 if (!response.ok) {
                     throw new Error('Failed to download file');
