@@ -4273,33 +4273,26 @@ async function handleAddUser(e) {
         }
 
         async function downloadFile(url, fileName) {
-            try {
-                const response = await fetch(`${API_BASE_URL}/download/${url.split('/').pop()}`, {
+    try {
+        // Extract the file name from the URL
+        const fileKey = url.split('/').pop();
+        
+        // Request a presigned URL from your backend
+        const response = await fetch(`${API_BASE_URL}/download/${fileKey}`, {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
         });
+        
         const data = await response.json();
+        
+        // Use the presigned URL to download the file
         window.open(data.url, '_blank');
-                
-                if (!response.ok) {
-                    throw new Error('Failed to download file');
-                }
-                
-                const blob = await response.blob();
-                const downloadUrl = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = downloadUrl;
-                a.download = fileName || 'download';
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(downloadUrl);
-                a.remove();
-            } catch (error) {
-                console.error('Error downloading file:', error);
-                showAlert('Failed to download file', 'danger');
-            }
-        }
+    } catch (error) {
+        console.error('Error downloading file:', error);
+        showAlert('Failed to download file', 'danger');
+    }
+}
 
         // Handle saving settings
         function handleSaveSettings() {
