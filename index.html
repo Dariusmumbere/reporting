@@ -4272,28 +4272,19 @@ async function handleAddUser(e) {
             }
         }
 
-        async function downloadFile(url, fileName) {
-    try {
-        // Extract the file name from the URL
-        const fileKey = url.split('/').pop();
-        
-        // Request a presigned URL from your backend
-        const response = await fetch(`${API_BASE_URL}/download/${fileKey}`, {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-        });
-        
-        const data = await response.json();
-        
-        // Use the presigned URL to download the file
-        window.open(data.url, '_blank');
-    } catch (error) {
-        console.error('Error downloading file:', error);
-        showAlert('Failed to download file', 'danger');
-    }
+        function downloadFile(url, fileName) {
+    // Extract the file name from the URL
+    const fileKey = url.split('/').pop();
+    
+    // Create a hidden link and trigger download
+    const link = document.createElement('a');
+    link.href = `${API_BASE_URL}/download/${fileKey}`;
+    link.download = fileName;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
-
         // Handle saving settings
         function handleSaveSettings() {
             // Show loading state
