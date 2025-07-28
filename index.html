@@ -4712,14 +4712,14 @@ async function handleAddUser(e) {
         const report = await response.json();
         selectedReportId = reportId;
 
-        // Set basic report details (existing code)
+        // Set report details
         viewReportTitle.textContent = report.title;
         viewReportAuthor.textContent = report.author_name;
         viewReportDate.textContent = new Date(report.created_at).toLocaleDateString();
         viewReportDescription.innerHTML = report.description;
         viewReportCategory.textContent = report.category;
 
-        // Set status badge (existing code)
+        // Set status badge
         let statusBadge;
         if (report.status === 'approved') {
             statusBadge = '<span class="badge badge-success">Approved</span>';
@@ -4730,14 +4730,27 @@ async function handleAddUser(e) {
         }
         viewReportStatus.innerHTML = statusBadge;
 
-        // Handle template fields if they exist
-        const templateFieldsContainer = document.getElementById('template-fields-container');
-        const templateFieldsCard = document.getElementById('template-fields-card');
+        // Set status dropdown and admin comments
+        reportStatusChange.value = report.status;
+        adminComments.value = report.admin_comments || '';
+
+        // Display template fields if they exist
+        const templateFieldsContainer = document.createElement('div');
+        templateFieldsContainer.className = 'template-fields-view';
         
-        templateFieldsContainer.innerHTML = '';
-        
-        if (report.template_fields && Object.keys(report.template_fields).length > 0) {
-            templateFieldsCard.classList.remove('hidden');
+        if (report.template_fields) {
+            const fieldsSection = document.createElement('div');
+            fieldsSection.className = 'card mt-3';
+            fieldsSection.innerHTML = `
+                <div class="card-header">
+                    <h3 class="card-title">Form Data</h3>
+                </div>
+                <div class="card-body" id="template-fields-view">
+                    <!-- Template fields will be rendered here -->
+                </div>
+            `;
+            
+            const fieldsView = fieldsSection.querySelector('#template-fields-view');
             
             for (const [fieldName, fieldValue] of Object.entries(report.template_fields)) {
                 if (fieldValue === null || fieldValue === undefined) continue;
@@ -4758,18 +4771,18 @@ async function handleAddUser(e) {
                     value.textContent = fieldValue.join(', ');
                 } else if (typeof fieldValue === 'object') {
                     value.textContent = JSON.stringify(fieldValue, null, 2);
-                } else if (typeof fieldValue === 'boolean') {
-                    value.textContent = fieldValue ? 'Yes' : 'No';
                 } else {
                     value.textContent = fieldValue;
                 }
                 
                 fieldElement.appendChild(label);
                 fieldElement.appendChild(value);
-                templateFieldsContainer.appendChild(fieldElement);
+                fieldsView.appendChild(fieldElement);
             }
-        } else {
-            templateFieldsCard.classList.add('hidden');
+            
+            // Insert fields section after the description card
+            const descriptionCard = document.querySelector('#view-report-modal .card');
+            descriptionCard.parentNode.insertBefore(fieldsSection, descriptionCard.nextSibling);
         }
 
         // Set attachments
@@ -4843,11 +4856,10 @@ async function handleAddUser(e) {
 
         // Show the modal
         viewReportModal.classList.add('active');
-    })
-    .catch(error => {
+    } catch (error) {
         console.error('Error viewing report:', error);
         showAlert('Failed to load report details', 'danger');
-    });
+    }
 }
         // Edit report
         function editReport(reportId) {
