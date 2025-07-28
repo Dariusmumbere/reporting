@@ -12,6 +12,108 @@
     <script src="download.js"></script>
     <link rel="stylesheet" href="styles.css">
     <style>
+/* Support Section Styles */
+.support-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.support-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 1.5rem;
+}
+
+.support-tab {
+    padding: 0.75rem 1.5rem;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.support-tab:hover {
+    color: var(--primary-color);
+}
+
+.support-tab.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}
+
+.support-tab-content {
+    display: none;
+}
+
+.support-tab-content.active {
+    display: block;
+}
+
+/* FAQ Styles */
+.faq-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.faq-item {
+    border-radius: 0.5rem;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+.faq-question {
+    width: 100%;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--card-bg);
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.faq-question:hover {
+    background-color: var(--hover-color);
+}
+
+.faq-question i {
+    transition: transform 0.2s;
+}
+
+.faq-question.active i {
+    transform: rotate(180deg);
+}
+
+.faq-answer {
+    padding: 0 1rem;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    background-color: var(--background-color);
+}
+
+.faq-answer.active {
+    padding: 1rem;
+    max-height: 500px;
+}
+
+.faq-answer p, .faq-answer ol, .faq-answer ul {
+    margin-bottom: 1rem;
+}
+
+.faq-answer ol, .faq-answer ul {
+    padding-left: 1.5rem;
+}
+
+.faq-answer li {
+    margin-bottom: 0.5rem;
+}
 
 .chat-container {
     display: flex;
@@ -1248,6 +1350,11 @@
                         <i class="fas fa-user-plus"></i>
                         <span>Invite Organization</span>
                     </a>
+                    <div class="menu-category">Support</div>
+                    <a href="#" class="menu-item" data-view="support">
+                        <i class="fas fa-headset"></i>
+                        <span>Contact Support</span>
+                    </a>
                     <div id="admin-menu" class="hidden">
                         <div class="menu-category">Administration</div>
                         <a href="#" class="menu-item" data-view="users">
@@ -1482,6 +1589,142 @@
                             </div>
                         </div>
                     </div>
+                    <!-- Support View -->
+<div class="view hidden" id="support-view">
+    <div class="page-header">
+        <h1 class="page-title">Contact Support</h1>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="support-container">
+                <div class="support-tabs">
+                    <button class="support-tab active" data-tab="contact">Contact Form</button>
+                    <button class="support-tab" data-tab="faq">FAQs</button>
+                </div>
+
+                <div class="support-content">
+                    <!-- Contact Form Tab -->
+                    <div class="support-tab-content active" id="contact-tab">
+                        <form id="support-form">
+                            <div class="form-group">
+                                <label for="support-subject" class="form-label">Subject</label>
+                                <input type="text" id="support-subject" class="form-control" placeholder="What's this about?" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="support-message" class="form-label">Message</label>
+                                <textarea id="support-message" class="form-control" rows="5" placeholder="Describe your issue in detail..." required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="support-attachments" class="form-label">Attachments (Optional)</label>
+                                <div class="file-upload">
+                                    <input type="file" id="support-attachments" class="file-upload-input" multiple>
+                                    <label for="support-attachments" class="file-upload-label">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <div class="file-upload-text">
+                                            <strong>Click to upload</strong> or drag and drop
+                                            <div style="font-size: 0.75rem; margin-top: 0.25rem;">PNG, JPG, PDF, DOCX (Max 5MB each)</div>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="file-list" id="support-attachments-list"></div>
+                            </div>
+                            <button type="submit" class="btn btn-primary" id="submit-support">
+                                <i class="fas fa-paper-plane"></i> Send Message
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- FAQ Tab -->
+                    <div class="support-tab-content" id="faq-tab">
+                        <div class="faq-container">
+                            <div class="faq-item">
+                                <button class="faq-question">
+                                    <span>How do I create a new report?</span>
+                                    <i class="fas fa-chevron-down"></i>
+                                </button>
+                                <div class="faq-answer">
+                                    <p>To create a new report:</p>
+                                    <ol>
+                                        <li>Click on "New Report" in the dashboard or "Create Report" in the Reports view</li>
+                                        <li>Fill in the report title, description, and select a category</li>
+                                        <li>Add any attachments if needed</li>
+                                        <li>Click "Submit Report" to save and submit your report</li>
+                                    </ol>
+                                </div>
+                            </div>
+
+                            <div class="faq-item">
+                                <button class="faq-question">
+                                    <span>How can I track the status of my reports?</span>
+                                    <i class="fas fa-chevron-down"></i>
+                                </button>
+                                <div class="faq-answer">
+                                    <p>You can track report status in several ways:</p>
+                                    <ul>
+                                        <li>The dashboard shows counts of reports by status</li>
+                                        <li>The reports view displays status badges for each report</li>
+                                        <li>When viewing a report, the status is shown at the top</li>
+                                        <li>You'll receive notifications when status changes occur</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="faq-item">
+                                <button class="faq-question">
+                                    <span>How do I invite team members to the system?</span>
+                                    <i class="fas fa-chevron-down"></i>
+                                </button>
+                                <div class="faq-answer">
+                                    <p>Administrators can invite team members:</p>
+                                    <ol>
+                                        <li>Go to User Management in the admin section</li>
+                                        <li>Click "Add User"</li>
+                                        <li>Fill in the user's details and select their role</li>
+                                        <li>The user will receive an email invitation to join</li>
+                                    </ol>
+                                </div>
+                            </div>
+
+                            <div class="faq-item">
+                                <button class="faq-question">
+                                    <span>What file types can I attach to reports?</span>
+                                    <i class="fas fa-chevron-down"></i>
+                                </button>
+                                <div class="faq-answer">
+                                    <p>You can attach the following file types:</p>
+                                    <ul>
+                                        <li>Documents: PDF, DOC, DOCX</li>
+                                        <li>Spreadsheets: XLS, XLSX, CSV</li>
+                                        <li>Images: JPG, JPEG, PNG, GIF</li>
+                                        <li>Presentations: PPT, PPTX</li>
+                                    </ul>
+                                    <p>Maximum file size is 10MB per file.</p>
+                                </div>
+                            </div>
+
+                            <div class="faq-item">
+                                <button class="faq-question">
+                                    <span>How do I download a report as PDF?</span>
+                                    <i class="fas fa-chevron-down"></i>
+                                </button>
+                                <div class="faq-answer">
+                                    <p>To download a report as PDF:</p>
+                                    <ol>
+                                        <li>Open the report you want to download</li>
+                                        <li>Click the "Download PDF" button in the top right corner</li>
+                                        <li>The PDF will be generated and downloaded automatically</li>
+                                    </ol>
+                                    <p>The PDF includes the report content and any attachments as links.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
                     <!-- Chat View -->
                     <div class="view hidden" id="chat-view">
@@ -4785,6 +5028,151 @@ async function updateSidebarOrganizationInfo() {
     } catch (error) {
         console.error('Error updating sidebar organization info:', error);
     }
+}
+// Support tab functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Tab switching
+    document.querySelectorAll('.support-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            const tabId = this.getAttribute('data-tab');
+            
+            // Update active tab
+            document.querySelectorAll('.support-tab').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Update active content
+            document.querySelectorAll('.support-tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(`${tabId}-tab`).classList.add('active');
+        });
+    });
+    
+    // FAQ accordion
+    document.querySelectorAll('.faq-question').forEach(question => {
+        question.addEventListener('click', function() {
+            this.classList.toggle('active');
+            const answer = this.nextElementSibling;
+            answer.classList.toggle('active');
+        });
+    });
+    
+    // File upload for support attachments
+    document.getElementById('support-attachments')?.addEventListener('change', function(e) {
+        const files = e.target.files;
+        const fileList = document.getElementById('support-attachments-list');
+        fileList.innerHTML = '';
+        
+        if (!files || files.length === 0) return;
+        
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            
+            // Get file icon based on type
+            let fileIcon, fileColor;
+            if (file.type.includes('image')) {
+                fileIcon = 'fa-file-image';
+                fileColor = '#e74c3c';
+            } else if (file.type.includes('pdf')) {
+                fileIcon = 'fa-file-pdf';
+                fileColor = '#e74c3c';
+            } else if (file.type.includes('word') || file.type.includes('document')) {
+                fileIcon = 'fa-file-word';
+                fileColor = '#2c7be5';
+            } else if (file.type.includes('excel') || file.type.includes('spreadsheet')) {
+                fileIcon = 'fa-file-excel';
+                fileColor = '#2ecc71';
+            } else {
+                fileIcon = 'fa-file';
+                fileColor = '#95a5a6';
+            }
+            
+            // Format file size
+            const fileSize = formatFileSize(file.size);
+            
+            fileItem.innerHTML = `
+                <i class="fas ${fileIcon} file-icon" style="color: ${fileColor};"></i>
+                <div class="file-info">
+                    <div class="file-name">${file.name}</div>
+                    <div class="file-size">${fileSize}</div>
+                </div>
+                <i class="fas fa-times file-remove" data-index="${i}"></i>
+            `;
+            
+            fileList.appendChild(fileItem);
+        }
+        
+        // Add event listeners to remove buttons
+        document.querySelectorAll('.file-remove').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const index = parseInt(e.currentTarget.getAttribute('data-index'));
+                removeFileFromList(index, 'support-attachments', 'support-attachments-list');
+            });
+        });
+    });
+    
+    // Support form submission
+    document.getElementById('support-form')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const subject = document.getElementById('support-subject').value.trim();
+        const message = document.getElementById('support-message').value.trim();
+        const files = document.getElementById('support-attachments').files;
+        
+        if (!subject || !message) {
+            showAlert('Please fill in all required fields', 'danger');
+            return;
+        }
+        
+        // Show loading state
+        const submitBtn = document.getElementById('submit-support');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+        submitBtn.disabled = true;
+        
+        // In a real implementation, you would use Email.js here
+        // For this example, we'll simulate a successful submission
+        setTimeout(() => {
+            showAlert('Your support request has been sent successfully! We will respond within 24 hours.', 'success');
+            this.reset();
+            document.getElementById('support-attachments-list').innerHTML = '';
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+            
+            // In a real implementation with Email.js:
+            // emailjs.sendForm('service_id', 'template_id', this)
+            //     .then(() => {
+            //         showAlert('Message sent successfully!', 'success');
+            //         this.reset();
+            //     })
+            //     .catch(error => {
+            //         showAlert('Failed to send message. Please try again.', 'danger');
+            //     })
+            //     .finally(() => {
+            //         submitBtn.innerHTML = originalText;
+            //         submitBtn.disabled = false;
+            //     });
+        }, 1500);
+    });
+});
+
+// Helper function to remove files from any file input/list
+function removeFileFromList(index, inputId, listId) {
+    const input = document.getElementById(inputId);
+    const dataTransfer = new DataTransfer();
+    const files = input.files;
+    
+    for (let i = 0; i < files.length; i++) {
+        if (i !== index) {
+            dataTransfer.items.add(files[i]);
+        }
+    }
+    
+    input.files = dataTransfer.files;
+    
+    // Re-render the file list
+    const event = new Event('change');
+    input.dispatchEvent(event);
 }
 
         // Initialize the app
