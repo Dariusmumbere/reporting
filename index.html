@@ -4701,6 +4701,8 @@ async function viewReport(reportId) {
         }
         
         const report = await response.json();
+        console.log('Full report data:', report);
+        console.log('Template data:', report.template_data);
         selectedReportId = reportId;
 
         // Set report details
