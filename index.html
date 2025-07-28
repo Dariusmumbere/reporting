@@ -5722,7 +5722,7 @@ function loadTemplates() {
         renderTemplatesTable(data.filter(t => 
             t.name.toLowerCase().includes(searchQuery) || 
             t.category?.toLowerCase().includes(searchQuery)
-        );
+        ));
     })
     .catch(error => {
         console.error('Error loading templates:', error);
