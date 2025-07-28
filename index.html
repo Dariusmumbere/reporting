@@ -4548,9 +4548,9 @@ document.getElementById('org-logo').addEventListener('change', function(e) {
     formData.append('description', description);
     formData.append('category', category);
     
-    // Add template fields data if any - Ensure this matches your backend expectation
+    // Add template fields data if any
     if (Object.keys(templateFieldsData).length > 0) {
-        formData.append('template_data', JSON.stringify(templateFieldsData)); // Changed from template_fields to template_data
+        formData.append('template_fields', JSON.stringify(templateFieldsData));
     }
     
     // Add attachments if any
@@ -4574,21 +4574,16 @@ document.getElementById('org-logo').addEventListener('change', function(e) {
         return response.json();
     })
     .then(report => {
-        // Show success message
         showAlert('Report created successfully', 'success');
-        
-        // Close modal and reset form
         createReportModal.classList.remove('active');
         createReportForm.reset();
         reportAttachmentsList.innerHTML = '';
         
-        // Remove dynamic fields container if exists
         const dynamicFieldsContainer = document.getElementById('dynamic-fields-container');
         if (dynamicFieldsContainer) {
             dynamicFieldsContainer.remove();
         }
         
-        // Reload reports
         loadReports();
         loadDashboardData();
     })
@@ -4725,15 +4720,18 @@ async function handleAddUser(e) {
         }
         viewReportStatus.innerHTML = statusBadge;
 
+        // Set status dropdown and admin comments
+        reportStatusChange.value = report.status;
+        adminComments.value = report.admin_comments || '';
+
         // Display template fields if they exist
         const templateFieldsContainer = document.getElementById('template-fields-container');
         templateFieldsContainer.innerHTML = '';
         
         if (report.template_data) {  // Changed from template_fields to template_data
-            // Create a card to contain the template fields
-            const templateFieldsCard = document.createElement('div');
-            templateFieldsCard.className = 'card mt-3';
-            templateFieldsCard.innerHTML = `
+            const fieldsSection = document.createElement('div');
+            fieldsSection.className = 'card mt-3';
+            fieldsSection.innerHTML = `
                 <div class="card-header">
                     <h3 class="card-title">Form Data</h3>
                 </div>
@@ -4742,7 +4740,7 @@ async function handleAddUser(e) {
                 </div>
             `;
             
-            const fieldsBody = templateFieldsCard.querySelector('.card-body');
+            const fieldsView = fieldsSection.querySelector('.card-body');
             
             for (const [fieldName, fieldValue] of Object.entries(report.template_data)) {
                 if (fieldValue === null || fieldValue === undefined) continue;
@@ -4761,7 +4759,7 @@ async function handleAddUser(e) {
                 
                 if (Array.isArray(fieldValue)) {
                     value.textContent = fieldValue.join(', ');
-                } else if (typeof fieldValue === 'object' && fieldValue !== null) {
+                } else if (typeof fieldValue === 'object') {
                     value.textContent = JSON.stringify(fieldValue, null, 2);
                 } else {
                     value.textContent = fieldValue;
@@ -4769,14 +4767,14 @@ async function handleAddUser(e) {
                 
                 fieldElement.appendChild(label);
                 fieldElement.appendChild(value);
-                fieldsBody.appendChild(fieldElement);
+                fieldsView.appendChild(fieldElement);
             }
             
-            // Insert the template fields card after the description
+            // Insert fields section after the description card
             const descriptionCard = document.querySelector('#view-report-modal .card');
-            descriptionCard.parentNode.insertBefore(templateFieldsCard, descriptionCard.nextSibling);
+            descriptionCard.parentNode.insertBefore(fieldsSection, descriptionCard.nextSibling);
         }
-
+        
         // Set attachments
         viewReportAttachments.innerHTML = '';
         if (report.attachments && report.attachments.length > 0) {
