@@ -4687,7 +4687,8 @@ async function handleAddUser(e) {
     }
 }
         // View report details
-        async function viewReport(reportId) {
+        // View report details
+async function viewReport(reportId) {
     try {
         const response = await fetch(`${API_BASE_URL}/reports/${reportId}`, {
             headers: {
@@ -4728,8 +4729,7 @@ async function handleAddUser(e) {
         const templateFieldsContainer = document.getElementById('template-fields-container');
         templateFieldsContainer.innerHTML = '';
         
-        if (report.template_fields) {
-            // Create the fields section
+        if (report.template_data) {  // Changed from template_fields to template_data
             const fieldsSection = document.createElement('div');
             fieldsSection.className = 'card mt-3';
             fieldsSection.innerHTML = `
@@ -4743,8 +4743,7 @@ async function handleAddUser(e) {
             
             const fieldsView = fieldsSection.querySelector('.card-body');
             
-            // Render each template field
-            for (const [fieldName, fieldValue] of Object.entries(report.template_fields)) {
+            for (const [fieldName, fieldValue] of Object.entries(report.template_data)) {
                 if (fieldValue === null || fieldValue === undefined) continue;
                 
                 const fieldElement = document.createElement('div');
@@ -4759,13 +4758,10 @@ async function handleAddUser(e) {
                 const value = document.createElement('div');
                 value.className = 'form-field-value';
                 
-                // Handle different value types
                 if (Array.isArray(fieldValue)) {
                     value.textContent = fieldValue.join(', ');
                 } else if (typeof fieldValue === 'object') {
                     value.textContent = JSON.stringify(fieldValue, null, 2);
-                } else if (typeof fieldValue === 'boolean') {
-                    value.textContent = fieldValue ? 'Yes' : 'No';
                 } else {
                     value.textContent = fieldValue;
                 }
@@ -4775,7 +4771,7 @@ async function handleAddUser(e) {
                 fieldsView.appendChild(fieldElement);
             }
             
-            // Insert fields section after the description
+            // Insert fields section after the description card
             const descriptionCard = document.querySelector('#view-report-modal .card');
             descriptionCard.parentNode.insertBefore(fieldsSection, descriptionCard.nextSibling);
         }
