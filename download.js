@@ -1,4 +1,4 @@
-// download.js - Modern Report PDF Generation and Download Functionality
+// download.js - Premium Report PDF Generation with Template Data Support
 
 // Global Configuration
 const CONFIG = {
@@ -184,7 +184,15 @@ function htmlToPlainText(html) {
   return text;
 }
 
-// Generate Modern PDF Report
+// Format template field value for display
+function formatTemplateFieldValue(value) {
+  if (value === null || value === undefined) return 'N/A';
+  if (Array.isArray(value)) return value.join(', ');
+  if (typeof value === 'object') return JSON.stringify(value, null, 2);
+  return String(value);
+}
+
+// Generate Modern PDF Report with Template Data Support
 async function generateReportPDF(report) {
   try {
     // Initialize PDF document with modern settings
@@ -284,6 +292,56 @@ async function generateReportPDF(report) {
     });
     
     currentY += CONFIG.LAYOUT.SECTION_SPACING;
+    
+    // Template Data Section (if exists)
+    if (report.template_data && Object.keys(report.template_data).length > 0) {
+      currentY = createSectionDivider(doc, currentY, 'Form Data');
+      
+      // Create a table for template data
+      const templateDataRows = [];
+      
+      // Convert template data to table rows
+      for (const [fieldName, fieldValue] of Object.entries(report.template_data)) {
+        const formattedName = fieldName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        const formattedValue = formatTemplateFieldValue(fieldValue);
+        
+        templateDataRows.push({
+          name: formattedName,
+          value: formattedValue
+        });
+      }
+      
+      // Add table to PDF
+      doc.autoTable({
+        startY: currentY,
+        head: [['Field', 'Value']],
+        body: templateDataRows.map(row => [row.name, row.value]),
+        margin: { left: CONFIG.LAYOUT.MARGIN, right: CONFIG.LAYOUT.MARGIN },
+        styles: {
+          fontSize: 10,
+          cellPadding: 4,
+          overflow: 'linebreak',
+          valign: 'middle'
+        },
+        headStyles: {
+          fillColor: CONFIG.DESIGN.PRIMARY_COLOR,
+          textColor: 255,
+          fontStyle: 'bold'
+        },
+        alternateRowStyles: {
+          fillColor: CONFIG.DESIGN.LIGHT_GRAY
+        },
+        columnStyles: {
+          0: { cellWidth: 60, fontStyle: 'bold' },
+          1: { cellWidth: 'auto' }
+        },
+        didDrawPage: function(data) {
+          currentY = data.cursor.y + 10;
+        }
+      });
+      
+      currentY = doc.lastAutoTable.finalY + 10;
+    }
     
     // Admin Comments (if exists)
     if (report.admin_comments) {
@@ -453,7 +511,7 @@ function formatFileSize(bytes) {
   const k = 1024;
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i];
 }
 
 // Modern toast notification system
