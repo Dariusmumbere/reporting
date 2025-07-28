@@ -4706,6 +4706,7 @@ async function handleAddUser(e) {
         
         const report = await response.json();
         console.log('Full report data:', report); 
+        console.log('Report template data:', report.template_data);
         selectedReportId = reportId;
 
         // Set report details
