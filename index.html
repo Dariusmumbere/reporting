@@ -4510,7 +4510,6 @@ document.getElementById('org-logo').addEventListener('change', function(e) {
         return;
     }
     
-    // Collect data from template fields
     const templateFieldsData = {};
     const dynamicFieldsContainer = document.getElementById('dynamic-fields-container');
     if (dynamicFieldsContainer) {
@@ -4543,19 +4542,15 @@ document.getElementById('org-logo').addEventListener('change', function(e) {
         });
     }
     
-    // Show loading state
-    submitReportText.textContent = 'Submitting...';
-    submitReportSpinner.classList.remove('hidden');
-    
     // Create form data
     const formData = new FormData();
     formData.append('title', title);
     formData.append('description', description);
     formData.append('category', category);
     
-    // Add template fields data if any
+    // Add template fields data if any - Ensure this matches your backend expectation
     if (Object.keys(templateFieldsData).length > 0) {
-        formData.append('template_fields', JSON.stringify(templateFieldsData));
+        formData.append('template_data', JSON.stringify(templateFieldsData)); // Changed from template_fields to template_data
     }
     
     // Add attachments if any
@@ -4739,7 +4734,7 @@ async function handleAddUser(e) {
         const templateFieldsContainer = document.createElement('div');
         templateFieldsContainer.className = 'template-fields-view';
         
-        if (report.template_fields) {
+        if (report.template_data) {  // Changed from template_fields to template_data
             const fieldsSection = document.createElement('div');
             fieldsSection.className = 'card mt-3';
             fieldsSection.innerHTML = `
@@ -4753,7 +4748,7 @@ async function handleAddUser(e) {
             
             const fieldsView = fieldsSection.querySelector('#template-fields-view');
             
-            for (const [fieldName, fieldValue] of Object.entries(report.template_fields)) {
+            for (const [fieldName, fieldValue] of Object.entries(report.template_data)) {
                 if (fieldValue === null || fieldValue === undefined) continue;
                 
                 const fieldElement = document.createElement('div');
