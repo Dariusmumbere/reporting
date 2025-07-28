@@ -12,109 +12,96 @@
     <script src="download.js"></script>
     <link rel="stylesheet" href="styles.css">
     <style>
-/* Support Section Styles */
-.support-container {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
+/* Contact Support Styles */
+.contact-form-container, .faq-container {
+    padding: 1.5rem;
+    background-color: var(--card-bg);
+    border-radius: 0.5rem;
+    height: 100%;
 }
 
-.support-tabs {
-    display: flex;
-    border-bottom: 1px solid var(--border-color);
+.section-title {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+    color: var(--primary-color);
+}
+
+.section-subtitle {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
     margin-bottom: 1.5rem;
 }
 
-.support-tab {
-    padding: 0.75rem 1.5rem;
-    background: none;
-    border: none;
-    border-bottom: 3px solid transparent;
-    font-weight: 500;
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: all 0.2s;
+.accordion {
+    margin-bottom: 2rem;
 }
 
-.support-tab:hover {
-    color: var(--primary-color);
-}
-
-.support-tab.active {
-    color: var(--primary-color);
-    border-bottom-color: var(--primary-color);
-}
-
-.support-tab-content {
-    display: none;
-}
-
-.support-tab-content.active {
-    display: block;
-}
-
-/* FAQ Styles */
-.faq-container {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.faq-item {
-    border-radius: 0.5rem;
-    overflow: hidden;
+.accordion-item {
     border: 1px solid var(--border-color);
-}
-
-.faq-question {
-    width: 100%;
-    padding: 1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: var(--card-bg);
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.faq-question:hover {
-    background-color: var(--hover-color);
-}
-
-.faq-question i {
-    transition: transform 0.2s;
-}
-
-.faq-question.active i {
-    transform: rotate(180deg);
-}
-
-.faq-answer {
-    padding: 0 1rem;
-    max-height: 0;
+    border-radius: 0.5rem;
+    margin-bottom: 0.75rem;
     overflow: hidden;
-    transition: max-height 0.3s ease, padding 0.3s ease;
+}
+
+.accordion-button {
     background-color: var(--background-color);
+    color: var(--text-primary);
+    font-weight: 500;
+    padding: 0.75rem 1rem;
 }
 
-.faq-answer.active {
+.accordion-button:not(.collapsed) {
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+}
+
+.accordion-button:focus {
+    box-shadow: none;
+    border-color: var(--primary-color);
+}
+
+.accordion-body {
     padding: 1rem;
-    max-height: 500px;
+    background-color: var(--background-color);
+    color: var(--text-secondary);
 }
 
-.faq-answer p, .faq-answer ol, .faq-answer ul {
-    margin-bottom: 1rem;
+.support-info {
+    background-color: var(--primary-light);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-top: 1.5rem;
 }
 
-.faq-answer ol, .faq-answer ul {
-    padding-left: 1.5rem;
+.support-info h4 {
+    color: var(--primary-color);
+    margin-bottom: 0.75rem;
 }
 
-.faq-answer li {
-    margin-bottom: 0.5rem;
+.support-info ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
+.support-info li {
+    padding: 0.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.support-info li i {
+    color: var(--primary-color);
+    width: 20px;
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    .contact-form-container, .faq-container {
+        margin-bottom: 1.5rem;
+    }
+}
 .chat-container {
     display: flex;
     flex-direction: column;
@@ -1589,34 +1576,41 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Support View -->
-<div class="view hidden" id="support-view">
+                    <div class="view hidden" id="support-view">
     <div class="page-header">
         <h1 class="page-title">Contact Support</h1>
     </div>
 
     <div class="card">
         <div class="card-body">
-            <div class="support-container">
-                <div class="support-tabs">
-                    <button class="support-tab active" data-tab="contact">Contact Form</button>
-                    <button class="support-tab" data-tab="faq">FAQs</button>
-                </div>
-
-                <div class="support-content">
-                    <!-- Contact Form Tab -->
-                    <div class="support-tab-content active" id="contact-tab">
+            <div class="row">
+                <!-- Contact Form Column -->
+                <div class="col-md-6">
+                    <div class="contact-form-container">
+                        <h3 class="section-title">Send us a message</h3>
+                        <p class="section-subtitle">Our team typically responds within 24 hours</p>
+                        
                         <form id="support-form">
                             <div class="form-group">
                                 <label for="support-subject" class="form-label">Subject</label>
-                                <input type="text" id="support-subject" class="form-control" placeholder="What's this about?" required>
+                                <select id="support-subject" class="form-control" required>
+                                    <option value="">Select a subject</option>
+                                    <option value="General Inquiry">General Inquiry</option>
+                                    <option value="Technical Issue">Technical Issue</option>
+                                    <option value="Feature Request">Feature Request</option>
+                                    <option value="Account Help">Account Help</option>
+                                    <option value="Bug Report">Bug Report</option>
+                                    <option value="Other">Other</option>
+                                </select>
                             </div>
+                            
                             <div class="form-group">
                                 <label for="support-message" class="form-label">Message</label>
                                 <textarea id="support-message" class="form-control" rows="5" placeholder="Describe your issue in detail..." required></textarea>
                             </div>
+                            
                             <div class="form-group">
-                                <label for="support-attachments" class="form-label">Attachments (Optional)</label>
+                                <label for="support-attachments" class="form-label">Attachments (optional)</label>
                                 <div class="file-upload">
                                     <input type="file" id="support-attachments" class="file-upload-input" multiple>
                                     <label for="support-attachments" class="file-upload-label">
@@ -1629,95 +1623,101 @@
                                 </div>
                                 <div class="file-list" id="support-attachments-list"></div>
                             </div>
-                            <button type="submit" class="btn btn-primary" id="submit-support">
-                                <i class="fas fa-paper-plane"></i> Send Message
+                            
+                            <button type="submit" class="btn btn-primary" id="submit-support-btn">
+                                <span id="submit-support-text">Send Message</span>
+                                <span class="spinner hidden" id="submit-support-spinner"></span>
                             </button>
                         </form>
                     </div>
-
-                    <!-- FAQ Tab -->
-                    <div class="support-tab-content" id="faq-tab">
-                        <div class="faq-container">
-                            <div class="faq-item">
-                                <button class="faq-question">
-                                    <span>How do I create a new report?</span>
-                                    <i class="fas fa-chevron-down"></i>
-                                </button>
-                                <div class="faq-answer">
-                                    <p>To create a new report:</p>
-                                    <ol>
-                                        <li>Click on "New Report" in the dashboard or "Create Report" in the Reports view</li>
-                                        <li>Fill in the report title, description, and select a category</li>
-                                        <li>Add any attachments if needed</li>
-                                        <li>Click "Submit Report" to save and submit your report</li>
-                                    </ol>
+                </div>
+                
+                <!-- FAQ Column -->
+                <div class="col-md-6">
+                    <div class="faq-container">
+                        <h3 class="section-title">Frequently Asked Questions</h3>
+                        <p class="section-subtitle">Quick answers to common questions</p>
+                        
+                        <div class="accordion" id="faq-accordion">
+                            <!-- FAQ Item 1 -->
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="faq-heading-1">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-collapse-1" aria-expanded="false" aria-controls="faq-collapse-1">
+                                        How do I create a new report?
+                                    </button>
+                                </h2>
+                                <div id="faq-collapse-1" class="accordion-collapse collapse" aria-labelledby="faq-heading-1">
+                                    <div class="accordion-body">
+                                        To create a new report, click on the "New Report" button in the dashboard or navigate to the Reports section and click "Create Report". Fill in the required fields, add any attachments if needed, and submit the report.
+                                    </div>
                                 </div>
                             </div>
-
-                            <div class="faq-item">
-                                <button class="faq-question">
-                                    <span>How can I track the status of my reports?</span>
-                                    <i class="fas fa-chevron-down"></i>
-                                </button>
-                                <div class="faq-answer">
-                                    <p>You can track report status in several ways:</p>
-                                    <ul>
-                                        <li>The dashboard shows counts of reports by status</li>
-                                        <li>The reports view displays status badges for each report</li>
-                                        <li>When viewing a report, the status is shown at the top</li>
-                                        <li>You'll receive notifications when status changes occur</li>
-                                    </ul>
+                            
+                            <!-- FAQ Item 2 -->
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="faq-heading-2">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-collapse-2" aria-expanded="false" aria-controls="faq-collapse-2">
+                                        How can I track the status of my reports?
+                                    </button>
+                                </h2>
+                                <div id="faq-collapse-2" class="accordion-collapse collapse" aria-labelledby="faq-heading-2">
+                                    <div class="accordion-body">
+                                        You can track report statuses in the Dashboard which shows counts for each status (Pending, Approved, Rejected). The Reports section provides a detailed table view where you can filter by status and view individual report details.
+                                    </div>
                                 </div>
                             </div>
-
-                            <div class="faq-item">
-                                <button class="faq-question">
-                                    <span>How do I invite team members to the system?</span>
-                                    <i class="fas fa-chevron-down"></i>
-                                </button>
-                                <div class="faq-answer">
-                                    <p>Administrators can invite team members:</p>
-                                    <ol>
-                                        <li>Go to User Management in the admin section</li>
-                                        <li>Click "Add User"</li>
-                                        <li>Fill in the user's details and select their role</li>
-                                        <li>The user will receive an email invitation to join</li>
-                                    </ol>
+                            
+                            <!-- FAQ Item 3 -->
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="faq-heading-3">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-collapse-3" aria-expanded="false" aria-controls="faq-collapse-3">
+                                        What file types can I attach to reports?
+                                    </button>
+                                </h2>
+                                <div id="faq-collapse-3" class="accordion-collapse collapse" aria-labelledby="faq-heading-3">
+                                    <div class="accordion-body">
+                                        You can attach PDF, DOCX, XLSX, JPG, and PNG files. Each file must be under 10MB in size. For support requests, you can also attach these file types with a maximum of 5MB each.
+                                    </div>
                                 </div>
                             </div>
-
-                            <div class="faq-item">
-                                <button class="faq-question">
-                                    <span>What file types can I attach to reports?</span>
-                                    <i class="fas fa-chevron-down"></i>
-                                </button>
-                                <div class="faq-answer">
-                                    <p>You can attach the following file types:</p>
-                                    <ul>
-                                        <li>Documents: PDF, DOC, DOCX</li>
-                                        <li>Spreadsheets: XLS, XLSX, CSV</li>
-                                        <li>Images: JPG, JPEG, PNG, GIF</li>
-                                        <li>Presentations: PPT, PPTX</li>
-                                    </ul>
-                                    <p>Maximum file size is 10MB per file.</p>
+                            
+                            <!-- FAQ Item 4 -->
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="faq-heading-4">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-collapse-4" aria-expanded="false" aria-controls="faq-collapse-4">
+                                        How do I invite team members to the system?
+                                    </button>
+                                </h2>
+                                <div id="faq-collapse-4" class="accordion-collapse collapse" aria-labelledby="faq-heading-4">
+                                    <div class="accordion-body">
+                                        Administrators can invite team members by navigating to User Management and clicking "Add User". You can also share an invite link via email or other platforms from the "Invite Organization" section.
+                                    </div>
                                 </div>
                             </div>
-
-                            <div class="faq-item">
-                                <button class="faq-question">
-                                    <span>How do I download a report as PDF?</span>
-                                    <i class="fas fa-chevron-down"></i>
-                                </button>
-                                <div class="faq-answer">
-                                    <p>To download a report as PDF:</p>
-                                    <ol>
-                                        <li>Open the report you want to download</li>
-                                        <li>Click the "Download PDF" button in the top right corner</li>
-                                        <li>The PDF will be generated and downloaded automatically</li>
-                                    </ol>
-                                    <p>The PDF includes the report content and any attachments as links.</p>
+                            
+                            <!-- FAQ Item 5 -->
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="faq-heading-5">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-collapse-5" aria-expanded="false" aria-controls="faq-collapse-5">
+                                        Can I download reports as PDF?
+                                    </button>
+                                </h2>
+                                <div id="faq-collapse-5" class="accordion-collapse collapse" aria-labelledby="faq-heading-5">
+                                    <div class="accordion-body">
+                                        Yes, you can download any report as PDF by clicking the download icon (↓) next to the report in the Reports table or from the report details view.
+                                    </div>
                                 </div>
                             </div>
+                        </div>
+                        
+                        <div class="support-info">
+                            <h4>Still need help?</h4>
+                            <p>If you can't find what you're looking for, our support team is available:</p>
+                            <ul>
+                                <li><i class="fas fa-envelope"></i> support@reporthub.com</li>
+                                <li><i class="fas fa-phone"></i> +1 (555) 123-4567</li>
+                                <li><i class="fas fa-clock"></i> Monday - Friday, 9am - 5pm EST</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
@@ -2522,6 +2522,7 @@
             addUserBtn.addEventListener('click', () => {
                 addUserModal.classList.add('active');
             });
+            document.getElementById('support-form')?.addEventListener('submit', handleSupportFormSubmit);
             
             // Close add user modal
             closeAddUserModal.addEventListener('click', () => {
@@ -2678,6 +2679,7 @@
                 e.preventDefault();
                 resendOtp();
             });
+            
         }
 
         // Debounce function for search inputs
@@ -5029,148 +5031,147 @@ async function updateSidebarOrganizationInfo() {
         console.error('Error updating sidebar organization info:', error);
     }
 }
-// Support tab functionality
-document.addEventListener('DOMContentLoaded', function() {
-    // Tab switching
-    document.querySelectorAll('.support-tab').forEach(tab => {
-        tab.addEventListener('click', function() {
-            const tabId = this.getAttribute('data-tab');
-            
-            // Update active tab
-            document.querySelectorAll('.support-tab').forEach(t => t.classList.remove('active'));
-            this.classList.add('active');
-            
-            // Update active content
-            document.querySelectorAll('.support-tab-content').forEach(c => c.classList.remove('active'));
-            document.getElementById(`${tabId}-tab`).classList.add('active');
-        });
-    });
+async function handleSupportFormSubmit(e) {
+    e.preventDefault();
     
-    // FAQ accordion
-    document.querySelectorAll('.faq-question').forEach(question => {
-        question.addEventListener('click', function() {
-            this.classList.toggle('active');
-            const answer = this.nextElementSibling;
-            answer.classList.toggle('active');
-        });
-    });
+    const subject = document.getElementById('support-subject').value;
+    const message = document.getElementById('support-message').value;
+    const attachments = document.getElementById('support-attachments').files;
     
-    // File upload for support attachments
-    document.getElementById('support-attachments')?.addEventListener('change', function(e) {
-        const files = e.target.files;
-        const fileList = document.getElementById('support-attachments-list');
-        fileList.innerHTML = '';
+    if (!subject || !message) {
+        showAlert('Please fill in all required fields', 'danger');
+        return;
+    }
+    
+    // Show loading state
+    document.getElementById('submit-support-text').textContent = 'Sending...';
+    document.getElementById('submit-support-spinner').classList.remove('hidden');
+    document.getElementById('submit-support-btn').disabled = true;
+    
+    try {
+        // Prepare email data
+        const templateParams = {
+            from_name: currentUser.name,
+            from_email: currentUser.email,
+            subject: `[ReportHub Support] ${subject}`,
+            message: message,
+            user_role: currentUser.role,
+            organization: currentUser.organization_name || 'No organization'
+        };
         
-        if (!files || files.length === 0) return;
+        // Initialize EmailJS with your credentials
+        emailjs.init('YOUR_EMAILJS_USER_ID'); // Replace with your EmailJS user ID
         
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            const fileItem = document.createElement('div');
-            fileItem.className = 'file-item';
-            
-            // Get file icon based on type
-            let fileIcon, fileColor;
-            if (file.type.includes('image')) {
-                fileIcon = 'fa-file-image';
-                fileColor = '#e74c3c';
-            } else if (file.type.includes('pdf')) {
-                fileIcon = 'fa-file-pdf';
-                fileColor = '#e74c3c';
-            } else if (file.type.includes('word') || file.type.includes('document')) {
-                fileIcon = 'fa-file-word';
-                fileColor = '#2c7be5';
-            } else if (file.type.includes('excel') || file.type.includes('spreadsheet')) {
-                fileIcon = 'fa-file-excel';
-                fileColor = '#2ecc71';
-            } else {
-                fileIcon = 'fa-file';
-                fileColor = '#95a5a6';
+        // Send email
+        const response = await emailjs.send(
+            'YOUR_EMAILJS_SERVICE_ID', // Replace with your service ID
+            'YOUR_EMAILJS_TEMPLATE_ID', // Replace with your template ID
+            templateParams
+        );
+        
+        // If there are attachments, send them separately (EmailJS has a 6MB limit per request)
+        if (attachments.length > 0) {
+            for (let i = 0; i < attachments.length; i++) {
+                if (attachments[i].size > 5 * 1024 * 1024) {
+                    showAlert(`Attachment ${attachments[i].name} is too large (max 5MB)`, 'warning');
+                    continue;
+                }
+                
+                const attachmentParams = {
+                    ...templateParams,
+                    attachment: attachments[i]
+                };
+                
+                await emailjs.send(
+                    'YOUR_EMAILJS_SERVICE_ID',
+                    'YOUR_EMAILJS_ATTACHMENT_TEMPLATE_ID', // Different template for attachments if needed
+                    attachmentParams
+                );
             }
-            
-            // Format file size
-            const fileSize = formatFileSize(file.size);
-            
-            fileItem.innerHTML = `
-                <i class="fas ${fileIcon} file-icon" style="color: ${fileColor};"></i>
-                <div class="file-info">
-                    <div class="file-name">${file.name}</div>
-                    <div class="file-size">${fileSize}</div>
-                </div>
-                <i class="fas fa-times file-remove" data-index="${i}"></i>
-            `;
-            
-            fileList.appendChild(fileItem);
         }
         
-        // Add event listeners to remove buttons
-        document.querySelectorAll('.file-remove').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const index = parseInt(e.currentTarget.getAttribute('data-index'));
-                removeFileFromList(index, 'support-attachments', 'support-attachments-list');
-            });
-        });
-    });
+        // Show success message
+        showAlert('Your support request has been sent successfully!', 'success');
+        
+        // Reset form
+        document.getElementById('support-form').reset();
+        document.getElementById('support-attachments-list').innerHTML = '';
+        
+    } catch (error) {
+        console.error('Error sending support request:', error);
+        showAlert('Failed to send support request. Please try again later.', 'danger');
+    } finally {
+        // Reset button state
+        document.getElementById('submit-support-text').textContent = 'Send Message';
+        document.getElementById('submit-support-spinner').classList.add('hidden');
+        document.getElementById('submit-support-btn').disabled = false;
+    }
+}
+
+// Add this to handle file uploads for support attachments
+document.getElementById('support-attachments')?.addEventListener('change', function(e) {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
     
-    // Support form submission
-    document.getElementById('support-form')?.addEventListener('submit', function(e) {
-        e.preventDefault();
+    const attachmentsList = document.getElementById('support-attachments-list');
+    attachmentsList.innerHTML = '';
+    
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const fileItem = document.createElement('div');
+        fileItem.className = 'file-item';
         
-        const subject = document.getElementById('support-subject').value.trim();
-        const message = document.getElementById('support-message').value.trim();
-        const files = document.getElementById('support-attachments').files;
-        
-        if (!subject || !message) {
-            showAlert('Please fill in all required fields', 'danger');
-            return;
+        // Get file icon based on type
+        let fileIcon, fileColor;
+        if (file.type.includes('image')) {
+            fileIcon = 'fa-file-image';
+            fileColor = '#e74c3c';
+        } else if (file.type.includes('pdf')) {
+            fileIcon = 'fa-file-pdf';
+            fileColor = '#e74c3c';
+        } else if (file.type.includes('word') || file.type.includes('document')) {
+            fileIcon = 'fa-file-word';
+            fileColor = '#2c7be5';
+        } else {
+            fileIcon = 'fa-file';
+            fileColor = '#95a5a6';
         }
         
-        // Show loading state
-        const submitBtn = document.getElementById('submit-support');
-        const originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-        submitBtn.disabled = true;
+        // Format file size
+        const fileSize = formatFileSize(file.size);
         
-        // In a real implementation, you would use Email.js here
-        // For this example, we'll simulate a successful submission
-        setTimeout(() => {
-            showAlert('Your support request has been sent successfully! We will respond within 24 hours.', 'success');
-            this.reset();
-            document.getElementById('support-attachments-list').innerHTML = '';
-            submitBtn.innerHTML = originalText;
-            submitBtn.disabled = false;
-            
-            // In a real implementation with Email.js:
-            // emailjs.sendForm('service_id', 'template_id', this)
-            //     .then(() => {
-            //         showAlert('Message sent successfully!', 'success');
-            //         this.reset();
-            //     })
-            //     .catch(error => {
-            //         showAlert('Failed to send message. Please try again.', 'danger');
-            //     })
-            //     .finally(() => {
-            //         submitBtn.innerHTML = originalText;
-            //         submitBtn.disabled = false;
-            //     });
-        }, 1500);
+        fileItem.innerHTML = `
+            <i class="fas ${fileIcon} file-icon" style="color: ${fileColor};"></i>
+            <div class="file-info">
+                <div class="file-name">${file.name}</div>
+                <div class="file-size">${fileSize}</div>
+            </div>
+            <i class="fas fa-times file-remove" data-index="${i}"></i>
+        `;
+        
+        attachmentsList.appendChild(fileItem);
+    }
+    
+    // Add event listeners to remove buttons
+    document.querySelectorAll('#support-attachments-list .file-remove').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const index = parseInt(e.currentTarget.getAttribute('data-index'));
+            removeFileFromList(index, 'support-attachments');
+        });
     });
 });
 
-// Helper function to remove files from any file input/list
-function removeFileFromList(index, inputId, listId) {
+function removeFileFromList(index, inputId) {
     const input = document.getElementById(inputId);
     const dataTransfer = new DataTransfer();
-    const files = input.files;
     
-    for (let i = 0; i < files.length; i++) {
+    for (let i = 0; i < input.files.length; i++) {
         if (i !== index) {
-            dataTransfer.items.add(files[i]);
+            dataTransfer.items.add(input.files[i]);
         }
     }
     
     input.files = dataTransfer.files;
-    
-    // Re-render the file list
     const event = new Event('change');
     input.dispatchEvent(event);
 }
@@ -5179,4 +5180,4 @@ function removeFileFromList(index, inputId, listId) {
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
-</html> 
+</html>
