@@ -14,6 +14,138 @@
     <link rel="stylesheet" href="styles.css">
     
     <style>
+/* Template Management Styles */
+.template-field-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 12px;
+    margin-bottom: 12px;
+}
+
+.template-fields-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.template-field {
+    background-color: var(--card-bg);
+    padding: 16px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+}
+
+/* Field type badges */
+.badge-info {
+    background-color: #17a2b8;
+    color: white;
+}
+
+/* Form check styles */
+.form-check {
+    margin-bottom: 8px;
+}
+
+.form-check-input {
+    margin-right: 8px;
+}
+
+/* Modal scrollable content */
+.modal-body {
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+/* Voice message player styles */
+.voice-message-container {
+    background-color: var(--card-bg);
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.voice-message-container.received {
+    background-color: var(--primary-light);
+}
+
+.voice-message-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.play-pause-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.voice-progress {
+    flex: 1;
+    height: 4px;
+    background-color: var(--border-color);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.voice-progress-bar {
+    height: 100%;
+    background-color: var(--primary-color);
+    width: 0%;
+    transition: width 0.1s linear;
+}
+
+.voice-duration {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    min-width: 40px;
+    text-align: center;
+}
+
+/* Admin badge in chat */
+.admin-badge {
+    color: var(--primary-color);
+    margin-left: 4px;
+    font-size: 0.8em;
+}
+
+/* Message status indicators */
+.message-status {
+    margin-left: 4px;
+    color: var(--text-secondary);
+}
+
+.message-status.delivered {
+    color: var(--success-color);
+}
+
+.message-status.read {
+    color: var(--primary-color);
+}
+
+/* Animation for new messages */
+.message-animate {
+    animation: messageAppear 0.3s ease-out;
+}
+
+@keyframes messageAppear {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 /* Contact Support Styles */
 .contact-form-container, .faq-container {
     padding: 1.5rem;
@@ -1167,6 +1299,109 @@
 .message-sent .voice-message-duration {
     color: rgba(255, 255, 255, 0.7);
 }
+/* Template fields view styles */
+.template-fields-view {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+}
+
+.form-field-view {
+    background-color: var(--card-bg);
+    padding: 12px;
+    border-radius: 4px;
+    border-left: 3px solid var(--primary-color);
+}
+
+.form-field-label {
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+    font-size: 0.9rem;
+}
+
+.form-field-value {
+    padding: 8px;
+    background-color: var(--body-bg);
+    border-radius: 4px;
+    word-break: break-word;
+}
+
+/* File upload styles */
+.file-upload {
+    border: 2px dashed var(--border-color);
+    border-radius: 4px;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 16px;
+    cursor: pointer;
+    transition: border-color 0.3s;
+}
+
+.file-upload:hover {
+    border-color: var(--primary-color);
+}
+
+.file-upload-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+}
+
+.file-upload-text {
+    margin-top: 8px;
+    text-align: center;
+}
+
+.file-upload i {
+    font-size: 2rem;
+    color: var(--primary-color);
+    margin-bottom: 8px;
+}
+
+.file-list {
+    margin-top: 8px;
+}
+
+.file-item {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    border-radius: 4px;
+    background-color: var(--card-bg);
+    margin-bottom: 8px;
+}
+
+.file-icon {
+    font-size: 1.5rem;
+    margin-right: 12px;
+}
+
+.file-info {
+    flex: 1;
+}
+
+.file-name {
+    font-weight: 500;
+    margin-bottom: 2px;
+}
+
+.file-size {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.file-remove, .download-attachment-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    margin-left: 8px;
+}
+
+.file-remove:hover, .download-attachment-btn:hover {
+    color: var(--primary-color);
+}
     </style>
 </head>
 <body>
@@ -2000,6 +2235,159 @@
                 </div>
             </div>
         </div>
+    <!-- Template Management Modal -->
+<div class="modal" id="template-management-modal">
+    <div class="modal-content" style="max-width: 800px;">
+        <div class="modal-header">
+            <h3 class="modal-title">Report Templates</h3>
+            <button class="modal-close" id="close-template-management-modal">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="d-flex justify-content-between mb-3">
+                <button class="btn btn-primary" id="create-template-btn">
+                    <i class="fas fa-plus"></i> New Template
+                </button>
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="template-search" placeholder="Search templates...">
+                </div>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Fields</th>
+                            <th>Last Updated</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="templates-table-body">
+                        <!-- Templates will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create/Edit Template Modal -->
+<div class="modal" id="template-editor-modal">
+    <div class="modal-content" style="max-width: 800px;">
+        <div class="modal-header">
+            <h3 class="modal-title" id="template-editor-title">Create New Template</h3>
+            <button class="modal-close" id="close-template-editor-modal">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="template-editor-form">
+                <div class="form-group">
+                    <label for="template-name" class="form-label">Template Name</label>
+                    <input type="text" id="template-name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="template-description" class="form-label">Description</label>
+                    <textarea id="template-description" class="form-control" rows="2"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="template-category" class="form-label">Category</label>
+                    <input type="text" id="template-category" class="form-control">
+                </div>
+                
+                <div class="card mt-3">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">Fields</h4>
+                        <button type="button" class="btn btn-sm btn-primary" id="add-field-btn">
+                            <i class="fas fa-plus"></i> Add Field
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="template-fields-container">
+                            <!-- Fields will be added here -->
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" id="cancel-template-editor">Cancel</button>
+            <button class="btn btn-primary" id="save-template-btn">
+                <span id="save-template-text">Save Template</span>
+                <span class="spinner hidden" id="save-template-spinner"></span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Field Editor Modal (for editing individual fields) -->
+<div class="modal" id="field-editor-modal">
+    <div class="modal-content" style="max-width: 600px;">
+        <div class="modal-header">
+            <h3 class="modal-title">Edit Field</h3>
+            <button class="modal-close" id="close-field-editor-modal">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="field-editor-form">
+                <div class="form-group">
+                    <label for="field-name" class="form-label">Field Name (internal)</label>
+                    <input type="text" id="field-name" class="form-control" required>
+                    <small class="text-muted">No spaces or special characters (underscores allowed)</small>
+                </div>
+                <div class="form-group">
+                    <label for="field-label" class="form-label">Display Label</label>
+                    <input type="text" id="field-label" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="field-type" class="form-label">Field Type</label>
+                    <select id="field-type" class="form-control" required>
+                        <option value="text">Text</option>
+                        <option value="number">Number</option>
+                        <option value="textarea">Text Area</option>
+                        <option value="date">Date</option>
+                        <option value="datetime">Date & Time</option>
+                        <option value="dropdown">Dropdown</option>
+                        <option value="checkbox">Checkbox</option>
+                        <option value="radio">Radio Buttons</option>
+                        <option value="file">File Upload</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <div class="form-check">
+                        <input type="checkbox" id="field-required" class="form-check-input">
+                        <label for="field-required" class="form-check-label">Required Field</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="field-placeholder" class="form-label">Placeholder Text</label>
+                    <input type="text" id="field-placeholder" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="field-default-value" class="form-label">Default Value</label>
+                    <input type="text" id="field-default-value" class="form-control">
+                </div>
+                <div class="form-group hidden" id="field-options-group">
+                    <label for="field-options" class="form-label">Options (one per line)</label>
+                    <textarea id="field-options" class="form-control" rows="4"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="field-order" class="form-label">Display Order</label>
+                    <input type="number" id="field-order" class="form-control" min="0" value="0">
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" id="cancel-field-editor">Cancel</button>
+            <button class="btn btn-primary" id="save-field-btn">Save Field</button>
+        </div>
+    </div>
+</div>
 
         <!-- Add User Modal (Admin only) -->
         <div class="modal" id="add-user-modal">
@@ -2240,6 +2628,11 @@
         let activeChatUserId = null;
         let chatUsers = [];
         let unreadMessagesCount = 0;
+        let currentTemplateId = null;
+        let currentFieldIndex = null;
+        let templates = [];
+        let currentTemplateFields = [];
+
 
         // OTP verification state
         let otpVerificationEmail = null;
@@ -2381,6 +2774,8 @@
             setupSidebar();
             setupEventListeners();
             checkAuth();
+            addTemplateManagementButton();
+            initTemplateManagement();
         }
 
         // Apply the current theme
@@ -4068,67 +4463,125 @@ document.getElementById('org-logo').addEventListener('change', function(e) {
 
         // Handle create report submission
         function handleCreateReport() {
-            const title = document.getElementById('report-title').value;
-            const description = document.getElementById('report-description').value;
-            const category = document.getElementById('report-category').value;
-            const files = reportAttachments.files;
+    const title = document.getElementById('report-title').value;
+    const description = document.getElementById('report-description').value;
+    const category = document.getElementById('report-category').value;
+    const files = reportAttachments.files;
+    
+    if (!title || !description || !category) {
+        showAlert('Please fill in all required fields', 'danger');
+        return;
+    }
+    
+    // Collect data from template fields
+    const templateFieldsData = {};
+    const dynamicFieldsContainer = document.getElementById('dynamic-fields-container');
+    if (dynamicFieldsContainer) {
+        dynamicFieldsContainer.querySelectorAll('.template-field').forEach(fieldGroup => {
+            const fieldName = fieldGroup.dataset.fieldName;
+            const inputElement = fieldGroup.querySelector('input, select, textarea');
             
-            if (!title || !description || !category) {
-                showAlert('Please fill in all required fields', 'danger');
-                return;
-            }
+            if (!inputElement) return;
             
-            // Show loading state
-            submitReportText.textContent = 'Submitting...';
-            submitReportSpinner.classList.remove('hidden');
-            
-            // Create form data
-            const formData = new FormData();
-            formData.append('title', title);
-            formData.append('description', description);
-            formData.append('category', category);
-            
-            // Add attachments if any
-            for (let i = 0; i < files.length; i++) {
-                formData.append('attachments', files[i]);
-            }
-            
-            fetch(`${API_BASE_URL}/reports`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
-                body: formData
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(err => {
-                        throw new Error(err.detail || 'Failed to create report');
+            if (inputElement.type === 'checkbox' && !inputElement.name) {
+                // Single checkbox
+                templateFieldsData[fieldName] = inputElement.checked ? inputElement.value : false;
+            } else if (inputElement.type === 'checkbox' || inputElement.type === 'radio') {
+                // Multiple checkboxes or radios
+                const inputs = fieldGroup.querySelectorAll(`input[name="${inputElement.name}"]`);
+                if (inputs.length > 1) {
+                    const values = [];
+                    inputs.forEach(input => {
+                        if (input.checked) {
+                            values.push(input.value);
+                        }
                     });
+                    templateFieldsData[fieldName] = values.length > 0 ? values : null;
+                } else {
+                    templateFieldsData[fieldName] = inputs[0].checked ? inputs[0].value : null;
                 }
-                return response.json();
-            })
-            .then(report => {
-                // Show success message
-                showAlert('Report created successfully', 'success');
-                
-                // Close modal and reset form
-                createReportModal.classList.remove('active');
-                createReportForm.reset();
-                reportAttachmentsList.innerHTML = '';
-                
-                // Reload reports
-                loadReports();
-                loadDashboardData();
-            })
-            .catch(error => {
-                showAlert(error.message, 'danger');
-            })
-            .finally(() => {
-                submitReportText.textContent = 'Submit Report';
-                submitReportSpinner.classList.add('hidden');
+            } else {
+                templateFieldsData[fieldName] = inputElement.value;
+            }
+        });
+    }
+    
+    // Show loading state
+    submitReportText.textContent = 'Submitting...';
+    submitReportSpinner.classList.remove('hidden');
+    
+    // Create form data
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('description', description);
+    formData.append('category', category);
+    
+    // Add template fields data if any
+    if (Object.keys(templateFieldsData).length > 0) {
+        formData.append('template_fields', JSON.stringify(templateFieldsData));
+    }
+    
+    // Add attachments if any
+    for (let i = 0; i < files.length; i++) {
+        formData.append('attachments', files[i]);
+    }
+    
+    fetch(`${API_BASE_URL}/reports`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => {
+                throw new Error(err.detail || 'Failed to create report');
             });
         }
+        return response.json();
+    })
+    .then(report => {
+        // Show success message
+        showAlert('Report created successfully', 'success');
+        
+        // Close modal and reset form
+        createReportModal.classList.remove('active');
+        createReportForm.reset();
+        reportAttachmentsList.innerHTML = '';
+        
+        // Remove dynamic fields container if exists
+        const dynamicFieldsContainer = document.getElementById('dynamic-fields-container');
+        if (dynamicFieldsContainer) {
+            dynamicFieldsContainer.remove();
+        }
+        
+        // Reload reports
+        loadReports();
+        loadDashboardData();
+    })
+    .catch(error => {
+        showAlert(error.message, 'danger');
+    })
+    .finally(() => {
+        submitReportText.textContent = 'Submit Report';
+        submitReportSpinner.classList.add('hidden');
+    });
+}
+
+// Add template management button to the UI
+function addTemplateManagementButton() {
+    // Add to the page actions in reports view
+    const pageActions = document.querySelector('#reports-view .page-actions');
+    if (pageActions) {
+        const templateBtn = document.createElement('button');
+        templateBtn.className = 'btn btn-outline-primary';
+        templateBtn.id = 'template-management-btn';
+        templateBtn.innerHTML = '<i class="fas fa-file-alt"></i> Templates';
+        pageActions.insertBefore(templateBtn, pageActions.firstChild);
+    }
+}
+
 async function handleAddUser(e) {
     e.preventDefault(); // This prevents the form from submitting traditionally
     
@@ -4208,143 +4661,170 @@ async function handleAddUser(e) {
 }
         // View report details
         function viewReport(reportId) {
-            fetch(`${API_BASE_URL}/reports/${reportId}`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to fetch report');
-                }
-                return response.json();
-            })
-            .then(report => {
-                selectedReportId = reportId;
+    fetch(`${API_BASE_URL}/reports/${reportId}`, {
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to fetch report');
+        }
+        return response.json();
+    })
+    .then(report => {
+        selectedReportId = reportId;
 
-                // Set report details
-                viewReportTitle.textContent = report.title;
-                viewReportAuthor.textContent = report.author_name;
-                viewReportDate.textContent = new Date(report.created_at).toLocaleDateString();
-                viewReportDescription.innerHTML = report.description;
-                viewReportCategory.textContent = report.category;
+        // Set report details
+        viewReportTitle.textContent = report.title;
+        viewReportAuthor.textContent = report.author_name;
+        viewReportDate.textContent = new Date(report.created_at).toLocaleDateString();
+        viewReportDescription.innerHTML = report.description;
+        viewReportCategory.textContent = report.category;
 
-                // Set status badge
-                let statusBadge;
-                if (report.status === 'approved') {
-                    statusBadge = '<span class="badge badge-success">Approved</span>';
-                } else if (report.status === 'pending') {
-                    statusBadge = '<span class="badge badge-warning">Pending</span>';
+        // Set status badge
+        let statusBadge;
+        if (report.status === 'approved') {
+            statusBadge = '<span class="badge badge-success">Approved</span>';
+        } else if (report.status === 'pending') {
+            statusBadge = '<span class="badge badge-warning">Pending</span>';
+        } else {
+            statusBadge = '<span class="badge badge-danger">Rejected</span>';
+        }
+        viewReportStatus.innerHTML = statusBadge;
+
+        // Set status dropdown and admin comments
+        reportStatusChange.value = report.status;
+        adminComments.value = report.admin_comments || '';
+
+        // Display template fields if they exist
+        const fieldsContainer = document.createElement('div');
+        fieldsContainer.className = 'template-fields-view';
+        
+        if (report.template_fields) {
+            const fieldsSection = document.createElement('div');
+            fieldsSection.className = 'card mt-3';
+            fieldsSection.innerHTML = `
+                <div class="card-header">
+                    <h3 class="card-title">Form Data</h3>
+                </div>
+                <div class="card-body" id="template-fields-view">
+                    <!-- Template fields will be rendered here -->
+                </div>
+            `;
+            
+            const fieldsView = fieldsSection.querySelector('#template-fields-view');
+            
+            for (const [fieldName, fieldValue] of Object.entries(report.template_fields)) {
+                if (fieldValue === null || fieldValue === undefined) continue;
+                
+                const fieldElement = document.createElement('div');
+                fieldElement.className = 'form-field-view mb-3';
+                
+                const label = document.createElement('div');
+                label.className = 'form-field-label';
+                label.textContent = fieldName.replace(/_/g, ' ');
+                label.style.textTransform = 'capitalize';
+                label.style.fontWeight = 'bold';
+                
+                const value = document.createElement('div');
+                value.className = 'form-field-value';
+                
+                if (Array.isArray(fieldValue)) {
+                    value.textContent = fieldValue.join(', ');
+                } else if (typeof fieldValue === 'object') {
+                    value.textContent = JSON.stringify(fieldValue, null, 2);
                 } else {
-                    statusBadge = '<span class="badge badge-danger">Rejected</span>';
+                    value.textContent = fieldValue;
                 }
-                viewReportStatus.innerHTML = statusBadge;
-
-                // Set status dropdown and admin comments
-                reportStatusChange.value = report.status;
-                adminComments.value = report.admin_comments || '';
-
-                // Initially disable save button
-                saveReportChanges.disabled = true;
-
-                // Enable save button if status changes
-                reportStatusChange.addEventListener('change', (e) => {
-                    saveReportChanges.disabled = false;
-                });
-
-                // Enable save button if comments change
-                adminComments.addEventListener('input', (e) => {
-                    saveReportChanges.disabled = false;
-                });
-
-                // Set attachments
-                viewReportAttachments.innerHTML = '';
-                if (report.attachments && report.attachments.length > 0) {
-                    report.attachments.forEach(attachment => {
-                        const fileItem = document.createElement('div');
-                        fileItem.className = 'file-item';
-
-                        // Determine file icon based on type
-                        let fileIcon, fileColor;
-                        if (attachment.type.includes('image')) {
-                            fileIcon = 'fa-file-image';
-                            fileColor = '#e74c3c';
-                        } else if (attachment.type.includes('pdf')) {
-                            fileIcon = 'fa-file-pdf';
-                            fileColor = '#e74c3c';
-                        } else if (attachment.type.includes('word') || attachment.type.includes('document')) {
-                            fileIcon = 'fa-file-word';
-                            fileColor = '#2c7be5';
-                        } else if (attachment.type.includes('excel') || attachment.type.includes('spreadsheet')) {
-                            fileIcon = 'fa-file-excel';
-                            fileColor = '#2ecc71';
-                        } else {
-                            fileIcon = 'fa-file';
-                            fileColor = '#95a5a6';
-                        }
-
-                        const fileSize = formatFileSize(attachment.size);
-
-                        fileItem.innerHTML = `
-                            <i class="fas ${fileIcon} file-icon" style="color: ${fileColor};"></i>
-                            <div class="file-info">
-                                <div class="file-name">${attachment.name}</div>
-                                <div class="file-size">${fileSize}</div>
-                            </div>
-                            <button class="action-btn download-attachment-btn" 
-                                    data-url="${API_BASE_URL}/download/${attachment.url.split('/').pop()}" 
-                                    data-name="${attachment.name}"
-                                    title="Download">
-                                <i class="fas fa-download"></i>
-                            </button>
-                        `;
-
-                        viewReportAttachments.appendChild(fileItem);
-                    });
-
-                    // Add event listeners to download buttons
-                    document.querySelectorAll('.download-attachment-btn').forEach(btn => {
-                        btn.addEventListener('click', (e) => {
-                            const url = e.currentTarget.getAttribute('data-url');
-                            const fileName = e.currentTarget.getAttribute('data-name');
-                            downloadFile(url, fileName);
-                        });
-                    });
-                } else {
-                    const noFiles = document.createElement('div');
-                    noFiles.className = 'text-center text-muted';
-                    noFiles.textContent = 'No attachments';
-                    viewReportAttachments.appendChild(noFiles);
-                }
-
-                // Add download PDF button
-                const downloadBtn = document.createElement('button');
-                downloadBtn.className = 'btn btn-outline';
-                downloadBtn.id = 'download-report-pdf-btn';
-                downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download PDF';
-                downloadBtn.addEventListener('click', () => downloadReportAsPDF(reportId));
-
-                const closeBtn = document.querySelector('#close-report-modal');
-                closeBtn.parentNode.insertBefore(downloadBtn, closeBtn);
-
-                // Show admin actions based on role
-                if (currentUser.role === 'admin') {
-                    adminReportActions.classList.remove('hidden');
-                    saveReportChanges.classList.remove('hidden');
-                } else {
-                    adminReportActions.classList.add('hidden');
-                    saveReportChanges.classList.add('hidden');
-                }
-
-                // Show the modal
-                viewReportModal.classList.add('active');
-            })
-            .catch(error => {
-                console.error('Error viewing report:', error);
-                showAlert('Failed to load report details', 'danger');
-            });
+                
+                fieldElement.appendChild(label);
+                fieldElement.appendChild(value);
+                fieldsView.appendChild(fieldElement);
+            }
+            
+            // Insert fields section after the description card
+            const descriptionCard = document.querySelector('#view-report-modal .card');
+            descriptionCard.parentNode.insertBefore(fieldsSection, descriptionCard.nextSibling);
         }
 
+        // Set attachments
+        viewReportAttachments.innerHTML = '';
+        if (report.attachments && report.attachments.length > 0) {
+            report.attachments.forEach(attachment => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+
+                // Determine file icon based on type
+                let fileIcon, fileColor;
+                if (attachment.type.includes('image')) {
+                    fileIcon = 'fa-file-image';
+                    fileColor = '#e74c3c';
+                } else if (attachment.type.includes('pdf')) {
+                    fileIcon = 'fa-file-pdf';
+                    fileColor = '#e74c3c';
+                } else if (attachment.type.includes('word') || attachment.type.includes('document')) {
+                    fileIcon = 'fa-file-word';
+                    fileColor = '#2c7be5';
+                } else if (attachment.type.includes('excel') || attachment.type.includes('spreadsheet')) {
+                    fileIcon = 'fa-file-excel';
+                    fileColor = '#2ecc71';
+                } else {
+                    fileIcon = 'fa-file';
+                    fileColor = '#95a5a6';
+                }
+
+                const fileSize = formatFileSize(attachment.size);
+
+                fileItem.innerHTML = `
+                    <i class="fas ${fileIcon} file-icon" style="color: ${fileColor};"></i>
+                    <div class="file-info">
+                        <div class="file-name">${attachment.name}</div>
+                        <div class="file-size">${fileSize}</div>
+                    </div>
+                    <button class="action-btn download-attachment-btn" 
+                            data-url="${API_BASE_URL}/download/${attachment.url.split('/').pop()}" 
+                            data-name="${attachment.name}"
+                            title="Download">
+                        <i class="fas fa-download"></i>
+                    </button>
+                `;
+
+                viewReportAttachments.appendChild(fileItem);
+            });
+
+            // Add event listeners to download buttons
+            document.querySelectorAll('.download-attachment-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const url = e.currentTarget.getAttribute('data-url');
+                    const fileName = e.currentTarget.getAttribute('data-name');
+                    downloadFile(url, fileName);
+                });
+            });
+        } else {
+            const noFiles = document.createElement('div');
+            noFiles.className = 'text-center text-muted';
+            noFiles.textContent = 'No attachments';
+            viewReportAttachments.appendChild(noFiles);
+        }
+
+        // Show admin actions based on role
+        if (currentUser.role === 'admin') {
+            adminReportActions.classList.remove('hidden');
+            saveReportChanges.classList.remove('hidden');
+        } else {
+            adminReportActions.classList.add('hidden');
+            saveReportChanges.classList.add('hidden');
+        }
+
+        // Show the modal
+        viewReportModal.classList.add('active');
+    })
+    .catch(error => {
+        console.error('Error viewing report:', error);
+        showAlert('Failed to load report details', 'danger');
+    });
+}
         // Edit report
         function editReport(reportId) {
             showAlert('Edit functionality would be implemented here', 'info');
@@ -5166,6 +5646,689 @@ function removeFileFromList(index, inputId) {
     input.files = dataTransfer.files;
     const event = new Event('change');
     input.dispatchEvent(event);
+}
+function initTemplateManagement() {
+    // Open template management modal
+    document.getElementById('template-management-btn')?.addEventListener('click', () => {
+        document.getElementById('template-management-modal').classList.add('active');
+        loadTemplates();
+    });
+    
+    // Close template management modal
+    document.getElementById('close-template-management-modal')?.addEventListener('click', () => {
+        document.getElementById('template-management-modal').classList.remove('active');
+    });
+    
+    // Create new template button
+    document.getElementById('create-template-btn')?.addEventListener('click', () => {
+        openTemplateEditor();
+    });
+    
+    // Close template editor modal
+    document.getElementById('close-template-editor-modal')?.addEventListener('click', () => {
+        document.getElementById('template-editor-modal').classList.remove('active');
+    });
+    
+    // Cancel template editor
+    document.getElementById('cancel-template-editor')?.addEventListener('click', () => {
+        document.getElementById('template-editor-modal').classList.remove('active');
+    });
+    
+    // Save template
+    document.getElementById('save-template-btn')?.addEventListener('click', saveTemplate);
+    
+    // Add field button
+    document.getElementById('add-field-btn')?.addEventListener('click', () => {
+        openFieldEditor();
+    });
+    
+    // Field type change handler
+    document.getElementById('field-type')?.addEventListener('change', (e) => {
+        const showOptions = ['dropdown', 'radio', 'checkbox'].includes(e.target.value);
+        document.getElementById('field-options-group').classList.toggle('hidden', !showOptions);
+    });
+    
+    // Save field button
+    document.getElementById('save-field-btn')?.addEventListener('click', saveField);
+    
+    // Cancel field editor
+    document.getElementById('cancel-field-editor')?.addEventListener('click', () => {
+        document.getElementById('field-editor-modal').classList.remove('active');
+    });
+    
+    // Template search
+    document.getElementById('template-search')?.addEventListener('input', debounce(() => {
+        loadTemplates();
+    }, 300));
+}
+
+// Load templates from API
+function loadTemplates() {
+    const searchQuery = document.getElementById('template-search')?.value.toLowerCase() || '';
+    
+    fetch(`${API_BASE_URL}/templates`, {
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to fetch templates');
+        }
+        return response.json();
+    })
+    .then(data => {
+        templates = data;
+        renderTemplatesTable(data.filter(t => 
+            t.name.toLowerCase().includes(searchQuery) || 
+            t.category?.toLowerCase().includes(searchQuery)
+        );
+    })
+    .catch(error => {
+        console.error('Error loading templates:', error);
+        showAlert('Failed to load templates', 'danger');
+    });
+}
+
+// Render templates table
+function renderTemplatesTable(templates) {
+    const tableBody = document.getElementById('templates-table-body');
+    tableBody.innerHTML = '';
+    
+    if (templates.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center text-muted">No templates found</td>
+            </tr>
+        `;
+        return;
+    }
+    
+    templates.forEach(template => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${template.name}</td>
+            <td>${template.category || '-'}</td>
+            <td>${template.fields?.length || 0}</td>
+            <td>${new Date(template.updated_at || template.created_at).toLocaleDateString()}</td>
+            <td>
+                <button class="action-btn edit-template-btn" data-id="${template.id}" title="Edit">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="action-btn delete-template-btn" data-id="${template.id}" title="Delete">
+                    <i class="fas fa-trash"></i>
+                </button>
+                <button class="action-btn use-template-btn" data-id="${template.id}" title="Use Template">
+                    <i class="fas fa-file-alt"></i>
+                </button>
+            </td>
+        `;
+        tableBody.appendChild(row);
+    });
+    
+    // Add event listeners to action buttons
+    document.querySelectorAll('.edit-template-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const templateId = e.currentTarget.getAttribute('data-id');
+            editTemplate(templateId);
+        });
+    });
+    
+    document.querySelectorAll('.delete-template-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const templateId = e.currentTarget.getAttribute('data-id');
+            deleteTemplate(templateId);
+        });
+    });
+    
+    document.querySelectorAll('.use-template-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const templateId = e.currentTarget.getAttribute('data-id');
+            useTemplate(templateId);
+        });
+    });
+}
+
+// Open template editor (for new or existing template)
+function openTemplateEditor(template = null) {
+    currentTemplateId = template?.id || null;
+    currentTemplateFields = template?.fields || [];
+    
+    // Set modal title
+    document.getElementById('template-editor-title').textContent = 
+        template ? `Edit Template: ${template.name}` : 'Create New Template';
+    
+    // Set form values
+    if (template) {
+        document.getElementById('template-name').value = template.name;
+        document.getElementById('template-description').value = template.description || '';
+        document.getElementById('template-category').value = template.category || '';
+    } else {
+        document.getElementById('template-editor-form').reset();
+    }
+    
+    // Render fields
+    renderTemplateFields();
+    
+    // Show modal
+    document.getElementById('template-editor-modal').classList.add('active');
+}
+
+// Render template fields in the editor
+function renderTemplateFields() {
+    const container = document.getElementById('template-fields-container');
+    container.innerHTML = '';
+    
+    if (currentTemplateFields.length === 0) {
+        container.innerHTML = `
+            <div class="text-center text-muted py-3">
+                No fields added yet. Click "Add Field" to get started.
+            </div>
+        `;
+        return;
+    }
+    
+    // Sort fields by order
+    currentTemplateFields.sort((a, b) => a.order - b.order);
+    
+    currentTemplateFields.forEach((field, index) => {
+        const fieldElement = document.createElement('div');
+        fieldElement.className = 'template-field-card';
+        fieldElement.setAttribute('data-index', index);
+        
+        let fieldTypeBadge;
+        switch(field.field_type) {
+            case 'dropdown':
+                fieldTypeBadge = '<span class="badge badge-info">Dropdown</span>';
+                break;
+            case 'checkbox':
+                fieldTypeBadge = '<span class="badge badge-info">Checkbox</span>';
+                break;
+            case 'radio':
+                fieldTypeBadge = '<span class="badge badge-info">Radio</span>';
+                break;
+            case 'date':
+                fieldTypeBadge = '<span class="badge badge-info">Date</span>';
+                break;
+            case 'file':
+                fieldTypeBadge = '<span class="badge badge-info">File</span>';
+                break;
+            default:
+                fieldTypeBadge = '<span class="badge badge-secondary">Text</span>';
+        }
+        
+        fieldElement.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>${field.label}</strong>
+                    ${field.required ? '<span class="badge badge-danger ml-2">Required</span>' : ''}
+                    ${fieldTypeBadge}
+                    <div class="text-muted small">${field.name}</div>
+                </div>
+                <div>
+                    <button class="btn btn-sm btn-outline edit-field-btn" data-index="${index}">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger delete-field-btn" data-index="${index}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        container.appendChild(fieldElement);
+    });
+    
+    // Add event listeners to field buttons
+    document.querySelectorAll('.edit-field-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const index = parseInt(e.currentTarget.getAttribute('data-index'));
+            editField(index);
+        });
+    });
+    
+    document.querySelectorAll('.delete-field-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const index = parseInt(e.currentTarget.getAttribute('data-index'));
+            deleteField(index);
+        });
+    });
+}
+
+// Open field editor (for new or existing field)
+function openFieldEditor(field = null, index = null) {
+    currentFieldIndex = index;
+    
+    // Reset form
+    document.getElementById('field-editor-form').reset();
+    document.getElementById('field-options-group').classList.add('hidden');
+    
+    // Set form values if editing existing field
+    if (field) {
+        document.getElementById('field-name').value = field.name;
+        document.getElementById('field-label').value = field.label;
+        document.getElementById('field-type').value = field.field_type;
+        document.getElementById('field-required').checked = field.required;
+        document.getElementById('field-placeholder').value = field.placeholder || '';
+        document.getElementById('field-default-value').value = field.default_value || '';
+        document.getElementById('field-order').value = field.order || 0;
+        
+        // Handle options for dropdown/radio/checkbox
+        if (field.options) {
+            const optionsText = Object.entries(field.options)
+                .map(([value, label]) => `${value}|${label}`)
+                .join('\n');
+            document.getElementById('field-options').value = optionsText;
+        }
+        
+        // Show options group if needed
+        if (['dropdown', 'radio', 'checkbox'].includes(field.field_type)) {
+            document.getElementById('field-options-group').classList.remove('hidden');
+        }
+    }
+    
+    // Show modal
+    document.getElementById('field-editor-modal').classList.add('active');
+}
+
+// Save field to template
+function saveField() {
+    const name = document.getElementById('field-name').value.trim();
+    const label = document.getElementById('field-label').value.trim();
+    const fieldType = document.getElementById('field-type').value;
+    const required = document.getElementById('field-required').checked;
+    const placeholder = document.getElementById('field-placeholder').value.trim();
+    const defaultValue = document.getElementById('field-default-value').value.trim();
+    const order = parseInt(document.getElementById('field-order').value) || 0;
+    
+    // Validate
+    if (!name || !label) {
+        showAlert('Field name and label are required', 'danger');
+        return;
+    }
+    
+    // Validate field name format (no spaces, only letters, numbers, underscores)
+    if (!/^[a-zA-Z0-9_]+$/.test(name)) {
+        showAlert('Field name can only contain letters, numbers, and underscores', 'danger');
+        return;
+    }
+    
+    // Process options for dropdown/radio/checkbox
+    let options = null;
+    if (['dropdown', 'radio', 'checkbox'].includes(fieldType)) {
+        const optionsText = document.getElementById('field-options').value.trim();
+        if (optionsText) {
+            options = {};
+            optionsText.split('\n').forEach(line => {
+                const parts = line.split('|');
+                if (parts.length === 2) {
+                    options[parts[0].trim()] = parts[1].trim();
+                } else if (parts.length === 1) {
+                    options[parts[0].trim()] = parts[0].trim();
+                }
+            });
+        }
+    }
+    
+    // Create field object
+    const field = {
+        name,
+        label,
+        field_type: fieldType,
+        required,
+        placeholder: placeholder || null,
+        default_value: defaultValue || null,
+        options,
+        order
+    };
+    
+    // Add or update field in template
+    if (currentFieldIndex !== null) {
+        currentTemplateFields[currentFieldIndex] = field;
+    } else {
+        currentTemplateFields.push(field);
+    }
+    
+    // Close modal and refresh fields display
+    document.getElementById('field-editor-modal').classList.remove('active');
+    renderTemplateFields();
+}
+
+// Edit existing field
+function editField(index) {
+    if (index >= 0 && index < currentTemplateFields.length) {
+        openFieldEditor(currentTemplateFields[index], index);
+    }
+}
+
+// Delete field from template
+function deleteField(index) {
+    if (index >= 0 && index < currentTemplateFields.length) {
+        if (confirm('Are you sure you want to delete this field?')) {
+            currentTemplateFields.splice(index, 1);
+            renderTemplateFields();
+        }
+    }
+}
+
+// Save template to API
+function saveTemplate() {
+    const name = document.getElementById('template-name').value.trim();
+    const description = document.getElementById('template-description').value.trim();
+    const category = document.getElementById('template-category').value.trim();
+    
+    if (!name) {
+        showAlert('Template name is required', 'danger');
+        return;
+    }
+    
+    if (currentTemplateFields.length === 0) {
+        showAlert('Please add at least one field to the template', 'danger');
+        return;
+    }
+    
+    // Show loading state
+    document.getElementById('save-template-text').textContent = 'Saving...';
+    document.getElementById('save-template-spinner').classList.remove('hidden');
+    
+    const templateData = {
+        name,
+        description: description || null,
+        category: category || null,
+        fields: currentTemplateFields
+    };
+    
+    const method = currentTemplateId ? 'PUT' : 'POST';
+    const url = currentTemplateId ? 
+        `${API_BASE_URL}/templates/${currentTemplateId}` : 
+        `${API_BASE_URL}/templates`;
+    
+    fetch(url, {
+        method,
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(templateData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => {
+                throw new Error(err.detail || 'Failed to save template');
+            });
+        }
+        return response.json();
+    })
+    .then(() => {
+        showAlert('Template saved successfully', 'success');
+        document.getElementById('template-editor-modal').classList.remove('active');
+        loadTemplates();
+    })
+    .catch(error => {
+        showAlert(error.message, 'danger');
+    })
+    .finally(() => {
+        document.getElementById('save-template-text').textContent = 'Save Template';
+        document.getElementById('save-template-spinner').classList.add('hidden');
+    });
+}
+
+// Edit existing template
+function editTemplate(templateId) {
+    const template = templates.find(t => t.id == templateId);
+    if (template) {
+        openTemplateEditor(template);
+    }
+}
+
+// Delete template
+function deleteTemplate(templateId) {
+    if (!confirm('Are you sure you want to delete this template? Reports created with this template will not be affected.')) {
+        return;
+    }
+    
+    fetch(`${API_BASE_URL}/templates/${templateId}`, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to delete template');
+        }
+        return response.json();
+    })
+    .then(() => {
+        showAlert('Template deleted successfully', 'success');
+        loadTemplates();
+    })
+    .catch(error => {
+        console.error('Error deleting template:', error);
+        showAlert('Failed to delete template', 'danger');
+    });
+}
+
+// Use template to create a report
+function useTemplate(templateId) {
+    const template = templates.find(t => t.id == templateId);
+    if (!template) return;
+    
+    // Close template management modal
+    document.getElementById('template-management-modal').classList.remove('active');
+    
+    // Open report creation modal with template
+    createReportFromTemplate(template);
+}
+
+// Create report from template
+function createReportFromTemplate(template) {
+    // Reset create report modal
+    document.getElementById('create-report-form').reset();
+    document.getElementById('report-attachments-list').innerHTML = '';
+    
+    // Set template name as default title
+    document.getElementById('report-title').value = template.name;
+    
+    // Set template category if available
+    if (template.category) {
+        document.getElementById('report-category').value = template.category;
+    }
+    
+    // Create form fields based on template
+    const descriptionEditor = document.getElementById('report-description-editor');
+    descriptionEditor.innerHTML = '';
+    
+    // Create a container for dynamic fields
+    const fieldsContainer = document.createElement('div');
+    fieldsContainer.className = 'template-fields-container';
+    fieldsContainer.id = 'dynamic-fields-container';
+    
+    // Add fields to container
+    template.fields.sort((a, b) => a.order - b.order).forEach(field => {
+        const fieldElement = createFieldElement(field);
+        fieldsContainer.appendChild(fieldElement);
+    });
+    
+    // Insert fields container after description editor
+    descriptionEditor.parentNode.insertBefore(fieldsContainer, descriptionEditor.nextSibling);
+    
+    // Show create report modal
+    document.getElementById('create-report-modal').classList.add('active');
+}
+
+// Create HTML element for a template field
+function createFieldElement(field) {
+    const fieldGroup = document.createElement('div');
+    fieldGroup.className = 'form-group template-field';
+    fieldGroup.dataset.fieldName = field.name;
+    
+    const label = document.createElement('label');
+    label.className = 'form-label';
+    label.textContent = field.label;
+    if (field.required) {
+        label.innerHTML += ' <span class="text-danger">*</span>';
+    }
+    
+    fieldGroup.appendChild(label);
+    
+    let inputElement;
+    
+    switch(field.field_type) {
+        case 'textarea':
+            inputElement = document.createElement('textarea');
+            inputElement.className = 'form-control';
+            inputElement.rows = 3;
+            break;
+            
+        case 'dropdown':
+            inputElement = document.createElement('select');
+            inputElement.className = 'form-control';
+            
+            if (field.placeholder) {
+                const placeholderOption = document.createElement('option');
+                placeholderOption.value = '';
+                placeholderOption.textContent = field.placeholder;
+                placeholderOption.selected = true;
+                placeholderOption.disabled = true;
+                inputElement.appendChild(placeholderOption);
+            }
+            
+            if (field.options) {
+                Object.entries(field.options).forEach(([value, label]) => {
+                    const option = document.createElement('option');
+                    option.value = value;
+                    option.textContent = label;
+                    if (field.default_value && value === field.default_value) {
+                        option.selected = true;
+                    }
+                    inputElement.appendChild(option);
+                });
+            }
+            break;
+            
+        case 'checkbox':
+            inputElement = document.createElement('div');
+            if (field.options) {
+                Object.entries(field.options).forEach(([value, label]) => {
+                    const checkboxGroup = document.createElement('div');
+                    checkboxGroup.className = 'form-check';
+                    
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.className = 'form-check-input';
+                    checkbox.id = `${field.name}_${value}`;
+                    checkbox.value = value;
+                    checkbox.name = field.name;
+                    
+                    const checkboxLabel = document.createElement('label');
+                    checkboxLabel.className = 'form-check-label';
+                    checkboxLabel.htmlFor = checkbox.id;
+                    checkboxLabel.textContent = label;
+                    
+                    checkboxGroup.appendChild(checkbox);
+                    checkboxGroup.appendChild(checkboxLabel);
+                    inputElement.appendChild(checkboxGroup);
+                });
+            } else {
+                // Single checkbox
+                const checkboxGroup = document.createElement('div');
+                checkboxGroup.className = 'form-check';
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'form-check-input';
+                checkbox.id = field.name;
+                checkbox.value = 'true';
+                
+                const checkboxLabel = document.createElement('label');
+                checkboxLabel.className = 'form-check-label';
+                checkboxLabel.htmlFor = checkbox.id;
+                checkboxLabel.textContent = field.label;
+                
+                checkboxGroup.appendChild(checkbox);
+                checkboxGroup.appendChild(checkboxLabel);
+                inputElement.appendChild(checkboxGroup);
+            }
+            break;
+            
+        case 'radio':
+            inputElement = document.createElement('div');
+            if (field.options) {
+                Object.entries(field.options).forEach(([value, label]) => {
+                    const radioGroup = document.createElement('div');
+                    radioGroup.className = 'form-check';
+                    
+                    const radio = document.createElement('input');
+                    radio.type = 'radio';
+                    radio.className = 'form-check-input';
+                    radio.id = `${field.name}_${value}`;
+                    radio.value = value;
+                    radio.name = field.name;
+                    if (field.default_value && value === field.default_value) {
+                        radio.checked = true;
+                    }
+                    
+                    const radioLabel = document.createElement('label');
+                    radioLabel.className = 'form-check-label';
+                    radioLabel.htmlFor = radio.id;
+                    radioLabel.textContent = label;
+                    
+                    radioGroup.appendChild(radio);
+                    radioGroup.appendChild(radioLabel);
+                    inputElement.appendChild(radioGroup);
+                });
+            }
+            break;
+            
+        case 'date':
+            inputElement = document.createElement('input');
+            inputElement.type = 'date';
+            inputElement.className = 'form-control';
+            break;
+            
+        case 'datetime':
+            inputElement = document.createElement('input');
+            inputElement.type = 'datetime-local';
+            inputElement.className = 'form-control';
+            break;
+            
+        case 'file':
+            inputElement = document.createElement('input');
+            inputElement.type = 'file';
+            inputElement.className = 'form-control';
+            break;
+            
+        case 'number':
+            inputElement = document.createElement('input');
+            inputElement.type = 'number';
+            inputElement.className = 'form-control';
+            break;
+            
+        default: // text
+            inputElement = document.createElement('input');
+            inputElement.type = 'text';
+            inputElement.className = 'form-control';
+    }
+    
+    // Set common attributes
+    if (['input', 'textarea', 'select'].includes(inputElement.tagName.toLowerCase())) {
+        inputElement.id = field.name;
+        inputElement.name = field.name;
+        inputElement.required = field.required;
+        
+        if (field.placeholder) {
+            inputElement.placeholder = field.placeholder;
+        }
+        
+        if (field.default_value && !['checkbox', 'radio'].includes(field.field_type)) {
+            inputElement.value = field.default_value;
+        }
+    }
+    
+    fieldGroup.appendChild(inputElement);
+    
+    return fieldGroup;
 }
 
         // Initialize the app
