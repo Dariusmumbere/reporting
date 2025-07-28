@@ -4710,6 +4710,7 @@ async function handleAddUser(e) {
         }
         
         const report = await response.json();
+        console.log('Full report data:', report); 
         selectedReportId = reportId;
 
         // Set report details
