@@ -4705,8 +4705,6 @@ async function handleAddUser(e) {
         }
         
         const report = await response.json();
-        console.log('Full report data:', report); 
-        console.log('Report template data:', report.template_data);
         selectedReportId = reportId;
 
         // Set report details
@@ -4727,27 +4725,24 @@ async function handleAddUser(e) {
         }
         viewReportStatus.innerHTML = statusBadge;
 
-        // Set status dropdown and admin comments
-        reportStatusChange.value = report.status;
-        adminComments.value = report.admin_comments || '';
-
         // Display template fields if they exist
-        const templateFieldsContainer = document.createElement('div');
-        templateFieldsContainer.className = 'template-fields-view';
+        const templateFieldsContainer = document.getElementById('template-fields-container');
+        templateFieldsContainer.innerHTML = '';
         
         if (report.template_data) {  // Changed from template_fields to template_data
-            const fieldsSection = document.createElement('div');
-            fieldsSection.className = 'card mt-3';
-            fieldsSection.innerHTML = `
+            // Create a card to contain the template fields
+            const templateFieldsCard = document.createElement('div');
+            templateFieldsCard.className = 'card mt-3';
+            templateFieldsCard.innerHTML = `
                 <div class="card-header">
                     <h3 class="card-title">Form Data</h3>
                 </div>
-                <div class="card-body" id="template-fields-view">
+                <div class="card-body">
                     <!-- Template fields will be rendered here -->
                 </div>
             `;
             
-            const fieldsView = fieldsSection.querySelector('#template-fields-view');
+            const fieldsBody = templateFieldsCard.querySelector('.card-body');
             
             for (const [fieldName, fieldValue] of Object.entries(report.template_data)) {
                 if (fieldValue === null || fieldValue === undefined) continue;
@@ -4766,7 +4761,7 @@ async function handleAddUser(e) {
                 
                 if (Array.isArray(fieldValue)) {
                     value.textContent = fieldValue.join(', ');
-                } else if (typeof fieldValue === 'object') {
+                } else if (typeof fieldValue === 'object' && fieldValue !== null) {
                     value.textContent = JSON.stringify(fieldValue, null, 2);
                 } else {
                     value.textContent = fieldValue;
@@ -4774,12 +4769,12 @@ async function handleAddUser(e) {
                 
                 fieldElement.appendChild(label);
                 fieldElement.appendChild(value);
-                fieldsView.appendChild(fieldElement);
+                fieldsBody.appendChild(fieldElement);
             }
             
-            // Insert fields section after the description card
+            // Insert the template fields card after the description
             const descriptionCard = document.querySelector('#view-report-modal .card');
-            descriptionCard.parentNode.insertBefore(fieldsSection, descriptionCard.nextSibling);
+            descriptionCard.parentNode.insertBefore(templateFieldsCard, descriptionCard.nextSibling);
         }
 
         // Set attachments
