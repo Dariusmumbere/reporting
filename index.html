@@ -1416,7 +1416,7 @@
 }
 
 .form-field-label {
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
     color: var(--text-secondary);
 }
 
@@ -2497,6 +2497,14 @@
                                     This report contains the financial performance of the company for the third quarter of 2023. It includes revenue, expenses, profit margins, and comparisons with previous quarters.
                                 </div>
                             </div>
+                            <div class="card hidden" id="template-fields-card" style="margin-top: 1.5rem;">
+    <div class="card-header">
+        <h2 class="card-title">Form Data</h2>
+    </div>
+    <div class="card-body" id="template-fields-container">
+        <!-- Template fields will be rendered here -->
+    </div>
+</div>
                         </div>
                     </div>
 
@@ -4689,29 +4697,29 @@ async function handleAddUser(e) {
     }
 }
         // View report details
-        function viewReport(reportId) {
-    fetch(`${API_BASE_URL}/reports/${reportId}`, {
-        headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-    })
-    .then(response => {
+        async function viewReport(reportId) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/reports/${reportId}`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        
         if (!response.ok) {
             throw new Error('Failed to fetch report');
         }
-        return response.json();
-    })
-    .then(report => {
+        
+        const report = await response.json();
         selectedReportId = reportId;
 
-        // Set report details
+        // Set basic report details (existing code)
         viewReportTitle.textContent = report.title;
         viewReportAuthor.textContent = report.author_name;
         viewReportDate.textContent = new Date(report.created_at).toLocaleDateString();
         viewReportDescription.innerHTML = report.description;
         viewReportCategory.textContent = report.category;
 
-        // Set status badge
+        // Set status badge (existing code)
         let statusBadge;
         if (report.status === 'approved') {
             statusBadge = '<span class="badge badge-success">Approved</span>';
@@ -4722,27 +4730,14 @@ async function handleAddUser(e) {
         }
         viewReportStatus.innerHTML = statusBadge;
 
-        // Set status dropdown and admin comments
-        reportStatusChange.value = report.status;
-        adminComments.value = report.admin_comments || '';
-
-        // Display template fields if they exist
-        const fieldsContainer = document.createElement('div');
-        fieldsContainer.className = 'template-fields-view';
+        // Handle template fields if they exist
+        const templateFieldsContainer = document.getElementById('template-fields-container');
+        const templateFieldsCard = document.getElementById('template-fields-card');
         
-        if (report.template_fields) {
-            const fieldsSection = document.createElement('div');
-            fieldsSection.className = 'card mt-3';
-            fieldsSection.innerHTML = `
-                <div class="card-header">
-                    <h3 class="card-title">Form Data</h3>
-                </div>
-                <div class="card-body" id="template-fields-view">
-                    <!-- Template fields will be rendered here -->
-                </div>
-            `;
-            
-            const fieldsView = fieldsSection.querySelector('#template-fields-view');
+        templateFieldsContainer.innerHTML = '';
+        
+        if (report.template_fields && Object.keys(report.template_fields).length > 0) {
+            templateFieldsCard.classList.remove('hidden');
             
             for (const [fieldName, fieldValue] of Object.entries(report.template_fields)) {
                 if (fieldValue === null || fieldValue === undefined) continue;
@@ -4763,18 +4758,18 @@ async function handleAddUser(e) {
                     value.textContent = fieldValue.join(', ');
                 } else if (typeof fieldValue === 'object') {
                     value.textContent = JSON.stringify(fieldValue, null, 2);
+                } else if (typeof fieldValue === 'boolean') {
+                    value.textContent = fieldValue ? 'Yes' : 'No';
                 } else {
                     value.textContent = fieldValue;
                 }
                 
                 fieldElement.appendChild(label);
                 fieldElement.appendChild(value);
-                fieldsView.appendChild(fieldElement);
+                templateFieldsContainer.appendChild(fieldElement);
             }
-            
-            // Insert fields section after the description card
-            const descriptionCard = document.querySelector('#view-report-modal .card');
-            descriptionCard.parentNode.insertBefore(fieldsSection, descriptionCard.nextSibling);
+        } else {
+            templateFieldsCard.classList.add('hidden');
         }
 
         // Set attachments
