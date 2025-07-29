@@ -4226,66 +4226,89 @@ document.getElementById('org-logo').addEventListener('change', function(e) {
         }
 
         // Load reports from API
-        function loadReports() {
-            // Show loading state
-            reportsTableBody.innerHTML = `
-                <tr>
-                    <td colspan="7" class="text-center">
-                        <div class="d-flex justify-content-center py-4">
-                            <div class="spinner spinner-primary"></div>
-                        </div>
-                    </td>
-                </tr>
-            `;
-            
-            const statusFilter = reportStatusFilter.value;
-            const searchQuery = reportSearch.value.toLowerCase();
-            
-            fetchReports()
-                .then(reports => {
-                    // Filter reports based on status and search query
-                    let filteredReports = reports;
-                    
-                    if (statusFilter) {
-                        filteredReports = filteredReports.filter(r => r.status === statusFilter);
-                    }
-                    
-                    if (searchQuery) {
-                        filteredReports = filteredReports.filter(r => 
-                            r.title.toLowerCase().includes(searchQuery) || 
-                            r.description.toLowerCase().includes(searchQuery) ||
-                            r.author_name.toLowerCase().includes(searchQuery));
-                    }
-                    
-                    // Paginate results
-                    const totalReports = filteredReports.length;
-                    const totalPages = Math.ceil(totalReports / reportsPerPage);
-                    const startIndex = (currentReportsPage - 1) * reportsPerPage;
-                    const endIndex = Math.min(startIndex + reportsPerPage, totalReports);
-                    const paginatedReports = filteredReports.slice(startIndex, endIndex);
-                    
-                    renderReportsTable(paginatedReports);
-                    
-                    // Update pagination info
-                    document.getElementById('reports-from').textContent = startIndex + 1;
-                    document.getElementById('reports-to').textContent = endIndex;
-                    document.getElementById('reports-total').textContent = totalReports;
-                    
-                    // Update pagination buttons
-                    reportsPrevBtn.disabled = currentReportsPage === 1;
-                    reportsNextBtn.disabled = currentReportsPage >= totalPages;
-                })
-                .catch(error => {
-                    console.error('Error loading reports:', error);
-                    showAlert('Failed to load reports', 'danger');
-                    
-                    reportsTableBody.innerHTML = `
-                        <tr>
-                            <td colspan="7" class="text-center text-muted">Error loading reports</td>
-                        </tr>
-                    `;
-                });
+        async function loadReports() {
+  // Show loading state
+  reportsTableBody.innerHTML = `
+    <tr>
+      <td colspan="7" class="text-center">
+        <div class="d-flex justify-content-center py-4">
+          <div class="spinner spinner-primary"></div>
+        </div>
+      </td>
+    </tr>
+  `;
+  
+  try {
+    let reports;
+    
+    if (offlineManager.isOnline) {
+      // Online - fetch from server
+      const response = await fetch(`${API_BASE_URL}/reports`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch reports');
+      }
+      
+      reports = await response.json();
+      
+      // Cache the reports for offline use
+      await offlineManager.cacheReports(reports);
+    } else {
+      // Offline - load from cache
+      reports = await offlineManager.getCachedReports();
+      showAlert('Showing cached reports. Some data may be outdated.', 'info');
+    }
+    
+    // Filter and render reports
+    const statusFilter = reportStatusFilter.value;
+    const searchQuery = reportSearch.value.toLowerCase();
+    
+    let filteredReports = reports;
+    
+    if (statusFilter) {
+      filteredReports = filteredReports.filter(r => r.status === statusFilter);
+    }
+    
+    if (searchQuery) {
+      filteredReports = filteredReports.filter(r => 
+        r.title.toLowerCase().includes(searchQuery) || 
+        r.description.toLowerCase().includes(searchQuery) ||
+        r.author_name.toLowerCase().includes(searchQuery));
+    }
+    
+    // Paginate results
+    const totalReports = filteredReports.length;
+    const totalPages = Math.ceil(totalReports / reportsPerPage);
+    const startIndex = (currentReportsPage - 1) * reportsPerPage;
+    const endIndex = Math.min(startIndex + reportsPerPage, totalReports);
+    const paginatedReports = filteredReports.slice(startIndex, endIndex);
+    
+    renderReportsTable(paginatedReports);
+    
+    // Update pagination info
+    document.getElementById('reports-from').textContent = startIndex + 1;
+    document.getElementById('reports-to').textContent = endIndex;
+    document.getElementById('reports-total').textContent = totalReports;
+    
+    // Update pagination buttons
+    reportsPrevBtn.disabled = currentReportsPage === 1;
+    reportsNextBtn.disabled = currentReportsPage >= totalPages;
+    
+  } catch (error) {
+    console.error('Error loading reports:', error);
+    showAlert('Failed to load reports', 'danger');
+    
+    reportsTableBody.innerHTML = `
+      <tr>
+        <td colspan="7" class="text-center text-muted">Error loading reports</td>
+      </tr>
+    `;
+  }
+}
 
         // Render reports table
         function renderReportsTable(reports) {
@@ -4555,106 +4578,88 @@ document.getElementById('org-logo').addEventListener('change', function(e) {
         }
 
         // Handle create report submission
-        function handleCreateReport() {
-    // Ensure Quill content is captured
-    if (quill) {
-        document.getElementById('report-description').value = quill.root.innerHTML;
-    }
-    
-    const title = document.getElementById('report-title').value;
-    const description = document.getElementById('report-description').value;
-    const category = document.getElementById('report-category').value;
-    const files = reportAttachments.files;
-    
-    if (!title || !description || !category) {
-        showAlert('Please fill in all required fields', 'danger');
-        return;
-    }
-    
-    const templateFieldsData = {};
-    const dynamicFieldsContainer = document.getElementById('dynamic-fields-container');
-    if (dynamicFieldsContainer) {
-        dynamicFieldsContainer.querySelectorAll('.template-field').forEach(fieldGroup => {
-            const fieldName = fieldGroup.dataset.fieldName;
-            const inputElement = fieldGroup.querySelector('input, select, textarea');
-            
-            if (!inputElement) return;
-            
-            if (inputElement.type === 'checkbox' && !inputElement.name) {
-                // Single checkbox
-                templateFieldsData[fieldName] = inputElement.checked ? inputElement.value : false;
-            } else if (inputElement.type === 'checkbox' || inputElement.type === 'radio') {
-                // Multiple checkboxes or radios
-                const inputs = fieldGroup.querySelectorAll(`input[name="${inputElement.name}"]`);
-                if (inputs.length > 1) {
-                    const values = [];
-                    inputs.forEach(input => {
-                        if (input.checked) {
-                            values.push(input.value);
-                        }
-                    });
-                    templateFieldsData[fieldName] = values.length > 0 ? values : null;
-                } else {
-                    templateFieldsData[fieldName] = inputs[0].checked ? inputs[0].value : null;
-                }
-            } else {
-                templateFieldsData[fieldName] = inputElement.value;
-            }
-        });
-    }
-    
-    // Create form data
-    const formData = new FormData();
-    formData.append('title', title);
-    formData.append('description', description);
-    formData.append('category', category);
-    
-    // Add template fields data if any
-    if (Object.keys(templateFieldsData).length > 0) {
-        formData.append('template_fields', JSON.stringify(templateFieldsData));
-    }
-    
-    // Add attachments if any
-    for (let i = 0; i < files.length; i++) {
-        formData.append('attachments', files[i]);
-    }
-    
-    fetch(`${API_BASE_URL}/reports`, {
+        async function handleCreateReport() {
+  // Ensure Quill content is captured
+  if (quill) {
+    document.getElementById('report-description').value = quill.root.innerHTML;
+  }
+  
+  const title = document.getElementById('report-title').value;
+  const description = document.getElementById('report-description').value;
+  const category = document.getElementById('report-category').value;
+  const files = reportAttachments.files;
+  
+  if (!title || !description || !category) {
+    showAlert('Please fill in all required fields', 'danger');
+    return;
+  }
+  
+  // Create report data object
+  const reportData = {
+    title,
+    description,
+    category,
+    author_id: currentUser.id,
+    organization_id: currentUser.organization_id,
+    status: 'pending',
+    created_at: new Date().toISOString(),
+    attachments: []
+  };
+  
+  // Show loading state
+  submitReportText.textContent = 'Submitting...';
+  submitReportSpinner.classList.remove('hidden');
+  
+  try {
+    if (offlineManager.isOnline) {
+      // Online - submit directly to server
+      const response = await fetch(`${API_BASE_URL}/reports`, {
         method: 'POST',
         headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
         },
-        body: formData
-    })
-    .then(response => {
-        if (!response.ok) {
-            return response.json().then(err => {
-                throw new Error(err.detail || 'Failed to create report');
-            });
-        }
-        return response.json();
-    })
-    .then(report => {
-        showAlert('Report created successfully', 'success');
-        createReportModal.classList.remove('active');
-        createReportForm.reset();
-        reportAttachmentsList.innerHTML = '';
-        
-        const dynamicFieldsContainer = document.getElementById('dynamic-fields-container');
-        if (dynamicFieldsContainer) {
-            dynamicFieldsContainer.remove();
-        }
-        
-        loadReports();
-        loadDashboardData();
-    })
-    .catch(error => {
-        showAlert(error.message, 'danger');
-    })
-    .finally(() => {
-        submitReportText.textContent = 'Submit Report';
-        submitReportSpinner.classList.add('hidden');
-    });
+        body: JSON.stringify(reportData)
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to create report');
+      }
+      
+      const report = await response.json();
+      
+      // Handle attachments if online
+      if (files.length > 0) {
+        await handleAttachments(report.id, files);
+      }
+      
+      showAlert('Report created successfully', 'success');
+      createReportModal.classList.remove('active');
+      createReportForm.reset();
+      reportAttachmentsList.innerHTML = '';
+      
+      loadReports();
+      loadDashboardData();
+    } else {
+      // Offline - queue for later sync
+      await offlineManager.queueAction('createReport', reportData);
+      
+      showAlert('Report saved offline and will be synced when you reconnect', 'success');
+      createReportModal.classList.remove('active');
+      createReportForm.reset();
+      reportAttachmentsList.innerHTML = '';
+      
+      // Update UI with local data
+      const localReports = await offlineManager.getCachedReports();
+      renderReports(localReports);
+    }
+  } catch (error) {
+    console.error('Error creating report:', error);
+    showAlert(error.message || 'Failed to create report', 'danger');
+  } finally {
+    submitReportText.textContent = 'Submit Report';
+    submitReportSpinner.classList.add('hidden');
+  }
 }
 
 // Add template management button to the UI
