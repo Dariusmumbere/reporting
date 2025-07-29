@@ -1426,6 +1426,31 @@
     border-radius: 4px;
     word-break: break-word;
 }
+.chat-date-separator {
+    text-align: center;
+    margin: 1rem 0;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    position: relative;
+}
+
+.chat-date-separator::before,
+.chat-date-separator::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 30%;
+    height: 1px;
+    background-color: var(--border-color);
+}
+
+.chat-date-separator::before {
+    left: 0;
+}
+
+.chat-date-separator::after {
+    right: 0;
+}
     </style>
 </head>
 <body>
@@ -3567,7 +3592,7 @@ function formatTime(timestamp) {
         }
 
         // Load chat messages
-        function loadChatMessages(userId) {
+        async function loadChatMessages(userId) {
     chatMessages.innerHTML = `
         <div class="no-messages-container" id="no-messages-container">
             <img src="https://img.icons8.com/fluency/96/000000/nothing-found.png" class="no-messages-image" alt="No messages">
@@ -3576,35 +3601,68 @@ function formatTime(timestamp) {
         </div>
     `;
     
-    fetch(`${API_BASE_URL}/chat/messages/${userId}`, {
-        headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Failed to fetch messages');
-        }
-        return response.json();
-    })
-    .then(messages => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/chat/messages/${userId}`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        
+        if (!response.ok) throw new Error('Failed to fetch messages');
+        
+        const messages = await response.json();
         if (messages.length === 0) {
             updateMessageVisibility();
             return;
         }
         
         chatMessages.innerHTML = ''; // Clear the no messages container
+        
+        let currentDateGroup = null;
+        
         messages.forEach(message => {
+            const messageDate = new Date(message.timestamp);
+            const messageDay = messageDate.toDateString();
+            
+            // Check if we need to create a new date group
+            if (!currentDateGroup || currentDateGroup !== messageDay) {
+                currentDateGroup = messageDay;
+                
+                // Format date display (like WhatsApp)
+                const today = new Date();
+                const yesterday = new Date(today);
+                yesterday.setDate(yesterday.getDate() - 1);
+                
+                let dateLabel;
+                if (messageDay === today.toDateString()) {
+                    dateLabel = "Today";
+                } else if (messageDay === yesterday.toDateString()) {
+                    dateLabel = "Yesterday";
+                } else {
+                    // Format as "Weekday, Month Day" (e.g., "Monday, June 5")
+                    dateLabel = messageDate.toLocaleDateString('en-US', {
+                        weekday: 'long',
+                        month: 'long',
+                        day: 'numeric'
+                    });
+                }
+                
+                // Add date separator
+                const dateSeparator = document.createElement('div');
+                dateSeparator.className = 'chat-date-separator';
+                dateSeparator.textContent = dateLabel;
+                chatMessages.appendChild(dateSeparator);
+            }
+            
             const type = message.sender_id === currentUser.id ? 'sent' : 'received';
             addMessageToChat(message, type);
         });
         
         scrollChatToBottom();
-    })
-    .catch(error => {
+    } catch (error) {
         console.error('Error loading messages:', error);
         updateMessageVisibility();
-    });
+    }
 }
 
 
