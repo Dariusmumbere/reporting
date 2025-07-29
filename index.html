@@ -11,6 +11,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script src="download.js"></script>
+    <script src="offline.js" type="module"></script>
     <link rel="stylesheet" href="styles.css">
     
     <style>
@@ -6475,6 +6476,17 @@ async function deleteMessage(messageId) {
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
     </script>
+    <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').then(registration => {
+        console.log('ServiceWorker registration successful');
+      }).catch(err => {
+        console.log('ServiceWorker registration failed: ', err);
+      });
+    });
+  }
+</script>
     
 </body>
 </html>
