@@ -2969,3 +2969,29 @@ a:hover {
 .chat-users-container::-webkit-scrollbar-thumb:hover {
     background-color: var(--primary-dark);
 }
+.no-messages-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-secondary);
+}
+
+.no-messages-image {
+    max-width: 200px;
+    margin-bottom: 1rem;
+    opacity: 0.7;
+}
+
+.no-messages-text {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.no-messages-subtext {
+    font-size: 0.875rem;
+    color: var(--text-tertiary);
+}
