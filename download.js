@@ -486,6 +486,9 @@ async function downloadReportAsPDF(reportId) {
       console.warn('Failed to fetch organization data:', error);
     }
     
+    // Load jsPDF library if not already loaded
+    await loadJSPDFLibrary();
+    
     // Generate premium PDF
     const pdfDoc = await generatePremiumReportPDF(report, organization);
     
@@ -518,8 +521,10 @@ async function downloadReportAsPDF(reportId) {
   }
 }
 
-// Helper function to convert HTML to plain text (unchanged from your original)
+// Helper function to convert HTML to plain text
 function htmlToPlainText(html) {
+  if (!html) return '';
+  
   const tempDiv = document.createElement('div');
   tempDiv.innerHTML = html;
   
@@ -549,16 +554,16 @@ function htmlToPlainText(html) {
   return text.trim();
 }
 
-// Modern file size formatter (unchanged from your original)
+// Modern file size formatter
 function formatFileSize(bytes) {
   if (bytes === 0) return '0 Bytes';
   const k = 1024;
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i];
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
-// Modern toast notification system (unchanged from your original)
+// Modern toast notification system
 function showModernToast(message, type, options = {}) {
   const toast = document.createElement('div');
   toast.className = `modern-toast modern-toast-${type}`;
@@ -645,3 +650,6 @@ if (document.readyState === 'loading') {
 } else {
   initializePDFFeatures();
 }
+
+// Make the function available globally
+window.downloadReportAsPDF = downloadReportAsPDF;
