@@ -1395,7 +1395,21 @@
     font-size: 1.5rem;
     margin-right: 12px;
 }
+/* Add to your CSS */
+#new-org-fields, #invite-fields {
+    padding: 10px;
+    border-left: 3px solid var(--primary-color);
+    margin-left: 20px;
+}
 
+.form-check-label {
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.form-check-input {
+    cursor: pointer;
+}
 .file-info {
     flex: 1;
 }
@@ -1539,38 +1553,74 @@
                     </div>
                 </div>
             </div>
-            <form id="signup-form" class="hidden">
-                <div class="alert alert-danger hidden" id="signup-error">
-                    <i class="fas fa-exclamation-circle"></i>
-                    <div class="alert-content">
-                        <div class="alert-title">Signup failed</div>
-                        <p class="alert-message" id="signup-error-message">Error during signup</p>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="signup-name" class="form-label">Full Name</label>
-                    <input type="text" id="signup-name" class="form-control" placeholder="Enter your full name" required>
-                </div>
-                <div class="form-group">
-                    <label for="signup-email" class="form-label">Email Address</label>
-                    <input type="email" id="signup-email" class="form-control" placeholder="Enter your email" required>
-                </div>
-                <div class="form-group">
-                    <label for="signup-password" class="form-label">Password</label>
-                    <input type="password" id="signup-password" class="form-control" placeholder="Create a password" required minlength="8">
-                </div>
-                <div class="form-group">
-                    <label for="signup-confirm-password" class="form-label">Confirm Password</label>
-                    <input type="password" id="signup-confirm-password" class="form-control" placeholder="Confirm your password" required minlength="8">
-                </div>
-                <button type="submit" class="btn btn-primary login-btn" id="signup-btn">
-                    <span id="signup-btn-text">Create Account</span>
-                    <span class="spinner hidden" id="signup-spinner"></span>
-                </button>
-                <div class="login-footer">
-                    Already have an account? <a href="#" id="show-login">Sign in</a>
-                </div>
-            </form>
+            <!-- Update the signup form in your HTML -->
+<form id="signup-form" class="hidden">
+    <div class="alert alert-danger hidden" id="signup-error">
+        <i class="fas fa-exclamation-circle"></i>
+        <div class="alert-content">
+            <div class="alert-title">Signup failed</div>
+            <p class="alert-message" id="signup-error-message">Error during signup</p>
+        </div>
+    </div>
+    
+    <div class="form-group">
+        <label for="signup-name" class="form-label">Full Name</label>
+        <input type="text" id="signup-name" class="form-control" placeholder="Enter your full name" required>
+    </div>
+    
+    <div class="form-group">
+        <label for="signup-email" class="form-label">Email Address</label>
+        <input type="email" id="signup-email" class="form-control" placeholder="Enter your email" required>
+    </div>
+    
+    <div class="form-group">
+        <label for="signup-password" class="form-label">Password</label>
+        <input type="password" id="signup-password" class="form-control" placeholder="Create a password" required minlength="8">
+    </div>
+    
+    <div class="form-group">
+        <label for="signup-confirm-password" class="form-label">Confirm Password</label>
+        <input type="password" id="signup-confirm-password" class="form-control" placeholder="Confirm your password" required minlength="8">
+    </div>
+    
+    <!-- Organization selection -->
+    <div class="form-group">
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="signup-type" id="signup-new-org" value="new" checked>
+            <label class="form-check-label" for="signup-new-org">
+                Create a new organization
+            </label>
+        </div>
+        
+        <div id="new-org-fields" class="mt-2">
+            <label for="organization-name" class="form-label">Organization Name</label>
+            <input type="text" id="organization-name" class="form-control" placeholder="Enter your organization name">
+        </div>
+    </div>
+    
+    <div class="form-group">
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="signup-type" id="signup-invite" value="invite">
+            <label class="form-check-label" for="signup-invite">
+                Join an existing organization with an invitation link
+            </label>
+        </div>
+        
+        <div id="invite-fields" class="mt-2 hidden">
+            <label for="invite-token" class="form-label">Invitation Link</label>
+            <input type="text" id="invite-token" class="form-control" placeholder="Paste your invitation link here">
+        </div>
+    </div>
+    
+    <button type="submit" class="btn btn-primary login-btn" id="signup-btn">
+        <span id="signup-btn-text">Create Account</span>
+        <span class="spinner hidden" id="signup-spinner"></span>
+    </button>
+    
+    <div class="login-footer">
+        Already have an account? <a href="#" id="show-login">Sign in</a>
+    </div>
+</form>
         </div>
 
         <!-- OTP Verification Modal -->
@@ -3074,6 +3124,17 @@
                 signupForm.classList.add('hidden');
                 loginForm.classList.remove('hidden');
             });
+            document.querySelectorAll('input[name="signup-type"]').forEach(radio => {
+    radio.addEventListener('change', (e) => {
+        if (e.target.value === 'new') {
+            document.getElementById('new-org-fields').style.display = 'block';
+            document.getElementById('invite-fields').classList.add('hidden');
+        } else {
+            document.getElementById('new-org-fields').style.display = 'none';
+            document.getElementById('invite-fields').classList.remove('hidden');
+        }
+    });
+});
             
             // Login form submission
             loginForm.addEventListener('submit', handleLogin);
@@ -3895,9 +3956,10 @@ function formatTime(timestamp) {
     const password = document.getElementById('signup-password').value;
     const confirmPassword = document.getElementById('signup-confirm-password').value;
     
-    // Check if there's an invite token in the URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const inviteToken = urlParams.get('invite');
+    // Get signup type
+    const signupType = document.querySelector('input[name="signup-type"]:checked').value;
+    const organizationName = signupType === 'new' ? document.getElementById('organization-name').value.trim() : null;
+    const inviteToken = signupType === 'invite' ? document.getElementById('invite-token').value.trim() : null;
     
     // Validate inputs
     if (!name || !email || !password || !confirmPassword) {
@@ -3915,20 +3977,22 @@ function formatTime(timestamp) {
         return;
     }
     
+    if (signupType === 'new' && !organizationName) {
+        showSignupError('Please enter an organization name');
+        return;
+    }
+    
+    if (signupType === 'invite' && !inviteToken) {
+        showSignupError('Please enter an invitation link');
+        return;
+    }
+    
     // Show loading state
     signupBtnText.textContent = 'Creating account...';
     signupSpinner.classList.remove('hidden');
     signupError.classList.add('hidden');
     
     try {
-        // If there's an invite token, validate it first
-        if (inviteToken) {
-            const response = await fetch(`${API_BASE_URL}/invitations/validate/${inviteToken}`);
-            if (!response.ok) {
-                throw new Error('Invalid or expired invitation link');
-            }
-        }
-        
         // First send verification email
         const otpResponse = await fetch(`${API_BASE_URL}/auth/send-verification-email`, {
             method: 'POST',
@@ -3945,13 +4009,15 @@ function formatTime(timestamp) {
             throw new Error(errorData.detail || 'Failed to send verification email');
         }
         
-        // Store the email for verification
+        // Store the email and signup data for verification
         otpVerificationEmail = email;
-        
-        // Store invite token if present
-        if (inviteToken) {
-            localStorage.setItem('inviteToken', inviteToken);
-        }
+        otpSignupData = {
+            name,
+            email,
+            password,
+            organizationName,
+            inviteToken
+        };
         
         // Show OTP verification modal
         otpModal.classList.add('active');
@@ -4086,84 +4152,85 @@ async function verifyOtp() {
 }
         // Verify OTP
         async function verifyOtp() {
-            // Get OTP from inputs
-            let otp = '';
-            otpInputs.forEach(input => {
-                otp += input.value;
-            });
-            
-            if (otp.length !== 6) {
-                otpErrorMessage.textContent = 'Please enter a 6-digit code';
-                otpError.classList.remove('hidden');
-                return;
-            }
-            
-            // Show loading state
-            verifyOtpText.textContent = 'Verifying...';
-            verifyOtpSpinner.classList.remove('hidden');
-            otpError.classList.add('hidden');
-            
-            try {
-                // Verify OTP with backend
-                const response = await fetch(`${API_BASE_URL}/auth/verify-otp`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        email: otpVerificationEmail,
-                        otp: otp
-                    })
-                });
-                
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.detail || 'Invalid or expired OTP');
-                }
-                
-                // OTP verified, proceed with signup
-                const name = document.getElementById('signup-name').value.trim();
-                const email = otpVerificationEmail;
-                const password = document.getElementById('signup-password').value;
-                
-                const signupResponse = await fetch(`${API_BASE_URL}/auth/signup`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: new URLSearchParams({
-                        name: name,
-                        email: email,
-                        password: password
-                    })
-                });
-                
-                if (!signupResponse.ok) {
-                    const errorData = await signupResponse.json();
-                    throw new Error(errorData.detail || 'Signup failed');
-                }
-                
-                const data = await signupResponse.json();
-                
-                // Store the token
-                localStorage.setItem('token', data.access_token);
-                
-                // Close OTP modal
-                otpModal.classList.remove('active');
-                
-                // Show organization registration modal
-                orgRegistrationModal.classList.add('active');
-                
-            } catch (error) {
-                console.error('OTP verification error:', error);
-                otpErrorMessage.textContent = error.message || 'Invalid or expired OTP';
-                otpError.classList.remove('hidden');
-            } finally {
-                verifyOtpText.textContent = 'Verify';
-                verifyOtpSpinner.classList.add('hidden');
-            }
+    // Get OTP from inputs
+    let otp = '';
+    otpInputs.forEach(input => {
+        otp += input.value;
+    });
+    
+    if (otp.length !== 6) {
+        otpErrorMessage.textContent = 'Please enter a 6-digit code';
+        otpError.classList.remove('hidden');
+        return;
+    }
+    
+    // Show loading state
+    verifyOtpText.textContent = 'Verifying...';
+    verifyOtpSpinner.classList.remove('hidden');
+    otpError.classList.add('hidden');
+    
+    try {
+        // Verify OTP with backend
+        const response = await fetch(`${API_BASE_URL}/auth/verify-otp`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email: otpVerificationEmail,
+                otp: otp
+            })
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || 'Invalid or expired OTP');
         }
-
+        
+        // Proceed with signup
+        const formData = new FormData();
+        formData.append('name', otpSignupData.name);
+        formData.append('email', otpSignupData.email);
+        formData.append('password', otpSignupData.password);
+        
+        if (otpSignupData.organizationName) {
+            formData.append('organization_name', otpSignupData.organizationName);
+        }
+        
+        if (otpSignupData.inviteToken) {
+            formData.append('invite_token', otpSignupData.inviteToken);
+        }
+        
+        const signupResponse = await fetch(`${API_BASE_URL}/auth/signup`, {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!signupResponse.ok) {
+            const errorData = await signupResponse.json();
+            throw new Error(errorData.detail || 'Signup failed');
+        }
+        
+        const data = await signupResponse.json();
+        
+        // Store the token
+        localStorage.setItem('token', data.access_token);
+        
+        // Close OTP modal
+        otpModal.classList.remove('active');
+        
+        // Redirect to app
+        window.location.href = '/app';
+        
+    } catch (error) {
+        console.error('OTP verification error:', error);
+        otpErrorMessage.textContent = error.message || 'Invalid or expired OTP';
+        otpError.classList.remove('hidden');
+    } finally {
+        verifyOtpText.textContent = 'Verify';
+        verifyOtpSpinner.classList.add('hidden');
+    }
+}
         // Resend OTP
         async function resendOtp() {
             if (!otpVerificationEmail) return;
@@ -7323,6 +7390,15 @@ async function revokeInvitation(inviteId) {
         console.error('Error revoking invitation:', error);
         showAlert('Failed to revoke invitation', 'danger');
     }
+}
+const urlParams = new URLSearchParams(window.location.search);
+const inviteToken = urlParams.get('invite');
+if (inviteToken) {
+    // Show the signup form with invite option selected
+    document.getElementById('signup-invite').checked = true;
+    document.getElementById('new-org-fields').style.display = 'none';
+    document.getElementById('invite-fields').classList.remove('hidden');
+    document.getElementById('invite-token').value = inviteToken;
 }
 
         // Initialize the app
