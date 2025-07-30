@@ -3951,29 +3951,18 @@ function formatTime(timestamp) {
         async function handleSignup(e) {
     e.preventDefault();
     
+    // Get form values
     const name = document.getElementById('signup-name').value.trim();
     const email = document.getElementById('signup-email').value.trim();
     const password = document.getElementById('signup-password').value;
     const confirmPassword = document.getElementById('signup-confirm-password').value;
-    
-    // Get signup type
     const signupType = document.querySelector('input[name="signup-type"]:checked').value;
     const organizationName = signupType === 'new' ? document.getElementById('organization-name').value.trim() : null;
     const inviteToken = signupType === 'invite' ? document.getElementById('invite-token').value.trim() : null;
-    
+
     // Validate inputs
-    if (!name || !email || !password || !confirmPassword) {
-        showSignupError('Please fill in all fields');
-        return;
-    }
-    
-    if (password !== confirmPassword) {
-        showSignupError('Passwords do not match');
-        return;
-    }
-    
-    if (password.length < 8) {
-        showSignupError('Password must be at least 8 characters');
+    if (signupType === 'invite' && !inviteToken) {
+        showSignupError('Please enter a valid invitation link');
         return;
     }
     
@@ -3981,300 +3970,84 @@ function formatTime(timestamp) {
         showSignupError('Please enter an organization name');
         return;
     }
-    
-    if (signupType === 'invite' && !inviteToken) {
-        showSignupError('Please enter an invitation link');
-        return;
-    }
-    
-    // Show loading state
-    signupBtnText.textContent = 'Creating account...';
-    signupSpinner.classList.remove('hidden');
-    signupError.classList.add('hidden');
-    
+
+    // First send OTP
     try {
-        // First send verification email
         const otpResponse = await fetch(`${API_BASE_URL}/auth/send-verification-email`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                email: email
-            })
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ email })
         });
         
-        if (!otpResponse.ok) {
-            const errorData = await otpResponse.json();
-            throw new Error(errorData.detail || 'Failed to send verification email');
-        }
+        if (!otpResponse.ok) throw new Error('Failed to send OTP');
         
-        // Store the email and signup data for verification
-        otpVerificationEmail = email;
-        otpSignupData = {
-            name,
-            email,
-            password,
-            organizationName,
-            inviteToken
-        };
+        // Store data for after verification
+        window.tempSignupData = { name, email, password, organizationName, inviteToken };
         
-        // Show OTP verification modal
+        // Show OTP modal
         otpModal.classList.add('active');
-        
-        // Focus first OTP input
         otpInputs[0].focus();
         
     } catch (error) {
-        console.error('Signup error:', error);
-        showSignupError(error.message || 'An error occurred during signup');
-    } finally {
-        signupBtnText.textContent = 'Create Account';
-        signupSpinner.classList.add('hidden');
+        showSignupError(error.message);
+    }
+}
+       
+        // Resend OTP
+       async function verifyOtp() {
+    const otp = Array.from(otpInputs).map(i => i.value).join('');
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/auth/verify-otp`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                email: window.tempSignupData.email,
+                otp: otp
+            })
+        });
+        
+        if (!response.ok) throw new Error('Invalid OTP');
+        
+        const { signup_token } = await response.json();
+        
+        // Complete signup with the token
+        await completeSignup(signup_token);
+        
+    } catch (error) {
+        otpErrorMessage.textContent = error.message;
+        otpError.classList.remove('hidden');
     }
 }
 
-// Modify the verifyOtp function to handle invite tokens
-async function verifyOtp() {
-    // Get OTP from inputs
-    let otp = '';
-    otpInputs.forEach(input => {
-        otp += input.value;
-    });
+async function completeSignup(signupToken) {
+    const { name, email, password, organizationName, inviteToken } = window.tempSignupData;
     
-    if (otp.length !== 6) {
-        otpErrorMessage.textContent = 'Please enter a 6-digit code';
-        otpError.classList.remove('hidden');
-        return;
-    }
-    
-    // Show loading state
-    verifyOtpText.textContent = 'Verifying...';
-    verifyOtpSpinner.classList.remove('hidden');
-    otpError.classList.add('hidden');
+    const formData = new FormData();
+    formData.append('signup_token', signupToken);
+    formData.append('name', name);
+    formData.append('password', password);
+    if (organizationName) formData.append('organization_name', organizationName);
+    if (inviteToken) formData.append('invite_token', inviteToken);
     
     try {
-        // Verify OTP with backend
-        const response = await fetch(`${API_BASE_URL}/auth/verify-otp`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                email: otpVerificationEmail,
-                otp: otp
-            })
-        });
-        
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.detail || 'Invalid or expired OTP');
-        }
-        
-        // Check if there's an invite token
-        const inviteToken = localStorage.getItem('inviteToken') || 
-                           new URLSearchParams(window.location.search).get('invite');
-        
-        let name = document.getElementById('signup-name').value.trim();
-        let email = otpVerificationEmail;
-        let password = document.getElementById('signup-password').value;
-        
-        if (inviteToken) {
-            // Use the invitation signup flow
-            const signupResponse = await fetch(`${API_BASE_URL}/invitations/accept`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: new URLSearchParams({
-                    name: name,
-                    email: email,
-                    password: password,
-                    token: inviteToken
-                })
-            });
-            
-            if (!signupResponse.ok) {
-                const errorData = await signupResponse.json();
-                throw new Error(errorData.detail || 'Signup failed');
-            }
-            
-            const data = await signupResponse.json();
-            
-            // Store the token
-            localStorage.setItem('token', data.access_token);
-            
-            // Close OTP modal
-            otpModal.classList.remove('active');
-            
-            // Redirect to app
-            window.location.href = '/app';
-            
-        } else {
-            // Original signup flow
-            const signupResponse = await fetch(`${API_BASE_URL}/auth/signup`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: new URLSearchParams({
-                    name: name,
-                    email: email,
-                    password: password
-                })
-            });
-            
-            if (!signupResponse.ok) {
-                const errorData = await signupResponse.json();
-                throw new Error(errorData.detail || 'Signup failed');
-            }
-            
-            const data = await signupResponse.json();
-            
-            // Store the token
-            localStorage.setItem('token', data.access_token);
-            
-            // Close OTP modal
-            otpModal.classList.remove('active');
-            
-            // Show organization registration modal
-            orgRegistrationModal.classList.add('active');
-        }
-        
-    } catch (error) {
-        console.error('OTP verification error:', error);
-        otpErrorMessage.textContent = error.message || 'Invalid or expired OTP';
-        otpError.classList.remove('hidden');
-    } finally {
-        verifyOtpText.textContent = 'Verify';
-        verifyOtpSpinner.classList.add('hidden');
-    }
-}
-        // Verify OTP
-        async function verifyOtp() {
-    // Get OTP from inputs
-    let otp = '';
-    otpInputs.forEach(input => {
-        otp += input.value;
-    });
-    
-    if (otp.length !== 6) {
-        otpErrorMessage.textContent = 'Please enter a 6-digit code';
-        otpError.classList.remove('hidden');
-        return;
-    }
-    
-    // Show loading state
-    verifyOtpText.textContent = 'Verifying...';
-    verifyOtpSpinner.classList.remove('hidden');
-    otpError.classList.add('hidden');
-    
-    try {
-        // Verify OTP with backend
-        const response = await fetch(`${API_BASE_URL}/auth/verify-otp`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                email: otpVerificationEmail,
-                otp: otp
-            })
-        });
-        
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.detail || 'Invalid or expired OTP');
-        }
-        
-        // Proceed with signup
-        const formData = new FormData();
-        formData.append('name', otpSignupData.name);
-        formData.append('email', otpSignupData.email);
-        formData.append('password', otpSignupData.password);
-        
-        if (otpSignupData.organizationName) {
-            formData.append('organization_name', otpSignupData.organizationName);
-        }
-        
-        if (otpSignupData.inviteToken) {
-            formData.append('invite_token', otpSignupData.inviteToken);
-        }
-        
-        const signupResponse = await fetch(`${API_BASE_URL}/auth/signup`, {
+        const response = await fetch(`${API_BASE_URL}/auth/signup`, {
             method: 'POST',
             body: formData
         });
         
-        if (!signupResponse.ok) {
-            const errorData = await signupResponse.json();
-            throw new Error(errorData.detail || 'Signup failed');
-        }
+        if (!response.ok) throw new Error('Signup failed');
         
-        const data = await signupResponse.json();
+        const data = await response.json();
         
-        // Store the token
+        // Store token and proceed to app
         localStorage.setItem('token', data.access_token);
-        
-        // Close OTP modal
-        otpModal.classList.remove('active');
-        
-        // Redirect to app
         window.location.href = '/app';
         
     } catch (error) {
-        console.error('OTP verification error:', error);
-        otpErrorMessage.textContent = error.message || 'Invalid or expired OTP';
-        otpError.classList.remove('hidden');
-    } finally {
-        verifyOtpText.textContent = 'Verify';
-        verifyOtpSpinner.classList.add('hidden');
+        showSignupError(error.message);
     }
 }
-        // Resend OTP
-        async function resendOtp() {
-            if (!otpVerificationEmail) return;
-            
-            // Show loading state
-            verifyOtpText.textContent = 'Sending...';
-            verifyOtpSpinner.classList.remove('hidden');
-            otpError.classList.add('hidden');
-            
-            try {
-                const response = await fetch(`${API_BASE_URL}/auth/send-verification-email`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        email: otpVerificationEmail
-                    })
-                });
-                
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.detail || 'Failed to resend OTP');
-                }
-                
-                // Clear OTP inputs
-                otpInputs.forEach(input => {
-                    input.value = '';
-                });
-                
-                // Focus first input
-                otpInputs[0].focus();
-                
-                showAlert('New verification code sent to your email', 'success');
-                
-            } catch (error) {
-                console.error('Resend OTP error:', error);
-                otpErrorMessage.textContent = error.message || 'Failed to resend OTP';
-                otpError.classList.remove('hidden');
-            } finally {
-                verifyOtpText.textContent = 'Verify';
-                verifyOtpSpinner.classList.add('hidden');
-            }
-        }
 
         // Handle organization registration
 async function handleOrgRegistration() {
