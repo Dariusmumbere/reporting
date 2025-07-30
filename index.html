@@ -6890,11 +6890,14 @@ async function loadDashboardData() {
         
         const data = await response.json();
         
-        // Update stats cards
-        document.getElementById('total-reports-count').textContent = data.counts.total;
-        document.getElementById('pending-reports-count').textContent = data.counts.pending;
-        document.getElementById('approved-reports-count').textContent = data.counts.approved;
-        document.getElementById('rejected-reports-count').textContent = data.counts.rejected;
+        // Debug: Log the data to console to verify structure
+        console.log('Dashboard data:', data);
+        
+        // Update stats cards - make sure we're using the correct path
+        document.getElementById('total-reports-count').textContent = data.counts.total || 0;
+        document.getElementById('pending-reports-count').textContent = data.counts.pending || 0;
+        document.getElementById('approved-reports-count').textContent = data.counts.approved || 0;
+        document.getElementById('rejected-reports-count').textContent = data.counts.rejected || 0;
         
         // Update trend indicators
         updateTrendIndicator('total-reports-trend', data.trends.total);
@@ -6928,12 +6931,19 @@ async function loadDashboardData() {
         `;
     }
 }
-
 // Update trend indicator with value and direction
 function updateTrendIndicator(elementId, trendData) {
     const element = document.getElementById(elementId);
+    if (!element) return;
+    
     const icon = element.querySelector('i');
     const valueSpan = element.querySelector('.trend-value');
+    
+    // Make sure trendData exists and has the expected properties
+    if (!trendData || trendData.percentage === undefined) {
+        console.error('Invalid trend data:', trendData);
+        return;
+    }
     
     valueSpan.textContent = `${Math.abs(trendData.percentage)}%`;
     
@@ -6950,7 +6960,6 @@ function updateTrendIndicator(elementId, trendData) {
         element.classList.remove('trend-up', 'trend-down');
     }
 }
-
 // Update recent activity timeline
 function updateRecentActivity(activities) {
     const timeline = document.getElementById('recent-activity-timeline');
