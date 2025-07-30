@@ -6597,15 +6597,26 @@ const chartColors = {
 
 // Initialize all charts
 function initCharts() {
-    // Check if we're on the dashboard and canvas elements exist
-    if (!isDashboardView()) return;
+    // Only initialize if on dashboard view
+    if (!document.getElementById('dashboard-view') || 
+        document.getElementById('dashboard-view').classList.contains('hidden')) {
+        return;
+    }
     
-    // Load initial data for today
+    // Default to 'day' period
     loadChartData('day');
     
     // Set up time filter buttons
     setupTimeFilters();
 }
+
+// Call this when dashboard view is shown
+document.addEventListener('viewChanged', function() {
+    if (document.getElementById('dashboard-view') && 
+        !document.getElementById('dashboard-view').classList.contains('hidden')) {
+        initCharts();
+    }
+});
 
 // Check if we're on the dashboard view
 function isDashboardView() {
@@ -6730,16 +6741,24 @@ function renderStatusPieChart(data) {
         data: {
             labels: ['Approved', 'Pending', 'Rejected'],
             datasets: [{
-                data: [data.approved, data.pending, data.rejected],
+                data: [data.approved || 0, data.pending || 0, data.rejected || 0],
                 backgroundColor: [
-                    chartColors.success,
-                    chartColors.warning,
-                    chartColors.danger
+                    '#4cc9f0', // success
+                    '#f8961e', // warning
+                    '#f72585'  // danger
                 ],
                 borderWidth: 1
             }]
         },
-        options: getPieChartOptions()
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                }
+            }
+        }
     });
 }
 
