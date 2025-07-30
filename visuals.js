@@ -1,9 +1,9 @@
 // visuals.js - Handles all chart rendering and data fetching for analytics
 
 // Chart instances
-let statusPieChart = null;
-let reportsOverTimeChart = null;
-let categoryBarChart = null;
+let statusPieChart;
+let reportsOverTimeChart;
+let categoryBarChart;
 
 // Colors for charts
 const chartColors = {
@@ -18,24 +18,10 @@ const chartColors = {
 
 // Initialize all charts
 function initCharts() {
-    // Check if we're on the dashboard and canvas elements exist
-    if (!isDashboardView()) return;
-    
     // Load initial data for today
     loadChartData('day');
     
     // Set up time filter buttons
-    setupTimeFilters();
-}
-
-// Check if we're on the dashboard view
-function isDashboardView() {
-    const dashboardView = document.getElementById('dashboard-view');
-    return dashboardView && !dashboardView.classList.contains('hidden');
-}
-
-// Set up time filter buttons
-function setupTimeFilters() {
     document.querySelectorAll('.time-filter button').forEach(btn => {
         btn.addEventListener('click', function() {
             // Remove active class from all buttons in this group
@@ -55,97 +41,47 @@ function setupTimeFilters() {
 
 // Load data for all charts based on time period
 async function loadChartData(period) {
-    if (!isDashboardView()) return;
-    
     try {
         // Show loading state
-        showChartLoadingState();
+        document.querySelectorAll('.chart-container').forEach(container => {
+            container.innerHTML = '<div class="text-center py-4"><div class="spinner spinner-primary"></div></div>';
+        });
         
         // Fetch data from API
-        const data = await fetchChartData(period);
+        const response = await fetch(`${API_BASE_URL}/analytics?period=${period}`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch analytics data');
+        }
+        
+        const data = await response.json();
         
         // Destroy existing charts if they exist
-        destroyCharts();
+        if (statusPieChart) statusPieChart.destroy();
+        if (reportsOverTimeChart) reportsOverTimeChart.destroy();
+        if (categoryBarChart) categoryBarChart.destroy();
         
         // Render charts with new data
-        renderCharts(data);
+        renderStatusPieChart(data.status_distribution);
+        renderReportsOverTimeChart(data.reports_over_time);
+        renderCategoryBarChart(data.category_distribution);
         
     } catch (error) {
         console.error('Error loading chart data:', error);
-        showChartErrorState();
-    }
-}
-
-// Show loading state for charts
-function showChartLoadingState() {
-    document.querySelectorAll('.chart-container').forEach(container => {
-        container.innerHTML = '<div class="text-center py-4"><div class="spinner spinner-primary"></div></div>';
-    });
-}
-
-// Show error state for charts
-function showChartErrorState() {
-    document.querySelectorAll('.chart-container').forEach(container => {
-        container.innerHTML = '<div class="text-center text-muted py-4">Error loading chart data</div>';
-    });
-}
-
-// Fetch chart data from API
-async function fetchChartData(period) {
-    const response = await fetch(`${API_BASE_URL}/analytics?period=${period}`, {
-        headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-    });
-    
-    if (!response.ok) {
-        throw new Error('Failed to fetch analytics data');
-    }
-    
-    return await response.json();
-}
-
-// Destroy existing charts
-function destroyCharts() {
-    if (statusPieChart) {
-        statusPieChart.destroy();
-        statusPieChart = null;
-    }
-    if (reportsOverTimeChart) {
-        reportsOverTimeChart.destroy();
-        reportsOverTimeChart = null;
-    }
-    if (categoryBarChart) {
-        categoryBarChart.destroy();
-        categoryBarChart = null;
-    }
-}
-
-// Render all charts
-function renderCharts(data) {
-    // Clear loading/error states
-    document.querySelectorAll('.chart-container').forEach(container => {
-        container.innerHTML = '<canvas></canvas>';
-    });
-    
-    // Only try to render if canvas elements exist
-    if (document.getElementById('statusPieChart')) {
-        renderStatusPieChart(data.status_distribution);
-    }
-    if (document.getElementById('reportsOverTimeChart')) {
-        renderReportsOverTimeChart(data.reports_over_time);
-    }
-    if (document.getElementById('categoryBarChart')) {
-        renderCategoryBarChart(data.category_distribution);
+        document.querySelectorAll('.chart-container').forEach(container => {
+            container.innerHTML = '<div class="text-center text-muted py-4">Error loading chart data</div>';
+        });
     }
 }
 
 // Render pie chart for status distribution
 function renderStatusPieChart(data) {
-    const canvas = document.getElementById('statusPieChart');
-    if (!canvas) return;
+    const ctx = document.getElementById('statusPieChart').getContext('2d');
     
-    const ctx = canvas.getContext('2d');
     statusPieChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
@@ -160,66 +96,36 @@ function renderStatusPieChart(data) {
                 borderWidth: 1
             }]
         },
-        options: getPieChartOptions()
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.raw || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = Math.round((value / total) * 100);
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
+                    }
+                }
+            },
+            cutout: '70%'
+        }
     });
 }
 
 // Render line chart for reports over time
 function renderReportsOverTimeChart(data) {
-    const canvas = document.getElementById('reportsOverTimeChart');
-    if (!canvas) return;
+    const ctx = document.getElementById('reportsOverTimeChart').getContext('2d');
     
-    const ctx = canvas.getContext('2d');
-    reportsOverTimeChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: data.map(item => item.date),
-            datasets: getLineChartDatasets(data)
-        },
-        options: getLineChartOptions()
-    });
-}
-
-// Render bar chart for category distribution
-function renderCategoryBarChart(data) {
-    const canvas = document.getElementById('categoryBarChart');
-    if (!canvas) return;
-    
-    const ctx = canvas.getContext('2d');
-    categoryBarChart = new Chart(ctx, {
-        type: 'bar',
-        data: getBarChartData(data),
-        options: getBarChartOptions()
-    });
-}
-
-// Chart configuration functions
-function getPieChartOptions() {
-    return {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                position: 'right',
-            },
-            tooltip: {
-                callbacks: {
-                    label: function(context) {
-                        const label = context.label || '';
-                        const value = context.raw || 0;
-                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                        const percentage = Math.round((value / total) * 100);
-                        return `${label}: ${value} (${percentage}%)`;
-                    }
-                }
-            }
-        },
-        cutout: '70%'
-    };
-}
-
-function getLineChartDatasets(data) {
-    return [
+    // Prepare datasets for each status
+    const datasets = [
         {
             label: 'Approved',
             data: data.map(item => item.approved),
@@ -245,100 +151,96 @@ function getLineChartDatasets(data) {
             fill: true
         }
     ];
-}
-
-function getLineChartOptions() {
-    return {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                position: 'top',
-            },
-            tooltip: {
-                mode: 'index',
-                intersect: false,
-            }
+    
+    reportsOverTimeChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.map(item => item.date),
+            datasets: datasets
         },
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    precision: 0
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
                 }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            },
+            interaction: {
+                mode: 'nearest',
+                axis: 'x',
+                intersect: false
             }
-        },
-        interaction: {
-            mode: 'nearest',
-            axis: 'x',
-            intersect: false
         }
-    };
+    });
 }
 
-function getBarChartData(data) {
+// Render bar chart for category distribution
+function renderCategoryBarChart(data) {
+    const ctx = document.getElementById('categoryBarChart').getContext('2d');
+    
     // Sort categories by count (descending)
     const sortedCategories = Object.entries(data)
         .sort((a, b) => b[1] - a[1])
         .slice(0, 10); // Limit to top 10 categories
     
-    return {
-        labels: sortedCategories.map(item => item[0]),
-        datasets: [{
-            label: 'Reports',
-            data: sortedCategories.map(item => item[1]),
-            backgroundColor: chartColors.primary,
-            borderColor: chartColors.primary,
-            borderWidth: 1
-        }]
-    };
-}
-
-function getBarChartOptions() {
-    return {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                display: false
+    categoryBarChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: sortedCategories.map(item => item[0]),
+            datasets: [{
+                label: 'Reports',
+                data: sortedCategories.map(item => item[1]),
+                backgroundColor: chartColors.primary,
+                borderColor: chartColors.primary,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.parsed.y} reports`;
+                        }
+                    }
+                }
             },
-            tooltip: {
-                callbacks: {
-                    label: function(context) {
-                        return `${context.parsed.y} reports`;
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
                     }
                 }
             }
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    precision: 0
-                }
-            }
         }
-    };
+    });
 }
 
 // Initialize charts when dashboard view is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    // Load Chart.js first if not already loaded
-    if (typeof Chart === 'undefined') {
-        loadScript('https://cdn.jsdelivr.net/npm/chart.js', function() {
-            // Initialize charts after Chart.js is loaded
-            initCharts();
-        });
-    } else {
-        // Chart.js already loaded, initialize directly
-        initCharts();
-    }
-});
-
-// Listen for view changes
-document.addEventListener('viewChanged', function() {
-    if (isDashboardView()) {
-        initCharts();
+    // Only initialize if we're on the dashboard
+    if (document.getElementById('dashboard-view') && !document.getElementById('dashboard-view').classList.contains('hidden')) {
+        // Load Chart.js library dynamically
+        loadScript('https://cdn.jsdelivr.net/npm/chart.js', initCharts);
     }
 });
 
@@ -347,9 +249,5 @@ function loadScript(src, callback) {
     const script = document.createElement('script');
     script.src = src;
     script.onload = callback;
-    script.onerror = function() {
-        console.error('Error loading Chart.js');
-        showChartErrorState();
-    };
     document.head.appendChild(script);
 }
