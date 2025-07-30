@@ -4179,6 +4179,8 @@ function setupUIForUser() {
         } else {
             view.classList.add('hidden');
         }
+        const viewChangedEvent = new Event('viewChanged');
+        document.dispatchEvent(viewChangedEvent);
     });
     
     // Close sidebar on mobile
