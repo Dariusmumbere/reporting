@@ -2267,8 +2267,20 @@
                                         </tbody>
                                     </table>
                                 </div>
-                                // Add to the users view HTML
-<div class="card mb-4">
+                               
+
+                                <div class="card-footer">
+                                    <div class="text-muted">Showing <span id="users-from">0</span> to <span id="users-to">0</span> of <span id="users-total">0</span> entries</div>
+                                    <div class="d-flex gap-1">
+                                        <button class="btn btn-outline btn-sm" disabled id="users-prev-btn">
+                                            <i class="fas fa-chevron-left"></i> Previous
+                                        </button>
+                                        <button class="btn btn-outline btn-sm" id="users-next-btn">
+                                            Next <i class="fas fa-chevron-right"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card mb-4">
     <div class="card-header">
         <h3 class="card-title">Invitation Links</h3>
     </div>
@@ -2313,19 +2325,9 @@
         </div>
     </div>
 </div>
-                                <div class="card-footer">
-                                    <div class="text-muted">Showing <span id="users-from">0</span> to <span id="users-to">0</span> of <span id="users-total">0</span> entries</div>
-                                    <div class="d-flex gap-1">
-                                        <button class="btn btn-outline btn-sm" disabled id="users-prev-btn">
-                                            <i class="fas fa-chevron-left"></i> Previous
-                                        </button>
-                                        <button class="btn btn-outline btn-sm" id="users-next-btn">
-                                            Next <i class="fas fa-chevron-right"></i>
-                                        </button>
-                                    </div>
-                                </div>
                             </div>
                         </div>
+                        
                     </div>
 
                     <!-- Settings View (Admin only) -->
