@@ -2267,6 +2267,52 @@
                                         </tbody>
                                     </table>
                                 </div>
+                                // Add to the users view HTML
+<div class="card mb-4">
+    <div class="card-header">
+        <h3 class="card-title">Invitation Links</h3>
+    </div>
+    <div class="card-body">
+        <button class="btn btn-primary" id="generate-invite-link">
+            <i class="fas fa-plus"></i> Generate New Invitation Link
+        </button>
+        
+        <div class="mt-4" id="invite-link-container" style="display: none;">
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" id="generated-invite-link" readonly>
+                <button class="btn btn-outline-secondary" id="copy-invite-link">
+                    <i class="fas fa-copy"></i> Copy
+                </button>
+            </div>
+            
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-primary" id="share-invite-email">
+                    <i class="fas fa-envelope"></i> Share via Email
+                </button>
+                <button class="btn btn-outline-success" id="share-invite-whatsapp">
+                    <i class="fab fa-whatsapp"></i> Share via WhatsApp
+                </button>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <h5>Active Invitations</h5>
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Created</th>
+                        <th>Expires</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="invitations-table-body">
+                    <!-- Will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
                                 <div class="card-footer">
                                     <div class="text-muted">Showing <span id="users-from">0</span> to <span id="users-to">0</span> of <span id="users-total">0</span> entries</div>
                                     <div class="d-flex gap-1">
@@ -2975,6 +3021,7 @@
             checkAuth();
             addTemplateManagementButton();
             initTemplateManagement();
+            document.getElementById('users-view')?.addEventListener('viewShown', loadActiveInvitations);
         }
 
         // Apply the current theme
@@ -3839,69 +3886,202 @@ function formatTime(timestamp) {
 
         // Handle signup
         async function handleSignup(e) {
-            e.preventDefault();
-            
-            const name = document.getElementById('signup-name').value.trim();
-            const email = document.getElementById('signup-email').value.trim();
-            const password = document.getElementById('signup-password').value;
-            const confirmPassword = document.getElementById('signup-confirm-password').value;
-            
-            // Validate inputs
-            if (!name || !email || !password || !confirmPassword) {
-                showSignupError('Please fill in all fields');
-                return;
-            }
-            
-            if (password !== confirmPassword) {
-                showSignupError('Passwords do not match');
-                return;
-            }
-            
-            if (password.length < 8) {
-                showSignupError('Password must be at least 8 characters');
-                return;
-            }
-            
-            // Show loading state
-            signupBtnText.textContent = 'Creating account...';
-            signupSpinner.classList.remove('hidden');
-            signupError.classList.add('hidden');
-            
-            try {
-                // First send verification email
-                const otpResponse = await fetch(`${API_BASE_URL}/auth/send-verification-email`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        email: email
-                    })
-                });
-                
-                if (!otpResponse.ok) {
-                    const errorData = await otpResponse.json();
-                    throw new Error(errorData.detail || 'Failed to send verification email');
-                }
-                
-                // Store the email for verification
-                otpVerificationEmail = email;
-                
-                // Show OTP verification modal
-                otpModal.classList.add('active');
-                
-                // Focus first OTP input
-                otpInputs[0].focus();
-                
-            } catch (error) {
-                console.error('Signup error:', error);
-                showSignupError(error.message || 'An error occurred during signup');
-            } finally {
-                signupBtnText.textContent = 'Create Account';
-                signupSpinner.classList.add('hidden');
+    e.preventDefault();
+    
+    const name = document.getElementById('signup-name').value.trim();
+    const email = document.getElementById('signup-email').value.trim();
+    const password = document.getElementById('signup-password').value;
+    const confirmPassword = document.getElementById('signup-confirm-password').value;
+    
+    // Check if there's an invite token in the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const inviteToken = urlParams.get('invite');
+    
+    // Validate inputs
+    if (!name || !email || !password || !confirmPassword) {
+        showSignupError('Please fill in all fields');
+        return;
+    }
+    
+    if (password !== confirmPassword) {
+        showSignupError('Passwords do not match');
+        return;
+    }
+    
+    if (password.length < 8) {
+        showSignupError('Password must be at least 8 characters');
+        return;
+    }
+    
+    // Show loading state
+    signupBtnText.textContent = 'Creating account...';
+    signupSpinner.classList.remove('hidden');
+    signupError.classList.add('hidden');
+    
+    try {
+        // If there's an invite token, validate it first
+        if (inviteToken) {
+            const response = await fetch(`${API_BASE_URL}/invitations/validate/${inviteToken}`);
+            if (!response.ok) {
+                throw new Error('Invalid or expired invitation link');
             }
         }
+        
+        // First send verification email
+        const otpResponse = await fetch(`${API_BASE_URL}/auth/send-verification-email`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email: email
+            })
+        });
+        
+        if (!otpResponse.ok) {
+            const errorData = await otpResponse.json();
+            throw new Error(errorData.detail || 'Failed to send verification email');
+        }
+        
+        // Store the email for verification
+        otpVerificationEmail = email;
+        
+        // Store invite token if present
+        if (inviteToken) {
+            localStorage.setItem('inviteToken', inviteToken);
+        }
+        
+        // Show OTP verification modal
+        otpModal.classList.add('active');
+        
+        // Focus first OTP input
+        otpInputs[0].focus();
+        
+    } catch (error) {
+        console.error('Signup error:', error);
+        showSignupError(error.message || 'An error occurred during signup');
+    } finally {
+        signupBtnText.textContent = 'Create Account';
+        signupSpinner.classList.add('hidden');
+    }
+}
 
+// Modify the verifyOtp function to handle invite tokens
+async function verifyOtp() {
+    // Get OTP from inputs
+    let otp = '';
+    otpInputs.forEach(input => {
+        otp += input.value;
+    });
+    
+    if (otp.length !== 6) {
+        otpErrorMessage.textContent = 'Please enter a 6-digit code';
+        otpError.classList.remove('hidden');
+        return;
+    }
+    
+    // Show loading state
+    verifyOtpText.textContent = 'Verifying...';
+    verifyOtpSpinner.classList.remove('hidden');
+    otpError.classList.add('hidden');
+    
+    try {
+        // Verify OTP with backend
+        const response = await fetch(`${API_BASE_URL}/auth/verify-otp`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email: otpVerificationEmail,
+                otp: otp
+            })
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || 'Invalid or expired OTP');
+        }
+        
+        // Check if there's an invite token
+        const inviteToken = localStorage.getItem('inviteToken') || 
+                           new URLSearchParams(window.location.search).get('invite');
+        
+        let name = document.getElementById('signup-name').value.trim();
+        let email = otpVerificationEmail;
+        let password = document.getElementById('signup-password').value;
+        
+        if (inviteToken) {
+            // Use the invitation signup flow
+            const signupResponse = await fetch(`${API_BASE_URL}/invitations/accept`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    name: name,
+                    email: email,
+                    password: password,
+                    token: inviteToken
+                })
+            });
+            
+            if (!signupResponse.ok) {
+                const errorData = await signupResponse.json();
+                throw new Error(errorData.detail || 'Signup failed');
+            }
+            
+            const data = await signupResponse.json();
+            
+            // Store the token
+            localStorage.setItem('token', data.access_token);
+            
+            // Close OTP modal
+            otpModal.classList.remove('active');
+            
+            // Redirect to app
+            window.location.href = '/app';
+            
+        } else {
+            // Original signup flow
+            const signupResponse = await fetch(`${API_BASE_URL}/auth/signup`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    name: name,
+                    email: email,
+                    password: password
+                })
+            });
+            
+            if (!signupResponse.ok) {
+                const errorData = await signupResponse.json();
+                throw new Error(errorData.detail || 'Signup failed');
+            }
+            
+            const data = await signupResponse.json();
+            
+            // Store the token
+            localStorage.setItem('token', data.access_token);
+            
+            // Close OTP modal
+            otpModal.classList.remove('active');
+            
+            // Show organization registration modal
+            orgRegistrationModal.classList.add('active');
+        }
+        
+    } catch (error) {
+        console.error('OTP verification error:', error);
+        otpErrorMessage.textContent = error.message || 'Invalid or expired OTP';
+        otpError.classList.remove('hidden');
+    } finally {
+        verifyOtpText.textContent = 'Verify';
+        verifyOtpSpinner.classList.add('hidden');
+    }
+}
         // Verify OTP
         async function verifyOtp() {
             // Get OTP from inputs
@@ -4864,7 +5044,6 @@ async function handleAddUser(e) {
         submitAddUser.disabled = false;
     }
 }
-        // View report details
         // View report details
 async function viewReport(reportId) {
     try {
@@ -6988,6 +7167,162 @@ document.querySelectorAll('[data-view]').forEach(item => {
         }
     });
 });
+// Add to your JavaScript file
+document.getElementById('generate-invite-link')?.addEventListener('click', generateInvitationLink);
+
+async function generateInvitationLink() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/invitations/generate`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to generate invitation link');
+        }
+        
+        const data = await response.json();
+        
+        // Show the generated link
+        document.getElementById('generated-invite-link').value = data.invite_url;
+        document.getElementById('invite-link-container').style.display = 'block';
+        
+        // Load active invitations
+        loadActiveInvitations();
+        
+    } catch (error) {
+        console.error('Error generating invitation link:', error);
+        showAlert('Failed to generate invitation link', 'danger');
+    }
+}
+
+// Copy invite link to clipboard
+document.getElementById('copy-invite-link')?.addEventListener('click', () => {
+    const input = document.getElementById('generated-invite-link');
+    input.select();
+    document.execCommand('copy');
+    
+    // Show tooltip
+    const originalText = document.getElementById('copy-invite-link').innerHTML;
+    document.getElementById('copy-invite-link').innerHTML = '<i class="fas fa-check"></i> Copied!';
+    
+    setTimeout(() => {
+        document.getElementById('copy-invite-link').innerHTML = originalText;
+    }, 2000);
+});
+
+// Share via email
+document.getElementById('share-invite-email')?.addEventListener('click', () => {
+    const inviteLink = document.getElementById('generated-invite-link').value;
+    const subject = `Invitation to join ${currentUser.organization_name} on ReportHub`;
+    const body = `Hello,\n\nYou've been invited to join ${currentUser.organization_name} on ReportHub.\n\nClick this link to accept the invitation: ${inviteLink}\n\nThis link will expire in 7 days.\n\nBest regards,\n${currentUser.name}`;
+    
+    window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
+});
+
+// Share via WhatsApp
+document.getElementById('share-invite-whatsapp')?.addEventListener('click', () => {
+    const inviteLink = document.getElementById('generated-invite-link').value;
+    const text = `You've been invited to join ${currentUser.organization_name} on ReportHub. Click here to accept: ${inviteLink}`;
+    
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`);
+});
+
+// Load active invitations
+async function loadActiveInvitations() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/invitations`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to load invitations');
+        }
+        
+        const invitations = await response.json();
+        renderInvitationsTable(invitations);
+        
+    } catch (error) {
+        console.error('Error loading invitations:', error);
+        showAlert('Failed to load invitations', 'danger');
+    }
+}
+
+function renderInvitationsTable(invitations) {
+    const tableBody = document.getElementById('invitations-table-body');
+    tableBody.innerHTML = '';
+    
+    if (invitations.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="4" class="text-center text-muted">No active invitations</td>
+            </tr>
+        `;
+        return;
+    }
+    
+    invitations.forEach(invite => {
+        const row = document.createElement('tr');
+        
+        const createdDate = new Date(invite.created_at).toLocaleDateString();
+        const expiresDate = new Date(invite.expires_at).toLocaleDateString();
+        const status = invite.is_used ? 'Used' : 'Active';
+        
+        row.innerHTML = `
+            <td>${createdDate}</td>
+            <td>${expiresDate}</td>
+            <td>${status}</td>
+            <td>
+                ${!invite.is_used ? `
+                <button class="btn btn-sm btn-outline-danger revoke-invite-btn" data-id="${invite.id}">
+                    <i class="fas fa-times"></i> Revoke
+                </button>
+                ` : ''}
+            </td>
+        `;
+        
+        tableBody.appendChild(row);
+    });
+    
+    // Add event listeners to revoke buttons
+    document.querySelectorAll('.revoke-invite-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const inviteId = e.currentTarget.getAttribute('data-id');
+            revokeInvitation(inviteId);
+        });
+    });
+}
+
+async function revokeInvitation(inviteId) {
+    if (!confirm('Are you sure you want to revoke this invitation?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/invitations/${inviteId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to revoke invitation');
+        }
+        
+        showAlert('Invitation revoked successfully', 'success');
+        loadActiveInvitations();
+        
+    } catch (error) {
+        console.error('Error revoking invitation:', error);
+        showAlert('Failed to revoke invitation', 'danger');
+    }
+}
+
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
     </script>
