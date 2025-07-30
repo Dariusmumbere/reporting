@@ -11,50 +11,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script src="download.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="styles.css">
     
     <style>
-/* Chart containers */
-.chart-container {
-    position: relative;
-    height: 300px;
-    min-height: 300px;
-    width: 100%;
-}
-
-/* Time filter buttons */
-.time-filter {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.time-filter button {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.75rem;
-    border-radius: 4px;
-}
-
-.time-filter button.active {
-    background-color: var(--primary-color);
-    color: white;
-    border-color: var(--primary-color);
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .chart-container {
-        height: 250px;
-    }
-    
-    .row {
-        flex-direction: column;
-    }
-    
-    .col-md-6 {
-        width: 100%;
-    }
-}
+/* Add this to your CSS */
 .delete-message-btn {
     background: none;
     border: none;
@@ -1766,158 +1726,211 @@
                 <!-- Content Area -->
                 <div class="content">
                     <!-- Dashboard View -->
-                    <div class="view" id="dashboard-view">
-                        <div class="page-header">
-                            <h1 class="page-title">Dashboard</h1>
-                            <div class="page-actions">
-                                <button class="btn btn-primary" id="new-report-btn">
-                                    <i class="fas fa-plus"></i> New Report
-                                </button>
-                            </div>
-                        </div>
+<div class="view" id="dashboard-view">
+    <div class="page-header">
+        <h1 class="page-title">Dashboard</h1>
+        <div class="page-actions">
+            <div class="time-filter">
+                <select class="form-control form-select" id="time-period-filter">
+                    <option value="daily">Daily</option>
+                    <option value="weekly" selected>Weekly</option>
+                    <option value="monthly">Monthly</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" id="new-report-btn">
+                <i class="fas fa-plus"></i> New Report
+            </button>
+        </div>
+    </div>
 
-                        <div class="grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
-                            <div class="card">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <div>
-                                            <h3 style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Total Reports</h3>
-                                            <p style="font-size: 1.75rem; font-weight: 600; margin-bottom: 0;" id="total-reports-count">0</p>
-                                        </div>
-                                        <div style="width: 48px; height: 48px; border-radius: 50%; background-color: rgba(67, 97, 238, 0.1); display: flex; align-items: center; justify-content: center;">
-                                            <i class="fas fa-file-alt" style="font-size: 1.25rem; color: var(--primary-color);"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <div>
-                                            <h3 style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Pending</h3>
-                                            <p style="font-size: 1.75rem; font-weight: 600; margin-bottom: 0;" id="pending-reports-count">0</p>
-                                        </div>
-                                        <div style="width: 48px; height: 48px; border-radius: 50%; background-color: rgba(248, 150, 30, 0.1); display: flex; align-items: center; justify-content: center;">
-                                            <i class="fas fa-clock" style="font-size: 1.25rem; color: var(--warning-color);"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <div>
-                                            <h3 style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Approved</h3>
-                                            <p style="font-size: 1.75rem; font-weight: 600; margin-bottom: 0;" id="approved-reports-count">0</p>
-                                        </div>
-                                        <div style="width: 48px; height: 48px; border-radius: 50%; background-color: rgba(76, 201, 240, 0.1); display: flex; align-items: center; justify-content: center;">
-                                            <i class="fas fa-check-circle" style="font-size: 1.25rem; color: var(--success-color);"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <div>
-                                            <h3 style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Rejected</h3>
-                                            <p style="font-size: 1.75rem; font-weight: 600; margin-bottom: 0;" id="rejected-reports-count">0</p>
-                                        </div>
-                                        <div style="width: 48px; height: 48px; border-radius: 50%; background-color: rgba(247, 37, 133, 0.1); display: flex; align-items: center; justify-content: center;">
-                                            <i class="fas fa-times-circle" style="font-size: 1.25rem; color: var(--danger-color);"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Add this to your dashboard-view div, after the recent reports card -->
-<div class="row">
-    <!-- Reports Status Pie Chart -->
-    <div class="col-md-6">
+    <!-- Stats Cards -->
+    <div class="grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
         <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">Reports Status Distribution</h2>
-                <div class="time-filter">
-                    <button class="btn btn-sm btn-outline active" data-period="day">Today</button>
-                    <button class="btn btn-sm btn-outline" data-period="week">This Week</button>
-                    <button class="btn btn-sm btn-outline" data-period="month">This Month</button>
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h3 style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Total Reports</h3>
+                        <p style="font-size: 1.75rem; font-weight: 600; margin-bottom: 0;" id="total-reports-count">0</p>
+                        <div class="trend-indicator" id="total-reports-trend">
+                            <i class="fas fa-arrow-up trend-up"></i>
+                            <span class="trend-value">0%</span>
+                        </div>
+                    </div>
+                    <div style="width: 48px; height: 48px; border-radius: 50%; background-color: rgba(67, 97, 238, 0.1); display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-file-alt" style="font-size: 1.25rem; color: var(--primary-color);"></i>
+                    </div>
                 </div>
             </div>
+        </div>
+        <div class="card">
             <div class="card-body">
-                <div class="chart-container">
-                    <canvas id="statusPieChart"></canvas>
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h3 style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Pending</h3>
+                        <p style="font-size: 1.75rem; font-weight: 600; margin-bottom: 0;" id="pending-reports-count">0</p>
+                        <div class="trend-indicator" id="pending-reports-trend">
+                            <i class="fas fa-arrow-up trend-up"></i>
+                            <span class="trend-value">0%</span>
+                        </div>
+                    </div>
+                    <div style="width: 48px; height: 48px; border-radius: 50%; background-color: rgba(248, 150, 30, 0.1); display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-clock" style="font-size: 1.25rem; color: var(--warning-color);"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h3 style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Approved</h3>
+                        <p style="font-size: 1.75rem; font-weight: 600; margin-bottom: 0;" id="approved-reports-count">0</p>
+                        <div class="trend-indicator" id="approved-reports-trend">
+                            <i class="fas fa-arrow-up trend-up"></i>
+                            <span class="trend-value">0%</span>
+                        </div>
+                    </div>
+                    <div style="width: 48px; height: 48px; border-radius: 50%; background-color: rgba(76, 201, 240, 0.1); display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-check-circle" style="font-size: 1.25rem; color: var(--success-color);"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h3 style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Rejected</h3>
+                        <p style="font-size: 1.75rem; font-weight: 600; margin-bottom: 0;" id="rejected-reports-count">0</p>
+                        <div class="trend-indicator" id="rejected-reports-trend">
+                            <i class="fas fa-arrow-up trend-up"></i>
+                            <span class="trend-value">0%</span>
+                        </div>
+                    </div>
+                    <div style="width: 48px; height: 48px; border-radius: 50%; background-color: rgba(247, 37, 133, 0.1); display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-times-circle" style="font-size: 1.25rem; color: var(--danger-color);"></i>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Reports Over Time Line Chart -->
-    <div class="col-md-6">
+    <!-- Analytics Charts Row -->
+    <div class="grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
+        <!-- Reports Trend Chart -->
         <div class="card">
             <div class="card-header">
-                <h2 class="card-title">Reports Over Time</h2>
-                <div class="time-filter">
-                    <button class="btn btn-sm btn-outline active" data-period="day">Daily</button>
-                    <button class="btn btn-sm btn-outline" data-period="week">Weekly</button>
-                    <button class="btn btn-sm btn-outline" data-period="month">Monthly</button>
+                <h2 class="card-title">Reports Trend</h2>
+                <div class="chart-legend">
+                    <div class="legend-item">
+                        <span class="legend-color" style="background-color: #4361EE;"></span>
+                        <span>Total</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background-color: #F8961E;"></span>
+                        <span>Pending</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background-color: #4CC9F0;"></span>
+                        <span>Approved</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background-color: #F72585;"></span>
+                        <span>Rejected</span>
+                    </div>
                 </div>
             </div>
             <div class="card-body">
                 <div class="chart-container">
-                    <canvas id="reportsOverTimeChart"></canvas>
+                    <canvas id="reports-trend-chart"></canvas>
                 </div>
             </div>
         </div>
-    </div>
-</div>
 
-<!-- Reports by Category Bar Chart -->
-<div class="row mt-4">
-    <div class="col-md-12">
+        <!-- Reports by Category Chart -->
         <div class="card">
             <div class="card-header">
                 <h2 class="card-title">Reports by Category</h2>
-                <div class="time-filter">
-                    <button class="btn btn-sm btn-outline active" data-period="day">Today</button>
-                    <button class="btn btn-sm btn-outline" data-period="week">This Week</button>
-                    <button class="btn btn-sm btn-outline" data-period="month">This Month</button>
-                </div>
             </div>
             <div class="card-body">
                 <div class="chart-container">
-                    <canvas id="categoryBarChart"></canvas>
+                    <canvas id="reports-category-chart"></canvas>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-                        <div class="card">
-                            <div class="card-header">
-                                <h2 class="card-title">Recent Reports</h2>
-                                <a href="#" class="btn btn-outline" data-view="reports">View All</a>
+    <!-- Status Distribution and Recent Activity -->
+    <div class="grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
+        <!-- Status Distribution Pie Chart -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Status Distribution</h2>
+            </div>
+            <div class="card-body">
+                <div class="chart-container pie-chart-container">
+                    <canvas id="status-distribution-chart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity Timeline -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Recent Activity</h2>
+                <a href="#" class="btn btn-outline" data-view="reports">View All</a>
+            </div>
+            <div class="card-body">
+                <div class="timeline" id="recent-activity-timeline">
+                    <!-- Timeline items will be loaded here -->
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="timeline-time">Just now</span>
+                                <span class="badge badge-success">Approved</span>
                             </div>
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table">
-                                        <thead>
-                                            <tr>
-                                                <th>Report ID</th>
-                                                <th>Title</th>
-                                                <th>Status</th>
-                                                <th>Date</th>
-                                                <th>Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="dashboard-reports-table-body">
-                                            <!-- Reports will be loaded here -->
-                                        </tbody>
-                                    </table>
-                                </div>
+                            <div class="timeline-body">
+                                <p>Loading recent activity...</p>
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <!-- Recent Reports Table -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Recent Reports</h2>
+            <a href="#" class="btn btn-outline" data-view="reports">View All</a>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Report ID</th>
+                            <th>Title</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dashboard-reports-table-body">
+                        <tr>
+                            <td colspan="5" class="text-center">
+                                <div class="d-flex justify-content-center py-4">
+                                    <div class="spinner spinner-primary"></div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
                     <!-- Reports View -->
                     <div class="view hidden" id="reports-view">
                         <div class="page-header">
@@ -2784,7 +2797,7 @@
             </div>
         </div>
     </div>
-
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         // API Configuration
         const API_BASE_URL = 'https://reporting-api-uvze.onrender.com';
@@ -2804,7 +2817,10 @@
         let audioChunks = [];
         let recordingStartTime;
         let recordingTimer;
-        
+
+        let reportsTrendChart;
+        let reportsCategoryChart;
+        let statusDistributionChart;
         // Chat state
         let chatSocket = null;
         let activeChatUserId = null;
@@ -2815,11 +2831,7 @@
         let templates = [];
         let currentTemplateFields = [];
 
-        // Chart instances
-        let statusPieChart = null;
-        let reportsOverTimeChart = null;
-        let categoryBarChart = null;
-        
+
         // OTP verification state
         let otpVerificationEmail = null;
 
@@ -4171,11 +4183,7 @@ function setupUIForUser() {
             } else if (viewId === 'users' && currentUser.role === 'admin') {
                 loadUsers();
             } else if (viewId === 'dashboard') {
-                if (typeof Chart !== 'undefined' && !statusPieChart) {
-                    initCharts();
-                } else if (typeof Chart === 'undefined') {
-                    loadScript('https://cdn.jsdelivr.net/npm/chart.js', initCharts);
-                }
+                loadDashboardData();
             } else if (viewId === 'chat') {
                 loadChatUsers();
             } else if (viewId === 'settings') {
@@ -4184,8 +4192,6 @@ function setupUIForUser() {
         } else {
             view.classList.add('hidden');
         }
-        const viewChangedEvent = new Event('viewChanged');
-        document.dispatchEvent(viewChangedEvent);
     });
     
     // Close sidebar on mobile
@@ -6582,375 +6588,405 @@ async function deleteMessage(messageId) {
         showAlert('Message deleted successfully', 'success');
     }
 }
-// visuals.js - Handles all chart rendering and data fetching for analytics
-
-// Colors for charts
-const chartColors = {
-    primary: '#4361ee',
-    success: '#4cc9f0',
-    danger: '#f72585',
-    warning: '#f8961e',
-    info: '#4895ef',
-    secondary: '#b5179e',
-    dark: '#212529'
-};
-
-// Initialize all charts
 function initCharts() {
-    // Only initialize if on dashboard view
-    if (!document.getElementById('dashboard-view') || 
-        document.getElementById('dashboard-view').classList.contains('hidden')) {
-        return;
-    }
-    
-    // Default to 'day' period
-    loadChartData('day');
-    
-    // Set up time filter buttons
-    setupTimeFilters();
-}
-
-// Call this when dashboard view is shown
-document.addEventListener('viewChanged', function() {
-    if (document.getElementById('dashboard-view') && 
-        !document.getElementById('dashboard-view').classList.contains('hidden')) {
-        initCharts();
-    }
-});
-
-// Check if we're on the dashboard view
-function isDashboardView() {
-    const dashboardView = document.getElementById('dashboard-view');
-    return dashboardView && !dashboardView.classList.contains('hidden');
-}
-
-// Set up time filter buttons
-function setupTimeFilters() {
-    document.querySelectorAll('.time-filter button').forEach(btn => {
-        btn.addEventListener('click', function() {
-            // Remove active class from all buttons in this group
-            this.parentElement.querySelectorAll('button').forEach(b => {
-                b.classList.remove('active');
-            });
-            
-            // Add active class to clicked button
-            this.classList.add('active');
-            
-            // Get the period and load data
-            const period = this.dataset.period;
-            loadChartData(period);
-        });
-    });
-}
-
-// Load data for all charts based on time period
-async function loadChartData(period) {
-    if (!isDashboardView()) return;
-    
-    try {
-        // Show loading state
-        showChartLoadingState();
-        
-        // Fetch data from API
-        const data = await fetchChartData(period);
-        
-        // Destroy existing charts if they exist
-        destroyCharts();
-        
-        // Render charts with new data
-        renderCharts(data);
-        
-    } catch (error) {
-        console.error('Error loading chart data:', error);
-        showChartErrorState();
-    }
-}
-
-// Show loading state for charts
-function showChartLoadingState() {
-    document.querySelectorAll('.chart-container').forEach(container => {
-        container.innerHTML = '<div class="text-center py-4"><div class="spinner spinner-primary"></div></div>';
-    });
-}
-
-// Show error state for charts
-function showChartErrorState() {
-    document.querySelectorAll('.chart-container').forEach(container => {
-        container.innerHTML = '<div class="text-center text-muted py-4">Error loading chart data</div>';
-    });
-}
-
-// Fetch chart data from API
-async function fetchChartData(period) {
-    const response = await fetch(`${API_BASE_URL}/analytics?period=${period}`, {
-        headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+    // Reports Trend Chart (Line Chart)
+    const trendCtx = document.getElementById('reports-trend-chart').getContext('2d');
+    reportsTrendChart = new Chart(trendCtx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [
+                {
+                    label: 'Total Reports',
+                    data: [],
+                    borderColor: '#4361EE',
+                    backgroundColor: 'rgba(67, 97, 238, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Pending',
+                    data: [],
+                    borderColor: '#F8961E',
+                    backgroundColor: 'rgba(248, 150, 30, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Approved',
+                    data: [],
+                    borderColor: '#4CC9F0',
+                    backgroundColor: 'rgba(76, 201, 240, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Rejected',
+                    data: [],
+                    borderColor: '#F72585',
+                    backgroundColor: 'rgba(247, 37, 133, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            },
+            interaction: {
+                mode: 'nearest',
+                axis: 'x',
+                intersect: false
+            }
         }
     });
-    
-    if (!response.ok) {
-        throw new Error('Failed to fetch analytics data');
-    }
-    
-    return await response.json();
-}
 
-// Destroy existing charts
-function destroyCharts() {
-    if (statusPieChart) {
-        statusPieChart.destroy();
-        statusPieChart = null;
-    }
-    if (reportsOverTimeChart) {
-        reportsOverTimeChart.destroy();
-        reportsOverTimeChart = null;
-    }
-    if (categoryBarChart) {
-        categoryBarChart.destroy();
-        categoryBarChart = null;
-    }
-}
-
-// Render all charts
-function renderCharts(data) {
-    // Clear loading/error states
-    document.querySelectorAll('.chart-container').forEach(container => {
-        container.innerHTML = '<canvas></canvas>';
-    });
-    
-    // Only try to render if canvas elements exist
-    if (document.getElementById('statusPieChart')) {
-        renderStatusPieChart(data.status_distribution);
-    }
-    if (document.getElementById('reportsOverTimeChart')) {
-        renderReportsOverTimeChart(data.reports_over_time);
-    }
-    if (document.getElementById('categoryBarChart')) {
-        renderCategoryBarChart(data.category_distribution);
-    }
-}
-
-// Render pie chart for status distribution
-function renderStatusPieChart(data) {
-    const canvas = document.getElementById('statusPieChart');
-    if (!canvas) return;
-    
-    const ctx = canvas.getContext('2d');
-    statusPieChart = new Chart(ctx, {
-        type: 'doughnut',
+    // Reports by Category Chart (Bar Chart)
+    const categoryCtx = document.getElementById('reports-category-chart').getContext('2d');
+    reportsCategoryChart = new Chart(categoryCtx, {
+        type: 'bar',
         data: {
-            labels: ['Approved', 'Pending', 'Rejected'],
+            labels: [],
             datasets: [{
-                data: [data.approved || 0, data.pending || 0, data.rejected || 0],
+                label: 'Reports by Category',
+                data: [],
                 backgroundColor: [
-                    '#4cc9f0', // success
-                    '#f8961e', // warning
-                    '#f72585'  // danger
+                    'rgba(67, 97, 238, 0.7)',
+                    'rgba(248, 150, 30, 0.7)',
+                    'rgba(76, 201, 240, 0.7)',
+                    'rgba(52, 211, 153, 0.7)',
+                    'rgba(139, 92, 246, 0.7)',
+                    'rgba(236, 72, 153, 0.7)'
+                ],
+                borderColor: [
+                    '#4361EE',
+                    '#F8961E',
+                    '#4CC9F0',
+                    '#34D399',
+                    '#8B5CF6',
+                    '#EC4899'
                 ],
                 borderWidth: 1
             }]
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    position: 'right',
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
                 }
             }
         }
     });
-}
 
-// Render line chart for reports over time
-function renderReportsOverTimeChart(data) {
-    const canvas = document.getElementById('reportsOverTimeChart');
-    if (!canvas) return;
-    
-    const ctx = canvas.getContext('2d');
-    reportsOverTimeChart = new Chart(ctx, {
-        type: 'line',
+    // Status Distribution Chart (Doughnut Chart)
+    const statusCtx = document.getElementById('status-distribution-chart').getContext('2d');
+    statusDistributionChart = new Chart(statusCtx, {
+        type: 'doughnut',
         data: {
-            labels: data.map(item => item.date),
-            datasets: getLineChartDatasets(data)
+            labels: ['Pending', 'Approved', 'Rejected'],
+            datasets: [{
+                data: [0, 0, 0],
+                backgroundColor: [
+                    '#F8961E',
+                    '#4CC9F0',
+                    '#F72585'
+                ],
+                borderWidth: 0
+            }]
         },
-        options: getLineChartOptions()
-    });
-}
-
-// Render bar chart for category distribution
-function renderCategoryBarChart(data) {
-    const canvas = document.getElementById('categoryBarChart');
-    if (!canvas) return;
-    
-    const ctx = canvas.getContext('2d');
-    categoryBarChart = new Chart(ctx, {
-        type: 'bar',
-        data: getBarChartData(data),
-        options: getBarChartOptions()
-    });
-}
-
-// Chart configuration functions
-function getPieChartOptions() {
-    return {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                position: 'right',
-            },
-            tooltip: {
-                callbacks: {
-                    label: function(context) {
-                        const label = context.label || '';
-                        const value = context.raw || 0;
-                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                        const percentage = Math.round((value / total) * 100);
-                        return `${label}: ${value} (${percentage}%)`;
-                    }
+        options: {
+            responsive: true,
+            cutout: '70%',
+            plugins: {
+                legend: {
+                    position: 'bottom'
                 }
             }
-        },
-        cutout: '70%'
-    };
+        }
+    });
 }
 
-function getLineChartDatasets(data) {
-    return [
-        {
-            label: 'Approved',
-            data: data.map(item => item.approved),
-            borderColor: chartColors.success,
-            backgroundColor: 'rgba(76, 201, 240, 0.1)',
-            tension: 0.3,
-            fill: true
-        },
-        {
-            label: 'Pending',
-            data: data.map(item => item.pending),
-            borderColor: chartColors.warning,
-            backgroundColor: 'rgba(248, 150, 30, 0.1)',
-            tension: 0.3,
-            fill: true
-        },
-        {
-            label: 'Rejected',
-            data: data.map(item => item.rejected),
-            borderColor: chartColors.danger,
-            backgroundColor: 'rgba(247, 37, 133, 0.1)',
-            tension: 0.3,
-            fill: true
-        }
+// Update charts with data from API
+function updateCharts(data) {
+    // Update Reports Trend Chart
+    reportsTrendChart.data.labels = data.trend.labels;
+    reportsTrendChart.data.datasets[0].data = data.trend.total;
+    reportsTrendChart.data.datasets[1].data = data.trend.pending;
+    reportsTrendChart.data.datasets[2].data = data.trend.approved;
+    reportsTrendChart.data.datasets[3].data = data.trend.rejected;
+    reportsTrendChart.update();
+
+    // Update Reports by Category Chart
+    reportsCategoryChart.data.labels = data.categories.map(c => c.name);
+    reportsCategoryChart.data.datasets[0].data = data.categories.map(c => c.count);
+    reportsCategoryChart.update();
+
+    // Update Status Distribution Chart
+    statusDistributionChart.data.datasets[0].data = [
+        data.counts.pending,
+        data.counts.approved,
+        data.counts.rejected
     ];
+    statusDistributionChart.update();
 }
 
-function getLineChartOptions() {
-    return {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                position: 'top',
-            },
-            tooltip: {
-                mode: 'index',
-                intersect: false,
-            }
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    precision: 0
-                }
-            }
-        },
-        interaction: {
-            mode: 'nearest',
-            axis: 'x',
-            intersect: false
-        }
-    };
-}
-
-function getBarChartData(data) {
-    // Sort categories by count (descending)
-    const sortedCategories = Object.entries(data)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 10); // Limit to top 10 categories
+// Load dashboard data from API
+async function loadDashboardData() {
+    const timePeriod = document.getElementById('time-period-filter').value;
     
-    return {
-        labels: sortedCategories.map(item => item[0]),
-        datasets: [{
-            label: 'Reports',
-            data: sortedCategories.map(item => item[1]),
-            backgroundColor: chartColors.primary,
-            borderColor: chartColors.primary,
-            borderWidth: 1
-        }]
-    };
+    try {
+        // Show loading states
+        document.getElementById('total-reports-count').textContent = '...';
+        document.getElementById('pending-reports-count').textContent = '...';
+        document.getElementById('approved-reports-count').textContent = '...';
+        document.getElementById('rejected-reports-count').textContent = '...';
+        
+        // Fetch dashboard data
+        const response = await fetch(`${API_BASE_URL}/dashboard?period=${timePeriod}`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch dashboard data');
+        }
+        
+        const data = await response.json();
+        
+        // Update stats cards
+        document.getElementById('total-reports-count').textContent = data.counts.total;
+        document.getElementById('pending-reports-count').textContent = data.counts.pending;
+        document.getElementById('approved-reports-count').textContent = data.counts.approved;
+        document.getElementById('rejected-reports-count').textContent = data.counts.rejected;
+        
+        // Update trend indicators
+        updateTrendIndicator('total-reports-trend', data.trends.total);
+        updateTrendIndicator('pending-reports-trend', data.trends.pending);
+        updateTrendIndicator('approved-reports-trend', data.trends.approved);
+        updateTrendIndicator('rejected-reports-trend', data.trends.rejected);
+        
+        // Update charts
+        updateCharts(data);
+        
+        // Update recent activity timeline
+        updateRecentActivity(data.recentActivity);
+        
+        // Update recent reports table
+        renderRecentReports(data.recentReports);
+        
+    } catch (error) {
+        console.error('Error loading dashboard data:', error);
+        showAlert('Failed to load dashboard data', 'danger');
+        
+        // Set default/error values
+        document.getElementById('total-reports-count').textContent = '0';
+        document.getElementById('pending-reports-count').textContent = '0';
+        document.getElementById('approved-reports-count').textContent = '0';
+        document.getElementById('rejected-reports-count').textContent = '0';
+        
+        document.getElementById('dashboard-reports-table-body').innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center text-muted">Error loading reports</td>
+            </tr>
+        `;
+    }
 }
 
-function getBarChartOptions() {
-    return {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                display: false
-            },
-            tooltip: {
-                callbacks: {
-                    label: function(context) {
-                        return `${context.parsed.y} reports`;
-                    }
-                }
-            }
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    precision: 0
-                }
-            }
+// Update trend indicator with value and direction
+function updateTrendIndicator(elementId, trendData) {
+    const element = document.getElementById(elementId);
+    const icon = element.querySelector('i');
+    const valueSpan = element.querySelector('.trend-value');
+    
+    valueSpan.textContent = `${Math.abs(trendData.percentage)}%`;
+    
+    if (trendData.percentage > 0) {
+        icon.className = 'fas fa-arrow-up trend-up';
+        element.classList.add('trend-up');
+        element.classList.remove('trend-down');
+    } else if (trendData.percentage < 0) {
+        icon.className = 'fas fa-arrow-down trend-down';
+        element.classList.add('trend-down');
+        element.classList.remove('trend-up');
+    } else {
+        icon.className = 'fas fa-minus trend-neutral';
+        element.classList.remove('trend-up', 'trend-down');
+    }
+}
+
+// Update recent activity timeline
+function updateRecentActivity(activities) {
+    const timeline = document.getElementById('recent-activity-timeline');
+    timeline.innerHTML = '';
+    
+    if (activities.length === 0) {
+        timeline.innerHTML = `
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <div class="timeline-body">
+                        <p class="text-muted">No recent activity</p>
+                    </div>
+                </div>
+            </div>
+        `;
+        return;
+    }
+    
+    activities.forEach(activity => {
+        let badgeClass = '';
+        if (activity.type === 'report') {
+            if (activity.status === 'approved') badgeClass = 'badge-success';
+            else if (activity.status === 'pending') badgeClass = 'badge-warning';
+            else if (activity.status === 'rejected') badgeClass = 'badge-danger';
+        } else if (activity.type === 'user') {
+            badgeClass = 'badge-primary';
         }
-    };
+        
+        const timeAgo = formatTimeAgo(activity.timestamp);
+        
+        const item = document.createElement('div');
+        item.className = 'timeline-item';
+        item.innerHTML = `
+            <div class="timeline-content">
+                <div class="timeline-header">
+                    <span class="timeline-time">${timeAgo}</span>
+                    ${activity.status ? `<span class="badge ${badgeClass}">${activity.status}</span>` : ''}
+                </div>
+                <div class="timeline-body">
+                    <p>${activity.message}</p>
+                    ${activity.link ? `<a href="${activity.link}" class="btn btn-link btn-sm">View</a>` : ''}
+                </div>
+            </div>
+        `;
+        
+        timeline.appendChild(item);
+    });
+}
+
+// Format time as "X time ago"
+function formatTimeAgo(timestamp) {
+    const now = new Date();
+    const date = new Date(timestamp);
+    const seconds = Math.floor((now - date) / 1000);
+    
+    let interval = Math.floor(seconds / 31536000);
+    if (interval >= 1) return `${interval} year${interval === 1 ? '' : 's'} ago`;
+    
+    interval = Math.floor(seconds / 2592000);
+    if (interval >= 1) return `${interval} month${interval === 1 ? '' : 's'} ago`;
+    
+    interval = Math.floor(seconds / 86400);
+    if (interval >= 1) return `${interval} day${interval === 1 ? '' : 's'} ago`;
+    
+    interval = Math.floor(seconds / 3600);
+    if (interval >= 1) return `${interval} hour${interval === 1 ? '' : 's'} ago`;
+    
+    interval = Math.floor(seconds / 60);
+    if (interval >= 1) return `${interval} minute${interval === 1 ? '' : 's'} ago`;
+    
+    return 'Just now';
+}
+
+// Render recent reports for dashboard
+function renderRecentReports(reports) {
+    const tableBody = document.getElementById('dashboard-reports-table-body');
+    tableBody.innerHTML = '';
+    
+    if (reports.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center text-muted">No reports found</td>
+            </tr>
+        `;
+        return;
+    }
+    
+    reports.forEach(report => {
+        const row = document.createElement('tr');
+        
+        // Determine status badge
+        let statusBadge;
+        if (report.status === 'approved') {
+            statusBadge = '<span class="badge badge-success">Approved</span>';
+        } else if (report.status === 'pending') {
+            statusBadge = '<span class="badge badge-warning">Pending</span>';
+        } else {
+            statusBadge = '<span class="badge badge-danger">Rejected</span>';
+        }
+        
+        // Format date
+        const reportDate = new Date(report.created_at).toLocaleDateString();
+        
+        row.innerHTML = `
+            <td>#REP-${report.id.toString().padStart(3, '0')}</td>
+            <td>${report.title}</td>
+            <td>${statusBadge}</td>
+            <td>${reportDate}</td>
+            <td>
+                <button class="action-btn view-report-btn" data-id="${report.id}" title="View">
+                    <i class="fas fa-eye"></i>
+                </button>
+                <button class="action-btn download-report-btn" data-id="${report.id}" title="Download PDF">
+                    <i class="fas fa-download"></i>
+                </button>
+            </td>
+        `;
+        
+        tableBody.appendChild(row);
+    });
 }
 
 // Initialize charts when dashboard view is loaded
-document.addEventListener('DOMContentLoaded', function() {
-    // Load Chart.js first if not already loaded
-    if (typeof Chart === 'undefined') {
-        loadScript('https://cdn.jsdelivr.net/npm/chart.js', function() {
-            // Initialize charts after Chart.js is loaded
-            initCharts();
-        });
-    } else {
-        // Chart.js already loaded, initialize directly
-        initCharts();
-    }
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize charts
+    initCharts();
+    
+    // Load dashboard data when dashboard view is shown
+    document.getElementById('dashboard-view').addEventListener('viewShown', loadDashboardData);
+    
+    // Reload data when time period filter changes
+    document.getElementById('time-period-filter').addEventListener('change', loadDashboardData);
 });
 
-// Listen for view changes
-document.addEventListener('viewChanged', function() {
-    if (isDashboardView()) {
-        initCharts();
-    }
+// Custom event for view switching
+document.querySelectorAll('[data-view]').forEach(item => {
+    item.addEventListener('click', function() {
+        const viewId = this.getAttribute('data-view');
+        const viewElement = document.getElementById(`${viewId}-view`);
+        
+        // Dispatch custom event when view is shown
+        if (viewElement) {
+            const event = new Event('viewShown');
+            viewElement.dispatchEvent(event);
+        }
+    });
 });
-
-// Helper function to load scripts dynamically
-function loadScript(src, callback) {
-    const script = document.createElement('script');
-    script.src = src;
-    script.onload = callback;
-    script.onerror = function() {
-        console.error('Error loading Chart.js');
-        showChartErrorState();
-    };
-    document.head.appendChild(script);
-}
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
     </script>
