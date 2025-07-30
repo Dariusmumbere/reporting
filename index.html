@@ -1830,6 +1830,67 @@
                                 </div>
                             </div>
                         </div>
+                        <!-- Add this to your dashboard-view div, after the recent reports card -->
+<div class="row">
+    <!-- Reports Status Pie Chart -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Reports Status Distribution</h2>
+                <div class="time-filter">
+                    <button class="btn btn-sm btn-outline active" data-period="day">Today</button>
+                    <button class="btn btn-sm btn-outline" data-period="week">This Week</button>
+                    <button class="btn btn-sm btn-outline" data-period="month">This Month</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="statusPieChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reports Over Time Line Chart -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Reports Over Time</h2>
+                <div class="time-filter">
+                    <button class="btn btn-sm btn-outline active" data-period="day">Daily</button>
+                    <button class="btn btn-sm btn-outline" data-period="week">Weekly</button>
+                    <button class="btn btn-sm btn-outline" data-period="month">Monthly</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="reportsOverTimeChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reports by Category Bar Chart -->
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Reports by Category</h2>
+                <div class="time-filter">
+                    <button class="btn btn-sm btn-outline active" data-period="day">Today</button>
+                    <button class="btn btn-sm btn-outline" data-period="week">This Week</button>
+                    <button class="btn btn-sm btn-outline" data-period="month">This Month</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="categoryBarChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
                         <div class="card">
                             <div class="card-header">
