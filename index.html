@@ -11,10 +11,50 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script src="download.js"></script>
+    <script src="visuals.js"></script>
     <link rel="stylesheet" href="styles.css">
     
     <style>
-/* Add this to your CSS */
+/* Chart containers */
+.chart-container {
+    position: relative;
+    height: 300px;
+    min-height: 300px;
+    width: 100%;
+}
+
+/* Time filter buttons */
+.time-filter {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.time-filter button {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    border-radius: 4px;
+}
+
+.time-filter button.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .chart-container {
+        height: 250px;
+    }
+    
+    .row {
+        flex-direction: column;
+    }
+    
+    .col-md-6 {
+        width: 100%;
+    }
+}
 .delete-message-btn {
     background: none;
     border: none;
@@ -4066,7 +4106,11 @@ function setupUIForUser() {
             } else if (viewId === 'users' && currentUser.role === 'admin') {
                 loadUsers();
             } else if (viewId === 'dashboard') {
-                loadDashboardData();
+                if (typeof Chart !== 'undefined' && !statusPieChart) {
+                    initCharts();
+                } else if (typeof Chart === 'undefined') {
+                    loadScript('https://cdn.jsdelivr.net/npm/chart.js', initCharts);
+                }
             } else if (viewId === 'chat') {
                 loadChatUsers();
             } else if (viewId === 'settings') {
