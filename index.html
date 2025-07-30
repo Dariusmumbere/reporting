@@ -1746,18 +1746,22 @@
     <!-- Stats Cards -->
     <div class="grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
         <div class="card">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <div>
-                                            <h3 style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Approved</h3>
-                                            <p style="font-size: 1.75rem; font-weight: 600; margin-bottom: 0;" id="approved-reports-count">0</p>
-                                        </div>
-                                        <div style="width: 48px; height: 48px; border-radius: 50%; background-color: rgba(76, 201, 240, 0.1); display: flex; align-items: center; justify-content: center;">
-                                            <i class="fas fa-check-circle" style="font-size: 1.25rem; color: var(--success-color);"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h3 style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Total Reports</h3>
+                        <p style="font-size: 1.75rem; font-weight: 600; margin-bottom: 0;" id="total-reports-count">0</p>
+                        <div class="trend-indicator" id="total-reports-trend">
+                            <i class="fas fa-arrow-up trend-up"></i>
+                            <span class="trend-value">0%</span>
+                        </div>
+                    </div>
+                    <div style="width: 48px; height: 48px; border-radius: 50%; background-color: rgba(67, 97, 238, 0.1); display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-file-alt" style="font-size: 1.25rem; color: var(--primary-color);"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="card">
             <div class="card-body">
                 <div class="d-flex align-items-center justify-content-between">
@@ -1894,39 +1898,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Recent Reports Table -->
-    <div class="card">
-        <div class="card-header">
-            <h2 class="card-title">Recent Reports</h2>
-            <a href="#" class="btn btn-outline" data-view="reports">View All</a>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Report ID</th>
-                            <th>Title</th>
-                            <th>Status</th>
-                            <th>Date</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="dashboard-reports-table-body">
-                        <tr>
-                            <td colspan="5" class="text-center">
-                                <div class="d-flex justify-content-center py-4">
-                                    <div class="spinner spinner-primary"></div>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
                     <!-- Reports View -->
                     <div class="view hidden" id="reports-view">
                         <div class="page-header">
