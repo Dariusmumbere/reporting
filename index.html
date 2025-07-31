@@ -14,6 +14,292 @@
     <link rel="stylesheet" href="styles.css">
     
     <style>
+/* Base styles for the auth container */
+.auth-container {
+    display: flex;
+    min-height: 100vh;
+    background-color: #f8f9fa;
+    overflow: hidden;
+}
+
+/* Make right side scrollable if form is too long */
+.auth-right {
+    width: 450px;
+    background: white;
+    padding: 3rem 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    overflow-y: auto; /* Enable scrolling */
+    max-height: 100vh; /* Ensure scroll fits screen */
+    box-sizing: border-box;
+}
+
+/* Hide scrollbars in WebKit browsers */
+.auth-right::-webkit-scrollbar {
+    width: 6px;
+}
+.auth-right::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+}
+.auth-right::-webkit-scrollbar-thumb:hover {
+    background: #999;
+}
+
+.auth-left {
+    flex: 1;
+    background: linear-gradient(135deg, #4361ee, #3a0ca3);
+    color: white;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Form transition styles */
+.auth-form-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.auth-form {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(20px);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+}
+
+.auth-form.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+    pointer-events: all;
+}
+
+/* Toggle switch styles */
+.auth-toggle {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.auth-toggle-btn {
+    background: none;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #6c757d;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.auth-toggle-btn.active {
+    color: #4361ee;
+}
+
+.auth-toggle-indicator {
+    position: absolute;
+    bottom: 0;
+    height: 3px;
+    background-color: #4361ee;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+}
+
+/* Form styles */
+.auth-logo {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.auth-logo h2 {
+    font-size: 1.75rem;
+    margin-bottom: 0.5rem;
+    color: #212529;
+}
+
+.auth-logo p {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #495057;
+    font-size: 0.9rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+    font-size: 0.9rem;
+    transition: border-color 0.15s ease-in-out;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #4361ee;
+    box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+}
+
+.btn-primary {
+    background-color: #4361ee;
+    color: white;
+    width: 100%;
+}
+
+.btn-primary:hover {
+    background-color: #3a56d0;
+}
+
+.auth-footer {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.auth-footer a {
+    color: #4361ee;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.auth-footer a:hover {
+    text-decoration: underline;
+}
+
+/* Alert styles */
+.alert {
+    padding: 1rem;
+    border-radius: 0.375rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: flex-start;
+}
+
+.alert-danger {
+    background-color: #fff5f5;
+    border: 1px solid #ffd6d6;
+    color: #dc3545;
+}
+
+.alert i {
+    margin-right: 0.75rem;
+    font-size: 1.25rem;
+}
+
+.alert-content {
+    flex: 1;
+}
+
+.alert-title {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.alert-message {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+/* Remember me and forgot password */
+.auth-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.remember-me {
+    display: flex;
+    align-items: center;
+}
+
+.remember-me input {
+    margin-right: 0.5rem;
+}
+
+.forgot-password {
+    color: #4361ee;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.forgot-password:hover {
+    text-decoration: underline;
+}
+
+/* Spinner */
+.spinner {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s ease-in-out infinite;
+    margin-left: 0.5rem;
+}
+
+.hidden {
+    display: none;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .auth-container {
+        flex-direction: column;
+        overflow-y: auto; /* Scroll on small screens */
+    }
+    
+    .auth-left {
+        display: none; /* Hide left part */
+    }
+    
+    .auth-right {
+        width: 100%;
+        padding: 2rem 1.5rem;
+        max-height: unset; /* Allow natural height with scroll */
+        overflow-y: visible;
+    }
+}
 
 /* Add this to your CSS */
 .delete-message-btn {
