@@ -7719,7 +7719,7 @@ async function markAllNotificationsAsRead() {
         await fetch(`${API_BASE_URL}/notifications/mark-all-read`, {
             method: 'PATCH',
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}'
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
         });
         
@@ -7733,6 +7733,7 @@ async function markAllNotificationsAsRead() {
         console.error('Error marking all notifications as read:', error);
     }
 }
+
 
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
