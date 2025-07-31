@@ -7344,15 +7344,13 @@ if (inviteToken) {
     document.getElementById('invite-token').value = inviteToken;
 }
 // Profile Picture Upload Functionality
-function setupProfilePictureUpload() {
+// Profile Picture Management
+function setupProfilePictureHandling() {
     const profilePictureUpload = document.getElementById('profile-picture-upload');
-    const profilePicturePreview = document.getElementById('profile-picture-preview');
-    const profilePictureImg = document.getElementById('profile-picture-img');
-    const profilePictureInitials = document.getElementById('profile-picture-initials');
     const removeProfilePictureBtn = document.getElementById('remove-profile-picture-btn');
 
     // Handle file selection
-    profilePictureUpload.addEventListener('change', async function(e) {
+    profilePictureUpload?.addEventListener('change', async function(e) {
         const file = e.target.files[0];
         if (!file) return;
 
@@ -7371,12 +7369,10 @@ function setupProfilePictureUpload() {
             return;
         }
 
-        // Show preview
+        // Show temporary preview
         const reader = new FileReader();
         reader.onload = function(event) {
-            profilePictureImg.src = event.target.result;
-            profilePictureImg.style.display = 'block';
-            profilePictureInitials.style.display = 'none';
+            updateProfilePicturePreview(event.target.result);
         };
         reader.readAsDataURL(file);
 
@@ -7401,20 +7397,24 @@ function setupProfilePictureUpload() {
             const data = await response.json();
             showAlert('Profile picture updated successfully', 'success');
             
-            // Update user avatar in UI
-            updateProfilePictureInUI(data.profile_picture_url);
+            // Update current user's profile picture URL
+            if (currentUser) {
+                currentUser.profile_picture = data.profile_picture_url;
+            }
+            
+            // Reload profile picture
+            loadProfilePicture(currentUser?.id);
         } catch (error) {
             console.error('Error uploading profile picture:', error);
             showAlert(error.message || 'Failed to upload profile picture', 'danger');
             
             // Reset preview if upload fails
-            profilePictureImg.style.display = 'none';
-            profilePictureInitials.style.display = 'block';
+            updateProfilePicturePreview(null);
         }
     });
 
     // Handle remove profile picture
-    removeProfilePictureBtn.addEventListener('click', async function() {
+    removeProfilePictureBtn?.addEventListener('click', async function() {
         if (!confirm('Are you sure you want to remove your profile picture?')) {
             return;
         }
@@ -7435,13 +7435,13 @@ function setupProfilePictureUpload() {
 
             showAlert('Profile picture removed successfully', 'success');
             
-            // Reset preview
-            profilePictureImg.src = '';
-            profilePictureImg.style.display = 'none';
-            profilePictureInitials.style.display = 'block';
+            // Update current user's profile picture URL
+            if (currentUser) {
+                currentUser.profile_picture = null;
+            }
             
-            // Update user avatar in UI
-            updateProfilePictureInUI(null);
+            // Reload profile picture
+            loadProfilePicture(currentUser?.id);
         } catch (error) {
             console.error('Error removing profile picture:', error);
             showAlert(error.message || 'Failed to remove profile picture', 'danger');
@@ -7449,12 +7449,62 @@ function setupProfilePictureUpload() {
     });
 }
 
+// Update profile picture preview in the UI
+function updateProfilePicturePreview(imageUrl) {
+    const profilePictureImg = document.getElementById('profile-picture-img');
+    const profilePictureInitials = document.getElementById('profile-picture-initials');
+    
+    if (imageUrl) {
+        profilePictureImg.src = imageUrl;
+        profilePictureImg.style.display = 'block';
+        profilePictureInitials.style.display = 'none';
+    } else {
+        const initials = currentUser?.name ? currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'U';
+        profilePictureInitials.textContent = initials;
+        profilePictureInitials.style.display = 'block';
+        profilePictureImg.style.display = 'none';
+    }
+}
+
+// Load profile picture from backend
+async function loadProfilePicture(userId) {
+    if (!userId) return;
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/users/profile-picture/${userId}`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+
+        if (!response.ok) {
+            // If no profile picture exists, the backend returns 404
+            if (response.status === 404) {
+                updateProfilePicturePreview(null);
+                return;
+            }
+            throw new Error('Failed to load profile picture');
+        }
+
+        // For images, we need to create an object URL from the blob
+        const blob = await response.blob();
+        const imageUrl = URL.createObjectURL(blob);
+        
+        // Update the preview
+        updateProfilePicturePreview(imageUrl);
+        
+        // Update avatars in UI
+        updateProfilePictureInUI(imageUrl);
+    } catch (error) {
+        console.error('Error loading profile picture:', error);
+        updateProfilePicturePreview(null);
+    }
+}
+
 // Update profile picture in UI (sidebar, dropdown, etc.)
 function updateProfilePictureInUI(imageUrl) {
     const userAvatar = document.getElementById('user-avatar');
     const userDropdownAvatar = document.getElementById('user-dropdown-avatar');
-    const profilePictureImg = document.getElementById('profile-picture-img');
-    const profilePictureInitials = document.getElementById('profile-picture-initials');
     
     if (imageUrl) {
         // Update avatar in sidebar
@@ -7480,68 +7530,36 @@ function updateProfilePictureInUI(imageUrl) {
             img.style.borderRadius = '50%';
             userDropdownAvatar.appendChild(img);
         }
-        
-        // Update profile picture preview
-        if (profilePictureImg) {
-            profilePictureImg.src = imageUrl;
-            profilePictureImg.style.display = 'block';
-            profilePictureInitials.style.display = 'none';
-        }
     } else {
         // Use initials if no profile picture
         const initials = currentUser?.name ? currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'U';
         
         if (userAvatar) {
-            userAvatar.innerHTML = initials;
+            userAvatar.textContent = initials;
         }
         
         if (userDropdownAvatar) {
-            userDropdownAvatar.innerHTML = initials;
-        }
-        
-        if (profilePictureImg) {
-            profilePictureImg.style.display = 'none';
-            profilePictureInitials.textContent = initials;
-            profilePictureInitials.style.display = 'block';
+            userDropdownAvatar.textContent = initials;
         }
     }
 }
 
-// Load current profile picture
-function loadProfilePicture() {
-    if (!currentUser) return;
-    
-    const profilePictureImg = document.getElementById('profile-picture-img');
-    const profilePictureInitials = document.getElementById('profile-picture-initials');
-    
-    if (currentUser.profile_picture) {
-        // Show profile picture
-        profilePictureImg.src = currentUser.profile_picture;
-        profilePictureImg.style.display = 'block';
-        profilePictureInitials.style.display = 'none';
-        
-        // Update avatars in UI
-        updateProfilePictureInUI(currentUser.profile_picture);
-    } else {
-        // Show initials
-        const initials = currentUser.name ? currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'U';
-        profilePictureInitials.textContent = initials;
-        profilePictureInitials.style.display = 'block';
-        profilePictureImg.style.display = 'none';
-        
-        // Update avatars in UI
-        updateProfilePictureInUI(null);
-    }
-}
-
-// Initialize the profile picture upload functionality when the DOM is loaded
+// Initialize the profile picture functionality when the DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    setupProfilePictureUpload();
+    setupProfilePictureHandling();
     
-    // Also initialize when the profile view is shown
-    document.getElementById('profile-view')?.addEventListener('viewShown', loadProfilePicture);
+    // Load profile picture when profile view is shown
+    document.getElementById('profile-view')?.addEventListener('viewShown', function() {
+        if (currentUser) {
+            loadProfilePicture(currentUser.id);
+        }
+    });
+    
+    // Also load profile picture when user logs in
+    if (currentUser) {
+        loadProfilePicture(currentUser.id);
+    }
 });
-
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
     </script>
