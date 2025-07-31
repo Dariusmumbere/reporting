@@ -14,138 +14,6 @@
     <link rel="stylesheet" href="styles.css">
     
     <style>
-.notification-btn {
-    position: relative;
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 1.25rem;
-    color: var(--text-color);
-    padding: 0.5rem;
-    border-radius: 50%;
-    transition: background-color 0.2s;
-}
-
-.notification-btn:hover {
-    background-color: var(--hover-color);
-}
-
-.notification-badge {
-    position: absolute;
-    top: 0;
-    right: 0;
-    background-color: var(--danger-color);
-    color: white;
-    border-radius: 50%;
-    width: 18px;
-    height: 18px;
-    font-size: 0.7rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.notification-dropdown {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    width: 350px;
-    max-height: 400px;
-    overflow-y: auto;
-    background-color: var(--card-bg);
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    z-index: 1000;
-    padding: 0;
-    margin-top: 8px;
-    border: 1px solid var(--border-color);
-}
-
-.notification-header {
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border-color);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.notification-header h4 {
-    margin: 0;
-    font-size: 1rem;
-}
-
-.mark-all-read-btn {
-    background: none;
-    border: none;
-    color: var(--primary-color);
-    cursor: pointer;
-    font-size: 0.8rem;
-    padding: 4px 8px;
-}
-
-.mark-all-read-btn:hover {
-    text-decoration: underline;
-}
-
-.notification-list {
-    padding: 0;
-}
-
-.notification-item {
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border-color);
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.notification-item:hover {
-    background-color: var(--hover-color);
-}
-
-.notification-item.unread {
-    background-color: rgba(var(--primary-rgb), 0.1);
-}
-
-.notification-item .notification-title {
-    font-weight: 600;
-    margin-bottom: 4px;
-    display: flex;
-    justify-content: space-between;
-}
-
-.notification-item .notification-message {
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    margin-bottom: 4px;
-}
-
-.notification-item .notification-time {
-    font-size: 0.75rem;
-    color: var(--text-tertiary);
-    text-align: right;
-}
-
-.notification-empty {
-    padding: 16px;
-    text-align: center;
-    color: var(--text-secondary);
-}
-
-.notification-footer {
-    padding: 8px 16px;
-    border-top: 1px solid var(--border-color);
-    text-align: center;
-}
-
-.view-all-notifications {
-    color: var(--primary-color);
-    font-size: 0.9rem;
-    text-decoration: none;
-}
-
-.view-all-notifications:hover {
-    text-decoration: underline;
-}
 /* Base styles for the auth container */
 .auth-container {
     display: flex;
@@ -2220,22 +2088,10 @@
                         <button class="theme-toggle" id="theme-toggle">
                             <i class="fas fa-moon"></i>
                         </button>
-                        <button class="notification-btn" id="notification-btn">
-    <i class="fas fa-bell"></i>
-    <span class="notification-badge hidden" id="notification-badge">0</span>
-    <div class="notification-dropdown hidden" id="notification-dropdown">
-        <div class="notification-header">
-            <h4>Notifications</h4>
-            <button class="mark-all-read-btn" id="mark-all-read-btn">Mark all as read</button>
-        </div>
-        <div class="notification-list" id="notification-list">
-            <div class="notification-empty">Loading notifications...</div>
-        </div>
-        <div class="notification-footer">
-            <a href="#" class="view-all-notifications">View All</a>
-        </div>
-    </div>
-</button>
+                        <button class="notification-btn">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-badge">3</span>
+                        </button>
                         <div class="user-dropdown">
                             <button class="user-dropdown-btn" id="user-dropdown-btn">
                                 <div class="user-dropdown-avatar" id="user-dropdown-avatar">A</div>
@@ -3586,12 +3442,6 @@
         const shareLinkedinBtn = document.getElementById('share-linkedin');
         const shareTwitterBtn = document.getElementById('share-twitter');
 
-        const notificationBtn = document.getElementById('notification-btn');
-        const notificationBadge = document.getElementById('notification-badge');
-        const notificationDropdown = document.getElementById('notification-dropdown');
-        const notificationList = document.getElementById('notification-list');
-        const markAllReadBtn = document.getElementById('mark-all-read-btn');
-
 
         // Initialize the application
         function init() {
@@ -3603,7 +3453,6 @@
             initTemplateManagement();
             loadProfilePicture();
             updateToggleIndicator();
-            startNotificationPolling();
             document.getElementById('users-view')?.addEventListener('viewShown', loadActiveInvitations);
         }
 
@@ -8088,162 +7937,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('invite-fields').classList.remove('hidden');
     }
 });
-notificationBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    notificationDropdown.classList.toggle('hidden');
-    
-    if (!notificationDropdown.classList.contains('hidden')) {
-        loadNotifications();
-    }
-});
-
-// Close dropdown when clicking outside
-document.addEventListener('click', (e) => {
-    if (!notificationBtn.contains(e.target) && !notificationDropdown.contains(e.target)) {
-        notificationDropdown.classList.add('hidden');
-    }
-});
-
-// Load notifications
-async function loadNotifications() {
-    try {
-        notificationList.innerHTML = '<div class="notification-empty">Loading notifications...</div>';
-        
-        const response = await fetch(`${API_BASE_URL}/notifications?limit=5`);
-        if (!response.ok) throw new Error('Failed to load notifications');
-        
-        const notifications = await response.json();
-        
-        if (notifications.length === 0) {
-            notificationList.innerHTML = '<div class="notification-empty">No notifications</div>';
-            return;
-        }
-        
-        notificationList.innerHTML = '';
-        
-        notifications.forEach(notification => {
-            const notificationItem = document.createElement('div');
-            notificationItem.className = `notification-item ${notification.is_read ? '' : 'unread'}`;
-            notificationItem.innerHTML = `
-                <div class="notification-title">
-                    <span>${notification.title}</span>
-                    ${!notification.is_read ? '<span class="unread-dot"></span>' : ''}
-                </div>
-                <div class="notification-message">${notification.message}</div>
-                <div class="notification-time">${formatTimeAgo(notification.created_at)}</div>
-            `;
-            
-            notificationItem.addEventListener('click', () => {
-                markNotificationAsRead(notification.id);
-                if (notification.link) {
-                    window.location.href = notification.link;
-                }
-            });
-            
-            notificationList.appendChild(notificationItem);
-        });
-    } catch (error) {
-        console.error('Error loading notifications:', error);
-        notificationList.innerHTML = '<div class="notification-empty">Error loading notifications</div>';
-    }
-}
-
-// Format time ago
-function formatTimeAgo(dateString) {
-    const date = new Date(dateString);
-    const now = new Date();
-    const seconds = Math.floor((now - date) / 1000);
-    
-    if (seconds < 60) return 'Just now';
-    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
-    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
-    return `${Math.floor(seconds / 86400)}d ago`;
-}
-
-// Mark notification as read
-async function markNotificationAsRead(notificationId) {
-    try {
-        await fetch(`${API_BASE_URL}/notifications/${notificationId}/mark-read`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-        });
-        
-        // Update UI
-        const notificationItem = document.querySelector(`.notification-item[data-id="${notificationId}"]`);
-        if (notificationItem) {
-            notificationItem.classList.remove('unread');
-            const unreadDot = notificationItem.querySelector('.unread-dot');
-            if (unreadDot) unreadDot.remove();
-        }
-        
-        // Update badge count
-        updateNotificationBadge();
-    } catch (error) {
-        console.error('Error marking notification as read:', error);
-    }
-}
-
-// Mark all notifications as read
-markAllReadBtn.addEventListener('click', async (e) => {
-    e.stopPropagation();
-    
-    try {
-        await fetch(`${API_BASE_URL}/notifications/mark-all-read`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-        });
-        
-        // Update UI
-        document.querySelectorAll('.notification-item.unread').forEach(item => {
-            item.classList.remove('unread');
-            const unreadDot = item.querySelector('.unread-dot');
-            if (unreadDot) unreadDot.remove();
-        });
-        
-        // Update badge count
-        notificationBadge.textContent = '0';
-        notificationBadge.classList.add('hidden');
-    } catch (error) {
-        console.error('Error marking all notifications as read:', error);
-    }
-});
-
-// Update notification badge count
-async function updateNotificationBadge() {
-    try {
-        const response = await fetch(`${API_BASE_URL}/notifications/unread-count`, {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-        });
-        
-        if (!response.ok) throw new Error('Failed to get unread count');
-        
-        const count = await response.json();
-        
-        if (count > 0) {
-            notificationBadge.textContent = count > 9 ? '9+' : count;
-            notificationBadge.classList.remove('hidden');
-        } else {
-            notificationBadge.classList.add('hidden');
-        }
-    } catch (error) {
-        console.error('Error updating notification badge:', error);
-    }
-}
-
-// Periodically check for new notifications
-function startNotificationPolling() {
-    updateNotificationBadge();
-    
-    // Check every 30 seconds
-    setInterval(updateNotificationBadge, 30000);
-}
-
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
     </script>
