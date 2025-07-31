@@ -5658,46 +5658,107 @@ function addVoiceMessageToChat(message, type) {
 
 // Add this function to handle play/pause of voice messages
 function togglePlayPause(button) {
-  const messageElement = button.closest('.voice-message-container');
-  if (!messageElement) {
+  const messageContainer = button.closest('.voice-message-container');
+  if (!messageContainer) {
     console.error('Message container not found');
     return;
   }
 
-  const audioElement = messageElement.querySelector('audio');
+  const audioElement = messageContainer.querySelector('audio');
+  const progressBar = messageContainer.querySelector('.voice-progress-bar');
+  const durationDisplay = messageContainer.querySelector('.voice-duration');
+
   if (!audioElement) {
     console.error('Audio element not found');
     return;
   }
 
-  // Pause all other audio elements
+  // First, pause all other audio elements
   document.querySelectorAll('.voice-message-container audio').forEach(audio => {
     if (audio !== audioElement && !audio.paused) {
       audio.pause();
-      const otherButton = audio.closest('.voice-message-container')?.querySelector('.play-pause-btn');
+      const otherButton = audio.closest('.voice-message-container').querySelector('.play-pause-btn');
       if (otherButton) {
         otherButton.innerHTML = '<i class="fas fa-play"></i>';
-        const progressBar = audio.closest('.voice-message-container')?.querySelector('.voice-progress-bar');
-        if (progressBar) {
-          progressBar.style.width = '0%';
-        }
+        audio.closest('.voice-message-container').querySelector('.voice-progress-bar').style.width = '0%';
       }
     }
   });
 
+  // Handle the current audio element
   if (audioElement.paused) {
-    audioElement.play()
+    // If audio source isn't loaded or previous attempt failed
+    if (!audioElement.src || audioElement.error) {
+      const messageId = messageContainer.dataset.id;
+      const objectKey = messageContainer.dataset.objectKey;
+      
+      button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+      
+      // Get fresh signed URL
+      fetch(`${API_BASE_URL}/chat/voice-message/${messageId}/url`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      })
+      .then(response => {
+        if (!response.ok) throw new Error('Failed to get audio URL');
+        return response.json();
+      })
+      .then(data => {
+        audioElement.src = data.signed_url;
+        return audioElement.play();
+      })
       .then(() => {
         button.innerHTML = '<i class="fas fa-pause"></i>';
+        
+        // Update duration display once metadata is loaded
+        if (audioElement.duration && durationDisplay) {
+          durationDisplay.textContent = formatDuration(audioElement.duration);
+        }
       })
       .catch(error => {
-        console.error('Error playing audio:', error);
-        showAlert('Failed to play audio message', 'danger');
+        console.error('Playback error:', error);
+        button.innerHTML = '<i class="fas fa-play"></i>';
+        showAlert('Could not play voice message', 'danger');
       });
+    } else {
+      // Audio source is ready, just play it
+      audioElement.play()
+        .then(() => {
+          button.innerHTML = '<i class="fas fa-pause"></i>';
+        })
+        .catch(error => {
+          console.error('Playback error:', error);
+          button.innerHTML = '<i class="fas fa-play"></i>';
+          showAlert('Error playing message', 'danger');
+        });
+    }
   } else {
+    // Audio is playing, so pause it
     audioElement.pause();
     button.innerHTML = '<i class="fas fa-play"></i>';
   }
+
+  // Update progress bar during playback
+  audioElement.addEventListener('timeupdate', function() {
+    if (audioElement.duration) {
+      const progress = (audioElement.currentTime / audioElement.duration) * 100;
+      progressBar.style.width = `${progress}%`;
+    }
+  });
+
+  // Reset UI when playback ends
+  audioElement.addEventListener('ended', function() {
+    button.innerHTML = '<i class="fas fa-play"></i>';
+    progressBar.style.width = '0%';
+  });
+
+  // Handle errors
+  audioElement.addEventListener('error', function() {
+    button.innerHTML = '<i class="fas fa-play"></i>';
+    progressBar.style.width = '0%';
+    showAlert('Error playing voice message', 'danger');
+  });
 }
 async function loadOrganizationSettings() {
     try {
