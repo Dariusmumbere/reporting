@@ -14,6 +14,273 @@
     <link rel="stylesheet" href="styles.css">
     
     <style>
+/* Base styles for the auth container */
+        .auth-container {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f8f9fa;
+        }
+        
+        .auth-left {
+            flex: 1;
+            background: linear-gradient(135deg, #4361ee, #3a0ca3);
+            color: white;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .auth-right {
+            width: 450px;
+            background: white;
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Form transition styles */
+        .auth-form-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .auth-form {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateX(20px);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+        }
+        
+        .auth-form.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(0);
+            pointer-events: all;
+        }
+        
+        /* Toggle switch styles */
+        .auth-toggle {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+        
+        .auth-toggle-btn {
+            background: none;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #6c757d;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .auth-toggle-btn.active {
+            color: #4361ee;
+        }
+        
+        .auth-toggle-indicator {
+            position: absolute;
+            bottom: 0;
+            height: 3px;
+            background-color: #4361ee;
+            border-radius: 3px;
+            transition: all 0.3s ease;
+        }
+        
+        /* Form styles */
+        .auth-logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .auth-logo h2 {
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+            color: #212529;
+        }
+        
+        .auth-logo p {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #495057;
+            font-size: 0.9rem;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #ced4da;
+            border-radius: 0.375rem;
+            font-size: 0.9rem;
+            transition: border-color 0.15s ease-in-out;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #4361ee;
+            box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+        }
+        
+        .btn-primary {
+            background-color: #4361ee;
+            color: white;
+            width: 100%;
+        }
+        
+        .btn-primary:hover {
+            background-color: #3a56d0;
+        }
+        
+        .auth-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        
+        .auth-footer a {
+            color: #4361ee;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Alert styles */
+        .alert {
+            padding: 1rem;
+            border-radius: 0.375rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .alert-danger {
+            background-color: #fff5f5;
+            border: 1px solid #ffd6d6;
+            color: #dc3545;
+        }
+        
+        .alert i {
+            margin-right: 0.75rem;
+            font-size: 1.25rem;
+        }
+        
+        .alert-content {
+            flex: 1;
+        }
+        
+        .alert-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .alert-message {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+        
+        /* Remember me and forgot password */
+        .auth-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .remember-me {
+            display: flex;
+            align-items: center;
+        }
+        
+        .remember-me input {
+            margin-right: 0.5rem;
+        }
+        
+        .forgot-password {
+            color: #4361ee;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        
+        .forgot-password:hover {
+            text-decoration: underline;
+        }
+        
+        /* Spinner */
+        .spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 0.5rem;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .auth-container {
+                flex-direction: column;
+            }
+            
+            .auth-left {
+                display: none;
+            }
+            
+            .auth-right {
+                width: 100%;
+                padding: 2rem 1.5rem;
+            }
+        }
 /* Add this to your CSS */
 .delete-message-btn {
     background: none;
@@ -1553,114 +1820,135 @@
                     </div>
                 </div>
             </div>
-            <div class="login-right">
-                <div class="login-form">
-                    <div class="login-logo">
+            <!-- Right side with forms -->
+        <div class="auth-right">
+            <div class="auth-toggle">
+                <button class="auth-toggle-btn active" id="show-login">Sign In</button>
+                <button class="auth-toggle-btn" id="show-signup">Sign Up</button>
+                <div class="auth-toggle-indicator" id="toggle-indicator"></div>
+            </div>
+            
+            <div class="auth-form-container">
+                <!-- Login Form -->
+                <form id="login-form" class="auth-form active">
+                    <div class="auth-logo">
                         <h2>ReportHub</h2>
                         <p>Sign in to your account</p>
                     </div>
-                    <form id="login-form">
-                        <div class="alert alert-danger hidden" id="login-error">
-                            <i class="fas fa-exclamation-circle"></i>
-                            <div class="alert-content">
-                                <div class="alert-title">Login failed</div>
-                                <p class="alert-message" id="login-error-message">Invalid email or password</p>
-                            </div>
+                    
+                    <div class="alert alert-danger hidden" id="login-error">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <div class="alert-content">
+                            <div class="alert-title">Login failed</div>
+                            <p class="alert-message" id="login-error-message">Invalid email or password</p>
                         </div>
-                        <div class="form-group">
-                            <label for="email" class="form-label">Email Address</label>
-                            <input type="email" id="email" class="form-control" placeholder="Enter your email" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="password" class="form-label">Password</label>
-                            <input type="password" id="password" class="form-control" placeholder="Enter your password" required>
-                        </div>
-                        <div class="login-actions">
-                            <div class="remember-me">
-                                <input type="checkbox" id="remember-me" class="form-check-input">
-                                <label for="remember-me" class="form-check-label">Remember me</label>
-                            </div>
-                            <a href="reset-password.html" class="forgot-password">Forgot password?</a>
-                        </div>
-                        <button type="submit" class="btn btn-primary login-btn" id="login-btn">
-                            <span id="login-btn-text">Sign In</span>
-                            <span class="spinner hidden" id="login-spinner"></span>
-                        </button>
-                    </form>
-                    <div class="login-footer">
-                        Don't have an account? <a href="#" id="show-signup">Sign up</a>
                     </div>
-                </div>
+                    
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email" id="email" class="form-control" placeholder="Enter your email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" id="password" class="form-control" placeholder="Enter your password" required>
+                    </div>
+                    
+                    <div class="auth-actions">
+                        <div class="remember-me">
+                            <input type="checkbox" id="remember-me" class="form-check-input">
+                            <label for="remember-me" class="form-check-label">Remember me</label>
+                        </div>
+                        <a href="reset-password.html" class="forgot-password">Forgot password?</a>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" id="login-btn">
+                        <span id="login-btn-text">Sign In</span>
+                        <span class="spinner hidden" id="login-spinner"></span>
+                    </button>
+                    
+                    <div class="auth-footer">
+                        Don't have an account? <a href="#" id="show-signup-link">Sign up</a>
+                    </div>
+                </form>
+                
+                <!-- Signup Form -->
+                <form id="signup-form" class="auth-form">
+                    <div class="auth-logo">
+                        <h2>ReportHub</h2>
+                        <p>Create your account</p>
+                    </div>
+                    
+                    <div class="alert alert-danger hidden" id="signup-error">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <div class="alert-content">
+                            <div class="alert-title">Signup failed</div>
+                            <p class="alert-message" id="signup-error-message">Error during signup</p>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="signup-name" class="form-label">Full Name</label>
+                        <input type="text" id="signup-name" class="form-control" placeholder="Enter your full name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="signup-email" class="form-label">Email Address</label>
+                        <input type="email" id="signup-email" class="form-control" placeholder="Enter your email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="signup-password" class="form-label">Password</label>
+                        <input type="password" id="signup-password" class="form-control" placeholder="Create a password" required minlength="8">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="signup-confirm-password" class="form-label">Confirm Password</label>
+                        <input type="password" id="signup-confirm-password" class="form-control" placeholder="Confirm your password" required minlength="8">
+                    </div>
+                    
+                    <!-- Organization selection -->
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="signup-type" id="signup-new-org" value="new" checked>
+                            <label class="form-check-label" for="signup-new-org">
+                                Create a new organization
+                            </label>
+                        </div>
+                        
+                        <div id="new-org-fields" class="mt-2">
+                            <label for="organization-name" class="form-label">Organization Name</label>
+                            <input type="text" id="organization-name" class="form-control" placeholder="Enter your organization name">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="signup-type" id="signup-invite" value="invite">
+                            <label class="form-check-label" for="signup-invite">
+                                Join an existing organization with an invitation link
+                            </label>
+                        </div>
+                        
+                        <div id="invite-fields" class="mt-2 hidden">
+                            <label for="invite-token" class="form-label">Invitation Link</label>
+                            <input type="text" id="invite-token" class="form-control" placeholder="Paste your invitation link here">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" id="signup-btn">
+                        <span id="signup-btn-text">Create Account</span>
+                        <span class="spinner hidden" id="signup-spinner"></span>
+                    </button>
+                    
+                    <div class="auth-footer">
+                        Already have an account? <a href="#" id="show-login-link">Sign in</a>
+                    </div>
+                </form>
             </div>
-            <!-- Update the signup form in your HTML -->
-<form id="signup-form" class="hidden">
-    <div class="alert alert-danger hidden" id="signup-error">
-        <i class="fas fa-exclamation-circle"></i>
-        <div class="alert-content">
-            <div class="alert-title">Signup failed</div>
-            <p class="alert-message" id="signup-error-message">Error during signup</p>
         </div>
     </div>
-    
-    <div class="form-group">
-        <label for="signup-name" class="form-label">Full Name</label>
-        <input type="text" id="signup-name" class="form-control" placeholder="Enter your full name" required>
-    </div>
-    
-    <div class="form-group">
-        <label for="signup-email" class="form-label">Email Address</label>
-        <input type="email" id="signup-email" class="form-control" placeholder="Enter your email" required>
-    </div>
-    
-    <div class="form-group">
-        <label for="signup-password" class="form-label">Password</label>
-        <input type="password" id="signup-password" class="form-control" placeholder="Create a password" required minlength="8">
-    </div>
-    
-    <div class="form-group">
-        <label for="signup-confirm-password" class="form-label">Confirm Password</label>
-        <input type="password" id="signup-confirm-password" class="form-control" placeholder="Confirm your password" required minlength="8">
-    </div>
-    
-    <!-- Organization selection -->
-    <div class="form-group">
-        <div class="form-check">
-            <input class="form-check-input" type="radio" name="signup-type" id="signup-new-org" value="new" checked>
-            <label class="form-check-label" for="signup-new-org">
-                Create a new organization
-            </label>
-        </div>
-        
-        <div id="new-org-fields" class="mt-2">
-            <label for="organization-name" class="form-label">Organization Name</label>
-            <input type="text" id="organization-name" class="form-control" placeholder="Enter your organization name">
-        </div>
-    </div>
-    
-    <div class="form-group">
-        <div class="form-check">
-            <input class="form-check-input" type="radio" name="signup-type" id="signup-invite" value="invite">
-            <label class="form-check-label" for="signup-invite">
-                Join an existing organization with an invitation link
-            </label>
-        </div>
-        
-        <div id="invite-fields" class="mt-2 hidden">
-            <label for="invite-token" class="form-label">Invitation Link</label>
-            <input type="text" id="invite-token" class="form-control" placeholder="Paste your invitation link here">
-        </div>
-    </div>
-    
-    <button type="submit" class="btn btn-primary login-btn" id="signup-btn">
-        <span id="signup-btn-text">Create Account</span>
-        <span class="spinner hidden" id="signup-spinner"></span>
-    </button>
-    
-    <div class="login-footer">
-        Already have an account? <a href="#" id="show-login">Sign in</a>
-    </div>
-</form>
-        </div>
+
 
         <!-- OTP Verification Modal -->
         <div class="otp-modal" id="otp-modal">
@@ -3094,6 +3382,7 @@
         const submitOrgBtn = document.getElementById('submit-org-registration');
         const submitOrgText = document.getElementById('submit-org-text');
         const submitOrgSpinner = document.getElementById('submit-org-spinner');
+        const toggleIndicator = document.getElementById('toggle-indicator');
         
         // Chat elements
         const chatUsersList = document.getElementById('chat-users-list');
@@ -3141,6 +3430,7 @@
             addTemplateManagementButton();
             initTemplateManagement();
             loadProfilePicture();
+            updateToggleIndicator();
             document.getElementById('users-view')?.addEventListener('viewShown', loadActiveInvitations);
         }
 
@@ -7558,6 +7848,47 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }, 5 * 60 * 1000);
 });
+
+function toggleForms(showLogin) {
+            if (showLogin) {
+                loginForm.classList.add('active');
+                signupForm.classList.remove('active');
+                showLoginBtn.classList.add('active');
+                showSignupBtn.classList.remove('active');
+            } else {
+                loginForm.classList.remove('active');
+                signupForm.classList.add('active');
+                showLoginBtn.classList.remove('active');
+                showSignupBtn.classList.add('active');
+            }
+            updateToggleIndicator();
+        }
+        
+        // Update the toggle indicator position
+        function updateToggleIndicator() {
+            const activeBtn = document.querySelector('.auth-toggle-btn.active');
+            if (activeBtn) {
+                const btnRect = activeBtn.getBoundingClientRect();
+                const containerRect = activeBtn.parentElement.getBoundingClientRect();
+                const left = btnRect.left - containerRect.left;
+                const width = btnRect.width;
+                
+                toggleIndicator.style.left = `${left}px`;
+                toggleIndicator.style.width = `${width}px`;
+            }
+        }
+        
+        // Event listeners for toggle buttons
+        showLoginBtn.addEventListener('click', () => toggleForms(true));
+        showSignupBtn.addEventListener('click', () => toggleForms(false));
+        showLoginLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            toggleForms(true);
+        });
+        showSignupLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            toggleForms(false);
+        });
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
     </script>
