@@ -7275,6 +7275,14 @@ if (inviteToken) {
     document.getElementById('invite-fields').classList.remove('hidden');
     document.getElementById('invite-token').value = inviteToken;
 }
+function getStatusIcon(status) {
+    switch(status) {
+        case 'sending': return '<i class="fas fa-clock"></i>';
+        case 'delivered': return '<i class="fas fa-check"></i>';
+        case 'read': return '<i class="fas fa-check-double"></i>';
+        default: return '';
+    }
+}
 
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
