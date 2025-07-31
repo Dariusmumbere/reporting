@@ -2916,6 +2916,7 @@
         let audioChunks = [];
         let recordingStartTime;
         let recordingTimer;
+        let audioBlob = null;
 
         let reportsTrendChart;
         let reportsCategoryChart;
@@ -5504,40 +5505,41 @@ document.getElementById('cancel-voice-message-btn').addEventListener('click', ca
 
 // Add these functions to handle voice recording
 async function startVoiceRecording() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream);
-                audioChunks = [];
-                
-                mediaRecorder.ondataavailable = event => {
-                    audioChunks.push(event.data);
-                };
-                
-                mediaRecorder.onstop = () => {
-                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-                    const audioUrl = URL.createObjectURL(audioBlob);
-                    const audioElement = document.getElementById('recorded-audio');
-                    audioElement.src = audioUrl;
-                    
-                    document.getElementById('recording-controls').classList.remove('hidden');
-                    document.getElementById('recording-indicator').classList.add('hidden');
-                    
-                    // Stop all tracks in the stream
-                    stream.getTracks().forEach(track => track.stop());
-                };
-                
-                mediaRecorder.start();
-                recordingStartTime = Date.now();
-                updateRecordingTime();
-                
-                document.getElementById('voice-recorder').classList.remove('hidden');
-                document.getElementById('voice-record-btn').classList.add('hidden');
-                
-            } catch (error) {
-                console.error('Error accessing microphone:', error);
-                showAlert('Microphone access denied. Please allow microphone access to record voice messages.', 'danger');
-            }
-        }
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+        audioBlob = null;
+        
+        mediaRecorder.ondataavailable = event => {
+            audioChunks.push(event.data);
+        };
+        
+        mediaRecorder.onstop = () => {
+            audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+            const audioUrl = URL.createObjectURL(audioBlob);
+            document.getElementById('recorded-audio').src = audioUrl;
+            
+            // Show recording controls
+            document.getElementById('recording-controls').classList.remove('hidden');
+            document.getElementById('recording-indicator').classList.add('hidden');
+            
+            // Stop all tracks in the stream
+            stream.getTracks().forEach(track => track.stop());
+        };
+        
+        mediaRecorder.start();
+        recordingStartTime = Date.now();
+        updateRecordingTime();
+        
+        document.getElementById('voice-recorder').classList.remove('hidden');
+        document.getElementById('voice-record-btn').classList.add('hidden');
+        
+    } catch (error) {
+        console.error('Error accessing microphone:', error);
+        showAlert('Microphone access denied. Please allow microphone access to record voice messages.', 'danger');
+    }
+}
 
         function updateRecordingTime() {
             const elapsedTime = Math.floor((Date.now() - recordingStartTime) / 1000);
@@ -5551,39 +5553,46 @@ async function startVoiceRecording() {
         }
 
         function stopVoiceRecording() {
-            if (mediaRecorder && mediaRecorder.state === 'recording') {
-                mediaRecorder.stop();
-                clearTimeout(recordingTimer);
-            }
-        }
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+        clearTimeout(recordingTimer);
+    }
+}
+
 
         function cancelVoiceRecording() {
-            if (mediaRecorder && mediaRecorder.state === 'recording') {
-                mediaRecorder.stop();
-                clearTimeout(recordingTimer);
-            }
-            
-            // Clean up
-            audioChunks = [];
-            document.getElementById('recorded-audio').src = '';
-            document.getElementById('voice-recorder').classList.add('hidden');
-            document.getElementById('voice-record-btn').classList.remove('hidden');
-        }
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+        clearTimeout(recordingTimer);
+    }
+    
+    // Clean up
+    audioChunks = [];
+    audioBlob = null;
+    document.getElementById('recorded-audio').src = '';
+    document.getElementById('voice-recorder').classList.add('hidden');
+    document.getElementById('voice-record-btn').classList.remove('hidden');
+}
         
 async function sendVoiceMessage() {
-    if (!activeChatUserId || !audioBlob) return;
+    if (!activeChatUserId || !audioBlob) {
+        showAlert('No recording to send or no chat selected', 'warning');
+        return;
+    }
     
     try {
         const formData = new FormData();
-        formData.append('voice_message', audioBlob, `voice_${Date.now()}.wav`);
+        formData.append('voice_message', audioBlob, `voice_message_${Date.now()}.wav`);
         formData.append('recipient_id', activeChatUserId.toString());
-        formData.append('duration', duration.toString()); // Calculate duration from recording
+        
+        // Calculate duration in seconds
+        const duration = (Date.now() - recordingStartTime) / 1000;
+        formData.append('duration', duration.toFixed(2));
         
         const response = await fetch(`${API_BASE_URL}/chat/voice-message`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
-                // Don't set Content-Type header - let the browser set it with boundary
             },
             body: formData
         });
@@ -5607,7 +5616,7 @@ async function sendVoiceMessage() {
             duration: message.duration
         }, 'sent');
         
-        // Reset recording state
+        // Reset the recording UI
         cancelVoiceRecording();
         
     } catch (error) {
