@@ -7438,38 +7438,24 @@ function setupProfilePictureHandling() {
 
 // Load profile picture from backend with cache busting
 async function loadProfilePicture(userId, bustCache = false) {
-    if (!userId) return;
-    
     try {
         let url = `${API_BASE_URL}/users/profile-picture/${userId}`;
-        if (bustCache) {
-            url += `?t=${Date.now()}`;
-        }
-
+        if (bustCache) url += `?t=${Date.now()}`;
+        
         const response = await fetch(url, {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
+            headers: { 'Authorization': `Bearer ${token}` }
         });
 
         if (!response.ok) {
-            if (response.status === 404) {
-                updateProfilePicturePreview(null);
-                return;
-            }
-            throw new Error('Failed to load profile picture');
+            if (response.status === 404) return null;
+            throw new Error(`HTTP ${response.status}`);
         }
 
-        // For redirect responses, use the final URL
-        const finalUrl = response.url;
-        
-        // Update the preview with the redirected URL
-        updateProfilePicturePreview(finalUrl);
-        updateProfilePictureInUI(finalUrl);
+        // The backend will redirect to the actual image URL
+        return response.url; 
     } catch (error) {
-        console.error('Error loading profile picture:', error);
-        updateProfilePicturePreview(null);
-        updateProfilePictureInUI(null);
+        console.error('Profile picture load failed:', error);
+        return null;
     }
 }
 
