@@ -7722,17 +7722,19 @@ async function markAllNotificationsAsRead() {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
         });
-        
+
         // Update UI
         document.querySelectorAll('.notification-item.unread').forEach(item => {
             item.classList.remove('unread');
         });
-        
-        document.querySelector('.notification-badge').style.display = 'none';
+
+        const badge = document.querySelector('.notification-badge');
+        if (badge) badge.style.display = 'none';
     } catch (error) {
         console.error('Error marking all notifications as read:', error);
     }
 }
+
 
 
         // Initialize the app
