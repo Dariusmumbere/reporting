@@ -2818,7 +2818,7 @@
                 </div>
             </div>
         </div>
-    <!-- Template Management Modal -->
+   <!-- Template Management Modal -->
 <div class="modal" id="template-management-modal">
     <div class="modal-content" style="max-width: 800px;">
         <div class="modal-header">
@@ -2827,31 +2827,21 @@
                 <i class="fas fa-times"></i>
             </button>
         </div>
-        <!-- Add this to the template management modal -->
-<div class="d-flex justify-content-between mb-3">
-    <div>
-        <button class="btn btn-primary" id="create-template-btn">
-            <i class="fas fa-plus"></i> New Template
-        </button>
-    </div>
-    <div>
-        <button class="btn btn-success" id="export-template-btn" disabled>
-            <i class="fas fa-file-excel"></i> Export Reports
-        </button>
-        <div class="search-bar">
-            <i class="fas fa-search"></i>
-            <input type="text" id="template-search" placeholder="Search templates...">
-        </div>
-    </div>
-</div>
         <div class="modal-body">
             <div class="d-flex justify-content-between mb-3">
-                <button class="btn btn-primary" id="create-template-btn">
-                    <i class="fas fa-plus"></i> New Template
-                </button>
-                <div class="search-bar">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="template-search" placeholder="Search templates...">
+                <div>
+                    <button class="btn btn-primary" id="create-template-btn">
+                        <i class="fas fa-plus"></i> New Template
+                    </button>
+                </div>
+                <div>
+                    <button class="btn btn-success" id="export-template-btn" disabled>
+                        <i class="fas fa-file-excel"></i> Export Reports
+                    </button>
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="template-search" placeholder="Search templates...">
+                    </div>
                 </div>
             </div>
             
@@ -2868,45 +2858,53 @@
                     </thead>
                     <tbody id="templates-table-body">
                         <!-- Templates will be loaded here -->
+                        <tr>
+                            <td colspan="5" class="text-center">
+                                <div class="d-flex justify-content-center py-4">
+                                    <div class="spinner spinner-primary"></div>
+                                </div>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
-        </div>
-    </div>
-    <!-- Add this after the templates table -->
-<div class="export-controls hidden" id="export-controls">
-    <div class="card mt-3">
-        <div class="card-header">
-            <h4 class="mb-0">Export Options</h4>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="export-sort-by" class="form-label">Sort By</label>
-                        <select id="export-sort-by" class="form-control">
-                            <option value="created_at">Date</option>
-                            <option value="status">Status</option>
-                            <option value="category">Category</option>
-                        </select>
+            
+            <!-- Export Controls -->
+            <div class="export-controls hidden" id="export-controls">
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h4 class="mb-0">Export Options</h4>
                     </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="export-sort-order" class="form-label">Sort Order</label>
-                        <select id="export-sort-order" class="form-control">
-                            <option value="desc">Descending (Newest First)</option>
-                            <option value="asc">Ascending (Oldest First)</option>
-                        </select>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="export-sort-by" class="form-label">Sort By</label>
+                                    <select id="export-sort-by" class="form-control">
+                                        <option value="created_at">Date</option>
+                                        <option value="status">Status</option>
+                                        <option value="category">Category</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="export-sort-order" class="form-label">Sort Order</label>
+                                    <select id="export-sort-order" class="form-control">
+                                        <option value="desc">Descending (Newest First)</option>
+                                        <option value="asc">Ascending (Oldest First)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary mt-3" id="confirm-export-btn">
+                            <i class="fas fa-download"></i> Export Now
+                        </button>
                     </div>
                 </div>
             </div>
-            <button class="btn btn-primary mt-3" id="confirm-export-btn">
-                <i class="fas fa-download"></i> Export Now
-            </button>
         </div>
     </div>
-</div>
 </div>
 
 <!-- Create/Edit Template Modal -->
@@ -2943,6 +2941,9 @@
                     <div class="card-body">
                         <div id="template-fields-container">
                             <!-- Fields will be added here -->
+                            <div class="text-center text-muted py-3">
+                                No fields added yet. Click "Add Field" to get started.
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -2958,7 +2959,7 @@
     </div>
 </div>
 
-<!-- Field Editor Modal (for editing individual fields) -->
+<!-- Field Editor Modal -->
 <div class="modal" id="field-editor-modal">
     <div class="modal-content" style="max-width: 600px;">
         <div class="modal-header">
@@ -3009,6 +3010,7 @@
                 <div class="form-group hidden" id="field-options-group">
                     <label for="field-options" class="form-label">Options (one per line)</label>
                     <textarea id="field-options" class="form-control" rows="4"></textarea>
+                    <small class="text-muted">Format: value|label (e.g., "yes|Yes" or just "Yes" for both)</small>
                 </div>
                 <div class="form-group">
                     <label for="field-order" class="form-label">Display Order</label>
@@ -3022,7 +3024,7 @@
         </div>
     </div>
 </div>
-
+    
         <!-- Add User Modal (Admin only) -->
         <div class="modal" id="add-user-modal">
             <div class="modal-content">
