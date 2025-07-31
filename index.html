@@ -5604,94 +5604,142 @@ async function sendVoiceMessage() {
 }
         
 function addVoiceMessageToChat(message, type) {
-    const messageElement = document.createElement('div');
-    messageElement.className = `message message-${type} voice-message-container`;
-    messageElement.dataset.id = message.id;
-    messageElement.dataset.objectKey = message.object_key || message.content;
-    
-    messageElement.innerHTML = `
-        <div class="voice-message-controls">
-            <button class="play-pause-btn">
-                <i class="fas fa-play"></i>
-            </button>
-            <div class="voice-progress">
-                <div class="voice-progress-bar"></div>
+    try {
+        // Validate message object
+        if (!message || !message.id) {
+            console.error('Invalid message object:', message);
+            throw new Error('Invalid voice message data');
+        }
+
+        // Create container element
+        const messageElement = document.createElement('div');
+        messageElement.className = `message message-${type} voice-message-container`;
+        
+        // Set all required data attributes
+        messageElement.dataset.id = message.id;
+        messageElement.dataset.objectKey = message.object_key || message.content;
+        messageElement.dataset.senderId = message.sender_id;
+        messageElement.dataset.timestamp = message.timestamp;
+
+        // Create message HTML structure
+        messageElement.innerHTML = `
+            <div class="voice-message-controls">
+                <button class="play-pause-btn">
+                    <i class="fas fa-play"></i>
+                </button>
+                <div class="voice-progress">
+                    <div class="voice-progress-bar"></div>
+                </div>
+                <div class="voice-duration">${formatDuration(message.duration || 0)}</div>
+                <audio preload="none"></audio>
+                ${type === 'sent' ? `
+                <button class="delete-message-btn" title="Delete message" onclick="deleteMessage('${message.id}')">
+                    <i class="fas fa-trash"></i>
+                </button>` : ''}
             </div>
-            <div class="voice-duration">${formatDuration(message.duration || 0)}</div>
-            <audio preload="none"></audio>
-            ${type === 'sent' ? `
-            <button class="delete-message-btn" title="Delete message">
-                <i class="fas fa-trash"></i>
-            </button>` : ''}
-        </div>
-        <div class="message-time">
-            ${formatTime(message.timestamp)}
-            ${type === 'sent' ? `
-            <span class="message-status ${message.status}">
-                ${getStatusIcon(message.status)}
-            </span>` : ''}
-        </div>
-    `;
+            <div class="message-time">
+                ${formatTime(message.timestamp)}
+                ${type === 'sent' ? `
+                <span class="message-status ${message.status}">
+                    ${getStatusIcon(message.status)}
+                </span>` : ''}
+            </div>
+        `;
 
-    const playButton = messageElement.querySelector('.play-pause-btn');
-    const audioElement = messageElement.querySelector('audio');
-    const progressBar = messageElement.querySelector('.voice-progress-bar');
+        // Get references to elements
+        const playButton = messageElement.querySelector('.play-pause-btn');
+        const audioElement = messageElement.querySelector('audio');
+        const progressBar = messageElement.querySelector('.voice-progress-bar');
 
-    playButton.addEventListener('click', async () => {
-        await handleVoicePlayback(messageElement, audioElement, message.object_key);
-    });
+        // Set up event listeners
+        playButton.addEventListener('click', () => togglePlayPause(playButton));
+        
+        audioElement.addEventListener('timeupdate', () => {
+            if (audioElement.duration > 0) {
+                const progress = (audioElement.currentTime / audioElement.duration) * 100;
+                progressBar.style.width = `${progress}%`;
+            }
+        });
 
-    audioElement.addEventListener('timeupdate', () => {
-        const progress = (audioElement.currentTime / audioElement.duration) * 100;
-        progressBar.style.width = `${progress}%`;
-    });
+        audioElement.addEventListener('ended', () => {
+            playButton.innerHTML = '<i class="fas fa-play"></i>';
+            progressBar.style.width = '0%';
+        });
 
-    audioElement.addEventListener('ended', () => {
-        playButton.innerHTML = '<i class="fas fa-play"></i>';
-        progressBar.style.width = '0%';
-    });
+        audioElement.addEventListener('error', (e) => {
+            console.error('Audio error:', e);
+            playButton.innerHTML = '<i class="fas fa-play"></i>';
+            showAlert('Error playing voice message', 'danger');
+        });
 
-    chatMessages.appendChild(messageElement);
-    scrollChatToBottom();
+        // Add to chat container
+        chatMessages.appendChild(messageElement);
+        scrollChatToBottom();
+
+        return messageElement;
+
+    } catch (error) {
+        console.error('Failed to create voice message element:', {
+            error,
+            messageData: message
+        });
+        showAlert('Could not display voice message', 'danger');
+        return null;
+    }
 }
-
 
 // Add this function to handle play/pause of voice messages
 async function togglePlayPause(button) {
-    const messageContainer = button.closest('.voice-message-container');
-    if (!messageContainer) {
-        console.error('Message container not found');
-        showAlert('Message not found', 'danger');
-        return;
-    }
-
-    const messageId = messageContainer.dataset.id;
-    if (!messageId) {
-        console.error('Message ID is missing');
-        showAlert('This voice message is invalid', 'danger');
-        return;
-    }
-
-    const audioElement = messageContainer.querySelector('audio');
-    const progressBar = messageContainer.querySelector('.voice-progress-bar');
-    
-    // Pause all other audio first
-    document.querySelectorAll('.voice-message-container audio').forEach(audio => {
-        if (audio !== audioElement && !audio.paused) {
-            audio.pause();
-            const otherButton = audio.closest('.voice-message-container')
-                                .querySelector('.play-pause-btn');
-            if (otherButton) {
-                otherButton.innerHTML = '<i class="fas fa-play"></i>';
-                const otherProgress = audio.closest('.voice-message-container')
-                                        .querySelector('.voice-progress-bar');
-                if (otherProgress) otherProgress.style.width = '0%';
-            }
-        }
-    });
-
     try {
+        // Validate button and container
+        if (!button) {
+            throw new Error('Play button not found');
+        }
+
+        const messageContainer = button.closest('.voice-message-container');
+        if (!messageContainer) {
+            throw new Error('Message container not found');
+        }
+
+        // Validate required data attributes
+        const messageId = messageContainer.dataset.id;
+        const objectKey = messageContainer.dataset.objectKey;
+        
+        if (!messageId || !objectKey) {
+            console.error('Missing message data:', {
+                id: messageId,
+                objectKey: objectKey,
+                container: messageContainer
+            });
+            throw new Error('Voice message data incomplete');
+        }
+
+        // Get audio and progress elements
+        const audioElement = messageContainer.querySelector('audio');
+        const progressBar = messageContainer.querySelector('.voice-progress-bar');
+        
+        if (!audioElement || !progressBar) {
+            throw new Error('Audio controls not found');
+        }
+
+        // Pause all other audio messages
+        document.querySelectorAll('.voice-message-container audio').forEach(audio => {
+            if (audio !== audioElement && !audio.paused) {
+                audio.pause();
+                const otherButton = audio.closest('.voice-message-container')
+                                    .querySelector('.play-pause-btn');
+                if (otherButton) {
+                    otherButton.innerHTML = '<i class="fas fa-play"></i>';
+                    const otherProgress = audio.closest('.voice-message-container')
+                                            .querySelector('.voice-progress-bar');
+                    if (otherProgress) otherProgress.style.width = '0%';
+                }
+            }
+        });
+
+        // Handle play/pause
         if (audioElement.paused) {
+            // Show loading state
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             
             // Get fresh signed URL if needed
@@ -5715,30 +5763,21 @@ async function togglePlayPause(button) {
                 audioElement.src = signed_url;
             }
 
+            // Play audio
             await audioElement.play();
             button.innerHTML = '<i class="fas fa-pause"></i>';
+
         } else {
+            // Pause audio
             audioElement.pause();
             button.innerHTML = '<i class="fas fa-play"></i>';
         }
+
     } catch (error) {
-        console.error('Playback error:', error);
+        console.error('Voice message playback error:', error);
         button.innerHTML = '<i class="fas fa-play"></i>';
         showAlert(error.message || 'Could not play voice message', 'danger');
     }
-
-    // Update progress during playback
-    audioElement.addEventListener('timeupdate', () => {
-        if (audioElement.duration > 0) {
-            const progress = (audioElement.currentTime / audioElement.duration) * 100;
-            if (progressBar) progressBar.style.width = `${progress}%`;
-        }
-    });
-
-    audioElement.addEventListener('ended', () => {
-        button.innerHTML = '<i class="fas fa-play"></i>';
-        if (progressBar) progressBar.style.width = '0%';
-    });
 }
 
 async function loadOrganizationSettings() {
