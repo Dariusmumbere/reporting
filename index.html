@@ -7892,17 +7892,31 @@ function toggleForms(showLogin) {
             toggleForms(false);
         });
         // Handle radio button changes for organization type
-        document.querySelectorAll('input[name="signup-type"]').forEach(radio => {
-            radio.addEventListener('change', (e) => {
-                if (e.target.value === 'new') {
-                    document.getElementById('new-org-fields').style.display = 'block';
-                    document.getElementById('invite-fields').classList.add('hidden');
-                } else {
-                    document.getElementById('new-org-fields').style.display = 'none';
-                    document.getElementById('invite-fields').classList.remove('hidden');
-                }
-            });
-        });
+document.querySelectorAll('input[name="signup-type"]').forEach(radio => {
+    radio.addEventListener('change', (e) => {
+        if (e.target.value === 'new') {
+            // Show new org fields, hide invite fields
+            document.getElementById('new-org-fields').style.display = 'block';
+            document.getElementById('invite-fields').classList.add('hidden');
+        } else {
+            // Show invite fields, hide new org fields
+            document.getElementById('new-org-fields').style.display = 'none';
+            document.getElementById('invite-fields').classList.remove('hidden');
+        }
+    });
+});
+
+// Initialize the state on page load
+document.addEventListener('DOMContentLoaded', () => {
+    const newOrgRadio = document.getElementById('signup-new-org');
+    if (newOrgRadio.checked) {
+        document.getElementById('new-org-fields').style.display = 'block';
+        document.getElementById('invite-fields').classList.add('hidden');
+    } else {
+        document.getElementById('new-org-fields').style.display = 'none';
+        document.getElementById('invite-fields').classList.remove('hidden');
+    }
+});
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
     </script>
