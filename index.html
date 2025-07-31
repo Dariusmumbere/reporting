@@ -7343,160 +7343,204 @@ if (inviteToken) {
     document.getElementById('invite-fields').classList.remove('hidden');
     document.getElementById('invite-token').value = inviteToken;
 }
-// Profile picture handling
-async function loadProfilePicture() {
-    if (!currentUser) return;
+// Profile Picture Upload Functionality
+function setupProfilePictureUpload() {
+    const profilePictureUpload = document.getElementById('profile-picture-upload');
+    const profilePicturePreview = document.getElementById('profile-picture-preview');
+    const profilePictureImg = document.getElementById('profile-picture-img');
+    const profilePictureInitials = document.getElementById('profile-picture-initials');
+    const removeProfilePictureBtn = document.getElementById('remove-profile-picture-btn');
 
-    try {
-        // Fetch profile picture from API
-        const response = await fetch(`/users/profile-picture/${currentUser.id}`, {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('access_token')}`, // include token if required
-                'Content-Type': 'application/json'
+    // Handle file selection
+    profilePictureUpload.addEventListener('change', async function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Validate file type
+        const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        if (!validTypes.includes(file.type)) {
+            showAlert('Only JPEG, PNG, and GIF images are allowed', 'danger');
+            e.target.value = '';
+            return;
+        }
+
+        // Validate file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            showAlert('File size exceeds 5MB limit', 'danger');
+            e.target.value = '';
+            return;
+        }
+
+        // Show preview
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            profilePictureImg.src = event.target.result;
+            profilePictureImg.style.display = 'block';
+            profilePictureInitials.style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+
+        // Upload to server
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const response = await fetch(`${API_BASE_URL}/users/upload-profile-picture`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: formData
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Failed to upload profile picture');
             }
-        });
 
-        if (!response.ok) {
-            throw new Error('Failed to load profile picture');
+            const data = await response.json();
+            showAlert('Profile picture updated successfully', 'success');
+            
+            // Update user avatar in UI
+            updateProfilePictureInUI(data.profile_picture_url);
+        } catch (error) {
+            console.error('Error uploading profile picture:', error);
+            showAlert(error.message || 'Failed to upload profile picture', 'danger');
+            
+            // Reset preview if upload fails
+            profilePictureImg.style.display = 'none';
+            profilePictureInitials.style.display = 'block';
+        }
+    });
+
+    // Handle remove profile picture
+    removeProfilePictureBtn.addEventListener('click', async function() {
+        if (!confirm('Are you sure you want to remove your profile picture?')) {
+            return;
         }
 
-        const data = await response.json();
+        try {
+            const response = await fetch(`${API_BASE_URL}/users/remove-profile-picture`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'application/json'
+                }
+            });
 
-        const img = document.getElementById('profile-picture-img');
-        const initialsEl = document.getElementById('profile-picture-initials');
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Failed to remove profile picture');
+            }
 
-        if (data.profile_picture) {
-            // Show image if returned from API
-            img.src = data.profile_picture;
-            img.style.display = 'block';
-            initialsEl.style.display = 'none';
-        } else {
-            // Fallback to initials if no picture
-            const initials = currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase();
-            initialsEl.textContent = initials;
-            initialsEl.style.display = 'flex';
-            img.style.display = 'none';
+            showAlert('Profile picture removed successfully', 'success');
+            
+            // Reset preview
+            profilePictureImg.src = '';
+            profilePictureImg.style.display = 'none';
+            profilePictureInitials.style.display = 'block';
+            
+            // Update user avatar in UI
+            updateProfilePictureInUI(null);
+        } catch (error) {
+            console.error('Error removing profile picture:', error);
+            showAlert(error.message || 'Failed to remove profile picture', 'danger');
         }
-
-    } catch (error) {
-        console.error('Error loading profile picture:', error);
-
-        // Fallback to initials on error
-        const initials = currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase();
-        document.getElementById('profile-picture-initials').textContent = initials;
-        document.getElementById('profile-picture-initials').style.display = 'flex';
-        document.getElementById('profile-picture-img').style.display = 'none';
-    }
+    });
 }
 
-// Upload profile picture
-document.getElementById('profile-picture-upload').addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+// Update profile picture in UI (sidebar, dropdown, etc.)
+function updateProfilePictureInUI(imageUrl) {
+    const userAvatar = document.getElementById('user-avatar');
+    const userDropdownAvatar = document.getElementById('user-dropdown-avatar');
+    const profilePictureImg = document.getElementById('profile-picture-img');
+    const profilePictureInitials = document.getElementById('profile-picture-initials');
     
-    // Validate file type
-    if (!file.type.match('image.*')) {
-        showAlert('Please select an image file', 'danger');
-        return;
-    }
-    
-    // Validate file size (5MB max)
-    if (file.size > 5 * 1024 * 1024) {
-        showAlert('Image must be less than 5MB', 'danger');
-        return;
-    }
-    
-    try {
-        const formData = new FormData();
-        formData.append('file', file);
-        
-        const response = await fetch(`${API_BASE_URL}/users/upload-profile-picture`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-            body: formData
-        });
-        
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.detail || 'Failed to upload profile picture');
+    if (imageUrl) {
+        // Update avatar in sidebar
+        if (userAvatar) {
+            userAvatar.innerHTML = '';
+            const img = document.createElement('img');
+            img.src = imageUrl;
+            img.alt = 'Profile Picture';
+            img.style.width = '100%';
+            img.style.height = '100%';
+            img.style.borderRadius = '50%';
+            userAvatar.appendChild(img);
         }
         
-        const data = await response.json();
-        currentUser.profile_picture = data.profile_picture_url;
-        
-        // Update UI
-        loadProfilePicture();
-        
-        // Update avatar in sidebar and navbar
-        updateUserAvatar();
-        
-        showAlert('Profile picture updated successfully', 'success');
-    } catch (error) {
-        console.error('Error uploading profile picture:', error);
-        showAlert(error.message, 'danger');
-    }
-});
-
-// Remove profile picture
-document.getElementById('remove-profile-picture-btn').addEventListener('click', async () => {
-    if (!confirm('Are you sure you want to remove your profile picture?')) {
-        return;
-    }
-    
-    try {
-        const response = await fetch(`${API_BASE_URL}/users/remove-profile-picture`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.detail || 'Failed to remove profile picture');
+        // Update avatar in dropdown
+        if (userDropdownAvatar) {
+            userDropdownAvatar.innerHTML = '';
+            const img = document.createElement('img');
+            img.src = imageUrl;
+            img.alt = 'Profile Picture';
+            img.style.width = '100%';
+            img.style.height = '100%';
+            img.style.borderRadius = '50%';
+            userDropdownAvatar.appendChild(img);
         }
         
-        currentUser.profile_picture = null;
-        
-        // Update UI
-        loadProfilePicture();
-        
-        // Update avatar in sidebar and navbar
-        updateUserAvatar();
-        
-        showAlert('Profile picture removed successfully', 'success');
-    } catch (error) {
-        console.error('Error removing profile picture:', error);
-        showAlert(error.message, 'danger');
-    }
-});
-
-// Helper function to update avatar everywhere
-function updateUserAvatar() {
-    if (currentUser.profile_picture) {
-        // Update sidebar avatar
-        document.getElementById('user-avatar').innerHTML = '';
-        const sidebarImg = document.createElement('img');
-        sidebarImg.src = currentUser.profile_picture;
-        sidebarImg.alt = currentUser.name;
-        document.getElementById('user-avatar').appendChild(sidebarImg);
-        
-        // Update dropdown avatar
-        document.getElementById('user-dropdown-avatar').innerHTML = '';
-        const dropdownImg = document.createElement('img');
-        dropdownImg.src = currentUser.profile_picture;
-        dropdownImg.alt = currentUser.name;
-        document.getElementById('user-dropdown-avatar').appendChild(dropdownImg);
+        // Update profile picture preview
+        if (profilePictureImg) {
+            profilePictureImg.src = imageUrl;
+            profilePictureImg.style.display = 'block';
+            profilePictureInitials.style.display = 'none';
+        }
     } else {
-        // Use initials
-        const initials = currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase();
-        document.getElementById('user-avatar').textContent = initials;
-        document.getElementById('user-dropdown-avatar').textContent = initials;
+        // Use initials if no profile picture
+        const initials = currentUser?.name ? currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'U';
+        
+        if (userAvatar) {
+            userAvatar.innerHTML = initials;
+        }
+        
+        if (userDropdownAvatar) {
+            userDropdownAvatar.innerHTML = initials;
+        }
+        
+        if (profilePictureImg) {
+            profilePictureImg.style.display = 'none';
+            profilePictureInitials.textContent = initials;
+            profilePictureInitials.style.display = 'block';
+        }
     }
 }
+
+// Load current profile picture
+function loadProfilePicture() {
+    if (!currentUser) return;
+    
+    const profilePictureImg = document.getElementById('profile-picture-img');
+    const profilePictureInitials = document.getElementById('profile-picture-initials');
+    
+    if (currentUser.profile_picture) {
+        // Show profile picture
+        profilePictureImg.src = currentUser.profile_picture;
+        profilePictureImg.style.display = 'block';
+        profilePictureInitials.style.display = 'none';
+        
+        // Update avatars in UI
+        updateProfilePictureInUI(currentUser.profile_picture);
+    } else {
+        // Show initials
+        const initials = currentUser.name ? currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'U';
+        profilePictureInitials.textContent = initials;
+        profilePictureInitials.style.display = 'block';
+        profilePictureImg.style.display = 'none';
+        
+        // Update avatars in UI
+        updateProfilePictureInUI(null);
+    }
+}
+
+// Initialize the profile picture upload functionality when the DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    setupProfilePictureUpload();
+    
+    // Also initialize when the profile view is shown
+    document.getElementById('profile-view')?.addEventListener('viewShown', loadProfilePicture);
+});
 
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
