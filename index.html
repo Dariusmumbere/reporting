@@ -14,6 +14,30 @@
     <link rel="stylesheet" href="styles.css">
     
     <style>
+/* Add this to your CSS section */
+#export-view .form-group {
+    margin-bottom: 1.5rem;
+}
+
+#export-view .form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+#export-view .form-control, 
+#export-view .form-select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--card-bg);
+    color: var(--text-primary);
+}
+
+#export-btn {
+    margin-top: 1rem;
+}
 /* Base styles for the auth container */
 .auth-container {
     display: flex;
@@ -1945,16 +1969,16 @@
                         <i class="fas fa-user-plus"></i>
                         <span>Invite Organization</span>
                     </a>
+                    <!-- In the sidebar-menu div, add this after the Support category -->
+                    <div class="menu-category">Export</div>
+                    <a href="#" class="menu-item" data-view="export">
+                        <i class="fas fa-file-export"></i>
+                        <span>Export Reports</span>
+                    </a>
                     <div class="menu-category">Support</div>
                     <a href="#" class="menu-item" data-view="support">
                         <i class="fas fa-headset"></i>
                         <span>Contact Support</span>
-                    </a>
-                    <!-- In the sidebar-menu div, add this after the Support category -->
-                    <div class="menu-category">Tools</div>
-                    <a href="#" class="menu-item" data-view="export">
-                        <i class="fas fa-file-export"></i>
-                        <span>Export</span>
                     </a>
                     <div id="admin-menu" class="hidden">
                         <div class="menu-category">Administration</div>
@@ -2497,32 +2521,6 @@
                     <i class="fas fa-download"></i> Export Reports
                 </button>
             </form>
-        </div>
-    </div>
-    
-    <div class="card mt-3">
-        <div class="card-header">
-            <h2 class="card-title">Export History</h2>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Template</th>
-                            <th>Status</th>
-                            <th>Date Range</th>
-                            <th>Format</th>
-                            <th>Records</th>
-                            <th>Download</th>
-                        </tr>
-                    </thead>
-                    <tbody id="export-history-table">
-                        <!-- Export history will be loaded here -->
-                    </tbody>
-                </table>
-            </div>
         </div>
     </div>
 </div>
@@ -3483,7 +3481,6 @@
 
         // Setup event listeners
         function setupEventListeners() {
-            document.getElementById('export-form').addEventListener('submit', handleExport);
             // Toggle between login and signup forms
             showSignupLink?.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -4667,7 +4664,6 @@ function setupUIForUser() {
             // Load data for the view if needed
             if (viewId === 'reports') {
                 loadReports();
-                
             } else if (viewId === 'users' && currentUser.role === 'admin') {
                 loadUsers();
             } else if (viewId === 'dashboard') {
@@ -4677,8 +4673,7 @@ function setupUIForUser() {
             } else if (viewId === 'settings') {
                 loadOrganizationSettings();
             }else if (viewId === 'export') {
-                loadExportTemplates();
-                loadExportHistory();
+                loadExportView();
             }
         } else {
             view.classList.add('hidden');
@@ -7935,7 +7930,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('invite-fields').classList.remove('hidden');
     }
 });
-async function loadExportTemplates() {
+// Add this to your JavaScript section
+async function loadExportView() {
+    // Load templates for the dropdown
     try {
         const response = await fetch(`${API_BASE_URL}/templates`, {
             headers: {
@@ -7943,130 +7940,76 @@ async function loadExportTemplates() {
             }
         });
         
-        if (!response.ok) {
-            throw new Error('Failed to load templates');
-        }
+        if (!response.ok) throw new Error('Failed to load templates');
         
         const templates = await response.json();
         const templateSelect = document.getElementById('export-template');
         
-        // Clear existing options except the first one
-        while (templateSelect.options.length > 1) {
-            templateSelect.remove(1);
-        }
-        
-        // Add template options
         templates.forEach(template => {
             const option = document.createElement('option');
             option.value = template.id;
             option.textContent = template.name;
             templateSelect.appendChild(option);
         });
-        
     } catch (error) {
         console.error('Error loading templates:', error);
         showAlert('Failed to load templates', 'danger');
     }
 }
 
-async function loadExportHistory() {
+// Handle export form submission
+document.getElementById('export-form')?.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const templateId = document.getElementById('export-template').value || null;
+    const status = document.getElementById('export-status').value || null;
+    const dateFrom = document.getElementById('export-date-from').value || null;
+    const dateTo = document.getElementById('export-date-to').value || null;
+    const format = document.getElementById('export-format').value;
+    
+    // Build query parameters
+    const params = new URLSearchParams();
+    if (templateId) params.append('template_id', templateId);
+    if (status) params.append('status', status);
+    if (dateFrom) params.append('date_from', dateFrom);
+    if (dateTo) params.append('date_to', dateTo);
+    if (format) params.append('format', format);
+    
     try {
-        const response = await fetch(`${API_BASE_URL}/exports/history`, {
+        // Show loading state
+        const exportBtn = document.getElementById('export-btn');
+        exportBtn.disabled = true;
+        exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Exporting...';
+        
+        // Make the export request
+        const response = await fetch(`${API_BASE_URL}/reports/export?${params.toString()}`, {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
-        });
-        
-        if (!response.ok) {
-            throw new Error('Failed to load export history');
-        }
-        
-        const history = await response.json();
-        const historyTable = document.getElementById('export-history-table');
-        historyTable.innerHTML = '';
-        
-        if (history.length === 0) {
-            const row = document.createElement('tr');
-            row.innerHTML = '<td colspan="7" class="text-center text-muted">No export history found</td>';
-            historyTable.appendChild(row);
-            return;
-        }
-        
-        history.forEach(item => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${new Date(item.created_at).toLocaleDateString()}</td>
-                <td>${item.template_name || 'All'}</td>
-                <td>${item.status_filter || 'All'}</td>
-                <td>${item.date_from ? new Date(item.date_from).toLocaleDateString() : ''} - ${item.date_to ? new Date(item.date_to).toLocaleDateString() : ''}</td>
-                <td>${item.format.toUpperCase()}</td>
-                <td>${item.record_count}</td>
-                <td>
-                    <button class="btn btn-sm btn-outline download-export" data-id="${item.id}">
-                        <i class="fas fa-download"></i> Download
-                    </button>
-                </td>
-            `;
-            historyTable.appendChild(row);
-        });
-        
-        // Add event listeners to download buttons
-        document.querySelectorAll('.download-export').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const exportId = e.currentTarget.getAttribute('data-id');
-                downloadExport(exportId);
-            });
-        });
-        
-    } catch (error) {
-        console.error('Error loading export history:', error);
-        showAlert('Failed to load export history', 'danger');
-    }
-}
-
-async function handleExport(e) {
-    e.preventDefault();
-    
-    const templateId = document.getElementById('export-template').value;
-    const status = document.getElementById('export-status').value;
-    const dateFrom = document.getElementById('export-date-from').value;
-    const dateTo = document.getElementById('export-date-to').value;
-    const format = document.getElementById('export-format').value;
-    
-    try {
-        const response = await fetch(`${API_BASE_URL}/exports`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                template_id: templateId || null,
-                status: status || null,
-                date_from: dateFrom || null,
-                date_to: dateTo || null,
-                format: format
-            })
         });
         
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData.detail || 'Failed to export reports');
+            throw new Error(errorData.detail || 'Export failed');
         }
         
-        // Handle the download
-        const blob = await response.blob();
-        const contentDisposition = response.headers.get('Content-Disposition');
+        // Get the filename from content-disposition header or generate one
+        const contentDisposition = response.headers.get('content-disposition');
         let filename = 'reports_export';
         
         if (contentDisposition) {
-            const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+            const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
             if (filenameMatch && filenameMatch[1]) {
                 filename = filenameMatch[1];
             }
+        } else {
+            // Generate filename based on format
+            const extension = format === 'excel' ? 'xlsx' : format === 'csv' ? 'csv' : 'json';
+            filename = `reports_export_${new Date().toISOString().split('T')[0]}.${extension}`;
         }
         
-        // Create download link
+        // Download the file
+        const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -8075,57 +8018,20 @@ async function handleExport(e) {
         a.click();
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
-        
-        // Refresh export history
-        loadExportHistory();
         
         showAlert('Export completed successfully', 'success');
         
     } catch (error) {
-        console.error('Error exporting reports:', error);
+        console.error('Export error:', error);
         showAlert(error.message || 'Failed to export reports', 'danger');
+    } finally {
+        // Reset button state
+        const exportBtn = document.getElementById('export-btn');
+        exportBtn.disabled = false;
+        exportBtn.innerHTML = '<i class="fas fa-download"></i> Export Reports';
     }
-}
+});
 
-async function downloadExport(exportId) {
-    try {
-        const response = await fetch(`${API_BASE_URL}/exports/${exportId}`, {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-        });
-        
-        if (!response.ok) {
-            throw new Error('Failed to download export');
-        }
-        
-        // Handle the download
-        const blob = await response.blob();
-        const contentDisposition = response.headers.get('Content-Disposition');
-        let filename = 'reports_export';
-        
-        if (contentDisposition) {
-            const filenameMatch = contentDisposition.match(/filename="(.+)"/);
-            if (filenameMatch && filenameMatch[1]) {
-                filename = filenameMatch[1];
-            }
-        }
-        
-        // Create download link
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-        
-    } catch (error) {
-        console.error('Error downloading export:', error);
-        showAlert('Failed to download export', 'danger');
-    }
-}
 
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
