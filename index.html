@@ -14,23 +14,6 @@
     <link rel="stylesheet" href="styles.css">
     
     <style>
-/* Add to your CSS */
-.export-controls {
-    transition: all 0.3s ease;
-}
-
-.template-row {
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.template-row:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-}
-
-#templates-table-body tr.selected {
-    background-color: var(--primary-light);
-}
 /* Base styles for the auth container */
 .auth-container {
     display: flex;
@@ -1958,6 +1941,11 @@
                         <span>Messages</span>
                         <span class="menu-item-badge hidden" id="unread-messages-count">0</span>
                     </a>
+                    <div class="menu-category">Export</div>
+                    <a href="#" class="menu-item" data-view="export">
+                        <i class="fas fa-file-export"></i>
+                        <span>Export Reports</span>
+                    </a>
                     <a href="#" class="menu-item" id="invite-org-item">
                         <i class="fas fa-user-plus"></i>
                         <span>Invite Organization</span>
@@ -2455,7 +2443,64 @@
         </div>
     </div>
 </div>
+<!-- Add this with the other views -->
+<div class="view hidden" id="export-view">
+    <div class="page-header">
+        <h1 class="page-title">Export Reports</h1>
+    </div>
 
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Export Options</h2>
+        </div>
+        <div class="card-body">
+            <form id="export-form">
+                <div class="form-group">
+                    <label class="form-label">Report Template</label>
+                    <select class="form-control" id="export-template">
+                        <option value="">All Reports</option>
+                        <!-- Templates will be loaded here -->
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Date Range</label>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <input type="date" class="form-control" id="export-start-date">
+                        </div>
+                        <div class="col-md-6">
+                            <input type="date" class="form-control" id="export-end-date">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Status</label>
+                    <select class="form-control" id="export-status">
+                        <option value="">All Statuses</option>
+                        <option value="pending">Pending</option>
+                        <option value="approved">Approved</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Export Format</label>
+                    <select class="form-control" id="export-format">
+                        <option value="excel">Excel</option>
+                        <option value="csv">CSV</option>
+                        <option value="pdf">PDF</option>
+                    </select>
+                </div>
+                
+                <button type="button" class="btn btn-primary" id="export-btn">
+                    <i class="fas fa-download"></i> Export Reports
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
                     <!-- Chat View -->
                     <div class="view hidden" id="chat-view">
                         <div class="page-header">
@@ -2818,7 +2863,7 @@
                 </div>
             </div>
         </div>
-   <!-- Template Management Modal -->
+    <!-- Template Management Modal -->
 <div class="modal" id="template-management-modal">
     <div class="modal-content" style="max-width: 800px;">
         <div class="modal-header">
@@ -2829,19 +2874,12 @@
         </div>
         <div class="modal-body">
             <div class="d-flex justify-content-between mb-3">
-                <div>
-                    <button class="btn btn-primary" id="create-template-btn">
-                        <i class="fas fa-plus"></i> New Template
-                    </button>
-                </div>
-                <div>
-                    <button class="btn btn-success" id="export-template-btn">
-                        <i class="fas fa-file-excel"></i> Export Reports
-                    </button>
-                    <div class="search-bar">
-                        <i class="fas fa-search"></i>
-                        <input type="text" id="template-search" placeholder="Search templates...">
-                    </div>
+                <button class="btn btn-primary" id="create-template-btn">
+                    <i class="fas fa-plus"></i> New Template
+                </button>
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="template-search" placeholder="Search templates...">
                 </div>
             </div>
             
@@ -2858,50 +2896,8 @@
                     </thead>
                     <tbody id="templates-table-body">
                         <!-- Templates will be loaded here -->
-                        <tr>
-                            <td colspan="5" class="text-center">
-                                <div class="d-flex justify-content-center py-4">
-                                    <div class="spinner spinner-primary"></div>
-                                </div>
-                            </td>
-                        </tr>
                     </tbody>
                 </table>
-            </div>
-            
-            <!-- Export Controls -->
-            <div class="export-controls hidden" id="export-controls">
-                <div class="card mt-3">
-                    <div class="card-header">
-                        <h4 class="mb-0">Export Options</h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="export-sort-by" class="form-label">Sort By</label>
-                                    <select id="export-sort-by" class="form-control">
-                                        <option value="created_at">Date</option>
-                                        <option value="status">Status</option>
-                                        <option value="category">Category</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="export-sort-order" class="form-label">Sort Order</label>
-                                    <select id="export-sort-order" class="form-control">
-                                        <option value="desc">Descending (Newest First)</option>
-                                        <option value="asc">Ascending (Oldest First)</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        <button class="btn btn-primary mt-3" id="confirm-export-btn">
-                            <i class="fas fa-download"></i> Export Now
-                        </button>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -2941,9 +2937,6 @@
                     <div class="card-body">
                         <div id="template-fields-container">
                             <!-- Fields will be added here -->
-                            <div class="text-center text-muted py-3">
-                                No fields added yet. Click "Add Field" to get started.
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -2959,7 +2952,7 @@
     </div>
 </div>
 
-<!-- Field Editor Modal -->
+<!-- Field Editor Modal (for editing individual fields) -->
 <div class="modal" id="field-editor-modal">
     <div class="modal-content" style="max-width: 600px;">
         <div class="modal-header">
@@ -3010,7 +3003,6 @@
                 <div class="form-group hidden" id="field-options-group">
                     <label for="field-options" class="form-label">Options (one per line)</label>
                     <textarea id="field-options" class="form-control" rows="4"></textarea>
-                    <small class="text-muted">Format: value|label (e.g., "yes|Yes" or just "Yes" for both)</small>
                 </div>
                 <div class="form-group">
                     <label for="field-order" class="form-label">Display Order</label>
@@ -3024,7 +3016,7 @@
         </div>
     </div>
 </div>
-    
+
         <!-- Add User Modal (Admin only) -->
         <div class="modal" id="add-user-modal">
             <div class="modal-content">
@@ -3267,7 +3259,6 @@
         let recordingStartTime;
         let recordingTimer;
         let audioBlob = null;
-        let selectedTemplateId = null;
 
         let reportsTrendChart;
         let reportsCategoryChart;
@@ -4658,6 +4649,8 @@ function setupUIForUser() {
                 loadChatUsers();
             } else if (viewId === 'settings') {
                 loadOrganizationSettings();
+            } else if (viewId === 'export') {
+                loadExportTemplates();
             }
         } else {
             view.classList.add('hidden');
@@ -7914,112 +7907,90 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('invite-fields').classList.remove('hidden');
     }
 });
-document.querySelectorAll('#templates-table-body tr').forEach(row => {
-    row.addEventListener('click', (e) => {
-        // Don't trigger if clicking on action buttons
-        if (e.target.closest('.action-btn')) return;
-        
-        // Update selected template
-        selectedTemplateId = row.querySelector('.edit-template-btn').getAttribute('data-id');
-        document.getElementById('export-template-btn').disabled = false;
-        document.getElementById('export-controls').classList.remove('hidden');
-    });
-});
-document.getElementById('export-template-btn').addEventListener('click', async () => {
+async function loadExportTemplates() {
     try {
-        // Fetch templates from API
-        const response = await fetch(`${API_BASE_URL}/templates`);
+        const response = await fetch(`${API_BASE_URL}/templates`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to load templates');
+        }
+        
         const templates = await response.json();
-
-        // Show modal for template selection
-        showTemplateSelectionModal(templates);
-
+        const templateSelect = document.getElementById('export-template');
+        
+        templates.forEach(template => {
+            const option = document.createElement('option');
+            option.value = template.id;
+            option.textContent = template.name;
+            templateSelect.appendChild(option);
+        });
+        
     } catch (error) {
-        console.error('Failed to load templates:', error);
+        console.error('Error loading templates:', error);
         showAlert('Failed to load templates', 'danger');
     }
-});
-function showTemplateSelectionModal(templates) {
-    const modal = document.createElement('div');
-    modal.className = 'modal';
-    modal.innerHTML = `
-        <div class="modal-content" style="max-width: 500px;">
-            <div class="modal-header">
-                <h3>Select Template for Export</h3>
-                <button class="modal-close" id="close-select-template">&times;</button>
-            </div>
-            <div class="modal-body">
-                <ul class="list-group" id="template-selection-list">
-                    ${templates.map(t => `
-                        <li class="list-group-item template-item" data-id="${t.id}">
-                            <strong>${t.name}</strong> <span class="text-muted">(${t.category})</span>
-                        </li>
-                    `).join('')}
-                </ul>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-
-    // Close modal
-    modal.querySelector('#close-select-template').addEventListener('click', () => modal.remove());
-
-    // Handle template click
-    modal.querySelectorAll('.template-item').forEach(item => {
-        item.addEventListener('click', () => {
-            selectedTemplateId = item.getAttribute('data-id');
-            modal.remove();
-            startExport(selectedTemplateId); // Trigger export
-        });
-    });
 }
 
-// Export button click handler
-document.getElementById('export-template-btn').addEventListener('click', () => {
-    document.getElementById('export-controls').classList.remove('hidden');
-});
-
-// Confirm export button click handler
-document.getElementById('confirm-export-btn').addEventListener('click', async () => {
-    if (!selectedTemplateId) {
-        showAlert('Please select a template before exporting', 'warning');
-        return;
-    }
-
-    const sortBy = document.getElementById('export-sort-by').value;
-    const sortOrder = document.getElementById('export-sort-order').value;
-
+// Add event listener for export button
+document.getElementById('export-btn')?.addEventListener('click', async function() {
+    const templateId = document.getElementById('export-template').value || null;
+    const startDate = document.getElementById('export-start-date').value || null;
+    const endDate = document.getElementById('export-end-date').value || null;
+    const status = document.getElementById('export-status').value || null;
+    const format = document.getElementById('export-format').value;
+    
     try {
-        const exportUrl = `${API_BASE_URL}/templates/${selectedTemplateId}/reports/export?sort_by=${sortBy}&sort_order=${sortOrder}`;
-
-        const link = document.createElement('a');
-        link.href = exportUrl;
-        link.download = `reports_template_${selectedTemplateId}_${new Date().toISOString().split('T')[0]}.xlsx`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        showAlert('Export started successfully', 'success');
+        // Build query parameters
+        const params = new URLSearchParams();
+        if (templateId) params.append('template_id', templateId);
+        if (startDate) params.append('start_date', startDate);
+        if (endDate) params.append('end_date', endDate);
+        if (status) params.append('status', status);
+        params.append('format', format);
+        
+        // Make the export request
+        const response = await fetch(`${API_BASE_URL}/reports/export?${params.toString()}`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to export reports');
+        }
+        
+        // Get the filename from the Content-Disposition header
+        const contentDisposition = response.headers.get('Content-Disposition');
+        let filename = 'reports';
+        if (contentDisposition) {
+            const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
+            if (filenameMatch && filenameMatch[1]) {
+                filename = filenameMatch[1];
+            }
+        }
+        
+        // Download the file
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        
+        showAlert('Export completed successfully', 'success');
+        
     } catch (error) {
         console.error('Export error:', error);
-        showAlert('Failed to export reports', 'danger');
+        showAlert(error.message || 'Failed to export reports', 'danger');
     }
 });
-async function startExport(templateId) {
-    const sortBy = document.getElementById('export-sort-by').value;
-    const sortOrder = document.getElementById('export-sort-order').value;
-
-    const exportUrl = `${API_BASE_URL}/templates/${templateId}/reports/export?sort_by=${sortBy}&sort_order=${sortOrder}`;
-    const link = document.createElement('a');
-    link.href = exportUrl;
-    link.download = `reports_template_${templateId}_${new Date().toISOString().split('T')[0]}.xlsx`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    showAlert('Export started successfully', 'success');
-}
-
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
     </script>
