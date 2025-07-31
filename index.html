@@ -7716,10 +7716,10 @@ async function markNotificationAsRead(notificationId) {
 
 async function markAllNotificationsAsRead() {
     try {
-        await fetch(`${API_BASE_URL}/notifications/mark-all-read`, {
+        await fetch('https://reporting-api-uvze.onrender.com/notifications/mark-all-read', { // <--- Use full URL
             method: 'PATCH',
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                'Authorization': 'Bearer ' + localStorage.getItem('token') // No template literal
             }
         });
 
@@ -7730,11 +7730,11 @@ async function markAllNotificationsAsRead() {
 
         const badge = document.querySelector('.notification-badge');
         if (badge) badge.style.display = 'none';
+
     } catch (error) {
         console.error('Error marking all notifications as read:', error);
     }
 }
-
 
 
         // Initialize the app
