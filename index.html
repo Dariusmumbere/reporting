@@ -3140,6 +3140,7 @@
             checkAuth();
             addTemplateManagementButton();
             initTemplateManagement();
+            loadProfilePicture();
             document.getElementById('users-view')?.addEventListener('viewShown', loadActiveInvitations);
         }
 
@@ -4348,6 +4349,7 @@ function setupUIForUser() {
         adminMenu.classList.add('hidden');
     }
     updateSidebarOrganizationInfo();
+    loadProfilePicture();
 }
 
         // Switch between views
