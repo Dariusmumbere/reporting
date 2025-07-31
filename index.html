@@ -7992,6 +7992,56 @@ document.getElementById('export-btn')?.addEventListener('click', async function(
         showAlert(error.message || 'Failed to export reports', 'danger');
     }
 });
+async function exportReports() {
+  const params = {
+    template_id: document.getElementById('export-template').value || null,
+    start_date: document.getElementById('export-start-date').value || null,
+    end_date: document.getElementById('export-end-date').value || null,
+    status: document.getElementById('export-status').value || null,
+    format: document.getElementById('export-format').value || 'csv'
+  };
+
+  try {
+    // Validate dates
+    if (params.start_date && params.end_date) {
+      const start = new Date(params.start_date);
+      const end = new Date(params.end_date);
+      if (start > end) {
+        throw new Error('Start date cannot be after end date');
+      }
+    }
+
+    // Build URL
+    const url = new URL(`${API_BASE_URL}/reports/export`);
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== null) url.searchParams.append(key, value);
+    });
+
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.detail || `Export failed with status ${response.status}`);
+    }
+
+    // Handle successful export
+    const contentDisposition = response.headers.get('Content-Disposition');
+    const filename = contentDisposition 
+      ? contentDisposition.split('filename=')[1].replace(/"/g, '')
+      : `reports_${new Date().toISOString().slice(0,10)}.${params.format}`;
+
+    const blob = await response.blob();
+    downloadFile(blob, filename);
+    
+  } catch (error) {
+    console.error('Export error:', error);
+    showAlert(`Export failed: ${error.message}`, 'danger');
+  }
+}
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
     </script>
