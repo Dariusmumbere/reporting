@@ -5571,47 +5571,51 @@ async function startVoiceRecording() {
         }
         
 async function sendVoiceMessage() {
-            if (!activeChatUserId || audioChunks.length === 0) return;
-            
-            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-            const formData = new FormData();
-            formData.append('voice_message', audioBlob, `voice_message_${Date.now()}.wav`);
-            formData.append('recipient_id', activeChatUserId);
-            
-            try {
-                const response = await fetch(`${API_BASE_URL}/chat/voice-message`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    },
-                    body: formData
-                });
-                
-                if (!response.ok) {
-                    throw new Error('Failed to send voice message');
-                }
-                
-                const message = await response.json();
-                
-                // Add the voice message to the chat
-                const messageElement = addMessageToChat({
-                    id: message.id,
-                    sender_id: currentUser.id,
-                    recipient_id: activeChatUserId,
-                    content: `[VOICE_MESSAGE]${message.audio_url}`,
-                    timestamp: new Date().toISOString(),
-                    status: 'delivered'
-                }, 'sent');
-                
-                // Reset the recording UI
-                cancelVoiceRecording();
-                
-            } catch (error) {
-                console.error('Error sending voice message:', error);
-                showAlert('Failed to send voice message', 'danger');
-            }
+    if (!activeChatUserId || !audioBlob) return;
+    
+    try {
+        const formData = new FormData();
+        formData.append('voice_message', audioBlob, `voice_${Date.now()}.wav`);
+        formData.append('recipient_id', activeChatUserId.toString());
+        formData.append('duration', duration.toString()); // Calculate duration from recording
+        
+        const response = await fetch(`${API_BASE_URL}/chat/voice-message`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                // Don't set Content-Type header - let the browser set it with boundary
+            },
+            body: formData
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || 'Failed to send voice message');
         }
-
+        
+        const message = await response.json();
+        
+        // Add to chat UI
+        addMessageToChat({
+            id: message.id,
+            sender_id: currentUser.id,
+            recipient_id: activeChatUserId,
+            content: message.content,
+            timestamp: message.timestamp,
+            status: message.status,
+            message_type: 'voice',
+            duration: message.duration
+        }, 'sent');
+        
+        // Reset recording state
+        cancelVoiceRecording();
+        
+    } catch (error) {
+        console.error('Voice message error:', error);
+        showAlert(error.message || 'Failed to send voice message', 'danger');
+    }
+}
+        
 function addVoiceMessageToChat(message, type) {
     const messageElement = document.createElement('div');
     messageElement.className = `voice-message ${type}`;
