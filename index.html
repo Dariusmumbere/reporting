@@ -7925,6 +7925,54 @@ document.querySelectorAll('#templates-table-body tr').forEach(row => {
         document.getElementById('export-controls').classList.remove('hidden');
     });
 });
+document.getElementById('export-template-btn').addEventListener('click', async () => {
+    try {
+        // Fetch templates from API
+        const response = await fetch(`${API_BASE_URL}/templates`);
+        const templates = await response.json();
+
+        // Show modal for template selection
+        showTemplateSelectionModal(templates);
+
+    } catch (error) {
+        console.error('Failed to load templates:', error);
+        showAlert('Failed to load templates', 'danger');
+    }
+});
+function showTemplateSelectionModal(templates) {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3>Select Template for Export</h3>
+                <button class="modal-close" id="close-select-template">&times;</button>
+            </div>
+            <div class="modal-body">
+                <ul class="list-group" id="template-selection-list">
+                    ${templates.map(t => `
+                        <li class="list-group-item template-item" data-id="${t.id}">
+                            <strong>${t.name}</strong> <span class="text-muted">(${t.category})</span>
+                        </li>
+                    `).join('')}
+                </ul>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    // Close modal
+    modal.querySelector('#close-select-template').addEventListener('click', () => modal.remove());
+
+    // Handle template click
+    modal.querySelectorAll('.template-item').forEach(item => {
+        item.addEventListener('click', () => {
+            selectedTemplateId = item.getAttribute('data-id');
+            modal.remove();
+            startExport(selectedTemplateId); // Trigger export
+        });
+    });
+}
 
 // Export button click handler
 document.getElementById('export-template-btn').addEventListener('click', () => {
@@ -7957,6 +8005,21 @@ document.getElementById('confirm-export-btn').addEventListener('click', async ()
         showAlert('Failed to export reports', 'danger');
     }
 });
+async function startExport(templateId) {
+    const sortBy = document.getElementById('export-sort-by').value;
+    const sortOrder = document.getElementById('export-sort-order').value;
+
+    const exportUrl = `${API_BASE_URL}/templates/${templateId}/reports/export?sort_by=${sortBy}&sort_order=${sortOrder}`;
+    const link = document.createElement('a');
+    link.href = exportUrl;
+    link.download = `reports_template_${templateId}_${new Date().toISOString().split('T')[0]}.xlsx`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    showAlert('Export started successfully', 'success');
+}
+
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
     </script>
