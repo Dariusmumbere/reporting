@@ -5607,8 +5607,8 @@ function addVoiceMessageToChat(message, type) {
     const messageElement = document.createElement('div');
     messageElement.className = `message message-${type} voice-message-container`;
     messageElement.dataset.id = message.id;
-    messageElement.dataset.objectKey = message.object_key;
-
+    messageElement.dataset.objectKey = message.object_key || message.content;
+    
     messageElement.innerHTML = `
         <div class="voice-message-controls">
             <button class="play-pause-btn">
@@ -5657,109 +5657,90 @@ function addVoiceMessageToChat(message, type) {
 
 
 // Add this function to handle play/pause of voice messages
-function togglePlayPause(button) {
-  const messageContainer = button.closest('.voice-message-container');
-  if (!messageContainer) {
-    console.error('Message container not found');
-    return;
-  }
-
-  const audioElement = messageContainer.querySelector('audio');
-  const progressBar = messageContainer.querySelector('.voice-progress-bar');
-  const durationDisplay = messageContainer.querySelector('.voice-duration');
-
-  if (!audioElement) {
-    console.error('Audio element not found');
-    return;
-  }
-
-  // First, pause all other audio elements
-  document.querySelectorAll('.voice-message-container audio').forEach(audio => {
-    if (audio !== audioElement && !audio.paused) {
-      audio.pause();
-      const otherButton = audio.closest('.voice-message-container').querySelector('.play-pause-btn');
-      if (otherButton) {
-        otherButton.innerHTML = '<i class="fas fa-play"></i>';
-        audio.closest('.voice-message-container').querySelector('.voice-progress-bar').style.width = '0%';
-      }
+async function togglePlayPause(button) {
+    const messageContainer = button.closest('.voice-message-container');
+    if (!messageContainer) {
+        console.error('Message container not found');
+        showAlert('Message not found', 'danger');
+        return;
     }
-  });
 
-  // Handle the current audio element
-  if (audioElement.paused) {
-    // If audio source isn't loaded or previous attempt failed
-    if (!audioElement.src || audioElement.error) {
-      const messageId = messageContainer.dataset.id;
-      const objectKey = messageContainer.dataset.objectKey;
-      
-      button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-      
-      // Get fresh signed URL
-      fetch(`${API_BASE_URL}/chat/voice-message/${messageId}/url`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+    const messageId = messageContainer.dataset.id;
+    if (!messageId) {
+        console.error('Message ID is missing');
+        showAlert('This voice message is invalid', 'danger');
+        return;
+    }
+
+    const audioElement = messageContainer.querySelector('audio');
+    const progressBar = messageContainer.querySelector('.voice-progress-bar');
+    
+    // Pause all other audio first
+    document.querySelectorAll('.voice-message-container audio').forEach(audio => {
+        if (audio !== audioElement && !audio.paused) {
+            audio.pause();
+            const otherButton = audio.closest('.voice-message-container')
+                                .querySelector('.play-pause-btn');
+            if (otherButton) {
+                otherButton.innerHTML = '<i class="fas fa-play"></i>';
+                const otherProgress = audio.closest('.voice-message-container')
+                                        .querySelector('.voice-progress-bar');
+                if (otherProgress) otherProgress.style.width = '0%';
+            }
         }
-      })
-      .then(response => {
-        if (!response.ok) throw new Error('Failed to get audio URL');
-        return response.json();
-      })
-      .then(data => {
-        audioElement.src = data.signed_url;
-        return audioElement.play();
-      })
-      .then(() => {
-        button.innerHTML = '<i class="fas fa-pause"></i>';
-        
-        // Update duration display once metadata is loaded
-        if (audioElement.duration && durationDisplay) {
-          durationDisplay.textContent = formatDuration(audioElement.duration);
+    });
+
+    try {
+        if (audioElement.paused) {
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            
+            // Get fresh signed URL if needed
+            if (!audioElement.src || audioElement.error) {
+                const response = await fetch(
+                    `${API_BASE_URL}/chat/voice-message/${messageId}/url`, 
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        }
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error(response.status === 404 
+                        ? 'Voice message not found' 
+                        : 'Failed to get audio URL');
+                }
+
+                const { signed_url } = await response.json();
+                audioElement.src = signed_url;
+            }
+
+            await audioElement.play();
+            button.innerHTML = '<i class="fas fa-pause"></i>';
+        } else {
+            audioElement.pause();
+            button.innerHTML = '<i class="fas fa-play"></i>';
         }
-      })
-      .catch(error => {
+    } catch (error) {
         console.error('Playback error:', error);
         button.innerHTML = '<i class="fas fa-play"></i>';
-        showAlert('Could not play voice message', 'danger');
-      });
-    } else {
-      // Audio source is ready, just play it
-      audioElement.play()
-        .then(() => {
-          button.innerHTML = '<i class="fas fa-pause"></i>';
-        })
-        .catch(error => {
-          console.error('Playback error:', error);
-          button.innerHTML = '<i class="fas fa-play"></i>';
-          showAlert('Error playing message', 'danger');
-        });
+        showAlert(error.message || 'Could not play voice message', 'danger');
     }
-  } else {
-    // Audio is playing, so pause it
-    audioElement.pause();
-    button.innerHTML = '<i class="fas fa-play"></i>';
-  }
 
-  // Update progress bar during playback
-  audioElement.addEventListener('timeupdate', function() {
-    if (audioElement.duration) {
-      const progress = (audioElement.currentTime / audioElement.duration) * 100;
-      progressBar.style.width = `${progress}%`;
-    }
-  });
+    // Update progress during playback
+    audioElement.addEventListener('timeupdate', () => {
+        if (audioElement.duration > 0) {
+            const progress = (audioElement.currentTime / audioElement.duration) * 100;
+            if (progressBar) progressBar.style.width = `${progress}%`;
+        }
+    });
 
-  // Reset UI when playback ends
-  audioElement.addEventListener('ended', function() {
-    button.innerHTML = '<i class="fas fa-play"></i>';
-    progressBar.style.width = '0%';
-  });
-
-  // Handle errors
-  audioElement.addEventListener('error', function() {
-    button.innerHTML = '<i class="fas fa-play"></i>';
-    progressBar.style.width = '0%';
-    showAlert('Error playing voice message', 'danger');
-  });
+    audioElement.addEventListener('ended', () => {
+        button.innerHTML = '<i class="fas fa-play"></i>';
+        if (progressBar) progressBar.style.width = '0%';
+    });
 }
+
 async function loadOrganizationSettings() {
     try {
         const response = await fetch(`${API_BASE_URL}/organization`, {
