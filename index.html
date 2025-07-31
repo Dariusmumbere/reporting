@@ -610,7 +610,120 @@
     padding: 0.75rem 1rem;
     background-color: var(--background-color);
 }
+/* Add to your styles.css */
+.notification-btn {
+    position: relative;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.25rem;
+    color: var(--text-color);
+}
 
+.notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: var(--danger-color);
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    display: none;
+}
+
+.notifications-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 350px;
+    max-height: 400px;
+    overflow-y: auto;
+    background: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    padding: 0.5rem;
+}
+
+.notifications-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.notifications-header h4 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+#mark-all-read {
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.notification-item {
+    display: flex;
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--border-color-light);
+    cursor: pointer;
+}
+
+.notification-item.unread {
+    background-color: var(--unread-bg);
+}
+
+.notification-icon {
+    font-size: 1.2rem;
+    margin-right: 0.75rem;
+    color: var(--primary-color);
+}
+
+.notification-content {
+    flex: 1;
+}
+
+.notification-title {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.notification-message {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+}
+
+.notification-time {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.notification-empty {
+    padding: 1rem;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.notifications-footer {
+    padding: 0.5rem;
+    text-align: center;
+    border-top: 1px solid var(--border-color-light);
+}
+
+.notifications-footer a {
+    color: var(--primary-color);
+    font-size: 0.9rem;
+}
 .input-group .btn {
     border-radius: 0;
     border-left: 1px solid var(--border-color);
@@ -3075,7 +3188,14 @@
             addTemplateManagementButton();
             initTemplateManagement();
             document.getElementById('users-view')?.addEventListener('viewShown', loadActiveInvitations);
-        }
+            function initNotificationPolling() {
+                fetchUnreadNotifications();
+                // Poll every 30 seconds
+                setInterval(fetchUnreadNotifications, 30000);
+            }
+
+                initNotificationPolling();
+            }
 
         // Apply the current theme
         function applyTheme() {
@@ -7425,6 +7545,195 @@ function showLoader(button) {
         button.disabled = false;
     }, 10000); // Fallback in case loading fails
 }
+// Add this function to fetch notifications
+async function fetchUnreadNotifications() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/notifications/unread-count`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch notifications');
+        }
+        
+        const data = await response.json();
+        updateNotificationBadge(data.count);
+    } catch (error) {
+        console.error('Error fetching notifications:', error);
+    }
+}
+
+// Update the notification badge in the UI
+function updateNotificationBadge(count) {
+    const badge = document.querySelector('.notification-badge');
+    if (!badge) return;
+    
+    if (count > 0) {
+        badge.textContent = count > 9 ? '9+' : count;
+        badge.style.display = 'flex';
+    } else {
+        badge.style.display = 'none';
+    }
+}
+
+// Add click handler for notification button
+document.querySelector('.notification-btn')?.addEventListener('click', async () => {
+    // Show notifications dropdown
+    showNotificationsDropdown();
+    
+    // Mark all as read when opened
+    await markAllNotificationsAsRead();
+});
+
+async function showNotificationsDropdown() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/notifications?limit=5`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch notifications');
+        }
+        
+        const notifications = await response.json();
+        renderNotificationsDropdown(notifications);
+    } catch (error) {
+        console.error('Error showing notifications:', error);
+    }
+}
+
+function renderNotificationsDropdown(notifications) {
+    const dropdown = document.createElement('div');
+    dropdown.className = 'notifications-dropdown';
+    
+    if (notifications.length === 0) {
+        dropdown.innerHTML = '<div class="notification-empty">No new notifications</div>';
+    } else {
+        dropdown.innerHTML = `
+            <div class="notifications-header">
+                <h4>Notifications</h4>
+                <button id="mark-all-read">Mark all as read</button>
+            </div>
+            <div class="notifications-list">
+                ${notifications.map(notification => `
+                    <div class="notification-item ${notification.is_read ? '' : 'unread'}" 
+                         data-id="${notification.id}" 
+                         data-type="${notification.type}" 
+                         data-ref="${notification.reference_id || ''}">
+                        <div class="notification-icon">
+                            ${getNotificationIcon(notification.type)}
+                        </div>
+                        <div class="notification-content">
+                            <div class="notification-title">${notification.title}</div>
+                            <div class="notification-message">${notification.message}</div>
+                            <div class="notification-time">${formatTime(notification.created_at)}</div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+            <div class="notifications-footer">
+                <a href="#" data-view="notifications">View all notifications</a>
+            </div>
+        `;
+    }
+    
+    // Add to DOM
+    const notificationBtn = document.querySelector('.notification-btn');
+    notificationBtn.appendChild(dropdown);
+    
+    // Add event listeners
+    dropdown.querySelectorAll('.notification-item').forEach(item => {
+        item.addEventListener('click', handleNotificationClick);
+    });
+    
+    dropdown.querySelector('#mark-all-read')?.addEventListener('click', markAllNotificationsAsRead);
+}
+
+function getNotificationIcon(type) {
+    const icons = {
+        'report': '<i class="fas fa-file-alt"></i>',
+        'message': '<i class="fas fa-comment"></i>',
+        'system': '<i class="fas fa-bell"></i>',
+        'approval': '<i class="fas fa-check-circle"></i>'
+    };
+    return icons[type] || icons['system'];
+}
+
+async function handleNotificationClick(e) {
+    const notificationItem = e.currentTarget;
+    const notificationId = notificationItem.getAttribute('data-id');
+    const notificationType = notificationItem.getAttribute('data-type');
+    const referenceId = notificationItem.getAttribute('data-ref');
+    
+    // Mark as read
+    await markNotificationAsRead(notificationId);
+    
+    // Handle click based on type
+    switch (notificationType) {
+        case 'report':
+            if (referenceId) viewReport(referenceId);
+            break;
+        case 'message':
+            if (referenceId) {
+                const user = chatUsers.find(u => u.id === parseInt(referenceId));
+                if (user) openChat(user);
+            }
+            break;
+        // Add more cases as needed
+    }
+    
+    // Close dropdown
+    document.querySelector('.notifications-dropdown')?.remove();
+}
+
+async function markNotificationAsRead(notificationId) {
+    try {
+        await fetch(`${API_BASE_URL}/notifications/${notificationId}/read`, {
+            method: 'PATCH',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}'
+            }
+        });
+        
+        // Update local count
+        const badge = document.querySelector('.notification-badge');
+        if (badge && badge.textContent) {
+            const currentCount = parseInt(badge.textContent);
+            if (currentCount > 1) {
+                badge.textContent = currentCount - 1;
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+    } catch (error) {
+        console.error('Error marking notification as read:', error);
+    }
+}
+
+async function markAllNotificationsAsRead() {
+    try {
+        await fetch(`${API_BASE_URL}/notifications/mark-all-read`, {
+            method: 'PATCH',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}'
+            }
+        });
+        
+        // Update UI
+        document.querySelectorAll('.notification-item.unread').forEach(item => {
+            item.classList.remove('unread');
+        });
+        
+        document.querySelector('.notification-badge').style.display = 'none';
+    } catch (error) {
+        console.error('Error marking all notifications as read:', error);
+    }
+}
+
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
     </script>
