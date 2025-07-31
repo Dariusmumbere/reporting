@@ -5575,20 +5575,14 @@ async function startVoiceRecording() {
 }
         
 async function sendVoiceMessage() {
-    if (!activeChatUserId || !audioBlob) {
-        showAlert('No recording to send or no chat selected', 'warning');
-        return;
-    }
+    if (!activeChatUserId || !audioBlob) return;
     
     try {
         const formData = new FormData();
-        formData.append('voice_message', audioBlob, `voice_message_${Date.now()}.wav`);
+        formData.append('voice_message', audioBlob, `voice_${Date.now()}.wav`);
         formData.append('recipient_id', activeChatUserId.toString());
-        
-        // Calculate duration in seconds
-        const duration = (Date.now() - recordingStartTime) / 1000;
-        formData.append('duration', duration.toFixed(2));
-        
+        formData.append('duration', ((Date.now() - recordingStartTime) / 1000).toFixed(2));
+
         const response = await fetch(`${API_BASE_URL}/chat/voice-message`, {
             method: 'POST',
             headers: {
@@ -5596,74 +5590,71 @@ async function sendVoiceMessage() {
             },
             body: formData
         });
-        
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.detail || 'Failed to send voice message');
-        }
+
+        if (!response.ok) throw new Error('Failed to send voice message');
         
         const message = await response.json();
-        
-        // Add to chat UI
-        addMessageToChat({
-            id: message.id,
-            sender_id: currentUser.id,
-            recipient_id: activeChatUserId,
-            content: message.content,
-            timestamp: message.timestamp,
-            status: message.status,
-            message_type: 'voice',
-            duration: message.duration
-        }, 'sent');
-        
-        // Reset the recording UI
+        addVoiceMessageToChat(message, 'sent');
         cancelVoiceRecording();
-        
+
     } catch (error) {
-        console.error('Voice message error:', error);
+        console.error('Error sending voice message:', error);
         showAlert(error.message || 'Failed to send voice message', 'danger');
     }
 }
         
 function addVoiceMessageToChat(message, type) {
     const messageElement = document.createElement('div');
-    messageElement.className = `voice-message ${type}`;
-    
-    // Make sure the audio URL is properly constructed
-    const audioUrl = `${API_BASE_URL}${message.audio_url}`;
-    
+    messageElement.className = `message message-${type} voice-message-container`;
+    messageElement.dataset.id = message.id;
+    messageElement.dataset.objectKey = message.object_key;
+
     messageElement.innerHTML = `
         <div class="voice-message-controls">
-            <button class="play-pause-btn" onclick="togglePlayPause(this)">
+            <button class="play-pause-btn">
                 <i class="fas fa-play"></i>
             </button>
-            <div class="voice-message-duration">00:00</div>
+            <div class="voice-progress">
+                <div class="voice-progress-bar"></div>
+            </div>
+            <div class="voice-duration">${formatDuration(message.duration || 0)}</div>
+            <audio preload="none"></audio>
+            ${type === 'sent' ? `
+            <button class="delete-message-btn" title="Delete message">
+                <i class="fas fa-trash"></i>
+            </button>` : ''}
         </div>
-        <audio src="${audioUrl}" preload="none"></audio>
         <div class="message-time">
             ${formatTime(message.timestamp)}
             ${type === 'sent' ? `
             <span class="message-status ${message.status}">
-                ${message.status === 'sending' ? '<i class="fas fa-clock"></i>' : 
-                  message.status === 'delivered' ? '<i class="fas fa-check"></i>' : 
-                  message.status === 'read' ? '<i class="fas fa-check-double"></i>' : ''}
-            </span>
-            ` : ''}
+                ${getStatusIcon(message.status)}
+            </span>` : ''}
         </div>
     `;
-    
-    // Set up duration when metadata loads
+
+    const playButton = messageElement.querySelector('.play-pause-btn');
     const audioElement = messageElement.querySelector('audio');
-    audioElement.addEventListener('loadedmetadata', function() {
-        const duration = Math.floor(audioElement.duration);
-        const minutes = Math.floor(duration / 60).toString().padStart(2, '0');
-        const seconds = (duration % 60).toString().padStart(2, '0');
-        messageElement.querySelector('.voice-message-duration').textContent = `${minutes}:${seconds}`;
+    const progressBar = messageElement.querySelector('.voice-progress-bar');
+
+    playButton.addEventListener('click', async () => {
+        await handleVoicePlayback(messageElement, audioElement, message.object_key);
     });
-    
+
+    audioElement.addEventListener('timeupdate', () => {
+        const progress = (audioElement.currentTime / audioElement.duration) * 100;
+        progressBar.style.width = `${progress}%`;
+    });
+
+    audioElement.addEventListener('ended', () => {
+        playButton.innerHTML = '<i class="fas fa-play"></i>';
+        progressBar.style.width = '0%';
+    });
+
     chatMessages.appendChild(messageElement);
     scrollChatToBottom();
 }
+
 
 // Add this function to handle play/pause of voice messages
 function togglePlayPause(button) {
