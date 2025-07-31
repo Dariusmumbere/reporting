@@ -7343,8 +7343,7 @@ if (inviteToken) {
     document.getElementById('invite-fields').classList.remove('hidden');
     document.getElementById('invite-token').value = inviteToken;
 }
-// Profile Picture Upload Functionality
-// Profile Picture Management
+// Profile Picture Upload Functionality// Profile Picture Management
 function setupProfilePictureHandling() {
     const profilePictureUpload = document.getElementById('profile-picture-upload');
     const removeProfilePictureBtn = document.getElementById('remove-profile-picture-btn');
@@ -7400,12 +7399,10 @@ function setupProfilePictureHandling() {
             // Update current user's profile picture URL
             if (currentUser) {
                 currentUser.profile_picture = data.profile_picture_url;
-                // Store the URL in localStorage for persistence
-                localStorage.setItem(`profilePicture_${currentUser.id}`, data.profile_picture_url);
             }
             
-            // Update UI with the permanent URL
-            updateProfilePictureInUI(data.profile_picture_url);
+            // Reload profile picture
+            loadProfilePicture(currentUser?.id);
         } catch (error) {
             console.error('Error uploading profile picture:', error);
             showAlert(error.message || 'Failed to upload profile picture', 'danger');
@@ -7440,12 +7437,10 @@ function setupProfilePictureHandling() {
             // Update current user's profile picture URL
             if (currentUser) {
                 currentUser.profile_picture = null;
-                // Remove from localStorage
-                localStorage.removeItem(`profilePicture_${currentUser.id}`);
             }
             
-            // Update UI
-            updateProfilePictureInUI(null);
+            // Reload profile picture
+            loadProfilePicture(currentUser?.id);
         } catch (error) {
             console.error('Error removing profile picture:', error);
             showAlert(error.message || 'Failed to remove profile picture', 'danger');
@@ -7470,17 +7465,10 @@ function updateProfilePicturePreview(imageUrl) {
     }
 }
 
-// Load profile picture from backend or cache
+// Load profile picture from backend
 async function loadProfilePicture(userId) {
     if (!userId) return;
     
-    // Check localStorage first for a cached URL
-    const cachedUrl = localStorage.getItem(`profilePicture_${userId}`);
-    if (cachedUrl) {
-        updateProfilePicturePreview(cachedUrl);
-        updateProfilePictureInUI(cachedUrl);
-    }
-
     try {
         const response = await fetch(`${API_BASE_URL}/users/profile-picture/${userId}`, {
             headers: {
@@ -7491,20 +7479,15 @@ async function loadProfilePicture(userId) {
         if (!response.ok) {
             // If no profile picture exists, the backend returns 404
             if (response.status === 404) {
-                // Clear any cached URL if the picture was deleted
-                localStorage.removeItem(`profilePicture_${userId}`);
                 updateProfilePicturePreview(null);
-                updateProfilePictureInUI(null);
                 return;
             }
             throw new Error('Failed to load profile picture');
         }
 
-        // Get the URL from the response (assuming it's a redirect or direct URL)
-        const imageUrl = response.url;
-        
-        // Cache the URL in localStorage
-        localStorage.setItem(`profilePicture_${userId}`, imageUrl);
+        // For images, we need to create an object URL from the blob
+        const blob = await response.blob();
+        const imageUrl = URL.createObjectURL(blob);
         
         // Update the preview
         updateProfilePicturePreview(imageUrl);
@@ -7514,7 +7497,6 @@ async function loadProfilePicture(userId) {
     } catch (error) {
         console.error('Error loading profile picture:', error);
         updateProfilePicturePreview(null);
-        updateProfilePictureInUI(null);
     }
 }
 
@@ -7522,8 +7504,6 @@ async function loadProfilePicture(userId) {
 function updateProfilePictureInUI(imageUrl) {
     const userAvatar = document.getElementById('user-avatar');
     const userDropdownAvatar = document.getElementById('user-dropdown-avatar');
-    const profilePictureImg = document.getElementById('profile-picture-img');
-    const profilePictureInitials = document.getElementById('profile-picture-initials');
     
     if (imageUrl) {
         // Update avatar in sidebar
@@ -7549,13 +7529,6 @@ function updateProfilePictureInUI(imageUrl) {
             img.style.borderRadius = '50%';
             userDropdownAvatar.appendChild(img);
         }
-        
-        // Update profile preview
-        if (profilePictureImg && profilePictureInitials) {
-            profilePictureImg.src = imageUrl;
-            profilePictureImg.style.display = 'block';
-            profilePictureInitials.style.display = 'none';
-        }
     } else {
         // Use initials if no profile picture
         const initials = currentUser?.name ? currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'U';
@@ -7567,17 +7540,11 @@ function updateProfilePictureInUI(imageUrl) {
         if (userDropdownAvatar) {
             userDropdownAvatar.textContent = initials;
         }
-        
-        if (profilePictureImg && profilePictureInitials) {
-            profilePictureInitials.textContent = initials;
-            profilePictureInitials.style.display = 'block';
-            profilePictureImg.style.display = 'none';
-        }
     }
 }
 
-// Initialize the profile picture functionality
-function initProfilePicture() {
+// Initialize the profile picture functionality when the DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
     setupProfilePictureHandling();
     
     // Load profile picture when profile view is shown
@@ -7591,10 +7558,7 @@ function initProfilePicture() {
     if (currentUser) {
         loadProfilePicture(currentUser.id);
     }
-}
-
-// Call this when the app initializes
-document.addEventListener('DOMContentLoaded', initProfilePicture);
+});
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
     </script>
