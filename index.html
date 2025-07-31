@@ -7968,70 +7968,95 @@ async function loadExportTemplates() {
 
 async function handleExportClick() {
     try {
-        // Validate inputs
-        const startDate = document.getElementById('export-start-date').value;
-        const endDate = document.getElementById('export-end-date').value;
-        
-        if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
-            showAlert('End date must be after start date', 'warning');
-            return;
-        }
-        
-        showLoadingIndicator('#export-btn');
-        
-        // Get all parameters
-        const params = {
-            template_id: document.getElementById('export-template').value || undefined,
-            start_date: startDate || undefined,
-            end_date: endDate || undefined,
-            status: document.getElementById('export-status').value || undefined,
+        // Get form values
+        const formData = {
+            template_id: document.getElementById('export-template').value,
+            start_date: document.getElementById('export-start-date').value,
+            end_date: document.getElementById('export-end-date').value,
+            status: document.getElementById('export-status').value,
             format: document.getElementById('export-format').value
         };
-        
-        // Build query string
-        const queryString = Object.entries(params)
-            .filter(([_, value]) => value !== undefined)
-            .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
-            .join('&');
-        
-        const response = await fetch(`${API_BASE_URL}/reports/export?${queryString}`, {
-            headers: getAuthHeaders()
+
+        // Show loading state
+        const exportBtn = document.getElementById('export-btn');
+        exportBtn.disabled = true;
+        exportBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Exporting...';
+
+        // Build URL with params
+        const url = new URL(`${API_BASE_URL}/reports/export`);
+        Object.entries(formData).forEach(([key, value]) => {
+            if (value) url.searchParams.append(key, value);
         });
-        
-        // First check if the response is JSON (error case)
+
+        // Make the request
+        const response = await fetch(url, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+
+        // Check if response is JSON (error case)
         const contentType = response.headers.get('content-type');
         if (contentType && contentType.includes('application/json')) {
-            const errorData = await response.json();
-            throw new Error(errorData.detail || 'Export failed');
-        }
-        
-        // If not JSON, proceed with file download
-        const contentDisposition = response.headers.get('Content-Disposition');
-        let filename = 'reports_export';
-        
-        if (contentDisposition) {
-            const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
-            if (filenameMatch && filenameMatch[1]) {
-                filename = filenameMatch[1];
+            const result = await response.json();
+            if (!result.success) {
+                throw new Error(result.error || result.errors?.join(', ') || 'Export failed');
             }
         }
-        
+
+        // Handle file download
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const filename = response.headers.get('content-disposition')?.split('filename=')[1] || 
+                         `reports_export.${formData.format || 'xlsx'}`;
+
         const blob = await response.blob();
-        downloadFile(blob, filename);
-        
-        showAlert('Export completed successfully', 'success');
-        
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(downloadUrl);
+
+        showToast('Export completed successfully!', 'success');
+
     } catch (error) {
         console.error('Export error:', error);
-        // Properly extract error message
-        const errorMessage = error.message || 
-                           (error.detail ? error.detail : 'Failed to export reports');
-        showAlert(errorMessage, 'danger');
+        showToast(error.message || 'Export failed. Please try again.', 'danger');
     } finally {
-        hideLoadingIndicator('#export-btn');
+        // Reset button state
+        const exportBtn = document.getElementById('export-btn');
+        exportBtn.disabled = false;
+        exportBtn.innerHTML = '<i class="fas fa-download"></i> Export Reports';
     }
 }
 
+// Helper function to show toast notifications
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `toast show align-items-center text-white bg-${type} border-0`;
+    toast.setAttribute('role', 'alert');
+    toast.setAttribute('aria-live', 'assertive');
+    toast.setAttribute('aria-atomic', 'true');
+    toast.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">${message}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    `;
+    
+    const toastContainer = document.getElementById('toast-container') || document.body;
+    toastContainer.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 5000);
+}
 function downloadFile(blob, filename) {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
