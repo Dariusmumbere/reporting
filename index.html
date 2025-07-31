@@ -610,120 +610,7 @@
     padding: 0.75rem 1rem;
     background-color: var(--background-color);
 }
-/* Add to your styles.css */
-.notification-btn {
-    position: relative;
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 1.25rem;
-    color: var(--text-color);
-}
 
-.notification-badge {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background-color: var(--danger-color);
-    color: white;
-    border-radius: 50%;
-    width: 18px;
-    height: 18px;
-    font-size: 0.7rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    display: none;
-}
-
-.notifications-dropdown {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    width: 350px;
-    max-height: 400px;
-    overflow-y: auto;
-    background: var(--card-bg);
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-    padding: 0.5rem;
-}
-
-.notifications-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.5rem;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.notifications-header h4 {
-    margin: 0;
-    font-size: 1rem;
-}
-
-#mark-all-read {
-    background: none;
-    border: none;
-    color: var(--primary-color);
-    cursor: pointer;
-    font-size: 0.8rem;
-}
-
-.notification-item {
-    display: flex;
-    padding: 0.75rem;
-    border-bottom: 1px solid var(--border-color-light);
-    cursor: pointer;
-}
-
-.notification-item.unread {
-    background-color: var(--unread-bg);
-}
-
-.notification-icon {
-    font-size: 1.2rem;
-    margin-right: 0.75rem;
-    color: var(--primary-color);
-}
-
-.notification-content {
-    flex: 1;
-}
-
-.notification-title {
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-}
-
-.notification-message {
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    margin-bottom: 0.25rem;
-}
-
-.notification-time {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-}
-
-.notification-empty {
-    padding: 1rem;
-    text-align: center;
-    color: var(--text-muted);
-}
-
-.notifications-footer {
-    padding: 0.5rem;
-    text-align: center;
-    border-top: 1px solid var(--border-color-light);
-}
-
-.notifications-footer a {
-    color: var(--primary-color);
-    font-size: 0.9rem;
-}
 .input-group .btn {
     border-radius: 0;
     border-left: 1px solid var(--border-color);
@@ -3188,13 +3075,7 @@
             addTemplateManagementButton();
             initTemplateManagement();
             document.getElementById('users-view')?.addEventListener('viewShown', loadActiveInvitations);
-            initNotificationPolling();
-            }
-        function initNotificationPolling() {
-                fetchUnreadNotifications();
-                // Poll every 30 seconds
-                setInterval(fetchUnreadNotifications, 30000);
-            }
+        }
 
         // Apply the current theme
         function applyTheme() {
@@ -5723,182 +5604,101 @@ async function sendVoiceMessage() {
 }
         
 function addVoiceMessageToChat(message, type) {
-    try {
-        // Validate message object
-        if (!message || !message.id) {
-            console.error('Invalid message object:', message);
-            throw new Error('Invalid voice message data');
-        }
+    const messageElement = document.createElement('div');
+    messageElement.className = `message message-${type} voice-message-container`;
+    messageElement.dataset.id = message.id;
+    messageElement.dataset.objectKey = message.object_key;
 
-        // Create container element
-        const messageElement = document.createElement('div');
-        messageElement.className = `message message-${type} voice-message-container`;
-        
-        // Set all required data attributes
-        messageElement.dataset.id = message.id;
-        messageElement.dataset.objectKey = message.object_key || message.content;
-        messageElement.dataset.senderId = message.sender_id;
-        messageElement.dataset.timestamp = message.timestamp;
-
-        // Create message HTML structure
-        messageElement.innerHTML = `
-            <div class="voice-message-controls">
-                <button class="play-pause-btn">
-                    <i class="fas fa-play"></i>
-                </button>
-                <div class="voice-progress">
-                    <div class="voice-progress-bar"></div>
-                </div>
-                <div class="voice-duration">${formatDuration(message.duration || 0)}</div>
-                <audio preload="none"></audio>
-                ${type === 'sent' ? `
-                <button class="delete-message-btn" title="Delete message" onclick="deleteMessage('${message.id}')">
-                    <i class="fas fa-trash"></i>
-                </button>` : ''}
+    messageElement.innerHTML = `
+        <div class="voice-message-controls">
+            <button class="play-pause-btn">
+                <i class="fas fa-play"></i>
+            </button>
+            <div class="voice-progress">
+                <div class="voice-progress-bar"></div>
             </div>
-            <div class="message-time">
-                ${formatTime(message.timestamp)}
-                ${type === 'sent' ? `
-                <span class="message-status ${message.status}">
-                    ${getStatusIcon(message.status)}
-                </span>` : ''}
-            </div>
-        `;
+            <div class="voice-duration">${formatDuration(message.duration || 0)}</div>
+            <audio preload="none"></audio>
+            ${type === 'sent' ? `
+            <button class="delete-message-btn" title="Delete message">
+                <i class="fas fa-trash"></i>
+            </button>` : ''}
+        </div>
+        <div class="message-time">
+            ${formatTime(message.timestamp)}
+            ${type === 'sent' ? `
+            <span class="message-status ${message.status}">
+                ${getStatusIcon(message.status)}
+            </span>` : ''}
+        </div>
+    `;
 
-        // Get references to elements
-        const playButton = messageElement.querySelector('.play-pause-btn');
-        const audioElement = messageElement.querySelector('audio');
-        const progressBar = messageElement.querySelector('.voice-progress-bar');
+    const playButton = messageElement.querySelector('.play-pause-btn');
+    const audioElement = messageElement.querySelector('audio');
+    const progressBar = messageElement.querySelector('.voice-progress-bar');
 
-        // Set up event listeners
-        playButton.addEventListener('click', () => togglePlayPause(playButton));
-        
-        audioElement.addEventListener('timeupdate', () => {
-            if (audioElement.duration > 0) {
-                const progress = (audioElement.currentTime / audioElement.duration) * 100;
-                progressBar.style.width = `${progress}%`;
-            }
-        });
+    playButton.addEventListener('click', async () => {
+        await handleVoicePlayback(messageElement, audioElement, message.object_key);
+    });
 
-        audioElement.addEventListener('ended', () => {
-            playButton.innerHTML = '<i class="fas fa-play"></i>';
-            progressBar.style.width = '0%';
-        });
+    audioElement.addEventListener('timeupdate', () => {
+        const progress = (audioElement.currentTime / audioElement.duration) * 100;
+        progressBar.style.width = `${progress}%`;
+    });
 
-        audioElement.addEventListener('error', (e) => {
-            console.error('Audio error:', e);
-            playButton.innerHTML = '<i class="fas fa-play"></i>';
-            showAlert('Error playing voice message', 'danger');
-        });
+    audioElement.addEventListener('ended', () => {
+        playButton.innerHTML = '<i class="fas fa-play"></i>';
+        progressBar.style.width = '0%';
+    });
 
-        // Add to chat container
-        chatMessages.appendChild(messageElement);
-        scrollChatToBottom();
-
-        return messageElement;
-
-    } catch (error) {
-        console.error('Failed to create voice message element:', {
-            error,
-            messageData: message
-        });
-        showAlert('Could not display voice message', 'danger');
-        return null;
-    }
+    chatMessages.appendChild(messageElement);
+    scrollChatToBottom();
 }
+
 
 // Add this function to handle play/pause of voice messages
-async function togglePlayPause(button) {
-    try {
-        // Validate button and container
-        if (!button) {
-            throw new Error('Play button not found');
+function togglePlayPause(button) {
+  const messageElement = button.closest('.voice-message-container');
+  if (!messageElement) {
+    console.error('Message container not found');
+    return;
+  }
+
+  const audioElement = messageElement.querySelector('audio');
+  if (!audioElement) {
+    console.error('Audio element not found');
+    return;
+  }
+
+  // Pause all other audio elements
+  document.querySelectorAll('.voice-message-container audio').forEach(audio => {
+    if (audio !== audioElement && !audio.paused) {
+      audio.pause();
+      const otherButton = audio.closest('.voice-message-container')?.querySelector('.play-pause-btn');
+      if (otherButton) {
+        otherButton.innerHTML = '<i class="fas fa-play"></i>';
+        const progressBar = audio.closest('.voice-message-container')?.querySelector('.voice-progress-bar');
+        if (progressBar) {
+          progressBar.style.width = '0%';
         }
-
-        const messageContainer = button.closest('.voice-message-container');
-        if (!messageContainer) {
-            throw new Error('Message container not found');
-        }
-
-        // Validate required data attributes
-        const messageId = messageContainer.dataset.id;
-        const objectKey = messageContainer.dataset.objectKey;
-        
-        if (!messageId || !objectKey) {
-            console.error('Missing message data:', {
-                id: messageId,
-                objectKey: objectKey,
-                container: messageContainer
-            });
-            throw new Error('Voice message data incomplete');
-        }
-
-        // Get audio and progress elements
-        const audioElement = messageContainer.querySelector('audio');
-        const progressBar = messageContainer.querySelector('.voice-progress-bar');
-        
-        if (!audioElement || !progressBar) {
-            throw new Error('Audio controls not found');
-        }
-
-        // Pause all other audio messages
-        document.querySelectorAll('.voice-message-container audio').forEach(audio => {
-            if (audio !== audioElement && !audio.paused) {
-                audio.pause();
-                const otherButton = audio.closest('.voice-message-container')
-                                    .querySelector('.play-pause-btn');
-                if (otherButton) {
-                    otherButton.innerHTML = '<i class="fas fa-play"></i>';
-                    const otherProgress = audio.closest('.voice-message-container')
-                                            .querySelector('.voice-progress-bar');
-                    if (otherProgress) otherProgress.style.width = '0%';
-                }
-            }
-        });
-
-        // Handle play/pause
-        if (audioElement.paused) {
-            // Show loading state
-            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            
-            // Get fresh signed URL if needed
-            if (!audioElement.src || audioElement.error) {
-                const response = await fetch(
-                    `${API_BASE_URL}/chat/voice-message/${messageId}/url`, 
-                    {
-                        headers: {
-                            'Authorization': `Bearer ${localStorage.getItem('token')}`
-                        }
-                    }
-                );
-
-                if (!response.ok) {
-                    throw new Error(response.status === 404 
-                        ? 'Voice message not found' 
-                        : 'Failed to get audio URL');
-                }
-
-                const { signed_url } = await response.json();
-                audioElement.src = signed_url;
-            }
-
-            // Play audio
-            await audioElement.play();
-            button.innerHTML = '<i class="fas fa-pause"></i>';
-
-        } else {
-            // Pause audio
-            audioElement.pause();
-            button.innerHTML = '<i class="fas fa-play"></i>';
-        }
-
-    } catch (error) {
-        console.error('Voice message playback error:', error);
-        button.innerHTML = '<i class="fas fa-play"></i>';
-        showAlert(error.message || 'Could not play voice message', 'danger');
+      }
     }
-}
+  });
 
+  if (audioElement.paused) {
+    audioElement.play()
+      .then(() => {
+        button.innerHTML = '<i class="fas fa-pause"></i>';
+      })
+      .catch(error => {
+        console.error('Error playing audio:', error);
+        showAlert('Failed to play audio message', 'danger');
+      });
+  } else {
+    audioElement.pause();
+    button.innerHTML = '<i class="fas fa-play"></i>';
+  }
+}
 async function loadOrganizationSettings() {
     try {
         const response = await fetch(`${API_BASE_URL}/organization`, {
@@ -7475,267 +7275,6 @@ if (inviteToken) {
     document.getElementById('invite-fields').classList.remove('hidden');
     document.getElementById('invite-token').value = inviteToken;
 }
-function getStatusIcon(status) {
-    switch(status) {
-        case 'sending': return '<i class="fas fa-clock"></i>';
-        case 'delivered': return '<i class="fas fa-check"></i>';
-        case 'read': return '<i class="fas fa-check-double"></i>';
-        default: return '';
-    }
-}
-async function handleVoicePlayback(messageElement, audioElement, objectKey) {
-    const playButton = messageElement.querySelector('.play-pause-btn');
-    
-    // First, pause any currently playing audio
-    document.querySelectorAll('audio').forEach(audio => {
-        if (audio !== audioElement && !audio.paused) {
-            audio.pause();
-            const otherButton = audio.closest('.voice-message-container')?.querySelector('.play-pause-btn');
-            if (otherButton) {
-                otherButton.innerHTML = '<i class="fas fa-play"></i>';
-                otherButton.closest('.voice-message-container').querySelector('.voice-progress-bar').style.width = '0%';
-            }
-        }
-    });
-
-    if (audioElement.paused) {
-        try {
-            // Get fresh signed URL if needed
-            if (!audioElement.src || audioElement.error) {
-                showLoader(playButton);
-                
-                const response = await fetch(`${API_BASE_URL}/chat/voice-message/${messageElement.dataset.id}/url`, {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
-                });
-                
-                if (!response.ok) throw new Error('Failed to get audio URL');
-                
-                const { signed_url } = await response.json();
-                audioElement.src = signed_url;
-                
-                // Wait for the audio to be ready
-                await new Promise((resolve, reject) => {
-                    audioElement.onloadedmetadata = resolve;
-                    audioElement.onerror = reject;
-                    setTimeout(() => reject(new Error('Audio loading timeout')), 10000);
-                });
-            }
-
-            await audioElement.play();
-            playButton.innerHTML = '<i class="fas fa-pause"></i>';
-        } catch (error) {
-            console.error('Playback error:', error);
-            playButton.innerHTML = '<i class="fas fa-play"></i>';
-            showAlert('Could not play voice message: ' + error.message, 'danger');
-        }
-    } else {
-        audioElement.pause();
-        playButton.innerHTML = '<i class="fas fa-play"></i>';
-    }
-}
-
-function showLoader(button) {
-    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-    button.disabled = true;
-    setTimeout(() => {
-        button.innerHTML = '<i class="fas fa-play"></i>';
-        button.disabled = false;
-    }, 10000); // Fallback in case loading fails
-}
-// Add this function to fetch notifications
-async function fetchUnreadNotifications() {
-    try {
-        const response = await fetch(`${API_BASE_URL}/notifications/unread-count`, {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-        });
-        
-        if (!response.ok) {
-            throw new Error('Failed to fetch notifications');
-        }
-        
-        const data = await response.json();
-        updateNotificationBadge(data.count);
-    } catch (error) {
-        console.error('Error fetching notifications:', error);
-    }
-}
-
-// Update the notification badge in the UI
-function updateNotificationBadge(count) {
-    const badge = document.querySelector('.notification-badge');
-    if (!badge) return;
-    
-    if (count > 0) {
-        badge.textContent = count > 9 ? '9+' : count;
-        badge.style.display = 'flex';
-    } else {
-        badge.style.display = 'none';
-    }
-}
-
-// Add click handler for notification button
-document.querySelector('.notification-btn')?.addEventListener('click', async () => {
-    // Show notifications dropdown
-    showNotificationsDropdown();
-    
-    // Mark all as read when opened
-    await markAllNotificationsAsRead();
-});
-
-async function showNotificationsDropdown() {
-    try {
-        const response = await fetch(`${API_BASE_URL}/notifications?limit=5`, {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-        });
-        
-        if (!response.ok) {
-            throw new Error('Failed to fetch notifications');
-        }
-        
-        const notifications = await response.json();
-        renderNotificationsDropdown(notifications);
-    } catch (error) {
-        console.error('Error showing notifications:', error);
-    }
-}
-
-function renderNotificationsDropdown(notifications) {
-    const dropdown = document.createElement('div');
-    dropdown.className = 'notifications-dropdown';
-    
-    if (notifications.length === 0) {
-        dropdown.innerHTML = '<div class="notification-empty">No new notifications</div>';
-    } else {
-        dropdown.innerHTML = `
-            <div class="notifications-header">
-                <h4>Notifications</h4>
-                <button id="mark-all-read">Mark all as read</button>
-            </div>
-            <div class="notifications-list">
-                ${notifications.map(notification => `
-                    <div class="notification-item ${notification.is_read ? '' : 'unread'}" 
-                         data-id="${notification.id}" 
-                         data-type="${notification.type}" 
-                         data-ref="${notification.reference_id || ''}">
-                        <div class="notification-icon">
-                            ${getNotificationIcon(notification.type)}
-                        </div>
-                        <div class="notification-content">
-                            <div class="notification-title">${notification.title}</div>
-                            <div class="notification-message">${notification.message}</div>
-                            <div class="notification-time">${formatTime(notification.created_at)}</div>
-                        </div>
-                    </div>
-                `).join('')}
-            </div>
-            <div class="notifications-footer">
-                <a href="#" data-view="notifications">View all notifications</a>
-            </div>
-        `;
-    }
-    
-    // Add to DOM
-    const notificationBtn = document.querySelector('.notification-btn');
-    notificationBtn.appendChild(dropdown);
-    
-    // Add event listeners
-    dropdown.querySelectorAll('.notification-item').forEach(item => {
-        item.addEventListener('click', handleNotificationClick);
-    });
-    
-    dropdown.querySelector('#mark-all-read')?.addEventListener('click', markAllNotificationsAsRead);
-}
-
-function getNotificationIcon(type) {
-    const icons = {
-        'report': '<i class="fas fa-file-alt"></i>',
-        'message': '<i class="fas fa-comment"></i>',
-        'system': '<i class="fas fa-bell"></i>',
-        'approval': '<i class="fas fa-check-circle"></i>'
-    };
-    return icons[type] || icons['system'];
-}
-
-async function handleNotificationClick(e) {
-    const notificationItem = e.currentTarget;
-    const notificationId = notificationItem.getAttribute('data-id');
-    const notificationType = notificationItem.getAttribute('data-type');
-    const referenceId = notificationItem.getAttribute('data-ref');
-    
-    // Mark as read
-    await markNotificationAsRead(notificationId);
-    
-    // Handle click based on type
-    switch (notificationType) {
-        case 'report':
-            if (referenceId) viewReport(referenceId);
-            break;
-        case 'message':
-            if (referenceId) {
-                const user = chatUsers.find(u => u.id === parseInt(referenceId));
-                if (user) openChat(user);
-            }
-            break;
-        // Add more cases as needed
-    }
-    
-    // Close dropdown
-    document.querySelector('.notifications-dropdown')?.remove();
-}
-
-async function markNotificationAsRead(notificationId) {
-    try {
-        await fetch(`${API_BASE_URL}/notifications/${notificationId}/read`, {
-            method: 'PATCH',
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}'
-            }
-        });
-        
-        // Update local count
-        const badge = document.querySelector('.notification-badge');
-        if (badge && badge.textContent) {
-            const currentCount = parseInt(badge.textContent);
-            if (currentCount > 1) {
-                badge.textContent = currentCount - 1;
-            } else {
-                badge.style.display = 'none';
-            }
-        }
-    } catch (error) {
-        console.error('Error marking notification as read:', error);
-    }
-}
-
-async function markAllNotificationsAsRead() {
-    try {
-        await fetch('https://reporting-api-uvze.onrender.com/notifications/mark-all-read', { // <--- Use full URL
-            method: 'PATCH',
-            headers: {
-                'Authorization': 'Bearer ' + localStorage.getItem('token') // No template literal
-            }
-        });
-
-        // Update UI
-        document.querySelectorAll('.notification-item.unread').forEach(item => {
-            item.classList.remove('unread');
-        });
-
-        const badge = document.querySelector('.notification-badge');
-        if (badge) badge.style.display = 'none';
-
-    } catch (error) {
-        console.error('Error marking all notifications as read:', error);
-    }
-}
-        }
-
 
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
