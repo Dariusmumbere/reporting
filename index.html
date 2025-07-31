@@ -7908,21 +7908,49 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('invite-fields').classList.remove('hidden');
     }
 });
+
+// Initialize export functionality when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    initExportFunctionality();
+});
+
+function initExportFunctionality() {
+    // Load templates for dropdown
+    loadExportTemplates();
+    
+    // Set default dates (last 30 days)
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(endDate.getDate() - 30);
+    
+    document.getElementById('export-start-date').valueAsDate = startDate;
+    document.getElementById('export-end-date').valueAsDate = endDate;
+    
+    // Handle export button click
+    document.getElementById('export-btn').addEventListener('click', handleExportClick);
+}
+
 async function loadExportTemplates() {
     try {
+        showLoadingIndicator('#export-template-container');
+        
         const response = await fetch(`${API_BASE_URL}/templates`, {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
+            headers: getAuthHeaders()
         });
         
         if (!response.ok) {
-            throw new Error('Failed to load templates');
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
         
         const templates = await response.json();
         const templateSelect = document.getElementById('export-template');
         
+        // Clear existing options except the first one
+        while (templateSelect.options.length > 1) {
+            templateSelect.remove(1);
+        }
+        
+        // Add new options
         templates.forEach(template => {
             const option = document.createElement('option');
             option.value = template.id;
@@ -7931,42 +7959,54 @@ async function loadExportTemplates() {
         });
         
     } catch (error) {
-        console.error('Error loading templates:', error);
-        showAlert('Failed to load templates', 'danger');
+        console.error('Failed to load templates:', error);
+        showAlert('Failed to load templates. Please try again.', 'danger');
+    } finally {
+        hideLoadingIndicator('#export-template-container');
     }
 }
 
-// Add event listener for export button
-document.getElementById('export-btn')?.addEventListener('click', async function() {
-    const templateId = document.getElementById('export-template').value || null;
-    const startDate = document.getElementById('export-start-date').value || null;
-    const endDate = document.getElementById('export-end-date').value || null;
-    const status = document.getElementById('export-status').value || null;
-    const format = document.getElementById('export-format').value;
-    
+async function handleExportClick() {
     try {
-        // Build query parameters
-        const params = new URLSearchParams();
-        if (templateId) params.append('template_id', templateId);
-        if (startDate) params.append('start_date', startDate);
-        if (endDate) params.append('end_date', endDate);
-        if (status) params.append('status', status);
-        params.append('format', format);
+        // Validate inputs
+        const startDate = document.getElementById('export-start-date').value;
+        const endDate = document.getElementById('export-end-date').value;
         
-        // Make the export request
-        const response = await fetch(`${API_BASE_URL}/reports/export?${params.toString()}`, {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
+        if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+            showAlert('End date must be after start date', 'warning');
+            return;
+        }
+        
+        showLoadingIndicator('#export-btn');
+        
+        // Get all parameters
+        const params = {
+            template_id: document.getElementById('export-template').value || undefined,
+            start_date: startDate || undefined,
+            end_date: endDate || undefined,
+            status: document.getElementById('export-status').value || undefined,
+            format: document.getElementById('export-format').value
+        };
+        
+        // Build query string
+        const queryString = Object.entries(params)
+            .filter(([_, value]) => value !== undefined)
+            .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+            .join('&');
+        
+        const response = await fetch(`${API_BASE_URL}/reports/export?${queryString}`, {
+            headers: getAuthHeaders()
         });
         
         if (!response.ok) {
-            throw new Error('Failed to export reports');
+            const error = await response.json().catch(() => ({ detail: 'Export failed' }));
+            throw new Error(error.detail || 'Export failed');
         }
         
-        // Get the filename from the Content-Disposition header
+        // Handle file download
         const contentDisposition = response.headers.get('Content-Disposition');
-        let filename = 'reports';
+        let filename = 'reports_export';
+        
         if (contentDisposition) {
             const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
             if (filenameMatch && filenameMatch[1]) {
@@ -7974,24 +8014,61 @@ document.getElementById('export-btn')?.addEventListener('click', async function(
             }
         }
         
-        // Download the file
         const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
+        downloadFile(blob, filename);
         
         showAlert('Export completed successfully', 'success');
         
     } catch (error) {
         console.error('Export error:', error);
         showAlert(error.message || 'Failed to export reports', 'danger');
+    } finally {
+        hideLoadingIndicator('#export-btn');
     }
-});
+}
+
+function downloadFile(blob, filename) {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+}
+
+function getAuthHeaders() {
+    return {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json'
+    };
+}
+
+function showLoadingIndicator(selector) {
+    const element = document.querySelector(selector);
+    if (element) {
+        element.classList.add('loading');
+    }
+}
+
+function hideLoadingIndicator(selector) {
+    const element = document.querySelector(selector);
+    if (element) {
+        element.classList.remove('loading');
+    }
+}
+
+function showAlert(message, type) {
+    // Implement your alert system here
+    console.log(`${type.toUpperCase()}: ${message}`);
+    // Example: toast notification or inline alert
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type}`;
+    alertDiv.textContent = message;
+    document.body.appendChild(alertDiv);
+    setTimeout(() => alertDiv.remove(), 5000);
+}
 
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
