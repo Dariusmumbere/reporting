@@ -1484,49 +1484,44 @@
 .chat-date-separator::after {
     right: 0;
 }
-/* Profile Picture Upload Styles */
-.file-upload {
+.profile-picture-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.profile-picture-preview {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background-color: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
     position: relative;
-    display: inline-block;
+}
+
+.profile-picture-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-picture-preview span {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #ccc;
+}
+
+.profile-picture-actions {
+    display: flex;
+    gap: 1rem;
 }
 
 .file-upload-input {
-    position: absolute;
-    left: 0;
-    top: 0;
-    opacity: 0;
-    width: 100%;
-    height: 100%;
-    cursor: pointer;
-}
-
-.file-upload-label {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
-    background-color: var(--primary-light);
-    color: var(--primary-color);
-    border-radius: 0.5rem;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.file-upload-label:hover {
-    background-color: var(--primary-lighter);
-}
-
-.file-upload-text {
-    display: flex;
-    flex-direction: column;
-}
-
-#profile-picture-preview {
-    border: 2px solid var(--border-color);
-}
-
-#profile-picture-preview img {
-    object-fit: cover;
+    display: none;
 }
     </style>
 </head>
@@ -2504,28 +2499,32 @@
         </div>
     </div>
 </div>
-                    <div class="form-group">
-    <label class="form-label">Profile Picture</label>
-    <div class="d-flex align-items-center gap-3">
-        <div id="profile-picture-preview" style="width: 120px; height: 120px; border-radius: 50%; overflow: hidden; background-color: #f5f5f5; display: flex; align-items: center; justify-content: center;">
-            <img id="profile-picture-img" src="" style="max-width: 100%; max-height: 100%; display: none;">
-            <i class="fas fa-user" style="font-size: 3rem; color: #ccc;" id="profile-picture-placeholder"></i>
-        </div>
-        <div class="file-upload">
-            <input type="file" id="profile-picture" class="file-upload-input" accept="image/*">
-            <label for="profile-picture" class="file-upload-label">
-                <i class="fas fa-cloud-upload-alt"></i>
-                <div class="file-upload-text">
-                    <strong>Change Photo</strong>
-                    <div style="font-size: 0.75rem; margin-top: 0.25rem;">JPG, PNG (Max 2MB)</div>
+                    <!-- Add this to your profile view -->
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Profile Picture</h2>
+    </div>
+    <div class="card-body">
+        <div class="profile-picture-container">
+            <div class="profile-picture-preview" id="profile-picture-preview">
+                <!-- Initials will be shown if no picture -->
+                <span id="profile-picture-initials"></span>
+                <img id="profile-picture-img" src="" style="display: none;">
+            </div>
+            <div class="profile-picture-actions">
+                <div class="file-upload">
+                    <input type="file" id="profile-picture-upload" accept="image/*" class="file-upload-input">
+                    <label for="profile-picture-upload" class="btn btn-primary">
+                        <i class="fas fa-camera"></i> Change Photo
+                    </label>
                 </div>
-            </label>
+                <button class="btn btn-outline-danger" id="remove-profile-picture-btn">
+                    <i class="fas fa-trash"></i> Remove
+                </button>
+            </div>
         </div>
     </div>
 </div>
-<button class="btn btn-primary" id="save-profile-picture-btn">
-    <i class="fas fa-save"></i> Save Changes
-</button>
                     </div>
                 </div>
             </div>
@@ -7341,120 +7340,130 @@ if (inviteToken) {
     document.getElementById('invite-fields').classList.remove('hidden');
     document.getElementById('invite-token').value = inviteToken;
 }
-// Profile picture upload functionality
-document.getElementById('profile-picture')?.addEventListener('change', function(e) {
+// Profile picture handling
+async function loadProfilePicture() {
+    if (currentUser && currentUser.profile_picture) {
+        const img = document.getElementById('profile-picture-img');
+        img.src = currentUser.profile_picture;
+        img.style.display = 'block';
+        document.getElementById('profile-picture-initials').style.display = 'none';
+    } else {
+        const initials = currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase();
+        document.getElementById('profile-picture-initials').textContent = initials;
+        document.getElementById('profile-picture-initials').style.display = 'flex';
+        document.getElementById('profile-picture-img').style.display = 'none';
+    }
+}
+
+// Upload profile picture
+document.getElementById('profile-picture-upload').addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     
-    // Validate file type and size
+    // Validate file type
     if (!file.type.match('image.*')) {
-        showAlert('Please select an image file (JPG, PNG)', 'danger');
-        e.target.value = '';
+        showAlert('Please select an image file', 'danger');
         return;
     }
     
-    if (file.size > 2 * 1024 * 1024) { // 2MB limit
-        showAlert('Image must be less than 2MB', 'danger');
-        e.target.value = '';
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+        showAlert('Image must be less than 5MB', 'danger');
         return;
     }
-    
-    const reader = new FileReader();
-    reader.onload = function(event) {
-        const previewImg = document.getElementById('profile-picture-img');
-        const placeholder = document.getElementById('profile-picture-placeholder');
-        
-        previewImg.src = event.target.result;
-        previewImg.style.display = 'block';
-        placeholder.style.display = 'none';
-    };
-    reader.readAsDataURL(file);
-});
-
-// Save profile picture
-document.getElementById('save-profile-picture-btn')?.addEventListener('click', async function() {
-    const fileInput = document.getElementById('profile-picture');
-    if (!fileInput.files || fileInput.files.length === 0) {
-        showAlert('Please select a profile picture to upload', 'danger');
-        return;
-    }
-    
-    const file = fileInput.files[0];
-    const formData = new FormData();
-    formData.append('profile_picture', file);
     
     try {
-        const response = await fetch(`${API_BASE_URL}/users/profile-picture`, {
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        const response = await fetch(`${API_BASE_URL}/users/upload-profile-picture`, {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}'
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
             body: formData
         });
         
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.detail || 'Failed to upload profile picture');
+            const error = await response.json();
+            throw new Error(error.detail || 'Failed to upload profile picture');
         }
         
-        const result = await response.json();
-        showAlert('Profile picture updated successfully!', 'success');
+        const data = await response.json();
+        currentUser.profile_picture = data.profile_picture_url;
         
-        // Update the avatar in the UI
-        updateAvatarInUI(result.profile_picture_url);
+        // Update UI
+        loadProfilePicture();
         
+        // Update avatar in sidebar and navbar
+        updateUserAvatar();
+        
+        showAlert('Profile picture updated successfully', 'success');
     } catch (error) {
         console.error('Error uploading profile picture:', error);
-        showAlert(error.message || 'Failed to upload profile picture', 'danger');
+        showAlert(error.message, 'danger');
     }
 });
 
-// Function to update avatar in UI
-function updateAvatarInUI(imageUrl) {
-    // Update sidebar avatar
-    const sidebarAvatar = document.getElementById('user-avatar');
-    const dropdownAvatar = document.getElementById('user-dropdown-avatar');
-    
-    if (imageUrl) {
-        sidebarAvatar.innerHTML = `<img src="${imageUrl}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">`;
-        dropdownAvatar.innerHTML = `<img src="${imageUrl}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">`;
-    } else {
-        const initials = currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase();
-        sidebarAvatar.textContent = initials;
-        dropdownAvatar.textContent = initials;
+// Remove profile picture
+document.getElementById('remove-profile-picture-btn').addEventListener('click', async () => {
+    if (!confirm('Are you sure you want to remove your profile picture?')) {
+        return;
     }
-}
-
-// Load current profile picture when profile view is shown
-document.querySelector('[data-view="profile"]')?.addEventListener('click', async function() {
+    
     try {
-        const response = await fetch(`${API_BASE_URL}/users/me`, {
+        const response = await fetch(`${API_BASE_URL}/users/remove-profile-picture`, {
+            method: 'DELETE',
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json'
             }
         });
         
-        if (!response.ok) throw new Error('Failed to load user data');
-        
-        const userData = await response.json();
-        
-        // Update profile picture preview if it exists
-        const previewImg = document.getElementById('profile-picture-img');
-        const placeholder = document.getElementById('profile-picture-placeholder');
-        
-        if (userData.profile_picture_url) {
-            previewImg.src = userData.profile_picture_url;
-            previewImg.style.display = 'block';
-            placeholder.style.display = 'none';
-        } else {
-            previewImg.style.display = 'none';
-            placeholder.style.display = 'block';
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.detail || 'Failed to remove profile picture');
         }
         
+        currentUser.profile_picture = null;
+        
+        // Update UI
+        loadProfilePicture();
+        
+        // Update avatar in sidebar and navbar
+        updateUserAvatar();
+        
+        showAlert('Profile picture removed successfully', 'success');
     } catch (error) {
-        console.error('Error loading profile picture:', error);
+        console.error('Error removing profile picture:', error);
+        showAlert(error.message, 'danger');
     }
 });
+
+// Helper function to update avatar everywhere
+function updateUserAvatar() {
+    if (currentUser.profile_picture) {
+        // Update sidebar avatar
+        document.getElementById('user-avatar').innerHTML = '';
+        const sidebarImg = document.createElement('img');
+        sidebarImg.src = currentUser.profile_picture;
+        sidebarImg.alt = currentUser.name;
+        document.getElementById('user-avatar').appendChild(sidebarImg);
+        
+        // Update dropdown avatar
+        document.getElementById('user-dropdown-avatar').innerHTML = '';
+        const dropdownImg = document.createElement('img');
+        dropdownImg.src = currentUser.profile_picture;
+        dropdownImg.alt = currentUser.name;
+        document.getElementById('user-dropdown-avatar').appendChild(dropdownImg);
+    } else {
+        // Use initials
+        const initials = currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase();
+        document.getElementById('user-avatar').textContent = initials;
+        document.getElementById('user-dropdown-avatar').textContent = initials;
+    }
+}
+
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
     </script>
