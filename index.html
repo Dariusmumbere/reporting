@@ -7515,6 +7515,48 @@ setInterval(updateUnreadCount, 60000);
 
 // Initial load
 updateUnreadCount();
+
+function initWebSocket() {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+    const wsUrl = API_BASE_URL.replace(/^https?:\/\//, '');
+    const socket = new WebSocket(`${wsProtocol}${wsUrl}/ws?token=${token}`);
+
+    socket.onmessage = (event) => {
+        const message = JSON.parse(event.data);
+        
+        switch(message.type) {
+            case 'message':
+                handleNewMessage(message.message);
+                break;
+            case 'user_status':
+                updateUserStatus(message.user_id, message.status);
+                break;
+            case 'new_notification':
+                showNewNotification(message.notification);
+                break;
+            case 'unread_notification_count':
+                updateUnreadCount(message.count);
+                break;
+            case 'typing_indicator':
+                showTypingIndicator(message.sender_id, message.is_typing);
+                break;
+        }
+    };
+
+    socket.onclose = () => {
+        setTimeout(initWebSocket, 5000); // Reconnect after 5 seconds
+    };
+
+    // Subscribe to notifications
+    socket.onopen = () => {
+        socket.send(JSON.stringify({
+            type: "subscribe_notifications"
+        }));
+    };
+}
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
     </script>
