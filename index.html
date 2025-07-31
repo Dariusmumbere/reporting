@@ -7891,6 +7891,21 @@ function toggleForms(showLogin) {
             e.preventDefault();
             toggleForms(false);
         });
+        // Handle radio button changes for organization type
+        document.querySelectorAll('input[name="signup-type"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                if (e.target.value === 'new') {
+                    document.getElementById('new-org-fields').style.display = 'block';
+                    document.getElementById('invite-fields').classList.add('hidden');
+                } else {
+                    document.getElementById('new-org-fields').style.display = 'none';
+                    document.getElementById('invite-fields').classList.remove('hidden');
+                }
+            });
+        });
+        
+        // Handle window resize to update toggle indicator
+        window.addEventListener('resize', updateToggleIndicator);
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
     </script>
