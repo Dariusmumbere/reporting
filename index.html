@@ -3188,13 +3188,12 @@
             addTemplateManagementButton();
             initTemplateManagement();
             document.getElementById('users-view')?.addEventListener('viewShown', loadActiveInvitations);
-            function initNotificationPolling() {
+            initNotificationPolling();
+            }
+        function initNotificationPolling() {
                 fetchUnreadNotifications();
                 // Poll every 30 seconds
                 setInterval(fetchUnreadNotifications, 30000);
-            }
-
-                initNotificationPolling();
             }
 
         // Apply the current theme
