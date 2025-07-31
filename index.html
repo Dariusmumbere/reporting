@@ -3553,21 +3553,10 @@
             updateToggleIndicator();
             document.getElementById('users-view')?.addEventListener('viewShown', loadActiveInvitations);
             loadNotifications();
-            
-    
-    // Setup event listeners
-    notificationBtn.addEventListener('click', toggleNotificationDropdown);
-    markAllReadBtn.addEventListener('click', markAllNotificationsAsRead);
-    
-    // Start polling for new notifications
-    startNotificationPolling();
-    
-    // Close dropdown when clicking outside
-    document.addEventListener('click', (e) => {
-        if (!notificationBtn.contains(e.target) && !notificationDropdown.contains(e.target)) {
-            notificationDropdown.classList.remove('active');
-        }
-    });
+            startNotificationPolling();   
+            if (localStorage.getItem('token')) {
+                initNotifications();
+            }
         }
 
         // Apply the current theme
@@ -3604,6 +3593,8 @@
 
         // Setup event listeners
         function setupEventListeners() {
+            notificationBtn.addEventListener('click', toggleNotificationDropdown);
+            markAllReadBtn.addEventListener('click', markAllNotificationsAsRead);
             // Toggle between login and signup forms
             showSignupLink?.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -8301,7 +8292,11 @@ function showNotificationAlert(count) {
         }, 500);
     }, 3000);
 }
-
+document.addEventListener('click', (e) => {
+        if (!notificationBtn.contains(e.target) && !notificationDropdown.contains(e.target)) {
+            notificationDropdown.classList.remove('active');
+        }
+    });
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
     </script>
