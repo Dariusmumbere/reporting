@@ -7343,12 +7343,43 @@ if (inviteToken) {
 }
 // Profile picture handling
 async function loadProfilePicture() {
-    if (currentUser && currentUser.profile_picture) {
+    if (!currentUser) return;
+
+    try {
+        // Fetch profile picture from API
+        const response = await fetch(`/users/profile-picture/${currentUser.id}`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('access_token')}`, // include token if required
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to load profile picture');
+        }
+
+        const data = await response.json();
+
         const img = document.getElementById('profile-picture-img');
-        img.src = currentUser.profile_picture;
-        img.style.display = 'block';
-        document.getElementById('profile-picture-initials').style.display = 'none';
-    } else {
+        const initialsEl = document.getElementById('profile-picture-initials');
+
+        if (data.profile_picture) {
+            // Show image if returned from API
+            img.src = data.profile_picture;
+            img.style.display = 'block';
+            initialsEl.style.display = 'none';
+        } else {
+            // Fallback to initials if no picture
+            const initials = currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase();
+            initialsEl.textContent = initials;
+            initialsEl.style.display = 'flex';
+            img.style.display = 'none';
+        }
+
+    } catch (error) {
+        console.error('Error loading profile picture:', error);
+
+        // Fallback to initials on error
         const initials = currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase();
         document.getElementById('profile-picture-initials').textContent = initials;
         document.getElementById('profile-picture-initials').style.display = 'flex';
