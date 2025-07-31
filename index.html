@@ -7283,7 +7283,67 @@ function getStatusIcon(status) {
         default: return '';
     }
 }
+async function handleVoicePlayback(messageElement, audioElement, objectKey) {
+    const playButton = messageElement.querySelector('.play-pause-btn');
+    
+    // First, pause any currently playing audio
+    document.querySelectorAll('audio').forEach(audio => {
+        if (audio !== audioElement && !audio.paused) {
+            audio.pause();
+            const otherButton = audio.closest('.voice-message-container')?.querySelector('.play-pause-btn');
+            if (otherButton) {
+                otherButton.innerHTML = '<i class="fas fa-play"></i>';
+                otherButton.closest('.voice-message-container').querySelector('.voice-progress-bar').style.width = '0%';
+            }
+        }
+    });
 
+    if (audioElement.paused) {
+        try {
+            // Get fresh signed URL if needed
+            if (!audioElement.src || audioElement.error) {
+                showLoader(playButton);
+                
+                const response = await fetch(`${API_BASE_URL}/chat/voice-message/${messageElement.dataset.id}/url`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                
+                if (!response.ok) throw new Error('Failed to get audio URL');
+                
+                const { signed_url } = await response.json();
+                audioElement.src = signed_url;
+                
+                // Wait for the audio to be ready
+                await new Promise((resolve, reject) => {
+                    audioElement.onloadedmetadata = resolve;
+                    audioElement.onerror = reject;
+                    setTimeout(() => reject(new Error('Audio loading timeout')), 10000);
+                });
+            }
+
+            await audioElement.play();
+            playButton.innerHTML = '<i class="fas fa-pause"></i>';
+        } catch (error) {
+            console.error('Playback error:', error);
+            playButton.innerHTML = '<i class="fas fa-play"></i>';
+            showAlert('Could not play voice message: ' + error.message, 'danger');
+        }
+    } else {
+        audioElement.pause();
+        playButton.innerHTML = '<i class="fas fa-play"></i>';
+    }
+}
+
+function showLoader(button) {
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    button.disabled = true;
+    setTimeout(() => {
+        button.innerHTML = '<i class="fas fa-play"></i>';
+        button.disabled = false;
+    }, 10000); // Fallback in case loading fails
+}
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
     </script>
