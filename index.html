@@ -8106,6 +8106,27 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('invite-fields').classList.remove('hidden');
     }
 });
+function fetchReports() {
+  fetch("https://reporting-api-uvze.onrender.com/reports/simple", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      // No need to manually add Authorization if your frontend already handles it
+    },
+    body: JSON.stringify({
+      template_id: 4,
+      status: "approved",
+      start_date: "2025-07-01",
+      end_date: "2025-07-31"
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log("Reports data:", data); // ✅ Check returned data in browser console
+  })
+  .catch(error => console.error("Error fetching reports:", error));
+}
+
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
     </script>
