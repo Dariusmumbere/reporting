@@ -8117,8 +8117,8 @@ async function fetchAndLogReports() {
         }
 
         // 2. Make the request with full debugging info
-        console.log('Making request to:', `${API_BASE_URL}/reports/simple`);
-        const response = await fetch(`${API_BASE_URL}/reports/simple`, {
+        console.log('Making request to:', `${API_BASE_URL}/admin/reports-raw`);
+        const response = await fetch(`${API_BASE_URL}/admin/reports-raw`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
