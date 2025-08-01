@@ -7951,7 +7951,9 @@ async function loadProfilePicture(userId, bustCache = false) {
         if (bustCache) url += `?t=${Date.now()}`;
         
         const response = await fetch(url, {
-            headers: { 'Authorization': `Bearer ${token}` }
+            headers: { 
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
         });
 
         if (!response.ok) {
