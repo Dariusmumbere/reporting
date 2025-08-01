@@ -8270,12 +8270,21 @@ document.addEventListener('DOMContentLoaded', () => {
         if (notificationDropdown.classList.contains('show')) {
             // Mark all notifications as read when dropdown is opened
             try {
+                const token = localStorage.getItem('authToken'); // Get authorization token
                 const response = await fetch('https://reporting-api-uvze.onrender.com/notifications/mark-all-read', {
-                    method: 'POST'
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}` // Include authorization header
+                    }
                 });
                 if (response.ok) {
                     // Update badge
                     document.querySelector('.notification-badge').style.display = 'none';
+                } else if (response.status === 401) {
+                    // Handle unauthorized access
+                    console.error('Unauthorized access');
+                    // Optionally redirect to login or handle re-authentication
                 }
             } catch (error) {
                 console.error('Error marking notifications as read:', error);
