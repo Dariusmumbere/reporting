@@ -8194,14 +8194,6 @@ async function fetchNotifications() {
             }
         });
         
-        if (!response.ok) {
-            // Handle unauthorized (401) by redirecting to login
-            if (response.status === 401) {
-                window.location.href = '/login';
-                return;
-            }
-            throw new Error('Failed to fetch notifications');
-        }
         
         const notifications = await response.json();
         
