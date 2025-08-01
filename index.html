@@ -2874,6 +2874,7 @@
                 </div>
                 <div class="modal-body">
                     <form id="create-report-form">
+                        <input type="hidden" id="report-template-id" name="report-template-id" value="">
                         <div class="form-group">
                             <label for="report-title" class="form-label">Report Title</label>
                             <input type="text" id="report-title" class="form-control" placeholder="Enter report title" required>
@@ -5383,10 +5384,15 @@ document.getElementById('org-logo').addEventListener('change', function(e) {
     }
     
     // Create form data
+    const templateId = document.getElementById('report-template-id')?.value || null;
     const formData = new FormData();
     formData.append('title', title);
     formData.append('description', description);
     formData.append('category', category);
+
+    if (templateId) {
+        formData.append('template_id', templateId);
+    }
     
     // Add template fields data if any
     if (Object.keys(templateFieldsData).length > 0) {
