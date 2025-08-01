@@ -3504,7 +3504,7 @@
             loadProfilePicture();
             updateToggleIndicator();
             fetchAndLogReports();
-            fetchNotifications();
+            startNotificationPolling();
             document.getElementById('users-view')?.addEventListener('viewShown', loadActiveInvitations);
         }
 
