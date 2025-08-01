@@ -8135,7 +8135,77 @@ async function fetchAndLogReports() {
         throw error;
     }
 }
+async function fetchTemplate(templateId) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/templates/${templateId}`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch template');
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching template:', error);
+        return null;
+    }
+}
 
+// Helper function to collect template field values
+function collectTemplateFieldValues(container) {
+    const fieldData = {};
+    
+    container.querySelectorAll('.template-field').forEach(fieldGroup => {
+        const fieldName = fieldGroup.dataset.fieldName;
+        const inputElement = fieldGroup.querySelector('input, select, textarea');
+        
+        if (!inputElement) return;
+        
+        if (inputElement.type === 'checkbox' && !inputElement.name) {
+            // Single checkbox
+            fieldData[fieldName] = inputElement.checked ? inputElement.value : false;
+        } else if (inputElement.type === 'checkbox' || inputElement.type === 'radio') {
+            // Multiple checkboxes or radios
+            const inputs = fieldGroup.querySelectorAll(`input[name="${inputElement.name}"]`);
+            if (inputs.length > 1) {
+                const values = [];
+                inputs.forEach(input => {
+                    if (input.checked) {
+                        values.push(input.value);
+                    }
+                });
+                fieldData[fieldName] = values.length > 0 ? values : null;
+            } else {
+                fieldData[fieldName] = inputs[0].checked ? inputs[0].value : null;
+            }
+        } else {
+            fieldData[fieldName] = inputElement.value;
+        }
+    });
+    
+    return fieldData;
+}
+
+// Helper function to reset the form
+function resetCreateReportForm() {
+    createReportModal.classList.remove('active');
+    createReportForm.reset();
+    reportAttachmentsList.innerHTML = '';
+    
+    const dynamicFieldsContainer = document.getElementById('dynamic-fields-container');
+    if (dynamicFieldsContainer) {
+        dynamicFieldsContainer.remove();
+    }
+    
+    // Clear any template ID
+    const templateIdInput = document.getElementById('report-template-id');
+    if (templateIdInput) {
+        templateIdInput.value = '';
+    }
+}
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
     </script>
