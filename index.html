@@ -14,28 +14,43 @@
     <link rel="stylesheet" href="styles.css">
     
     <style>
-/* Add this to your CSS section */
+/* Add to your CSS */
+#export-view .card {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
 #export-view .form-group {
     margin-bottom: 1.5rem;
 }
 
 #export-view .form-label {
-    display: block;
-    margin-bottom: 0.5rem;
     font-weight: 500;
+    margin-bottom: 0.5rem;
+    display: block;
 }
 
 #export-view .form-control, 
 #export-view .form-select {
     width: 100%;
     padding: 0.5rem;
-    border: 1px solid var(--border-color);
     border-radius: 4px;
+    border: 1px solid var(--border-color);
     background-color: var(--card-bg);
     color: var(--text-primary);
 }
 
-#export-btn {
+#export-view .row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+#export-view .col-md-6 {
+    flex: 1;
+}
+
+#export-submit-btn {
     margin-top: 1rem;
 }
 /* Base styles for the auth container */
@@ -1969,12 +1984,12 @@
                         <i class="fas fa-user-plus"></i>
                         <span>Invite Organization</span>
                     </a>
-                    <!-- In the sidebar-menu div, add this after the Support category -->
-                    <div class="menu-category">Export</div>
-                    <a href="#" class="menu-item" data-view="export">
-                        <i class="fas fa-file-export"></i>
-                        <span>Export Reports</span>
-                    </a>
+                    <!-- Inside the sidebar-menu div, add this after the Support category -->
+<div class="menu-category">Export</div>
+<a href="#" class="menu-item" data-view="export">
+    <i class="fas fa-file-export"></i>
+    <span>Export Reports</span>
+</a>
                     <div class="menu-category">Support</div>
                     <a href="#" class="menu-item" data-view="support">
                         <i class="fas fa-headset"></i>
@@ -2468,7 +2483,7 @@
         </div>
     </div>
 </div>
-<!-- Add this with the other views -->
+<!-- Export View -->
 <div class="view hidden" id="export-view">
     <div class="page-header">
         <h1 class="page-title">Export Reports</h1>
@@ -2482,16 +2497,42 @@
             <form id="export-form">
                 <div class="form-group">
                     <label for="export-template" class="form-label">Template</label>
-                    <select id="export-template" class="form-control form-select">
-                        <option value="">All Templates</option>
-                        <!-- Templates will be loaded here -->
+                    <select id="export-template" class="form-control form-select" required>
+                        <option value="">Select a template</option>
+                        <!-- Templates will be loaded dynamically -->
                     </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="export-date-range" class="form-label">Date Range</label>
+                    <select id="export-date-range" class="form-control form-select">
+                        <option value="all">All Time</option>
+                        <option value="today">Today</option>
+                        <option value="week">This Week</option>
+                        <option value="month">This Month</option>
+                        <option value="quarter">This Quarter</option>
+                        <option value="year">This Year</option>
+                        <option value="custom">Custom Range</option>
+                    </select>
+                </div>
+                
+                <div class="form-group hidden" id="custom-date-range-group">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="export-start-date" class="form-label">Start Date</label>
+                            <input type="date" id="export-start-date" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="export-end-date" class="form-label">End Date</label>
+                            <input type="date" id="export-end-date" class="form-control">
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="form-group">
                     <label for="export-status" class="form-label">Status</label>
                     <select id="export-status" class="form-control form-select">
-                        <option value="">All Statuses</option>
+                        <option value="all">All Statuses</option>
                         <option value="pending">Pending</option>
                         <option value="approved">Approved</option>
                         <option value="rejected">Rejected</option>
@@ -2499,26 +2540,18 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="export-date-from" class="form-label">Date From</label>
-                    <input type="date" id="export-date-from" class="form-control">
-                </div>
-                
-                <div class="form-group">
-                    <label for="export-date-to" class="form-label">Date To</label>
-                    <input type="date" id="export-date-to" class="form-control">
-                </div>
-                
-                <div class="form-group">
                     <label for="export-format" class="form-label">Export Format</label>
-                    <select id="export-format" class="form-control form-select">
+                    <select id="export-format" class="form-control form-select" required>
                         <option value="excel">Excel (.xlsx)</option>
                         <option value="csv">CSV (.csv)</option>
+                        <option value="pdf">PDF (.pdf)</option>
                         <option value="json">JSON (.json)</option>
                     </select>
                 </div>
                 
-                <button type="submit" class="btn btn-primary" id="export-btn">
-                    <i class="fas fa-download"></i> Export Reports
+                <button type="submit" class="btn btn-primary" id="export-submit-btn">
+                    <span id="export-btn-text">Generate Export</span>
+                    <span class="spinner hidden" id="export-spinner"></span>
                 </button>
             </form>
         </div>
@@ -3481,6 +3514,10 @@
 
         // Setup event listeners
         function setupEventListeners() {
+            document.getElementById('export-form')?.addEventListener('submit', handleExportSubmit);
+            document.getElementById('export-date-range')?.addEventListener('change', function(e) {
+                document.getElementById('custom-date-range-group').classList.toggle('hidden', e.target.value !== 'custom');
+            });
             // Toggle between login and signup forms
             showSignupLink?.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -4672,8 +4709,8 @@ function setupUIForUser() {
                 loadChatUsers();
             } else if (viewId === 'settings') {
                 loadOrganizationSettings();
-            }else if (viewId === 'export') {
-                loadExportView();
+            } else if (viewId === 'export') {
+                loadTemplatesForExport();
             }
         } else {
             view.classList.add('hidden');
@@ -4684,6 +4721,145 @@ function setupUIForUser() {
     if (window.innerWidth < 768) {
         sidebar.classList.remove('active');
     }
+}
+async function loadTemplatesForExport() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/templates`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        
+        if (!response.ok) throw new Error('Failed to load templates');
+        
+        const templates = await response.json();
+        const templateSelect = document.getElementById('export-template');
+        
+        // Clear existing options except the first one
+        while (templateSelect.options.length > 1) {
+            templateSelect.remove(1);
+        }
+        
+        // Add template options
+        templates.forEach(template => {
+            const option = document.createElement('option');
+            option.value = template.id;
+            option.textContent = template.name;
+            templateSelect.appendChild(option);
+        });
+        
+    } catch (error) {
+        console.error('Error loading templates:', error);
+        showAlert('Failed to load templates for export', 'danger');
+    }
+}
+
+// Handle export form submission
+async function handleExportSubmit(e) {
+    e.preventDefault();
+    
+    const templateId = document.getElementById('export-template').value;
+    const dateRange = document.getElementById('export-date-range').value;
+    const status = document.getElementById('export-status').value;
+    const format = document.getElementById('export-format').value;
+    
+    let startDate, endDate;
+    
+    if (dateRange === 'custom') {
+        startDate = document.getElementById('export-start-date').value;
+        endDate = document.getElementById('export-end-date').value;
+        
+        if (!startDate || !endDate) {
+            showAlert('Please select both start and end dates for custom range', 'danger');
+            return;
+        }
+    }
+    
+    // Show loading state
+    document.getElementById('export-btn-text').textContent = 'Generating...';
+    document.getElementById('export-spinner').classList.remove('hidden');
+    document.getElementById('export-submit-btn').disabled = true;
+    
+    try {
+        // Build query parameters
+        const params = new URLSearchParams();
+        params.append('template_id', templateId);
+        params.append('format', format);
+        
+        if (dateRange !== 'all' && dateRange !== 'custom') {
+            params.append('date_range', dateRange);
+        }
+        
+        if (dateRange === 'custom') {
+            params.append('start_date', startDate);
+            params.append('end_date', endDate);
+        }
+        
+        if (status !== 'all') {
+            params.append('status', status);
+        }
+        
+        // Trigger export
+        const response = await fetch(`${API_BASE_URL}/export/reports?${params.toString()}`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || 'Failed to generate export');
+        }
+        
+        // Handle different response types
+        if (format === 'json') {
+            const data = await response.json();
+            downloadJSON(data, `reports_export_${new Date().toISOString().split('T')[0]}.json`);
+        } else {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            
+            let extension;
+            switch(format) {
+                case 'excel': extension = 'xlsx'; break;
+                case 'csv': extension = 'csv'; break;
+                case 'pdf': extension = 'pdf'; break;
+                default: extension = 'file';
+            }
+            
+            a.download = `reports_export_${new Date().toISOString().split('T')[0]}.${extension}`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+        
+        showAlert('Export generated successfully', 'success');
+        
+    } catch (error) {
+        console.error('Export error:', error);
+        showAlert(error.message || 'Failed to generate export', 'danger');
+    } finally {
+        document.getElementById('export-btn-text').textContent = 'Generate Export';
+        document.getElementById('export-spinner').classList.add('hidden');
+        document.getElementById('export-submit-btn').disabled = false;
+    }
+}
+
+// Helper function to download JSON
+function downloadJSON(data, filename) {
+    const jsonStr = JSON.stringify(data, null, 2);
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
 }
 
 // Add logo preview functionality
@@ -7930,109 +8106,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('invite-fields').classList.remove('hidden');
     }
 });
-// Add this to your JavaScript section
-async function loadExportView() {
-    // Load templates for the dropdown
-    try {
-        const response = await fetch(`${API_BASE_URL}/templates`, {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-        });
-        
-        if (!response.ok) throw new Error('Failed to load templates');
-        
-        const templates = await response.json();
-        const templateSelect = document.getElementById('export-template');
-        
-        templates.forEach(template => {
-            const option = document.createElement('option');
-            option.value = template.id;
-            option.textContent = template.name;
-            templateSelect.appendChild(option);
-        });
-    } catch (error) {
-        console.error('Error loading templates:', error);
-        showAlert('Failed to load templates', 'danger');
-    }
-}
-
-// Handle export form submission
-document.getElementById('export-form')?.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    const templateId = document.getElementById('export-template').value || null;
-    const status = document.getElementById('export-status').value || null;
-    const dateFrom = document.getElementById('export-date-from').value || null;
-    const dateTo = document.getElementById('export-date-to').value || null;
-    const format = document.getElementById('export-format').value;
-    
-    // Build query parameters
-    const params = new URLSearchParams();
-    if (templateId) params.append('template_id', templateId);
-    if (status) params.append('status', status);
-    if (dateFrom) params.append('date_from', dateFrom);
-    if (dateTo) params.append('date_to', dateTo);
-    if (format) params.append('format', format);
-    
-    try {
-        // Show loading state
-        const exportBtn = document.getElementById('export-btn');
-        exportBtn.disabled = true;
-        exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Exporting...';
-        
-        // Make the export request
-        const response = await fetch(`${API_BASE_URL}/reports/export?${params.toString()}`, {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-        });
-        
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.detail || 'Export failed');
-        }
-        
-        // Get the filename from content-disposition header or generate one
-        const contentDisposition = response.headers.get('content-disposition');
-        let filename = 'reports_export';
-        
-        if (contentDisposition) {
-            const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
-            if (filenameMatch && filenameMatch[1]) {
-                filename = filenameMatch[1];
-            }
-        } else {
-            // Generate filename based on format
-            const extension = format === 'excel' ? 'xlsx' : format === 'csv' ? 'csv' : 'json';
-            filename = `reports_export_${new Date().toISOString().split('T')[0]}.${extension}`;
-        }
-        
-        // Download the file
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-        
-        showAlert('Export completed successfully', 'success');
-        
-    } catch (error) {
-        console.error('Export error:', error);
-        showAlert(error.message || 'Failed to export reports', 'danger');
-    } finally {
-        // Reset button state
-        const exportBtn = document.getElementById('export-btn');
-        exportBtn.disabled = false;
-        exportBtn.innerHTML = '<i class="fas fa-download"></i> Export Reports';
-    }
-});
-
-
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
     </script>
