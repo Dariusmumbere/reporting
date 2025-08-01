@@ -8298,7 +8298,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span class="notification-time">${formatDate(notification.created_at)}</span>
                 </div>
                 <p class="notification-message">${notification.message || ''}</p>
-                ${notification.link ? `<a href="${notification.link}" class="notification-link">View</a>` : ''}
+                
             `;
             
             if (!notification.is_read) {
