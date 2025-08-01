@@ -2874,7 +2874,6 @@
                 </div>
                 <div class="modal-body">
                     <form id="create-report-form">
-                        <input type="hidden" id="report-template-id" name="report-template-id" value="">
                         <div class="form-group">
                             <label for="report-title" class="form-label">Report Title</label>
                             <input type="text" id="report-title" class="form-control" placeholder="Enter report title" required>
@@ -5335,96 +5334,108 @@ document.getElementById('org-logo').addEventListener('change', function(e) {
         }
 
         // Handle create report submission
-        async function handleCreateReport() {
-    try {
-        // Show loading state
-        submitReportText.textContent = 'Submitting...';
-        submitReportSpinner.classList.remove('hidden');
-
-        // Ensure Quill content is captured
-        if (quill) {
-            document.getElementById('report-description').value = quill.root.innerHTML;
-        }
-
-        // Get form values
-        const title = document.getElementById('report-title').value;
-        const description = document.getElementById('report-description').value;
-        const category = document.getElementById('report-category').value;
-        const files = reportAttachments.files;
-        const templateId = document.getElementById('report-template-id')?.value || null;
-
-        // Validate required fields
-        if (!title || !description || !category) {
-            throw new Error('Please fill in all required fields');
-        }
-
-        // Prepare template data
-        let templateFieldsData = {};
-        let templateToUse = null;
-
-        // If we have a template ID, fetch the template first
-        if (templateId) {
-            templateToUse = await fetchTemplate(templateId);
+        function handleCreateReport() {
+    // Ensure Quill content is captured
+    if (quill) {
+        document.getElementById('report-description').value = quill.root.innerHTML;
+    }
+    
+    const title = document.getElementById('report-title').value;
+    const description = document.getElementById('report-description').value;
+    const category = document.getElementById('report-category').value;
+    const files = reportAttachments.files;
+    
+    if (!title || !description || !category) {
+        showAlert('Please fill in all required fields', 'danger');
+        return;
+    }
+    
+    const templateFieldsData = {};
+    const dynamicFieldsContainer = document.getElementById('dynamic-fields-container');
+    if (dynamicFieldsContainer) {
+        dynamicFieldsContainer.querySelectorAll('.template-field').forEach(fieldGroup => {
+            const fieldName = fieldGroup.dataset.fieldName;
+            const inputElement = fieldGroup.querySelector('input, select, textarea');
             
-            // Validate template exists
-            if (!templateToUse) {
-                throw new Error('Selected template not found');
+            if (!inputElement) return;
+            
+            if (inputElement.type === 'checkbox' && !inputElement.name) {
+                // Single checkbox
+                templateFieldsData[fieldName] = inputElement.checked ? inputElement.value : false;
+            } else if (inputElement.type === 'checkbox' || inputElement.type === 'radio') {
+                // Multiple checkboxes or radios
+                const inputs = fieldGroup.querySelectorAll(`input[name="${inputElement.name}"]`);
+                if (inputs.length > 1) {
+                    const values = [];
+                    inputs.forEach(input => {
+                        if (input.checked) {
+                            values.push(input.value);
+                        }
+                    });
+                    templateFieldsData[fieldName] = values.length > 0 ? values : null;
+                } else {
+                    templateFieldsData[fieldName] = inputs[0].checked ? inputs[0].value : null;
+                }
+            } else {
+                templateFieldsData[fieldName] = inputElement.value;
             }
-        }
-
-        // Collect dynamic field values if we have a template
-        const dynamicFieldsContainer = document.getElementById('dynamic-fields-container');
-        if (dynamicFieldsContainer && templateToUse) {
-            templateFieldsData = collectTemplateFieldValues(dynamicFieldsContainer);
-        }
-
-        // Create form data
-        const formData = new FormData();
-        formData.append('title', title);
-        formData.append('description', description);
-        formData.append('category', category);
-
-        // Add template data if available
-        if (templateId) {
-            formData.append('template_id', templateId);
-            if (Object.keys(templateFieldsData).length > 0) {
-                formData.append('template_fields', JSON.stringify(templateFieldsData));
-            }
-        }
-
-        // Add attachments
-        for (let i = 0; i < files.length; i++) {
-            formData.append('attachments', files[i]);
-        }
-
-        // Submit the report
-        const response = await fetch(`${API_BASE_URL}/reports`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-            body: formData
         });
-
+    }
+    
+    // Create form data
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('description', description);
+    formData.append('category', category);
+    
+    // Add template fields data if any
+    if (Object.keys(templateFieldsData).length > 0) {
+        formData.append('template_fields', JSON.stringify(templateFieldsData));
+    }
+    
+    // Add attachments if any
+    for (let i = 0; i < files.length; i++) {
+        formData.append('attachments', files[i]);
+    }
+    
+    fetch(`${API_BASE_URL}/reports`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: formData
+    })
+    .then(response => {
         if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.detail || 'Failed to create report');
+            return response.json().then(err => {
+                throw new Error(err.detail || 'Failed to create report');
+            });
         }
-
-        const report = await response.json();
+        return response.json();
+    })
+    .then(report => {
         showAlert('Report created successfully', 'success');
-        resetCreateReportForm();
+        createReportModal.classList.remove('active');
+        createReportForm.reset();
+        reportAttachmentsList.innerHTML = '';
+        
+        const dynamicFieldsContainer = document.getElementById('dynamic-fields-container');
+        if (dynamicFieldsContainer) {
+            dynamicFieldsContainer.remove();
+        }
+        
         loadReports();
         loadDashboardData();
-    } catch (error) {
+    })
+    .catch(error => {
         showAlert(error.message, 'danger');
-        console.error('Report creation failed:', error);
-    } finally {
+    })
+    .finally(() => {
         submitReportText.textContent = 'Submit Report';
         submitReportSpinner.classList.add('hidden');
-    }
+    });
 }
-        
+
 // Add template management button to the UI
 function addTemplateManagementButton() {
     // Add to the page actions in reports view
@@ -8135,77 +8146,7 @@ async function fetchAndLogReports() {
         throw error;
     }
 }
-async function fetchTemplate(templateId) {
-    try {
-        const response = await fetch(`${API_BASE_URL}/templates/${templateId}`, {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-        });
-        
-        if (!response.ok) {
-            throw new Error('Failed to fetch template');
-        }
-        
-        return await response.json();
-    } catch (error) {
-        console.error('Error fetching template:', error);
-        return null;
-    }
-}
 
-// Helper function to collect template field values
-function collectTemplateFieldValues(container) {
-    const fieldData = {};
-    
-    container.querySelectorAll('.template-field').forEach(fieldGroup => {
-        const fieldName = fieldGroup.dataset.fieldName;
-        const inputElement = fieldGroup.querySelector('input, select, textarea');
-        
-        if (!inputElement) return;
-        
-        if (inputElement.type === 'checkbox' && !inputElement.name) {
-            // Single checkbox
-            fieldData[fieldName] = inputElement.checked ? inputElement.value : false;
-        } else if (inputElement.type === 'checkbox' || inputElement.type === 'radio') {
-            // Multiple checkboxes or radios
-            const inputs = fieldGroup.querySelectorAll(`input[name="${inputElement.name}"]`);
-            if (inputs.length > 1) {
-                const values = [];
-                inputs.forEach(input => {
-                    if (input.checked) {
-                        values.push(input.value);
-                    }
-                });
-                fieldData[fieldName] = values.length > 0 ? values : null;
-            } else {
-                fieldData[fieldName] = inputs[0].checked ? inputs[0].value : null;
-            }
-        } else {
-            fieldData[fieldName] = inputElement.value;
-        }
-    });
-    
-    return fieldData;
-}
-
-// Helper function to reset the form
-function resetCreateReportForm() {
-    createReportModal.classList.remove('active');
-    createReportForm.reset();
-    reportAttachmentsList.innerHTML = '';
-    
-    const dynamicFieldsContainer = document.getElementById('dynamic-fields-container');
-    if (dynamicFieldsContainer) {
-        dynamicFieldsContainer.remove();
-    }
-    
-    // Clear any template ID
-    const templateIdInput = document.getElementById('report-template-id');
-    if (templateIdInput) {
-        templateIdInput.value = '';
-    }
-}
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
     </script>
