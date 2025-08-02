@@ -7946,6 +7946,12 @@ function setupProfilePictureHandling() {
 
 // Load profile picture from backend with cache busting
 async function loadProfilePicture(userId, bustCache = false) {
+    // Add validation
+    if (!userId || isNaN(userId)) {
+        console.error('Invalid user ID:', userId);
+        return null;
+    }
+
     try {
         let url = `${API_BASE_URL}/users/profile-picture/${userId}`;
         if (bustCache) url += `?t=${Date.now()}`;
@@ -7962,7 +7968,7 @@ async function loadProfilePicture(userId, bustCache = false) {
         }
 
         const data = await response.json();
-        return data.url; // Return the URL from the JSON response
+        return data.url;
     } catch (error) {
         console.error('Profile picture load failed:', error);
         return null;
