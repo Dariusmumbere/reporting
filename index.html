@@ -7961,8 +7961,8 @@ async function loadProfilePicture(userId, bustCache = false) {
             throw new Error(`HTTP ${response.status}`);
         }
 
-        // The backend will redirect to the actual image URL
-        return response.url; 
+        const data = await response.json();
+        return data.url; // Return the URL from the JSON response
     } catch (error) {
         console.error('Profile picture load failed:', error);
         return null;
