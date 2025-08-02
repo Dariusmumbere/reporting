@@ -14,36 +14,6 @@
     <link rel="stylesheet" href="styles.css">
     
     <style>
-.user-dropdown-menu {
-    display: none;
-    position: absolute;
-    right: 0;
-    background-color: white;
-    min-width: 160px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    z-index: 1;
-    padding: 10px;
-    border-radius: 4px;
-}
-
-.user-dropdown-menu.show {
-    display: block;
-}
-
-/* Style the logout button to match your design */
-#logout-dropdown-btn {
-    display: block;
-    width: 100%;
-    text-align: left;
-    padding: 8px 12px;
-    border: none;
-    background: none;
-    cursor: pointer;
-}
-
-#logout-dropdown-btn:hover {
-    background-color: #f5f5f5;
-}
 .notifications-dropdown {
     display: none;
     position: absolute;
@@ -2099,16 +2069,29 @@
         </button>
     </div>
                         <div class="user-dropdown">
-            <button class="user-dropdown-btn" id="user-dropdown-btn">
-                <div class="user-dropdown-avatar" id="user-dropdown-avatar">A</div>
-                <i class="fas fa-chevron-down"></i>
-            </button>
-            <div class="user-dropdown-menu" id="user-dropdown-menu">
-                <button class="btn btn-outline btn-sm w-100" id="logout-dropdown-btn">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </button>
-            </div>
-        </div>
+                            <button class="user-dropdown-btn" id="user-dropdown-btn">
+                                <div class="user-dropdown-avatar" id="user-dropdown-avatar">A</div>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <div class="user-dropdown-menu" id="user-dropdown-menu">
+                                <div class="user-dropdown-header">
+                                    <div class="user-dropdown-name" id="user-dropdown-name">Admin User</div>
+                                    <div class="user-dropdown-email" id="user-dropdown-email">admin@reporthub.com</div>
+                                </div>
+                                <a href="#" class="user-dropdown-item" data-view="profile">
+                                    <i class="fas fa-user"></i>
+                                    <span>Profile</span>
+                                </a>
+                                <a href="#" class="user-dropdown-item">
+                                    <i class="fas fa-cog"></i>
+                                    <span>Settings</span>
+                                </a>
+                                <div class="user-dropdown-footer">
+                                    <button class="btn btn-outline btn-sm w-100" id="logout-dropdown-btn">
+                                        <i class="fas fa-sign-out-alt"></i> Logout
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -4686,6 +4669,8 @@ function setupUIForUser() {
     userRole.textContent = currentUser.role === 'admin' ? 'Administrator' : 'Staff Member';
     userAvatar.textContent = initials;
     userDropdownAvatar.textContent = initials;
+    userDropdownName.textContent = currentUser.name || 'User';
+    userDropdownEmail.textContent = currentUser.email;
     
     // Update sidebar header with organization name
     const sidebarHeader = document.querySelector('.sidebar-header h2');
@@ -8173,31 +8158,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return new Date(dateString).toLocaleDateString(undefined, options);
     }
 });
-document.addEventListener('DOMContentLoaded', function() {
-    // Get the necessary elements
-    const userDropdownBtn = document.getElementById('user-dropdown-btn');
-    const userDropdownMenu = document.getElementById('user-dropdown-menu');
-    const logoutDropdownBtn = document.getElementById('logout-dropdown-btn');
-
-    // Toggle dropdown visibility when clicking the avatar/button
-    userDropdownBtn.addEventListener('click', function(e) {
-        e.stopPropagation(); // Prevent event from bubbling up
-        userDropdownMenu.classList.toggle('show');
-    });
-
-    // Close dropdown when clicking anywhere else on the document
-    document.addEventListener('click', function() {
-        userDropdownMenu.classList.remove('show');
-    });
-
-    // Prevent dropdown from closing when clicking inside it
-    userDropdownMenu.addEventListener('click', function(e) {
-        e.stopPropagation();
-    });
-
-    
-});
-
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
     </script>
