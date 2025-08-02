@@ -3543,6 +3543,27 @@
         }
     });
 });
+            const userDropdownBtn = document.getElementById('user-dropdown-btn');
+const userDropdownMenu = document.getElementById('user-dropdown-menu');
+
+if (userDropdownBtn && userDropdownMenu) {
+    userDropdownBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent the click from bubbling up
+        userDropdownMenu.classList.toggle('active');
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!userDropdownBtn.contains(e.target) && !userDropdownMenu.contains(e.target)) {
+            userDropdownMenu.classList.remove('active');
+        }
+    });
+
+    // Prevent dropdown from closing when clicking inside it
+    userDropdownMenu.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
+}
             
             // Login form submission
             loginForm.addEventListener('submit', handleLogin);
