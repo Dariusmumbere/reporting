@@ -6268,11 +6268,15 @@ async function loadOrganizationSettings() {
         // Update logo preview
         const logoPreview = document.getElementById('org-logo-img');
         const logoPlaceholder = document.getElementById('org-logo-placeholder');
+        const logoFileInput = document.getElementById('org-logo');
         
         if (orgData.logo_url) {
-            logoPreview.src = orgData.logo_url;  // Use the URL directly (now it's a signed URL)
+            logoPreview.src = orgData.logo_url;
             logoPreview.style.display = 'block';
             logoPlaceholder.style.display = 'none';
+            
+            // Clear file input if we have a logo
+            logoFileInput.value = '';
         } else {
             logoPreview.style.display = 'none';
             logoPlaceholder.style.display = 'block';
@@ -6315,14 +6319,40 @@ async function saveOrganizationSettings() {
         // Update the sidebar header with new organization name and logo
         updateSidebarOrganizationInfo();
         
-        // Clear file input
-        logoInput.value = '';
-        
     } catch (error) {
         console.error('Error saving organization settings:', error);
         showAlert(error.message || 'Failed to update organization settings', 'danger');
     }
 }
+
+// Preview logo before upload
+document.getElementById('org-logo').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    if (!file.type.startsWith('image/')) {
+        showAlert('Please select an image file', 'danger');
+        e.target.value = '';
+        return;
+    }
+    
+    if (file.size > 2 * 1024 * 1024) {
+        showAlert('Image must be smaller than 2MB', 'danger');
+        e.target.value = '';
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        const logoPreview = document.getElementById('org-logo-img');
+        const logoPlaceholder = document.getElementById('org-logo-placeholder');
+        
+        logoPreview.src = event.target.result;
+        logoPreview.style.display = 'block';
+        logoPlaceholder.style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+});
 
 async function updateSidebarOrganizationInfo() {
     try {
@@ -6390,7 +6420,7 @@ async function updateSidebarOrganizationInfo() {
         const logoContainer = document.getElementById('sidebar-org-logo');
         
         if (orgData.logo_url) {
-            logoImg.src = `${API_BASE_URL}${orgData.logo_url}`;
+            logoImg.src = orgData.logo_url;
             logoImg.style.display = 'block';
             // Hide the building icon
             logoContainer.querySelector('i').style.display = 'none';
@@ -6404,6 +6434,7 @@ async function updateSidebarOrganizationInfo() {
         console.error('Error updating sidebar organization info:', error);
     }
 }
+        
 async function handleSupportFormSubmit(e) {
     e.preventDefault();
     
