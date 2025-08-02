@@ -6270,7 +6270,7 @@ async function loadOrganizationSettings() {
         const logoPlaceholder = document.getElementById('org-logo-placeholder');
         
         if (orgData.logo_url) {
-            logoPreview.src = `${API_BASE_URL}${orgData.logo_url}`;
+            logoPreview.src = orgData.logo_url;  // Use the URL directly (now it's a signed URL)
             logoPreview.style.display = 'block';
             logoPlaceholder.style.display = 'none';
         } else {
@@ -6324,17 +6324,42 @@ async function saveOrganizationSettings() {
     }
 }
 
-function updateSidebarOrganizationInfo() {
-    // This will be called after successful update to refresh the sidebar
-    const sidebarHeader = document.querySelector('.sidebar-header h2');
-    if (sidebarHeader) {
-        const orgName = document.getElementById('org-name').value.trim();
-        if (orgName) {
-            sidebarHeader.textContent = orgName;
+async function updateSidebarOrganizationInfo() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/organization`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        
+        if (!response.ok) return;
+        
+        const orgData = await response.json();
+        
+        // Update sidebar organization name
+        const orgNameElement = document.getElementById('sidebar-org-name');
+        if (orgNameElement) {
+            orgNameElement.textContent = orgData.name || 'ReportHub';
         }
+        
+        // Update sidebar logo
+        const logoImg = document.getElementById('sidebar-org-logo-img');
+        const logoContainer = document.getElementById('sidebar-org-logo');
+        
+        if (orgData.logo_url) {
+            logoImg.src = orgData.logo_url;  // Use the signed URL directly
+            logoImg.style.display = 'block';
+            // Hide the building icon
+            logoContainer.querySelector('i').style.display = 'none';
+        } else {
+            logoImg.style.display = 'none';
+            // Show the building icon
+            logoContainer.querySelector('i').style.display = 'block';
+        }
+        
+    } catch (error) {
+        console.error('Error updating sidebar organization info:', error);
     }
-    
-    // You can also update the logo in the sidebar if you have one
 }
 
 // Add event listeners
