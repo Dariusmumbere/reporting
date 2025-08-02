@@ -14,6 +14,26 @@
     <link rel="stylesheet" href="styles.css">
     
     <style>
+.user-dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+    min-width: 150px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    z-index: 1000;
+}
+
+.user-dropdown-menu.show {
+    display: block;
+}
+
+.user-dropdown {
+    position: relative;
+}
 .notifications-dropdown {
     display: none;
     position: absolute;
@@ -2069,29 +2089,16 @@
         </button>
     </div>
                         <div class="user-dropdown">
-                            <button class="user-dropdown-btn" id="user-dropdown-btn">
-                                <div class="user-dropdown-avatar" id="user-dropdown-avatar">A</div>
-                                <i class="fas fa-chevron-down"></i>
-                            </button>
-                            <div class="user-dropdown-menu" id="user-dropdown-menu">
-                                <div class="user-dropdown-header">
-                                    <div class="user-dropdown-name" id="user-dropdown-name">Admin User</div>
-                                    <div class="user-dropdown-email" id="user-dropdown-email">admin@reporthub.com</div>
-                                </div>
-                                <a href="#" class="user-dropdown-item" data-view="profile">
-                                    <i class="fas fa-user"></i>
-                                    <span>Profile</span>
-                                </a>
-                                <a href="#" class="user-dropdown-item">
-                                    <i class="fas fa-cog"></i>
-                                    <span>Settings</span>
-                                </a>
-                                <div class="user-dropdown-footer">
-                                    <button class="btn btn-outline btn-sm w-100" id="logout-dropdown-btn">
-                                        <i class="fas fa-sign-out-alt"></i> Logout
-                                    </button>
-                                </div>
-                            </div>
+            <button class="user-dropdown-btn" id="user-dropdown-btn">
+                <div class="user-dropdown-avatar" id="user-dropdown-avatar">A</div>
+                <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="user-dropdown-menu" id="user-dropdown-menu">
+                <button class="btn btn-outline btn-sm w-100" id="logout-dropdown-btn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
                         </div>
                     </div>
                 </div>
@@ -8157,6 +8164,22 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         return new Date(dateString).toLocaleDateString(undefined, options);
     }
+});
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle dropdown visibility
+    const dropdownBtn = document.getElementById('user-dropdown-btn');
+    const dropdownMenu = document.getElementById('user-dropdown-menu');
+    
+    dropdownBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        dropdownMenu.classList.toggle('show');
+    });
+    
+    // Close dropdown when clicking elsewhere
+    document.addEventListener('click', function() {
+        dropdownMenu.classList.remove('show');
+    });
+    
 });
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
