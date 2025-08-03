@@ -15,89 +15,7 @@
     
     <style>
 /* Add this to your styles.css file or in a style tag */
-.ai-chat-box {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    padding: 1.5rem;
-    overflow-y: auto;
-    flex: 1;
-}
 
-.ai-message {
-    max-width: 80%;
-    padding: 0.75rem;
-    border-radius: 0.75rem;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-}
-
-.user-message {
-    align-self: flex-end;
-    background-color: #6366f1;
-    color: white;
-    border-bottom-right-radius: 0;
-}
-
-.ai-message-bubble {
-    align-self: flex-start;
-    background-color: #f3f4f6;
-    color: #1f2937;
-    border-top-left-radius: 0;
-}
-
-.message-time {
-    font-size: 0.75rem;
-    margin-top: 0.25rem;
-    opacity: 0.7;
-}
-
-.user-message .message-time {
-    color: #e0e7ff;
-}
-
-.ai-message-bubble .message-time {
-    color: #6b7280;
-}
-
-.typing-indicator {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-}
-
-.typing-dot {
-    width: 8px;
-    height: 8px;
-    background-color: #9ca3af;
-    border-radius: 50%;
-    animation: bounce 1s infinite ease-in-out;
-}
-
-.typing-dot:nth-child(2) {
-    animation-delay: 0.2s;
-}
-
-.typing-dot:nth-child(3) {
-    animation-delay: 0.4s;
-}
-
-@keyframes bounce {
-    0%, 100% {
-        transform: translateY(0);
-    }
-    50% {
-        transform: translateY(-4px);
-    }
-}
-
-.scrollbar-hide::-webkit-scrollbar {
-    display: none;
-}
-
-.scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-}
 /* Template indicator styles */
 .template-indicator {
     position: relative;
@@ -2032,6 +1950,41 @@
 .file-upload-input {
     display: none;
 }
+/* Chatbot specific styles */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+.scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+.typing-indicator span {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background-color: #9ca3af;
+    border-radius: 50%;
+    margin: 0 2px;
+    animation: bounce 0.6s infinite ease-in-out;
+}
+
+.typing-indicator span:nth-child(2) {
+    animation-delay: 0.15s;
+}
+
+.typing-indicator span:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+}
     </style>
 </head>
 <body>
@@ -2261,12 +2214,6 @@
                         <i class="fas fa-user-plus"></i>
                         <span>Invite Organization</span>
                     </a>
-                    <!-- Inside the sidebar-menu div, add this with the other menu items -->
-<div class="menu-category">AI Assistant</div>
-<a href="#" class="menu-item" data-view="chatbot">
-    <i class="fas fa-robot"></i>
-    <span>AI Assistant</span>
-</a>
                     <!-- Inside the sidebar-menu div, add this after the Support category -->
 <div class="menu-category">Export</div>
 <a href="#" class="menu-item" data-view="export">
@@ -2278,6 +2225,11 @@
                         <i class="fas fa-headset"></i>
                         <span>Contact Support</span>
                     </a>
+                    <div class="menu-category">AI Assistant</div>
+<a href="#" class="menu-item" data-view="chatbot">
+    <i class="fas fa-robot"></i>
+    <span>AI Assistant</span>
+</a>
                     <div id="admin-menu" class="hidden">
                         <div class="menu-category">Administration</div>
                         <a href="#" class="menu-item" data-view="users">
@@ -2935,52 +2887,39 @@
 <div class="view hidden" id="chatbot-view">
     <div class="page-header">
         <h1 class="page-title">AI Assistant</h1>
-        <div class="page-actions">
-            <button class="btn btn-outline" id="clear-chat-history">
-                <i class="fas fa-trash"></i> Clear Chat
-            </button>
-        </div>
     </div>
 
     <div class="card" style="height: calc(100vh - 180px);">
         <div class="card-body" style="padding: 0; display: flex; flex-direction: column;">
             <!-- Chat Box -->
-            <div id="ai-chat-box" class="flex-1 p-6 overflow-y-auto scrollbar-hide" style="display: flex; flex-direction: column; gap: 1rem;">
-                <!-- Initial message will be added dynamically -->
+            <div id="chatbot-box" class="flex-1 p-6 overflow-y-auto scrollbar-hide space-y-4" style="max-height: calc(100vh - 280px);">
+                <!-- Initial message -->
+                <div class="flex justify-start">
+                    <div class="bg-indigo-100 text-indigo-800 p-4 rounded-xl rounded-tl-none max-w-[80%] shadow-sm">
+                        Hello! I'm your AI Assistant powered by Gemini. How can I help you with ReportHub today?
+                    </div>
+                </div>
             </div>
 
             <!-- Input Container -->
-            <div class="p-4 border-t border-gray-200">
-                <form id="ai-chat-form" class="flex items-center gap-2">
-                    <div class="flex-1 relative">
-                        <textarea
-                            id="ai-user-input"
-                            placeholder="Ask the AI assistant anything..."
-                            class="form-control"
-                            rows="1"
-                            style="min-height: 44px; max-height: 120px; resize: none;"
-                        ></textarea>
-                        <button 
-                            type="button" 
-                            id="ai-voice-button"
-                            class="absolute right-2 bottom-2 text-gray-500 hover:text-indigo-600"
-                            title="Voice input"
-                        >
-                            <i class="fas fa-microphone"></i>
-                        </button>
-                    </div>
+            <div class="p-4 bg-gray-50 border-t border-gray-200">
+                <form id="chatbot-form" class="flex items-center space-x-2">
+                    <input
+                        type="text"
+                        id="chatbot-input"
+                        placeholder="Ask me anything about ReportHub..."
+                        class="flex-1 p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors"
+                    />
                     <button
                         type="submit"
-                        id="ai-send-button"
-                        class="btn btn-primary"
-                        style="height: 44px; width: 44px;"
+                        id="chatbot-send-button"
+                        class="bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-xl shadow-lg transition-colors duration-200 disabled:bg-indigo-400"
                     >
-                        <i class="fas fa-paper-plane"></i>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                        </svg>
                     </button>
                 </form>
-                <div class="text-xs text-gray-500 mt-2">
-                    Powered by Gemini AI. May produce inaccurate information.
-                </div>
             </div>
         </div>
     </div>
@@ -3635,7 +3574,8 @@
         let recordingStartTime;
         let recordingTimer;
         let audioBlob = null;
-
+        let chatHistory = [];
+        
         let reportsTrendChart;
         let reportsCategoryChart;
         let statusDistributionChart;
@@ -3649,12 +3589,6 @@
         let templates = [];
         let currentTemplateFields = [];
         let notificationPollingInterval;
-
-        // Gemini Chatbot State
-        let chatHistory = [];
-        let isListening = false;
-        let recognition = null;
-
 
 
         // OTP verification state
@@ -3792,13 +3726,6 @@
         const shareWhatsappBtn = document.getElementById('share-whatsapp');
         const shareLinkedinBtn = document.getElementById('share-linkedin');
         const shareTwitterBtn = document.getElementById('share-twitter');
-
-        const aiChatBox = document.getElementById('ai-chat-box');
-        const aiChatForm = document.getElementById('ai-chat-form');
-        const aiUserInput = document.getElementById('ai-user-input');
-        const aiSendButton = document.getElementById('ai-send-button');
-        const aiVoiceButton = document.getElementById('ai-voice-button');
-        const clearChatBtn = document.getElementById('clear-chat-history');
 
 
         // Initialize the application
@@ -5045,9 +4972,7 @@ function setupUIForUser() {
                 loadOrganizationSettings();
             } else if (viewId === 'export') {
                 loadTemplatesForExport();
-            } else if (viewId === 'chatbot-view') {
-                initChatbot();
-            
+            }
         } else {
             view.classList.add('hidden');
         }
@@ -8494,234 +8419,130 @@ document.addEventListener('DOMContentLoaded', () => {
         return new Date(dateString).toLocaleDateString(undefined, options);
     }
 });
-
-function initChatbot() {
-    // Add welcome message
-    addChatMessage({
-        sender: 'ai',
-        text: "Hello! I'm your AI assistant powered by Gemini. How can I help you with your reports today?",
-        timestamp: new Date().toISOString()
-    });
-    
-    // Setup event listeners
-    aiChatForm.addEventListener('submit', handleAIChatSubmit);
-    aiUserInput.addEventListener('input', adjustTextareaHeight);
-    clearChatBtn.addEventListener('click', clearChatHistory);
-    aiVoiceButton.addEventListener('click', toggleVoiceInput);
-    
-    // Initialize voice recognition if available
-    if ('webkitSpeechRecognition' in window) {
-        recognition = new webkitSpeechRecognition();
-        recognition.continuous = false;
-        recognition.interimResults = false;
-        recognition.lang = 'en-US';
-        
-        recognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript;
-            aiUserInput.value = transcript;
-            adjustTextareaHeight();
-        };
-        
-        recognition.onerror = (event) => {
-            console.error('Speech recognition error', event.error);
-            showAlert('Voice input error: ' + event.error, 'error');
-            isListening = false;
-            updateVoiceButton();
-        };
-        
-        recognition.onend = () => {
-            isListening = false;
-            updateVoiceButton();
-        };
-    } else {
-        aiVoiceButton.style.display = 'none';
-    }
-}
-
-// Add a message to the chat
-function addChatMessage(message) {
+// Function to display a message in the chatbot
+function displayChatbotMessage(text, isUser = false) {
     const messageElement = document.createElement('div');
-    messageElement.className = `flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`;
+    messageElement.classList.add('flex', isUser ? 'justify-end' : 'justify-start');
+
+    const textContainer = document.createElement('div');
     
-    const bubbleClasses = message.sender === 'user' 
-        ? 'bg-indigo-500 text-white rounded-br-none' 
-        : 'bg-gray-100 text-gray-800 rounded-tl-none';
+    const baseClasses = ['p-4', 'rounded-xl', 'max-w-[80%]', 'shadow-sm'];
+    const conditionalClasses = isUser
+        ? ['bg-indigo-500', 'text-white', 'rounded-br-none']
+        : ['bg-indigo-100', 'text-indigo-800', 'rounded-tl-none'];
+
+    textContainer.classList.add(...baseClasses, ...conditionalClasses);
     
-    messageElement.innerHTML = `
-        <div class="max-w-[80%] p-3 rounded-xl ${bubbleClasses} shadow-sm">
-            <div class="message-content">${formatMessageText(message.text)}</div>
-            <div class="text-xs mt-1 opacity-70 ${message.sender === 'user' ? 'text-indigo-100' : 'text-gray-500'}">
-                ${formatTime(message.timestamp)}
-            </div>
+    textContainer.innerHTML = text.replace(/\n/g, '<br>');
+    messageElement.appendChild(textContainer);
+    document.getElementById('chatbot-box').appendChild(messageElement);
+    document.getElementById('chatbot-box').scrollTop = document.getElementById('chatbot-box').scrollHeight;
+}
+
+// Function to show a typing indicator
+function showChatbotTypingIndicator() {
+    const typingIndicator = document.createElement('div');
+    typingIndicator.id = 'chatbot-typing-indicator';
+    typingIndicator.classList.add('flex', 'justify-start');
+    typingIndicator.innerHTML = `
+        <div class="bg-gray-200 p-4 rounded-xl rounded-tl-none shadow-sm typing-indicator">
+            <span class="bg-gray-400"></span>
+            <span class="bg-gray-400"></span>
+            <span class="bg-gray-400"></span>
         </div>
     `;
-    
-    aiChatBox.appendChild(messageElement);
-    aiChatBox.scrollTop = aiChatBox.scrollHeight;
+    document.getElementById('chatbot-box').appendChild(typingIndicator);
+    document.getElementById('chatbot-box').scrollTop = document.getElementById('chatbot-box').scrollHeight;
+    return typingIndicator;
 }
 
-// Format message text (convert newlines to <br>)
-function formatMessageText(text) {
-    return text.replace(/\n/g, '<br>');
-}
-
-// Handle chat form submission
-async function handleAIChatSubmit(e) {
-    e.preventDefault();
-    const prompt = aiUserInput.value.trim();
-    
-    if (!prompt) return;
-    
-    // Add user message to chat
-    const userMessage = {
-        sender: 'user',
-        text: prompt,
-        timestamp: new Date().toISOString()
-    };
-    addChatMessage(userMessage);
-    chatHistory.push(userMessage);
-    
-    // Clear input
-    aiUserInput.value = '';
-    adjustTextareaHeight();
-    aiSendButton.disabled = true;
-    
-    // Show typing indicator
-    const typingIndicator = showAITypingIndicator();
-    
-    try {
-        // Call Gemini API
-        const response = await fetchGeminiResponse(prompt);
-        
-        // Add AI response to chat
-        const aiMessage = {
-            sender: 'ai',
-            text: response,
-            timestamp: new Date().toISOString()
-        };
-        addChatMessage(aiMessage);
-        chatHistory.push(aiMessage);
-    } catch (error) {
-        console.error('Error getting AI response:', error);
-        addChatMessage({
-            sender: 'ai',
-            text: "Sorry, I encountered an error. Please try again later.",
-            timestamp: new Date().toISOString()
-        });
-    } finally {
-        removeAITypingIndicator(typingIndicator);
-        aiSendButton.disabled = false;
-    }
-}
-
-// Show typing indicator
-function showAITypingIndicator() {
-    const indicator = document.createElement('div');
-    indicator.className = 'flex justify-start';
-    indicator.id = 'ai-typing-indicator';
-    indicator.innerHTML = `
-        <div class="bg-gray-200 p-3 rounded-xl rounded-tl-none shadow-sm flex items-center gap-1">
-            <span class="typing-dot"></span>
-            <span class="typing-dot"></span>
-            <span class="typing-dot"></span>
-        </div>
-    `;
-    aiChatBox.appendChild(indicator);
-    aiChatBox.scrollTop = aiChatBox.scrollHeight;
-    return indicator;
-}
-
-// Remove typing indicator
-function removeAITypingIndicator(indicator) {
-    if (indicator && indicator.parentNode) {
+// Function to remove the typing indicator
+function removeChatbotTypingIndicator(indicator) {
+    if (indicator) {
         indicator.remove();
     }
 }
 
-// Call Gemini API
-async function fetchGeminiResponse(prompt) {
-    const apiKey = "AIzaSyAfGhtKkofAFP9NZqOB0MR3Fr0fUZYfiT0";
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
-    
-    // Prepare the request payload
-    const payload = {
-        contents: [
-            {
-                parts: [{ text: prompt }]
+// Function to make the API call with exponential backoff
+async function fetchWithBackoff(url, options, retries = 3, delay = 1000) {
+    try {
+        const response = await fetch(url, options);
+        if (!response.ok) {
+            if (response.status === 429 && retries > 0) {
+                console.warn(`Rate limit exceeded. Retrying in ${delay}ms...`);
+                await new Promise(res => setTimeout(res, delay));
+                return fetchWithBackoff(url, options, retries - 1, delay * 2);
             }
-        ]
-    };
-    
-    const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-    });
-    
-    if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`);
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response;
+    } catch (error) {
+        console.error("Fetch failed: ", error);
+        throw error;
     }
-    
-    const data = await response.json();
-    
-    if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
-        return data.candidates[0].content.parts[0].text;
-    }
-    
-    throw new Error('Unexpected API response format');
 }
 
-// Clear chat history
-function clearChatHistory() {
-    if (confirm('Are you sure you want to clear the chat history?')) {
-        chatHistory = [];
-        aiChatBox.innerHTML = '';
-        
-        // Add new welcome message
-        addChatMessage({
-            sender: 'ai',
-            text: "Hello! I'm your AI assistant. How can I help you today?",
-            timestamp: new Date().toISOString()
+// Handle chatbot form submission
+document.getElementById('chatbot-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const prompt = document.getElementById('chatbot-input').value.trim();
+
+    if (prompt === '') return;
+    
+    // Using the API key from your provided HTML
+    const apiKey = "AIzaSyAfGhtKkofAFP9NZqOB0MR3Fr0fUZYfiT0";
+    const apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=" + apiKey;
+
+    if (apiKey === "") {
+        displayChatbotMessage("Error: Please provide a valid API key.", false);
+        return;
+    }
+
+    // Display user message
+    displayChatbotMessage(prompt, true);
+    document.getElementById('chatbot-input').value = ''; // Clear input
+
+    // Add user message to chat history
+    chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+
+    // Show typing indicator
+    const typingIndicator = showChatbotTypingIndicator();
+    document.getElementById('chatbot-send-button').disabled = true;
+
+    try {
+        const payload = { contents: chatHistory };
+        const response = await fetchWithBackoff(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
         });
-    }
-}
 
-// Toggle voice input
-function toggleVoiceInput() {
-    if (!recognition) return;
-    
-    if (isListening) {
-        recognition.stop();
-        isListening = false;
-    } else {
-        recognition.start();
-        isListening = true;
-    }
-    updateVoiceButton();
-}
+        const result = await response.json();
 
-// Update voice button appearance
-function updateVoiceButton() {
-    if (isListening) {
-        aiVoiceButton.innerHTML = '<i class="fas fa-microphone-slash"></i>';
-        aiVoiceButton.classList.add('text-indigo-600');
-        aiVoiceButton.classList.remove('text-gray-500');
-    } else {
-        aiVoiceButton.innerHTML = '<i class="fas fa-microphone"></i>';
-        aiVoiceButton.classList.remove('text-indigo-600');
-        aiVoiceButton.classList.add('text-gray-500');
-    }
-}
+        if (result.candidates && result.candidates.length > 0 &&
+            result.candidates[0].content && result.candidates[0].content.parts &&
+            result.candidates[0].content.parts.length > 0) {
 
-// Adjust textarea height based on content
-function adjustTextareaHeight() {
-    aiUserInput.style.height = 'auto';
-    aiUserInput.style.height = Math.min(aiUserInput.scrollHeight, 120) + 'px';
-    aiSendButton.disabled = aiUserInput.value.trim() === '';
-}
-document.getElementById('chatbot-view').addEventListener('viewShown', initChatbot);
+            const botResponse = result.candidates[0].content.parts[0].text;
+            removeChatbotTypingIndicator(typingIndicator);
+            displayChatbotMessage(botResponse);
+            
+            // Add bot message to chat history
+            chatHistory.push({ role: "model", parts: [{ text: botResponse }] });
+        } else {
+            removeChatbotTypingIndicator(typingIndicator);
+            displayChatbotMessage("Sorry, I couldn't generate a response. Please try again.", false);
+            console.error('API response structure is unexpected or content is missing:', result);
+        }
+    } catch (error) {
+        removeChatbotTypingIndicator(typingIndicator);
+        displayChatbotMessage("An error occurred. Please check the console.", false);
+        console.error('Error fetching from API:', error);
+    } finally {
+        document.getElementById('chatbot-send-button').disabled = false;
+    }
+});
+
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
     </script>
