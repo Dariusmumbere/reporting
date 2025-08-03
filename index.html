@@ -8527,7 +8527,10 @@ function initChatbot() {
     const clearChatButton = document.getElementById('clear-chat');
 
     // Add initial message
-   
+    if (chatHistory.length === 0) {
+        addBotMessage("Hello! I'm your AI assistant powered by ReportHub team. How can I help you with any question today?");
+    }
+
     chatbotForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const prompt = chatbotInput.value.trim();
@@ -8577,7 +8580,7 @@ function initChatbot() {
     clearChatButton.addEventListener('click', () => {
         chatHistory = [];
         chatbotBox.innerHTML = '';
-        addBotMessage("Hello! I'm your AI assistant powered by ReportHub Team. How can I help you with any question today?");
+        addBotMessage("Hello! I'm your AI assistant powered by ReportHub team. How can I help you with any question today?");
     });
 }
 
