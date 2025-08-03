@@ -8595,7 +8595,15 @@ function addUserMessage(text) {
 function addBotMessage(text) {
     const messageDiv = document.createElement('div');
     messageDiv.className = 'chatbot-message bot';
-    messageDiv.innerHTML = text.replace(/\n/g, '<br>');
+    
+    // Convert Markdown to HTML
+    let htmlText = text
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
+        .replace(/\*(.*?)\*/g, '<em>$1</em>') // Italic
+        .replace(/`(.*?)`/g, '<code>$1</code>') // Code
+        .replace(/\n/g, '<br>'); // New lines
+    
+    messageDiv.innerHTML = htmlText;
     document.getElementById('chatbot-box').appendChild(messageDiv);
     scrollChatToBottom();
 }
