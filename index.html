@@ -8678,6 +8678,165 @@ const systemDocs = {
   "notes": "For implementation details or troubleshooting, consult the system administrator or technical support team."
 };
 
+// ReportHub AI Assistant Implementation
+const systemDocumentation = {
+  "title": "ReportHub System Documentation",
+  "table_of_contents": [
+    "System Overview",
+    "User Registration",
+    "Login Process",
+    "Dashboard",
+    "Report Management",
+    "Creating Reports",
+    "Using Templates",
+    "Managing Templates",
+    "User Management",
+    "Organization Settings",
+    "Messaging System",
+    "AI Assistant",
+    "Exporting Reports",
+    "Support System",
+    "Technical Details",
+    "Security Features"
+  ],
+  "sections": {
+    "System Overview": {
+      "description": "ReportHub is a professional reporting system designed to streamline organizational reporting workflows.",
+      "key_features": [
+        "Role-based access control (Admin, Staff)",
+        "Comprehensive report creation and management",
+        "Template-based report generation",
+        "Real-time team messaging",
+        "AI-powered assistant",
+        "Data export capabilities",
+        "Organization management tools"
+      ]
+    },
+    "User Registration": {
+      "new_user_registration": [
+        "Navigate to the signup page",
+        "Select registration type: Create new organization (first-time users) or Join existing organization (invitation link)",
+        "Fill in personal details (name, email, password)",
+        "Complete email verification (6-digit OTP)",
+        "If creating new organization, provide organization name",
+        "Account is activated upon successful verification"
+      ],
+      "checking_registration_status": [
+        "Check email for verification code after submitting registration form",
+        "If no email received, click 'Resend code' in OTP modal",
+        "Registration status is displayed during login attempts"
+      ]
+    },
+    "Login Process": [
+      "Enter registered email and password",
+      "System verifies credentials",
+      "First-time organization creators complete organization registration",
+      "Upon successful login, user is redirected to dashboard"
+    ],
+    "Dashboard": {
+      "overview": "The dashboard provides an overview of reporting activity.",
+      "components": [
+        "Statistics Cards: Display counts of total, pending, approved, and rejected reports",
+        "Charts: Reports trend over time, Reports by category, Status distribution",
+        "Recent Activity Timeline: Shows latest system events",
+        "Recent Reports Table: Displays 5 most recent reports"
+      ]
+    },
+    "Report Management": {
+      "creating_reports": [
+        "Click 'New Report' button",
+        "Fill in report details: Title, Description (rich text editor), Category",
+        "Add attachments (optional)",
+        "Submit report"
+      ],
+      "using_templates": [
+        "Click 'Templates' button in Reports view",
+        "Select desired template",
+        "Click 'Use Template' icon",
+        "Fill in template-specific fields",
+        "Submit report"
+      ],
+      "managing_templates": {
+        "admin_only": true,
+        "steps": [
+          "Access Templates management from Reports view",
+          "Create Template: Define template name, description, category, add fields (text, dropdown, checkbox, etc.)",
+          "Set field properties (required, placeholder, etc.)",
+          "Edit/Delete Templates: Modify or remove existing templates"
+        ]
+      }
+    },
+    "User Management": {
+      "admin_only": true,
+      "features": [
+        "Access User Management from sidebar",
+        "Add User: Enter details (name, email, role), set temporary password",
+        "Edit/Delete Users: Modify details or deactivate accounts",
+        "Generate Invitations: Create invitation links, set expiration (default 7 days), share via email/WhatsApp",
+        "Manage Active Invitations: View/revoke outstanding invites"
+      ]
+    },
+    "Organization Settings": {
+      "admin_only": true,
+      "features": [
+        "Access Settings from sidebar",
+        "Organization Profile: Update organization name, upload/change logo",
+        "General Settings: Set timezone, configure date format"
+      ]
+    },
+    "Messaging System": {
+      "features": [
+        "Access Messages from sidebar",
+        "Start Conversation: Select user, type message or record voice memo, send message",
+        "View Conversations: See message history, view read receipts",
+        "Delete Messages: Remove messages from conversation"
+      ]
+    },
+    "AI Assistant": {
+      "features": [
+        "Access AI Assistant from sidebar",
+        "Type questions or requests in chat interface",
+        "Assistant provides responses with text formatting, context-aware suggestions",
+        "Clear chat history as needed"
+      ]
+    },
+    "Exporting Reports": {
+      "steps": [
+        "Access Export from sidebar",
+        "Select export criteria: Template, Date range, Status, Format (Excel, CSV, PDF, JSON)",
+        "Generate and download export file"
+      ]
+    },
+    "Support System": {
+      "features": [
+        "Access Support from sidebar",
+        "Submit support request: Select subject, describe issue, attach files (optional)",
+        "View FAQ for common questions",
+        "Expect response within 24 hours"
+      ]
+    },
+    "Technical Details": {
+      "frontend": "HTML5, CSS3, JavaScript",
+      "charts": "Chart.js",
+      "text_editor": "Quill.js",
+      "ai_integration": "Gemini API",
+      "real_time_communication": "WebSocket",
+      "authentication": "JWT tokens",
+      "responsive_design": "Works on desktop and mobile"
+    },
+    "Security Features": [
+      "Role-based access control",
+      "Secure password storage",
+      "Email verification",
+      "Session management",
+      "HTTPS encryption",
+      "File upload validation"
+    ]
+  },
+  "notes": "For implementation details or troubleshooting, consult the system administrator or technical support team."
+};
+
+
 function initChatbot() {
     const chatbotForm = document.getElementById('chatbot-form');
     const chatbotInput = document.getElementById('chatbot-input');
@@ -8687,7 +8846,7 @@ function initChatbot() {
 
     // Add initial message
     if (chatHistory.length === 0) {
-        addBotMessage("Hello! I'm your ReportHub AI Assistant. I can help you with questions about the system. What would you like to know?");
+        addBotMessage("Hello! I'm your ReportHub AI Assistant. I can help you with questions about the ReportHub system. How can I assist you today?");
     }
 
     chatbotForm.addEventListener('submit', async (e) => {
@@ -8704,23 +8863,54 @@ function initChatbot() {
         const typingIndicator = showTypingIndicator();
 
         try {
-            // First try to answer from system documentation
-            const systemAnswer = findAnswerInSystemDocs(prompt);
-            
-            if (systemAnswer) {
+            // First check if we can answer from system documentation
+            const docResponse = checkSystemDocumentation(prompt);
+            if (docResponse) {
                 // Remove typing indicator
                 removeTypingIndicator(typingIndicator);
                 
-                // Add system answer to chat
-                addBotMessage(systemAnswer);
-                chatHistory.push({ role: "model", parts: [{ text: systemAnswer }] });
+                addBotMessage(docResponse);
+                chatHistory.push({ role: "model", parts: [{ text: docResponse }] });
+                return;
+            }
+
+            // If not found in documentation, use Gemini
+            // Add user message to chat history
+            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+
+            const response = await fetchWithBackoff(apiUrl + apiKey, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    contents: [
+                        {
+                            role: "user",
+                            parts: [{
+                                text: `You are an AI assistant for ReportHub, a professional reporting system. 
+                                Answer the following question about ReportHub. If you're not sure, say you don't know.
+                                Question: ${prompt}`
+                            }]
+                        }
+                    ]
+                })
+            });
+
+            const result = await response.json();
+
+            // Remove typing indicator
+            removeTypingIndicator(typingIndicator);
+
+            if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
+                const botResponse = result.candidates[0].content.parts[0].text;
+                addBotMessage(botResponse);
+                chatHistory.push({ role: "model", parts: [{ text: botResponse }] });
             } else {
-                // If no system answer found, use Gemini
-                await handleGeminiRequest(prompt, typingIndicator);
+                addBotMessage("Sorry, I couldn't find information about that in the ReportHub documentation. Please try asking another way or contact support.");
+                console.error('Unexpected API response:', result);
             }
         } catch (error) {
             removeTypingIndicator(typingIndicator);
-            addBotMessage("An error occurred while processing your request.");
+            addBotMessage("An error occurred while processing your request. Please try again.");
             console.error('Chatbot error:', error);
         } finally {
             chatbotSendButton.disabled = false;
@@ -8731,137 +8921,104 @@ function initChatbot() {
     clearChatButton.addEventListener('click', () => {
         chatHistory = [];
         chatbotBox.innerHTML = '';
-        addBotMessage("Hello! I'm your ReportHub AI Assistant. I can help you with questions about the system. What would you like to know?");
+        addBotMessage("Hello! I'm your ReportHub AI Assistant. I can help you with questions about the ReportHub system. How can I assist you today?");
     });
 }
 
-async function handleGeminiRequest(prompt, typingIndicator) {
-    // Add user message to chat history
-    chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+function checkSystemDocumentation(prompt) {
+    const lowerPrompt = prompt.toLowerCase();
+    
+    // Check if the prompt is about ReportHub
+    if (!lowerPrompt.includes('reporthub') && 
+        !lowerPrompt.includes('report hub') && 
+        !lowerPrompt.includes('reporting system')) {
+        // If not clearly about ReportHub, let Gemini handle it
+        return null;
+    }
 
-    const response = await fetchWithBackoff(apiUrl + apiKey, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: chatHistory })
-    });
+    // Check for general system questions
+    if (lowerPrompt.includes('what is reporthub') || 
+        lowerPrompt.includes('about reporthub') || 
+        lowerPrompt.includes('overview')) {
+        return formatSystemOverviewResponse();
+    }
 
-    const result = await response.json();
+    // Check for specific sections
+    for (const section of systemDocumentation.table_of_contents) {
+        const lowerSection = section.toLowerCase();
+        if (lowerPrompt.includes(lowerSection)) {
+            return formatSectionResponse(section);
+        }
+    }
 
-    // Remove typing indicator
-    removeTypingIndicator(typingIndicator);
+    // Check for specific features
+    for (const [section, content] of Object.entries(systemDocumentation.sections)) {
+        if (typeof content === 'object' && content.key_features) {
+            for (const feature of content.key_features) {
+                if (lowerPrompt.includes(feature.toLowerCase())) {
+                    return formatFeatureResponse(section, feature);
+                }
+            }
+        }
+    }
 
-    if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
-        const botResponse = result.candidates[0].content.parts[0].text;
-        addBotMessage(botResponse);
-        chatHistory.push({ role: "model", parts: [{ text: botResponse }] });
-    } else {
-        addBotMessage("Sorry, I couldn't generate a response. Please try again.");
-        console.error('Unexpected API response:', result);
-    }
-}
-
-function findAnswerInSystemDocs(question) {
-    // Convert question to lowercase for case-insensitive matching
-    const lowerQuestion = question.toLowerCase();
-    
-    // Check for specific topics in the question
-    if (lowerQuestion.includes('register') || lowerQuestion.includes('sign up')) {
-        return formatSystemAnswer('User Registration', systemDocs.sections['User Registration']);
-    }
-    
-    if (lowerQuestion.includes('login') || lowerQuestion.includes('sign in')) {
-        return formatSystemAnswer('Login Process', systemDocs.sections['Login Process']);
-    }
-    
-    if (lowerQuestion.includes('dashboard')) {
-        return formatSystemAnswer('Dashboard', systemDocs.sections['Dashboard']);
-    }
-    
-    if (lowerQuestion.includes('report') && lowerQuestion.includes('create')) {
-        return formatSystemAnswer('Creating Reports', systemDocs.sections['Report Management'].creating_reports);
-    }
-    
-    if (lowerQuestion.includes('template') && lowerQuestion.includes('use')) {
-        return formatSystemAnswer('Using Templates', systemDocs.sections['Report Management'].using_templates);
-    }
-    
-    if (lowerQuestion.includes('template') && (lowerQuestion.includes('manage') || lowerQuestion.includes('create'))) {
-        return formatSystemAnswer('Managing Templates', systemDocs.sections['Report Management'].managing_templates);
-    }
-    
-    if (lowerQuestion.includes('user management') || (lowerQuestion.includes('user') && lowerQuestion.includes('manage'))) {
-        return formatSystemAnswer('User Management', systemDocs.sections['User Management']);
-    }
-    
-    if (lowerQuestion.includes('organization') || lowerQuestion.includes('settings')) {
-        return formatSystemAnswer('Organization Settings', systemDocs.sections['Organization Settings']);
-    }
-    
-    if (lowerQuestion.includes('message') || lowerQuestion.includes('chat')) {
-        return formatSystemAnswer('Messaging System', systemDocs.sections['Messaging System']);
-    }
-    
-    if (lowerQuestion.includes('export')) {
-        return formatSystemAnswer('Exporting Reports', systemDocs.sections['Exporting Reports']);
-    }
-    
-    if (lowerQuestion.includes('support') || lowerQuestion.includes('help')) {
-        return formatSystemAnswer('Support System', systemDocs.sections['Support System']);
-    }
-    
-    if (lowerQuestion.includes('technical') || lowerQuestion.includes('tech stack')) {
-        return formatSystemAnswer('Technical Details', systemDocs.sections['Technical Details']);
-    }
-    
-    if (lowerQuestion.includes('security') || lowerQuestion.includes('secure')) {
-        return formatSystemAnswer('Security Features', systemDocs.sections['Security Features']);
-    }
-    
-    if (lowerQuestion.includes('overview') || lowerQuestion.includes('what is') || lowerQuestion.includes('introduction')) {
-        return formatSystemAnswer('System Overview', systemDocs.sections['System Overview']);
-    }
-    
-    // If no specific topic matched, check if the question is about the table of contents
-    if (lowerQuestion.includes('topics') || lowerQuestion.includes('contents') || lowerQuestion.includes('what can you help with')) {
-        return `Here are the main topics I can help with:\n\n- ${systemDocs.table_of_contents.join('\n- ')}\n\nAsk me about any of these topics for more details.`;
-    }
-    
-    // If no match found, return null to fall back to Gemini
+    // If nothing found, return null to let Gemini handle it
     return null;
 }
 
-function formatSystemAnswer(sectionName, sectionData) {
-    let response = `Here's information about ${sectionName}:\n\n`;
+function formatSystemOverviewResponse() {
+    const overview = systemDocumentation.sections["System Overview"];
+    let response = `**ReportHub System Overview**\n\n`;
+    response += `${overview.description}\n\n`;
+    response += `**Key Features:**\n`;
+    response += overview.key_features.map(f => `• ${f}`).join('\n');
+    response += `\n\nFor more details, you can ask about specific features like user registration, report management, or dashboard.`;
+    return response;
+}
+
+function formatSectionResponse(section) {
+    const content = systemDocumentation.sections[section];
+    let response = `**${section}**\n\n`;
     
-    if (Array.isArray(sectionData)) {
-        // For array data (like steps or features lists)
-        response += sectionData.map((item, index) => `${index + 1}. ${item}`).join('\n');
-    } else if (typeof sectionData === 'object') {
-        // For object data with multiple properties
-        for (const [key, value] of Object.entries(sectionData)) {
-            if (key === 'admin_only') continue; // Skip admin flag
-            
-            response += `**${key.replace(/_/g, ' ')}**:\n`;
-            
-            if (Array.isArray(value)) {
-                response += value.map((item, index) => `  ${index + 1}. ${item}`).join('\n');
-            } else if (typeof value === 'object') {
-                response += JSON.stringify(value, null, 2);
-            } else {
-                response += `  ${value}`;
-            }
-            
-            response += '\n\n';
+    if (Array.isArray(content)) {
+        response += content.map(item => `• ${item}`).join('\n');
+    } else if (content.description) {
+        response += `${content.description}\n\n`;
+        if (content.key_features) {
+            response += `**Features:**\n`;
+            response += content.key_features.map(f => `• ${f}`).join('\n');
         }
-    } else {
-        // For simple string data
-        response += sectionData;
+        if (content.steps) {
+            response += `\n\n**Steps:**\n`;
+            response += content.steps.map((s, i) => `${i+1}. ${s}`).join('\n');
+        }
+        if (content.features) {
+            response += `\n\n**Features:**\n`;
+            response += content.features.map(f => `• ${f}`).join('\n');
+        }
     }
     
     return response;
 }
 
-// The rest of your existing functions remain the same:
+function formatFeatureResponse(section, feature) {
+    const content = systemDocumentation.sections[section];
+    let response = `**${feature}** (from ${section})\n\n`;
+    
+    if (Array.isArray(content)) {
+        response += `This feature is part of ${section}. Here's what it includes:\n`;
+        response += content.map(item => `• ${item}`).join('\n');
+    } else if (content.description) {
+        response += `${content.description}\n\n`;
+        if (content.key_features) {
+            response += `Other related features in ${section}:\n`;
+            response += content.key_features.filter(f => f !== feature).map(f => `• ${f}`).join('\n');
+        }
+    }
+    
+    return response;
+}
+
 function addUserMessage(text) {
     const messageDiv = document.createElement('div');
     messageDiv.className = 'chatbot-message user';
