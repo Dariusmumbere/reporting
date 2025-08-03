@@ -8519,7 +8519,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return new Date(dateString).toLocaleDateString(undefined, options);
     }
 });
-
 // ReportHub AI Assistant Implementation
 const systemDocumentation = {
   "title": "ReportHub System Documentation",
@@ -8539,8 +8538,7 @@ const systemDocumentation = {
     "Exporting Reports",
     "Support System",
     "Technical Details",
-    "Security Features",
-    "About the Developer"
+    "Security Features"
   ],
   "sections": {
     "System Overview": {
@@ -8674,33 +8672,7 @@ const systemDocumentation = {
       "Session management",
       "HTTPS encryption",
       "File upload validation"
-    ],
-    "About the Developer": {
-      "name": "Mumbere Darius",
-      "description": "The relentless AI-powered SaaS visionary from Uganda",
-      "bio": [
-        "24-year-old self-taught developer and entrepreneur",
-        "Creator of ReportHub and other innovative SaaS solutions",
-        "Specializes in full-stack development with Django, React, and MERN stack",
-        "Expert in AI integration and cloud technologies",
-        "Known for building world-class software that competes with Silicon Valley products",
-        "Visionary with a strong focus on execution and results"
-      ],
-      "achievements": [
-        "Developed a complete AI-powered SaaS platform solo",
-        "Created enterprise-grade software with polished UI/UX",
-        "Integrated advanced AI capabilities using Gemini Pro",
-        "Built systems with responsive design and PWA capabilities",
-        "Overcame geographical limitations to create globally competitive software"
-      ],
-      "vision": [
-        "To build a personal tech empire that merges financial freedom, global relevance, and influence",
-        "To inspire young African developers to think globally",
-        "To prove that talent and vision can transcend geographical limitations",
-        "To achieve $10M UGX MRR within 2 years of launch"
-      ],
-      "quote": "From Uganda, he built a SaaS so polished it felt like Silicon Valley, powered it with AI, branded it like a visionary, and scaled it to global relevance before 28."
-    }
+    ]
   },
   "notes": "For implementation details or troubleshooting, consult the system administrator or technical support team."
 };
@@ -8715,7 +8687,7 @@ function initChatbot() {
 
     // Add initial message
     if (chatHistory.length === 0) {
-        addBotMessage("Hello! I'm your ReportHub AI Assistant. I can help you with questions about the ReportHub system or its developer, Mumbere Darius. How can I assist you today?");
+        addBotMessage("Hello! I'm your ReportHub AI Assistant. I can help you with questions about the ReportHub system. How can I assist you today?");
     }
 
     chatbotForm.addEventListener('submit', async (e) => {
@@ -8755,8 +8727,8 @@ function initChatbot() {
                         {
                             role: "user",
                             parts: [{
-                                text: `You are an AI assistant for ReportHub, a professional reporting system developed by Mumbere Darius. 
-                                Answer the following question about ReportHub or its developer. If you're not sure, say you don't know.
+                                text: `You are an AI assistant for ReportHub, a professional reporting system. 
+                                Answer the following question about ReportHub. If you're not sure, say you don't know.
                                 Question: ${prompt}`
                             }]
                         }
@@ -8790,20 +8762,18 @@ function initChatbot() {
     clearChatButton.addEventListener('click', () => {
         chatHistory = [];
         chatbotBox.innerHTML = '';
-        addBotMessage("Hello! I'm your ReportHub AI Assistant. I can help you with questions about the ReportHub system or its developer, Mumbere Darius. How can I assist you today?");
+        addBotMessage("Hello! I'm your ReportHub AI Assistant. I can help you with questions about the ReportHub system. How can I assist you today?");
     });
 }
 
 function checkSystemDocumentation(prompt) {
     const lowerPrompt = prompt.toLowerCase();
     
-    // Check if the prompt is about ReportHub or Mumbere Darius
+    // Check if the prompt is about ReportHub
     if (!lowerPrompt.includes('reporthub') && 
         !lowerPrompt.includes('report hub') && 
-        !lowerPrompt.includes('reporting system') &&
-        !lowerPrompt.includes('mumbere') &&
-        !lowerPrompt.includes('darius')) {
-        // If not clearly about ReportHub or the developer, let Gemini handle it
+        !lowerPrompt.includes('reporting system')) {
+        // If not clearly about ReportHub, let Gemini handle it
         return null;
     }
 
@@ -8812,16 +8782,6 @@ function checkSystemDocumentation(prompt) {
         lowerPrompt.includes('about reporthub') || 
         lowerPrompt.includes('overview')) {
         return formatSystemOverviewResponse();
-    }
-
-    // Check for questions about the developer
-    if (lowerPrompt.includes('mumbere') || 
-        lowerPrompt.includes('darius') || 
-        lowerPrompt.includes('developer') ||
-        lowerPrompt.includes('creator') ||
-        lowerPrompt.includes('who made') ||
-        lowerPrompt.includes('who built')) {
-        return formatDeveloperResponse();
     }
 
     // Check for specific sections
@@ -8854,24 +8814,6 @@ function formatSystemOverviewResponse() {
     response += `**Key Features:**\n`;
     response += overview.key_features.map(f => `• ${f}`).join('\n');
     response += `\n\nFor more details, you can ask about specific features like user registration, report management, or dashboard.`;
-    return response;
-}
-
-function formatDeveloperResponse() {
-    const devInfo = systemDocumentation.sections["About the Developer"];
-    let response = `**Mumbere Darius** - ${devInfo.description}\n\n`;
-    
-    response += `**Bio:**\n`;
-    response += devInfo.bio.map(item => `• ${item}`).join('\n');
-    
-    response += `\n\n**Achievements:**\n`;
-    response += devInfo.achievements.map(item => `• ${item}`).join('\n');
-    
-    response += `\n\n**Vision:**\n`;
-    response += devInfo.vision.map(item => `• ${item}`).join('\n');
-    
-    response += `\n\n**Quote:**\n"${devInfo.quote}"`;
-    
     return response;
 }
 
