@@ -9170,7 +9170,7 @@ async function generateTemplateWithAI() {
         const aiResponse = await callGeminiAPI(`
             Create a report template specification based on this description: ${userInput}
             
-            Respond in JSON format with these fields:
+            Respond with ONLY the JSON content (no Markdown formatting or additional text) with these fields:
             - name: Template name
             - description: Template description
             - category: Template category
@@ -9182,7 +9182,7 @@ async function generateTemplateWithAI() {
               - options: For dropdown/checkbox fields
               - placeholder: Example text
               
-            Example:
+            Example response (only the JSON part):
             {
                 "name": "Financial Report",
                 "description": "Template for quarterly financial reports",
@@ -9199,15 +9199,24 @@ async function generateTemplateWithAI() {
             }
         `);
         
+        // Clean the response by removing Markdown code blocks if present
+        let cleanedResponse = aiResponse.trim();
+        if (cleanedResponse.startsWith('```json')) {
+            cleanedResponse = cleanedResponse.substring(7); // Remove ```json
+        }
+        if (cleanedResponse.endsWith('```')) {
+            cleanedResponse = cleanedResponse.substring(0, cleanedResponse.length - 3); // Remove ```
+        }
+        
         // Parse JSON response
-        const templateData = JSON.parse(aiResponse.trim());
+        const templateData = JSON.parse(cleanedResponse);
         
         // Open template editor with AI-generated template
         openTemplateEditor(templateData);
         
     } catch (error) {
         console.error('AI Template Generation Error:', error);
-        showAlert('Failed to generate template with AI', 'danger');
+        showAlert('Failed to generate template with AI. The response format was invalid.', 'danger');
     }
 }
         
