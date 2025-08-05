@@ -8827,8 +8827,7 @@ async function fetchWithBackoff(url, options, retries = 3, delay = 1000) {
     }
 }
 
-// Initialize chatbot when the view is shown
-document.getElementById('chatbot-view')?.addEventListener('viewShown', initChatbot);
+
 function initChatbot() {
     const chatbotView = document.getElementById('chatbot-view');
     chatbotView.innerHTML = `
@@ -9287,6 +9286,8 @@ async function fetchReportsForAI() {
         return [];
     }
 }
+        // Initialize chatbot when the view is shown
+document.getElementById('chatbot-view')?.addEventListener('viewShown', initChatbot);
         document.addEventListener('DOMContentLoaded', init);
     </script>
     
