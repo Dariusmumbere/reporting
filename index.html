@@ -7415,7 +7415,7 @@ async function saveTemplate() {
     // Show loading state
     document.getElementById('save-template-text').textContent = 'Saving...';
     document.getElementById('save-template-spinner').classList.remove('hidden');
-    
+    console.log("Submitting template data:", JSON.stringify(templateData, null, 2));
     try {
         const response = await fetch(`${API_BASE_URL}/templates`, {
             method: 'POST',
