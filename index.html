@@ -14,233 +14,6 @@
     <link rel="stylesheet" href="styles.css">
     
     <style>
-.chatbot-container {
-    max-width: 800px;
-    margin: 0 auto;
-    height: calc(100vh - 150px);
-    display: flex;
-    flex-direction: column;
-}
-
-.chatbot-card {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    overflow: hidden;
-}
-
-.chatbot-header {
-    padding: 16px 20px;
-    background: linear-gradient(135deg, #6e8efb, #a777e3);
-    color: white;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.chatbot-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-}
-
-.chatbot-header-info h2 {
-    margin: 0;
-    font-size: 18px;
-    font-weight: 600;
-}
-
-.chatbot-status {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 13px;
-    opacity: 0.9;
-    margin-top: 2px;
-}
-
-.status-indicator {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #4caf50;
-}
-
-.status-indicator.active {
-    background: #4caf50;
-}
-
-.chatbot-messages {
-    flex: 1;
-    padding: 20px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.chatbot-message {
-    display: flex;
-    gap: 12px;
-    max-width: 85%;
-}
-
-.chatbot-message.user-message {
-    align-self: flex-end;
-    flex-direction: row-reverse;
-}
-
-.chatbot-message.ai-message {
-    align-self: flex-start;
-}
-
-.chat-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: #f0f2f5;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    color: #6e8efb;
-    font-size: 14px;
-}
-
-.user-message .chat-avatar {
-    background: #e3f2fd;
-    color: #2196f3;
-}
-
-.chat-message-content {
-    padding: 12px 16px;
-    border-radius: 18px;
-    line-height: 1.5;
-    font-size: 14px;
-}
-
-.ai-message .chat-message-content {
-    background: #f5f7fa;
-    border-top-left-radius: 4px;
-    color: #333;
-}
-
-.user-message .chat-message-content {
-    background: #6e8efb;
-    color: white;
-    border-top-right-radius: 4px;
-}
-
-.ai-quick-questions {
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.ai-quick-questions p {
-    margin-bottom: 8px;
-    font-size: 13px;
-    color: #666;
-}
-
-.ai-quick-questions ul {
-    margin: 0;
-    padding-left: 20px;
-    font-size: 13px;
-    color: #555;
-}
-
-.ai-highlight {
-    color: #6e8efb;
-}
-
-.ai-heading {
-    margin: 16px 0 8px 0;
-    font-weight: 600;
-}
-
-.chatbot-tools {
-    display: flex;
-    padding: 0 20px 12px;
-    gap: 8px;
-    border-bottom: 1px solid #eee;
-}
-
-.chatbot-tool-btn {
-    flex: 1;
-    padding: 8px 12px;
-    border-radius: 8px;
-    background: #f5f7fa;
-    border: none;
-    font-size: 13px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.chatbot-tool-btn:hover {
-    background: #eef1f5;
-}
-
-.chatbot-tool-btn i {
-    font-size: 14px;
-}
-
-.chatbot-input-container {
-    padding: 16px 20px;
-    display: flex;
-    gap: 12px;
-    align-items: flex-end;
-}
-
-.chatbot-input-container textarea {
-    flex: 1;
-    border: 1px solid #e0e0e0;
-    border-radius: 12px;
-    padding: 12px 16px;
-    font-size: 14px;
-    resize: none;
-    max-height: 120px;
-    transition: border 0.2s;
-}
-
-.chatbot-input-container textarea:focus {
-    outline: none;
-    border-color: #6e8efb;
-    box-shadow: 0 0 0 2px rgba(110, 142, 251, 0.2);
-}
-
-#ai-send-btn {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.loading .chat-message-content::after {
-    content: "...";
-    animation: dots 1.5s infinite;
-}
-
-@keyframes dots {
-    0%, 20% { content: "."; }
-    40% { content: ".."; }
-    60%, 100% { content: "..."; }
-}
 /* Add this to your styles.css file or in a style tag */
 /* Chatbot Styles */
 .chatbot-container {
@@ -8987,78 +8760,61 @@ async function fetchWithBackoff(url, options, retries = 3, delay = 1000) {
     }
 }
 
-
 function initChatbot() {
     const chatbotView = document.getElementById('chatbot-view');
     chatbotView.innerHTML = `
         <div class="page-header">
             <h1 class="page-title">AI Assistant</h1>
-            <p class="page-description">Get instant help with your reports and data analysis</p>
         </div>
         
-        <div class="chatbot-container">
-            <div class="chatbot-card">
-                <div class="chatbot-header">
-                    <div class="chatbot-avatar">
-                        <i class="fas fa-robot"></i>
-                    </div>
-                    <div class="chatbot-header-info">
-                        <h2>AI Assistant</h2>
-                        <div class="chatbot-status">
-                            <span class="status-indicator active"></span>
-                            <span>Online</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="chatbot-messages" id="chatbot-box">
-                    <div class="chatbot-message ai-message">
-                        <div class="chat-avatar">
-                            <i class="fas fa-robot"></i>
-                        </div>
-                        <div class="chat-message-content">
-                            <p>Hello! I'm your AI reporting assistant. How can I help you today?</p>
-                            <div class="ai-quick-questions">
-                                <p><strong>Try asking:</strong></p>
-                                <ul>
-                                    <li>Help me analyze my recent reports</li>
-                                    <li>Generate a summary of last month's data</li>
-                                    <li>Create a financial report template</li>
-                                    <li>Find trends in my approval rates</li>
-                                </ul>
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Ask the AI Assistant</h2>
+            </div>
+            <div class="card-body">
+                <div class="ai-assistant-container">
+                    <div class="ai-messages" id="chatbot-box">
+                        <div class="chatbot-message ai-message">
+                            <div class="chat-avatar">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div class="chat-message-content">
+                                <p>Hello! I'm your AI reporting assistant. How can I help you today?</p>
+                                <div class="ai-quick-questions">
+                                    <p><strong>Try asking:</strong></p>
+                                    <ul>
+                                        <li>Help me analyze my recent reports</li>
+                                        <li>Generate a summary of last month's data</li>
+                                        <li>Create a financial report template</li>
+                                        <li>Find trends in my approval rates</li>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                
-                <div class="chatbot-tools">
-                    <button class="chatbot-tool-btn" id="ai-analyze-reports">
-                        <i class="fas fa-chart-bar"></i> Analyze Reports
-                    </button>
-                    <button class="chatbot-tool-btn" id="ai-generate-template">
-                        <i class="fas fa-file-alt"></i> Generate Template
-                    </button>
-                    <button class="chatbot-tool-btn" id="ai-summarize-data">
-                        <i class="fas fa-comment-alt"></i> Summarize Data
-                    </button>
-                </div>
-                
-                <div class="chatbot-input-container">
-                    <textarea id="ai-prompt" placeholder="Ask the AI anything about your reports..." rows="1"></textarea>
-                    <button id="ai-send-btn" class="btn btn-primary">
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
+                    
+                    <div class="ai-input-container">
+                        <textarea id="ai-prompt" placeholder="Ask the AI anything about your reports..." rows="2"></textarea>
+                        <button id="ai-send-btn" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="ai-tools">
+                        <button class="ai-tool-btn" id="ai-analyze-reports">
+                            <i class="fas fa-chart-bar"></i> Analyze Reports
+                        </button>
+                        <button class="ai-tool-btn" id="ai-generate-template">
+                            <i class="fas fa-file-alt"></i> Generate Template
+                        </button>
+                        <button class="ai-tool-btn" id="ai-summarize-data">
+                            <i class="fas fa-comment-alt"></i> Summarize Data
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     `;
-
-    // Auto-resize textarea
-    const textarea = document.getElementById('ai-prompt');
-    textarea.addEventListener('input', function() {
-        this.style.height = 'auto';
-        this.style.height = (this.scrollHeight) + 'px';
-    });
 
     // Set up event listeners
     document.getElementById('ai-send-btn').addEventListener('click', handleAIPrompt);
@@ -9092,7 +8848,6 @@ async function handleAIPrompt() {
     // Add user message to chat
     addAIMessage(prompt, 'user');
     promptInput.value = '';
-    promptInput.style.height = 'auto';
     
     // Show loading state
     const loadingMessage = addAIMessage('Thinking...', 'ai', true);
@@ -9123,7 +8878,7 @@ async function callGeminiAPI(prompt, context = '') {
     const fullPrompt = `You are an expert reporting assistant for the ReportHub system. 
         The user is asking: "${prompt}"
         ${context ? `Here is some relevant context:\n${context}` : ''}
-        Please provide a helpful, concise response. Format your response with clear headings, bullet points, and bold text for important information.`;
+        Please provide a helpful, concise response.`;
     
     const response = await fetch(apiUrl, {
         method: 'POST',
@@ -9177,7 +8932,7 @@ async function getAIContext(prompt) {
     return context;
 }
 
-// Add message to AI chat
+// Add AI/User message to chatbot with markdown rendering and avatar
 function addAIMessage(content, sender = 'ai', isLoading = false) {
     const messagesContainer = document.getElementById('chatbot-box');
     if (!messagesContainer) {
@@ -9234,44 +8989,138 @@ function formatAIResponse(response) {
     html = html.replace(/(\d+\.\s+.*(\n|$))/g, '<ol><li>$1</li></ol>');
     html = html.replace(/(-\s+.*(\n|$))/g, '<ul><li>$1</li></ul>');
     
-    // Add some styling classes
-    html = html.replace(/<strong>(.*?)<\/strong>/g, '<strong class="ai-highlight">$1</strong>');
-    html = html.replace(/<h[1-6]>(.*?)<\/h[1-6]>/g, '<h4 class="ai-heading">$1</h4>');
-    
     return html;
 }
 
-// AI Tool Functions
-async function analyzeReportsWithAI() {
-    try {
-        addAIMessage("Analyzing reports... Please wait.", 'ai');
-
-        const reports = await fetchReportsForAI();
-        if (reports.length === 0) {
-            addAIMessage("No reports found to analyze.", 'ai');
+function openAIReportAssistant() {
+    const modal = document.createElement('div');
+    modal.className = 'modal active';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 class="modal-title">AI Report Assistant</h3>
+                <button class="modal-close" id="close-ai-assistant">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">What kind of report would you like to create?</label>
+                    <textarea id="ai-report-prompt" class="form-control" 
+                        placeholder="Describe the report you want to create (e.g., 'A financial report for Q2 with revenue breakdown')" 
+                        rows="3"></textarea>
+                </div>
+                <div class="ai-report-options">
+                    <button class="btn btn-outline" id="ai-suggest-title">
+                        Suggest Title
+                    </button>
+                    <button class="btn btn-outline" id="ai-generate-description">
+                        Generate Description
+                    </button>
+                    <button class="btn btn-primary" id="ai-create-full-report">
+                        Create Full Report
+                    </button>
+                </div>
+                <div class="ai-result-container hidden" id="ai-report-result">
+                    <div class="ai-result-header">
+                        <h4>AI Suggestion</h4>
+                        <button class="btn btn-sm btn-outline" id="ai-apply-result">
+                            Apply to Report
+                        </button>
+                    </div>
+                    <div class="ai-result-content" id="ai-report-result-content"></div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Set up event listeners
+    document.getElementById('close-ai-assistant').addEventListener('click', () => {
+        modal.remove();
+    });
+    
+    document.getElementById('ai-suggest-title').addEventListener('click', async () => {
+        const prompt = document.getElementById('ai-report-prompt').value;
+        if (!prompt) {
+            showAlert('Please describe the report you want to create', 'danger');
             return;
         }
         
-        const prompt = `Analyze these reports and provide key insights:
-            ${reports.map(r => `- ${r.title} (${r.status}): ${r.description.substring(0, 100)}...`).join('\n')}
-            
-            Please identify trends, anomalies, and provide recommendations. Format your response with clear sections.`;
+        const response = await callGeminiAPI(`Suggest a concise, professional title for a report about: ${prompt}`);
+        showAIResult(response, 'title');
+    });
+    
+    document.getElementById('ai-generate-description').addEventListener('click', async () => {
+        const prompt = document.getElementById('ai-report-prompt').value;
+        if (!prompt) {
+            showAlert('Please describe the report you want to create', 'danger');
+            return;
+        }
         
-        const response = await callGeminiAPI(prompt);
-        addAIMessage(response, 'ai');
-    } catch (error) {
-        console.error('AI Analysis Error:', error);
-        addAIMessage("Failed to analyze reports. Please try again.", 'ai');
-    }
+        const response = await callGeminiAPI(`Write a professional report description for a report about: ${prompt}. Include key sections that should be covered.`);
+        showAIResult(response, 'description');
+    });
+    
+    document.getElementById('ai-create-full-report').addEventListener('click', async () => {
+        const prompt = document.getElementById('ai-report-prompt').value;
+        if (!prompt) {
+            showAlert('Please describe the report you want to create', 'danger');
+            return;
+        }
+        
+        const response = await callGeminiAPI(`Create a full report outline about: ${prompt}. Include a title, detailed description, and suggested sections with bullet points for each. Format as HTML.`);
+        showAIResult(response, 'full');
+    });
+    
+    document.getElementById('ai-apply-result').addEventListener('click', () => {
+        const resultType = modal.dataset.resultType;
+        const content = document.getElementById('ai-report-result-content').innerHTML;
+        
+        if (resultType === 'title') {
+            document.getElementById('report-title').value = content;
+        } else if (resultType === 'description') {
+            quill.root.innerHTML = content;
+            document.getElementById('report-description').value = content;
+        } else if (resultType === 'full') {
+            // Parse the full report and apply parts
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(content, 'text/html');
+            
+            const title = doc.querySelector('h1')?.textContent || 
+                          doc.querySelector('h2')?.textContent || 
+                          doc.querySelector('strong')?.textContent || '';
+            
+            if (title) {
+                document.getElementById('report-title').value = title;
+            }
+            
+            const description = doc.querySelector('p')?.outerHTML || content;
+            quill.root.innerHTML = description;
+            document.getElementById('report-description').value = description;
+        }
+        
+        modal.remove();
+    });
 }
 
+// Show AI result in modal
+function showAIResult(content, type) {
+    const resultContainer = document.getElementById('ai-report-result');
+    const resultContent = document.getElementById('ai-report-result-content');
+    
+    resultContent.innerHTML = type === 'title' ? `<p>${content}</p>` : content;
+    resultContainer.classList.remove('hidden');
+    resultContainer.parentElement.dataset.resultType = type;
+}
+
+// Add AI template generation
 async function generateTemplateWithAI() {
-    const userInput = window.prompt('Describe the template you want to create (e.g., "A financial report template with revenue and expense sections"):');
+    const userInput = window.prompt('Describe the template you want to create...');
     if (!userInput) return;
     
     try {
-        addAIMessage(`Generating template for: "${userInput}"...`, 'ai');
-        
         const aiResponse = await callGeminiAPI(`
             Create a report template specification based on this description: ${userInput}
             
@@ -9288,48 +9137,112 @@ async function generateTemplateWithAI() {
               - placeholder: Example text
               - default_value: Default value
               - order: Display order (number)
+              
+            Example response (only the JSON part):
+            {
+                "name": "Financial Report",
+                "description": "Template for quarterly financial reports",
+                "category": "Finance",
+                "fields": [
+                    {
+                        "name": "revenue",
+                        "label": "Total Revenue",
+                        "field_type": "number",
+                        "required": true,
+                        "placeholder": "Enter total revenue",
+                        "default_value": "0",
+                        "order": 1
+                    }
+                ]
+            }
         `);
         
         // Clean and parse the response
         let cleanedResponse = aiResponse.trim();
+        // Remove Markdown code blocks if present
         cleanedResponse = cleanedResponse.replace(/^```json|```$/g, '');
         
         const templateData = JSON.parse(cleanedResponse);
-        addAIMessage(`Template generated: <strong>${templateData.name}</strong><br>${templateData.description}`, 'ai');
         
-        // In a real app, you would open the template editor here
-        console.log('Generated template data:', templateData);
+        // Validate and normalize field types
+        const validFieldTypes = ["text", "textarea", "number", "date", "datetime", "dropdown", "checkbox", "radio", "file"];
+        templateData.fields = templateData.fields.map(field => {
+            // Ensure field_type is valid
+            if (!validFieldTypes.includes(field.field_type)) {
+                field.field_type = "text"; // default to text if invalid
+            }
+            
+            // Ensure options is an array for relevant field types
+            if (["dropdown", "checkbox", "radio"].includes(field.field_type)) {
+                if (!Array.isArray(field.options)) {
+                    field.options = field.options ? [field.options] : [];
+                }
+            } else {
+                field.options = null;
+            }
+            
+            return field;
+        });
+        
+        // Open template editor with the validated data
+        openTemplateEditor(templateData);
         
     } catch (error) {
         console.error('AI Template Generation Error:', error);
-        addAIMessage("Failed to generate template. Please check your description and try again.", 'ai');
+        showAlert('Failed to generate template with AI. Please check the format and try again.', 'danger');
+    }
+}
+        
+async function analyzeReportsWithAI() {
+    try {
+        addAIMessage("Analyzing reports... Please wait.", 'ai');
+
+        const reports = await fetchReportsForAI();
+        if (reports.length === 0) {
+            showAlert('No reports found to analyze', 'warning');
+            addAIMessage("No reports found to analyze.", 'ai');
+            return;
+        }
+        
+        const prompt = `Analyze these reports and provide key insights:
+            ${reports.map(r => `- ${r.title} (${r.status}): ${r.description.substring(0, 100)}...`).join('\n')}
+            
+            Please identify trends, anomalies, and provide recommendations.`;
+        
+        addAIMessage("Reports fetched. Sending to AI for analysis...", 'ai');
+        
+        const response = await callGeminiAPI(prompt);
+        
+        // Push AI response to chat
+        addAIMessage("AI Analysis complete:\n\n" + response, 'ai');
+    } catch (error) {
+        console.error('AI Analysis Error:', error);
+        showAlert('Failed to analyze reports', 'danger');
+        addAIMessage("Failed to analyze reports. Please try again.", 'ai');
     }
 }
 
 async function summarizeDataWithAI() {
     try {
-        addAIMessage("Gathering data to summarize...", 'ai');
-
         const reports = await fetchReportsForAI();
         if (reports.length === 0) {
-            addAIMessage("No reports found to summarize.", 'ai');
+            showAlert('No reports found to summarize', 'warning');
             return;
         }
         
         const prompt = `Summarize the key points from these reports:
             ${reports.map(r => `- ${r.title}`).join('\n')}
             
-            Provide a concise summary highlighting the most important information in bullet points.`;
+            Provide a concise summary highlighting the most important information.`;
             
         const response = await callGeminiAPI(prompt);
         addAIMessage(response, 'ai');
     } catch (error) {
         console.error('AI Summary Error:', error);
-        addAIMessage("Failed to summarize data. Please try again.", 'ai');
+        showAlert('Failed to summarize data', 'danger');
     }
 }
 
-// Data fetching functions
 async function fetchTemplatesForAI() {
     try {
         const response = await fetch(`${API_BASE_URL}/templates`, {
