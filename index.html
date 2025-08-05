@@ -9163,12 +9163,12 @@ function showAIResult(content, type) {
 }
 // Add AI template generation
 async function generateTemplateWithAI() {
-    const prompt = prompt('Describe the template you want to create (e.g., "A financial report template with sections for revenue, expenses, and profit")');
-    if (!prompt) return;
+    const userInput = window.prompt('Describe the template you want to create (e.g., "A financial report template with sections for revenue, expenses, and profit")');
+    if (!userInput) return;
     
     try {
         const aiResponse = await callGeminiAPI(`
-            Create a report template specification based on this description: ${prompt}
+            Create a report template specification based on this description: ${userInput}
             
             Respond in JSON format with these fields:
             - name: Template name
@@ -9210,6 +9210,7 @@ async function generateTemplateWithAI() {
         showAlert('Failed to generate template with AI', 'danger');
     }
 }
+        
 async function analyzeReportsWithAI() {
     try {
         addBotMessage("🤖 Analyzing reports... Please wait.");
