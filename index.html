@@ -8787,10 +8787,6 @@ function removeTypingIndicator(typingIndicator) {
     }
 }
 
-function scrollChatToBottom() {
-    const chatBox = document.getElementById('chatbot-box');
-    chatBox.scrollTop = chatBox.scrollHeight;
-}
 
 async function fetchWithBackoff(url, options, retries = 3, delay = 1000) {
     try {
