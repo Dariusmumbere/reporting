@@ -8946,7 +8946,6 @@ async function fetchWithBackoff(url, options, retries = 3, delay = 1000) {
         throw error;
     }
 }
-
 function initChatbot() {
     const chatbotView = document.getElementById('chatbot-view');
     chatbotView.innerHTML = `
@@ -9025,7 +9024,7 @@ function initChatbot() {
     });
 }
 
-// Handle AI prompts
+// Handle AI prompts with enhanced context awareness
 async function handleAIPrompt() {
     const promptInput = document.getElementById('ai-prompt');
     const prompt = promptInput.value.trim();
@@ -9040,10 +9039,10 @@ async function handleAIPrompt() {
     const loadingMessage = addAIMessage('Thinking...', 'ai', true);
     
     try {
-        // Get relevant data based on prompt
-        const context = await getAIContext(prompt);
+        // Get enhanced context based on prompt
+        const context = await getEnhancedAIContext(prompt);
         
-        // Call Gemini API
+        // Call Gemini API with context
         const response = await callGeminiAPI(prompt, context);
         
         // Update loading message with actual response
@@ -9057,15 +9056,182 @@ async function handleAIPrompt() {
     }
 }
 
-// Call Gemini API
+// Enhanced context gathering with multiple data sources
+async function getEnhancedAIContext(prompt) {
+    const lowerPrompt = prompt.toLowerCase();
+    let context = '';
+    
+    // Get user context
+    const userContext = await getUserContext();
+    if (userContext) {
+        context += `User Context:\n${JSON.stringify(userContext, null, 2)}\n\n`;
+    }
+    
+    // Get application context
+    const appContext = getApplicationContext();
+    if (appContext) {
+        context += `Application Context:\n${JSON.stringify(appContext, null, 2)}\n\n`;
+    }
+    
+    // Get report context if relevant
+    if (isReportRelatedPrompt(lowerPrompt)) {
+        const reportContext = await getReportContext();
+        if (reportContext) {
+            context += `Report Context:\n${JSON.stringify(reportContext, null, 2)}\n\n`;
+        }
+    }
+    
+    // Get template context if relevant
+    if (isTemplateRelatedPrompt(lowerPrompt)) {
+        const templateContext = await getTemplateContext();
+        if (templateContext) {
+            context += `Template Context:\n${JSON.stringify(templateContext, null, 2)}\n\n`;
+        }
+    }
+    
+    // Get recent activity context
+    const activityContext = await getRecentActivityContext();
+    if (activityContext) {
+        context += `Recent Activity:\n${JSON.stringify(activityContext, null, 2)}\n\n`;
+    }
+    
+    return context;
+}
+
+// Helper functions for context awareness
+function isReportRelatedPrompt(prompt) {
+    return prompt.includes('report') || 
+           prompt.includes('data') || 
+           prompt.includes('analyze') || 
+           prompt.includes('statistic') ||
+           prompt.includes('trend') ||
+           prompt.includes('summary');
+}
+
+function isTemplateRelatedPrompt(prompt) {
+    return prompt.includes('template') || 
+           prompt.includes('form') || 
+           prompt.includes('structure') ||
+           prompt.includes('format');
+}
+
+async function getUserContext() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/user/context`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        if (!response.ok) throw new Error('Failed to fetch user context');
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching user context:', error);
+        return null;
+    }
+}
+
+function getApplicationContext() {
+    // Get current view/state from the application
+    const currentView = document.querySelector('.view.active')?.id || 'unknown';
+    const currentReportId = window.currentReportId || null;
+    const currentTemplateId = window.currentTemplateId || null;
+    
+    return {
+        currentView,
+        currentReportId,
+        currentTemplateId,
+        systemTime: new Date().toISOString(),
+        userAgent: navigator.userAgent
+    };
+}
+
+async function getReportContext() {
+    try {
+        // Get current report if available
+        if (window.currentReportId) {
+            const response = await fetch(`${API_BASE_URL}/reports/${window.currentReportId}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            if (!response.ok) throw new Error('Failed to fetch current report');
+            return await response.json();
+        }
+        
+        // Otherwise get recent reports
+        const recentResponse = await fetch(`${API_BASE_URL}/reports?limit=5`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        if (!recentResponse.ok) throw new Error('Failed to fetch recent reports');
+        return await recentResponse.json();
+    } catch (error) {
+        console.error('Error fetching report context:', error);
+        return null;
+    }
+}
+
+async function getTemplateContext() {
+    try {
+        // Get current template if available
+        if (window.currentTemplateId) {
+            const response = await fetch(`${API_BASE_URL}/templates/${window.currentTemplateId}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            if (!response.ok) throw new Error('Failed to fetch current template');
+            return await response.json();
+        }
+        
+        // Otherwise get recent templates
+        const recentResponse = await fetch(`${API_BASE_URL}/templates?limit=5`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        if (!recentResponse.ok) throw new Error('Failed to fetch recent templates');
+        return await recentResponse.json();
+    } catch (error) {
+        console.error('Error fetching template context:', error);
+        return null;
+    }
+}
+
+async function getRecentActivityContext() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/activity?limit=5`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        if (!response.ok) throw new Error('Failed to fetch recent activity');
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching activity context:', error);
+        return null;
+    }
+}
+
+// Call Gemini API with enhanced context handling
 async function callGeminiAPI(prompt, context = '') {
     const apiKey = "AIzaSyAfGhtKkofAFP9NZqOB0MR3Fr0fUZYfiT0";
     const apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=" + apiKey;
     
-    const fullPrompt = `You are an expert reporting assistant for the ReportHub system. 
+    const fullPrompt = `You are an expert reporting assistant and a general knowledge(you should reply appropriately and accurately to any question given to you even if out of context of reporthub system chatbot for the ReportHub system. 
         The user is asking: "${prompt}"
-        ${context ? `Here is some relevant context:\n${context}` : ''}
-        Please provide a helpful, concise response.`;
+        
+        Here is the current context:
+        ${context || 'No additional context provided'}
+        
+        Please provide a helpful, concise response considering:
+        1. The user's role and permissions
+        2. The current application state
+        3. Relevant reports/templates data
+        4. Recent user activity
+        
+        Format your response with appropriate markdown for readability.`;
     
     const response = await fetch(apiUrl, {
         method: 'POST',
@@ -9087,36 +9253,6 @@ async function callGeminiAPI(prompt, context = '') {
     
     const data = await response.json();
     return data.candidates[0].content.parts[0].text;
-}
-
-// Get relevant context for AI based on prompt
-async function getAIContext(prompt) {
-    const lowerPrompt = prompt.toLowerCase();
-    let context = '';
-    
-    // If asking about reports, fetch recent reports data
-    if (lowerPrompt.includes('report') || lowerPrompt.includes('data') || lowerPrompt.includes('analyze')) {
-        const reports = await fetchReportsForAI();
-        if (reports.length > 0) {
-            context += `Recent Reports Data:\n`;
-            context += reports.map(r => 
-                `- ${r.title} (${r.status}): ${r.description.substring(0, 100)}...`
-            ).join('\n');
-        }
-    }
-    
-    // If asking about templates, fetch templates data
-    if (lowerPrompt.includes('template') || lowerPrompt.includes('form')) {
-        const templates = await fetchTemplatesForAI();
-        if (templates.length > 0) {
-            context += `\n\nAvailable Templates:\n`;
-            context += templates.map(t => 
-                `- ${t.name} (${t.category}): ${t.fields.length} fields`
-            ).join('\n');
-        }
-    }
-    
-    return context;
 }
 
 // Add AI/User message to chatbot with markdown rendering and avatar
@@ -9179,137 +9315,67 @@ function formatAIResponse(response) {
     return html;
 }
 
-function openAIReportAssistant() {
-    const modal = document.createElement('div');
-    modal.className = 'modal active';
-    modal.innerHTML = `
-        <div class="modal-content" style="max-width: 600px;">
-            <div class="modal-header">
-                <h3 class="modal-title">AI Report Assistant</h3>
-                <button class="modal-close" id="close-ai-assistant">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label">What kind of report would you like to create?</label>
-                    <textarea id="ai-report-prompt" class="form-control" 
-                        placeholder="Describe the report you want to create (e.g., 'A financial report for Q2 with revenue breakdown')" 
-                        rows="3"></textarea>
-                </div>
-                <div class="ai-report-options">
-                    <button class="btn btn-outline" id="ai-suggest-title">
-                        Suggest Title
-                    </button>
-                    <button class="btn btn-outline" id="ai-generate-description">
-                        Generate Description
-                    </button>
-                    <button class="btn btn-primary" id="ai-create-full-report">
-                        Create Full Report
-                    </button>
-                </div>
-                <div class="ai-result-container hidden" id="ai-report-result">
-                    <div class="ai-result-header">
-                        <h4>AI Suggestion</h4>
-                        <button class="btn btn-sm btn-outline" id="ai-apply-result">
-                            Apply to Report
-                        </button>
-                    </div>
-                    <div class="ai-result-content" id="ai-report-result-content"></div>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    document.body.appendChild(modal);
-    
-    // Set up event listeners
-    document.getElementById('close-ai-assistant').addEventListener('click', () => {
-        modal.remove();
-    });
-    
-    document.getElementById('ai-suggest-title').addEventListener('click', async () => {
-        const prompt = document.getElementById('ai-report-prompt').value;
-        if (!prompt) {
-            showAlert('Please describe the report you want to create', 'danger');
+// Context-aware report analysis
+async function analyzeReportsWithAI() {
+    try {
+        addAIMessage("Analyzing reports with context... Please wait.", 'ai');
+
+        // Get comprehensive context
+        const userContext = await getUserContext();
+        const reportContext = await getReportContext();
+        const activityContext = await getRecentActivityContext();
+        
+        if (!reportContext || reportContext.length === 0) {
+            showAlert('No reports found to analyze', 'warning');
+            addAIMessage("No reports found to analyze.", 'ai');
             return;
         }
         
-        const response = await callGeminiAPI(`Suggest a concise, professional title for a report about: ${prompt}`);
-        showAIResult(response, 'title');
-    });
-    
-    document.getElementById('ai-generate-description').addEventListener('click', async () => {
-        const prompt = document.getElementById('ai-report-prompt').value;
-        if (!prompt) {
-            showAlert('Please describe the report you want to create', 'danger');
-            return;
-        }
-        
-        const response = await callGeminiAPI(`Write a professional report description for a report about: ${prompt}. Include key sections that should be covered.`);
-        showAIResult(response, 'description');
-    });
-    
-    document.getElementById('ai-create-full-report').addEventListener('click', async () => {
-        const prompt = document.getElementById('ai-report-prompt').value;
-        if (!prompt) {
-            showAlert('Please describe the report you want to create', 'danger');
-            return;
-        }
-        
-        const response = await callGeminiAPI(`Create a full report outline about: ${prompt}. Include a title, detailed description, and suggested sections with bullet points for each. Format as HTML.`);
-        showAIResult(response, 'full');
-    });
-    
-    document.getElementById('ai-apply-result').addEventListener('click', () => {
-        const resultType = modal.dataset.resultType;
-        const content = document.getElementById('ai-report-result-content').innerHTML;
-        
-        if (resultType === 'title') {
-            document.getElementById('report-title').value = content;
-        } else if (resultType === 'description') {
-            quill.root.innerHTML = content;
-            document.getElementById('report-description').value = content;
-        } else if (resultType === 'full') {
-            // Parse the full report and apply parts
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(content, 'text/html');
+        const prompt = `Analyze these reports considering the user's role and recent activity:
+            User Role: ${userContext?.role || 'unknown'}
+            Recent Activity: ${activityContext?.map(a => a.action).join(', ') || 'none'}
             
-            const title = doc.querySelector('h1')?.textContent || 
-                          doc.querySelector('h2')?.textContent || 
-                          doc.querySelector('strong')?.textContent || '';
+            Reports Data:
+            ${reportContext.map(r => `- ${r.title} (${r.status}): ${r.description.substring(0, 100)}...`).join('\n')}
             
-            if (title) {
-                document.getElementById('report-title').value = title;
-            }
-            
-            const description = doc.querySelector('p')?.outerHTML || content;
-            quill.root.innerHTML = description;
-            document.getElementById('report-description').value = description;
-        }
+            Please provide:
+            1. Key trends and patterns
+            2. Notable anomalies
+            3. Actionable recommendations
+            4. Relevant visualizations suggestions`;
         
-        modal.remove();
-    });
+        addAIMessage("Context gathered. Analyzing with AI...", 'ai');
+        
+        const response = await callGeminiAPI(prompt);
+        
+        // Push AI response to chat
+        addAIMessage("AI Analysis complete:\n\n" + response, 'ai');
+    } catch (error) {
+        console.error('AI Analysis Error:', error);
+        showAlert('Failed to analyze reports', 'danger');
+        addAIMessage("Failed to analyze reports. Please try again.", 'ai');
+    }
 }
 
-// Show AI result in modal
-function showAIResult(content, type) {
-    const resultContainer = document.getElementById('ai-report-result');
-    const resultContent = document.getElementById('ai-report-result-content');
-    
-    resultContent.innerHTML = type === 'title' ? `<p>${content}</p>` : content;
-    resultContainer.classList.remove('hidden');
-    resultContainer.parentElement.dataset.resultType = type;
-}
-
-// Add AI template generation
+// Context-aware template generation
 async function generateTemplateWithAI() {
     const userInput = window.prompt('Describe the template you want to create...');
     if (!userInput) return;
     
     try {
+        // Get context for better template generation
+        const userContext = await getUserContext();
+        const templateContext = await getTemplateContext();
+        
         const aiResponse = await callGeminiAPI(`
             Create a report template specification based on this description: ${userInput}
+            
+            User Context:
+            - Role: ${userContext?.role || 'standard'}
+            - Department: ${userContext?.department || 'general'}
+            
+            Existing Templates (for reference):
+            ${templateContext?.map(t => `- ${t.name} (${t.category})`).join('\n') || 'None'}
             
             Respond with ONLY the JSON content (no Markdown formatting or additional text) with these fields:
             - name: Template name
@@ -9324,29 +9390,10 @@ async function generateTemplateWithAI() {
               - placeholder: Example text
               - default_value: Default value
               - order: Display order (number)
-              
-            Example response (only the JSON part):
-            {
-                "name": "Financial Report",
-                "description": "Template for quarterly financial reports",
-                "category": "Finance",
-                "fields": [
-                    {
-                        "name": "revenue",
-                        "label": "Total Revenue",
-                        "field_type": "number",
-                        "required": true,
-                        "placeholder": "Enter total revenue",
-                        "default_value": "0",
-                        "order": 1
-                    }
-                ]
-            }
         `);
         
         // Clean and parse the response
         let cleanedResponse = aiResponse.trim();
-        // Remove Markdown code blocks if present
         cleanedResponse = cleanedResponse.replace(/^```json|```$/g, '');
         
         const templateData = JSON.parse(cleanedResponse);
@@ -9354,12 +9401,10 @@ async function generateTemplateWithAI() {
         // Validate and normalize field types
         const validFieldTypes = ["text", "textarea", "number", "date", "datetime", "dropdown", "checkbox", "radio", "file"];
         templateData.fields = templateData.fields.map(field => {
-            // Ensure field_type is valid
             if (!validFieldTypes.includes(field.field_type)) {
-                field.field_type = "text"; // default to text if invalid
+                field.field_type = "text";
             }
             
-            // Ensure options is an array for relevant field types
             if (["dropdown", "checkbox", "radio"].includes(field.field_type)) {
                 if (!Array.isArray(field.options)) {
                     field.options = field.options ? [field.options] : [];
@@ -9379,86 +9424,38 @@ async function generateTemplateWithAI() {
         showAlert('Failed to generate template with AI. Please check the format and try again.', 'danger');
     }
 }
-        
-async function analyzeReportsWithAI() {
-    try {
-        addAIMessage("Analyzing reports... Please wait.", 'ai');
 
-        const reports = await fetchReportsForAI();
-        if (reports.length === 0) {
-            showAlert('No reports found to analyze', 'warning');
-            addAIMessage("No reports found to analyze.", 'ai');
-            return;
-        }
-        
-        const prompt = `Analyze these reports and provide key insights:
-            ${reports.map(r => `- ${r.title} (${r.status}): ${r.description.substring(0, 100)}...`).join('\n')}
-            
-            Please identify trends, anomalies, and provide recommendations.`;
-        
-        addAIMessage("Reports fetched. Sending to AI for analysis...", 'ai');
-        
-        const response = await callGeminiAPI(prompt);
-        
-        // Push AI response to chat
-        addAIMessage("AI Analysis complete:\n\n" + response, 'ai');
-    } catch (error) {
-        console.error('AI Analysis Error:', error);
-        showAlert('Failed to analyze reports', 'danger');
-        addAIMessage("Failed to analyze reports. Please try again.", 'ai');
-    }
-}
-
+// Context-aware data summarization
 async function summarizeDataWithAI() {
     try {
-        const reports = await fetchReportsForAI();
-        if (reports.length === 0) {
+        // Get comprehensive context
+        const userContext = await getUserContext();
+        const reportContext = await getReportContext();
+        const activityContext = await getRecentActivityContext();
+        
+        if (!reportContext || reportContext.length === 0) {
             showAlert('No reports found to summarize', 'warning');
             return;
         }
         
-        const prompt = `Summarize the key points from these reports:
-            ${reports.map(r => `- ${r.title}`).join('\n')}
+        const prompt = `Summarize the key points from these reports considering:
+            User Role: ${userContext?.role || 'standard'}
+            Recent Activity: ${activityContext?.map(a => a.action).join(', ') || 'none'}
             
-            Provide a concise summary highlighting the most important information.`;
+            Reports Data:
+            ${reportContext.map(r => `- ${r.title}`).join('\n')}
+            
+            Provide:
+            1. A concise executive summary
+            2. Key metrics and statistics
+            3. Important deadlines or follow-ups
+            4. Recommendations for next steps`;
             
         const response = await callGeminiAPI(prompt);
         addAIMessage(response, 'ai');
     } catch (error) {
         console.error('AI Summary Error:', error);
         showAlert('Failed to summarize data', 'danger');
-    }
-}
-
-async function fetchTemplatesForAI() {
-    try {
-        const response = await fetch(`${API_BASE_URL}/templates`, {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-        });
-        
-        if (!response.ok) throw new Error('Failed to fetch templates');
-        return await response.json();
-    } catch (error) {
-        console.error('Error fetching templates for AI:', error);
-        return [];
-    }
-}
-
-async function fetchReportsForAI() {
-    try {
-        const response = await fetch(`${API_BASE_URL}/reports`, {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-        });
-        
-        if (!response.ok) throw new Error('Failed to fetch reports');
-        return await response.json();
-    } catch (error) {
-        console.error('Error fetching reports for AI:', error);
-        return [];
     }
 }
 
