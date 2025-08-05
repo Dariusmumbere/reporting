@@ -7380,7 +7380,7 @@ function deleteField(index) {
 }
 
 // Save template to API
-function saveTemplate() {
+async function saveTemplate() {
     const name = document.getElementById('template-name').value.trim();
     const description = document.getElementById('template-description').value.trim();
     const category = document.getElementById('template-category').value.trim();
@@ -7399,11 +7399,29 @@ function saveTemplate() {
     document.getElementById('save-template-text').textContent = 'Saving...';
     document.getElementById('save-template-spinner').classList.remove('hidden');
     
+    // Prepare the template data
     const templateData = {
         name,
         description: description || null,
         category: category || null,
-        fields: currentTemplateFields
+        fields: currentTemplateFields.map(field => {
+            // Format options properly for the backend
+            let options = field.options;
+            if (options && typeof options === 'string') {
+                options = options.split('\n').map(o => o.trim()).filter(o => o);
+            }
+            
+            return {
+                name: field.name,
+                label: field.label,
+                field_type: field.field_type,
+                required: field.required || false,
+                placeholder: field.placeholder || null,
+                default_value: field.default_value || null,
+                order: field.order || 0,
+                options: options || null
+            };
+        })
     };
     
     const method = currentTemplateId ? 'PUT' : 'POST';
@@ -7411,34 +7429,31 @@ function saveTemplate() {
         `${API_BASE_URL}/templates/${currentTemplateId}` : 
         `${API_BASE_URL}/templates`;
     
-    fetch(url, {
-        method,
-        headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(templateData)
-    })
-    .then(response => {
+    try {
+        const response = await fetch(url, {
+            method,
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(templateData)
+        });
+        
         if (!response.ok) {
-            return response.json().then(err => {
-                throw new Error(err.detail || 'Failed to save template');
-            });
+            const errorData = await response.json();
+            throw new Error(errorData.detail || 'Failed to save template');
         }
-        return response.json();
-    })
-    .then(() => {
+        
         showAlert('Template saved successfully', 'success');
         document.getElementById('template-editor-modal').classList.remove('active');
         loadTemplates();
-    })
-    .catch(error => {
-        showAlert(error.message, 'danger');
-    })
-    .finally(() => {
+    } catch (error) {
+        console.error('Error saving template:', error);
+        showAlert(error.message || 'Failed to save template', 'danger');
+    } finally {
         document.getElementById('save-template-text').textContent = 'Save Template';
         document.getElementById('save-template-spinner').classList.add('hidden');
-    });
+    }
 }
 
 // Edit existing template
@@ -9177,10 +9192,12 @@ async function generateTemplateWithAI() {
             - fields: Array of fields with:
               - name: Field ID (snake_case)
               - label: Display name
-              - field_type: text/textarea/number/date/dropdown/checkbox
+              - field_type: One of [text, textarea, number, date, datetime, dropdown, checkbox, radio, file]
               - required: true/false
-              - options: For dropdown/checkbox fields
+              - options: For dropdown/checkbox/radio fields (array of values)
               - placeholder: Example text
+              - default_value: Default value
+              - order: Display order
               
             Example response (only the JSON part):
             {
@@ -9193,7 +9210,17 @@ async function generateTemplateWithAI() {
                         "label": "Total Revenue",
                         "field_type": "number",
                         "required": true,
-                        "placeholder": "Enter total revenue"
+                        "placeholder": "Enter total revenue",
+                        "default_value": "0",
+                        "order": 1
+                    },
+                    {
+                        "name": "report_period",
+                        "label": "Report Period",
+                        "field_type": "dropdown",
+                        "required": true,
+                        "options": ["Q1", "Q2", "Q3", "Q4"],
+                        "order": 2
                     }
                 ]
             }
@@ -9210,6 +9237,32 @@ async function generateTemplateWithAI() {
         
         // Parse JSON response
         const templateData = JSON.parse(cleanedResponse);
+        
+        // Validate and format the fields properly
+        if (templateData.fields && Array.isArray(templateData.fields)) {
+            templateData.fields = templateData.fields.map(field => {
+                // Ensure field_type is valid
+                const validTypes = ['text', 'textarea', 'number', 'date', 'datetime', 'dropdown', 'checkbox', 'radio', 'file'];
+                if (!validTypes.includes(field.field_type)) {
+                    field.field_type = 'text'; // Default to text if invalid
+                }
+                
+                // Convert options to proper format
+                if (field.options && !Array.isArray(field.options)) {
+                    if (typeof field.options === 'string') {
+                        field.options = field.options.split('\n').map(o => o.trim()).filter(o => o);
+                    } else {
+                        field.options = [];
+                    }
+                }
+                
+                // Ensure required fields are present
+                field.required = !!field.required;
+                field.order = field.order || 0;
+                
+                return field;
+            });
+        }
         
         // Open template editor with AI-generated template
         openTemplateEditor(templateData);
