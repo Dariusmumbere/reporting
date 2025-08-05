@@ -21,7 +21,7 @@
     background: #f8f9fa;
     border-radius: 8px;
     overflow: hidden;
-    position: relative; /* Added for proper layout */
+    position: relative;
 }
 
 /* Messages Container */
@@ -33,10 +33,12 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
-    /* Ensure messages start from bottom */
-    justify-content: flex-end;
-    min-height: 0; /* Important for flex scrolling */
+    /* Changed from justify-content: flex-end to allow natural scrolling */
+    min-height: 0;
+    /* Ensure messages don't get hidden behind fixed input */
+    padding-bottom: 80px; /* Adjust based on your input height */
 }
+
 
 /* Message Bubbles */
 .chatbot-message {
@@ -130,11 +132,13 @@
     border-top: 1px solid #e9ecef;
     gap: 8px;
     align-items: flex-end;
-    position: sticky;
+    position: absolute;
     bottom: 0;
+    left: 0;
+    right: 0;
     z-index: 10;
 }
-
+        
 .ai-input-container textarea {
     flex: 1;
     border: 1px solid #ced4da;
@@ -181,7 +185,13 @@
     flex-wrap: wrap;
     background: white;
     border-top: 1px solid #e9ecef;
+    position: absolute;
+    bottom: 72px; /* Height of input container */
+    left: 0;
+    right: 0;
+    z-index: 5;
 }
+
 
 .ai-tool-btn {
     background: white;
