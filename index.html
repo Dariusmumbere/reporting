@@ -8706,25 +8706,64 @@ function addUserMessage(text) {
 }
 
 function addBotMessage(text) {
-    const chatbotBox = document.getElementById('chatbot-box');
-    if (!chatbotBox) {
-        console.error('Chatbot box element not found');
+    const messageContainer = document.getElementById('ai-messages'); // Changed from chatbot-box
+    if (!messageContainer) {
+        console.error('AI messages container not found');
         return;
     }
 
     const messageDiv = document.createElement('div');
-    messageDiv.className = 'chatbot-message bot';
+    messageDiv.className = 'ai-message'; // Changed from chatbot-message bot
     
-    // Convert Markdown to HTML
-    let htmlText = text
+    // Create message structure to match your new design
+    messageDiv.innerHTML = `
+        <div class="ai-avatar">
+            <i class="fas fa-robot"></i>
+        </div>
+        <div class="ai-message-content">
+            ${convertMarkdownToHTML(text)}
+        </div>
+    `;
+    
+    messageContainer.appendChild(messageDiv);
+    scrollChatToBottom();
+}
+
+// Helper function for markdown conversion
+function convertMarkdownToHTML(text) {
+    return text
         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
         .replace(/\*(.*?)\*/g, '<em>$1</em>') // Italic
         .replace(/`(.*?)`/g, '<code>$1</code>') // Code
         .replace(/\n/g, '<br>'); // New lines
+}
+
+// Also update addUserMessage() if you have one
+function addUserMessage(text) {
+    const messageContainer = document.getElementById('ai-messages');
+    if (!messageContainer) return;
+
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'ai-message user-message';
     
-    messageDiv.innerHTML = htmlText;
-    chatbotBox.appendChild(messageDiv);
+    messageDiv.innerHTML = `
+        <div class="ai-avatar">
+            <i class="fas fa-user"></i>
+        </div>
+        <div class="ai-message-content">
+            ${text.replace(/\n/g, '<br>')}
+        </div>
+    `;
+    
+    messageContainer.appendChild(messageDiv);
     scrollChatToBottom();
+}
+
+function scrollChatToBottom() {
+    const container = document.getElementById('ai-messages');
+    if (container) {
+        container.scrollTop = container.scrollHeight;
+    }
 }
 
 function showTypingIndicator() {
