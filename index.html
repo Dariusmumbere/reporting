@@ -2936,27 +2936,59 @@
     </div>
 
     <div class="chatbot-container">
+        <!-- Chat Header with AI Tools -->
+        <div class="chatbot-header">
+            <div class="ai-tools-container">
+                <button class="ai-tool-btn" id="ai-analyze-reports">
+                    <i class="fas fa-chart-bar"></i> Analyze Reports
+                </button>
+                <button class="ai-tool-btn" id="ai-generate-template">
+                    <i class="fas fa-file-alt"></i> Generate Template
+                </button>
+                <button class="ai-tool-btn" id="ai-summarize-data">
+                    <i class="fas fa-comment-alt"></i> Summarize Data
+                </button>
+            </div>
+        </div>
+        
         <!-- Chat Box -->
         <div id="chatbot-box" class="chatbot-messages">
-            <!-- Initial message will be added by JavaScript -->
+            <div class="ai-welcome-message">
+                <div class="ai-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="ai-message-content">
+                    <h4>Hello! I'm your AI reporting assistant</h4>
+                    <p>How can I help you with your reports today? Try asking:</p>
+                    <ul class="ai-suggestions">
+                        <li>"Help me analyze last quarter's financial reports"</li>
+                        <li>"Create a template for weekly status reports"</li>
+                        <li>"Summarize the most common report categories"</li>
+                    </ul>
+                </div>
+            </div>
         </div>
 
         <!-- Input Container -->
         <div class="chatbot-input-container">
             <form id="chatbot-form" class="chatbot-form">
-                <input
-                    type="text"
-                    id="chatbot-input"
-                    placeholder="Ask me anything..."
-                    class="chatbot-input"
-                />
-                <button
-                    type="submit"
-                    id="chatbot-send-button"
-                    class="chatbot-send-button"
-                >
-                    <i class="fas fa-paper-plane"></i>
-                </button>
+                <div class="input-group">
+                    <textarea
+                        type="text"
+                        id="chatbot-input"
+                        placeholder="Ask me anything about reports..."
+                        class="chatbot-input"
+                        rows="1"
+                    ></textarea>
+                    <button
+                        type="submit"
+                        id="chatbot-send-button"
+                        class="chatbot-send-button"
+                        disabled
+                    >
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
             </form>
         </div>
     </div>
