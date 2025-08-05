@@ -9310,7 +9310,7 @@ async function callGeminiAPI(prompt, context = '') {
         parts: [{ text: msg.content }]
     }));
     
-    const fullPrompt = `You are an expert reporting assistant and a general knowledge assistant for the ReportHub system. 
+    const fullPrompt = `You are an expert reporting assistant and a general knowledge assistant for the ReportHub system.If a user asks anything outside reporthub feel free to answer it, dont tie yourself only on reporthub
         Maintain context from previous messages in this conversation and provide helpful responses.
         
         Current user question: "${prompt}"
