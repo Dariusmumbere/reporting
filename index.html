@@ -7390,50 +7390,57 @@ async function saveTemplate() {
         return;
     }
     
-    // Prepare fields data
-    const fields = currentTemplateFields.map(field => {
-        const fieldData = {
-            name: field.name,
-            label: field.label,
-            field_type: field.field_type,
-            required: field.required,
-            order: field.order || 0,
-            placeholder: field.placeholder || null,
-            default_value: field.default_value || null
-        };
-        
-        // Only include options for relevant field types
-        if (["dropdown", "checkbox", "radio"].includes(field.field_type)) {
-            fieldData.options = field.options || [];
-        } else {
-            fieldData.options = null;
-        }
-        
-        return fieldData;
-    });
+    if (currentTemplateFields.length === 0) {
+        showAlert('Please add at least one field to the template', 'danger');
+        return;
+    }
     
     // Show loading state
     document.getElementById('save-template-text').textContent = 'Saving...';
     document.getElementById('save-template-spinner').classList.remove('hidden');
-    console.log("Submitting template data:", JSON.stringify(templateData, null, 2));
+    
+    // Process fields to ensure dropdown options are in correct format
+    const processedFields = currentTemplateFields.map(field => {
+        // Convert array options to {value: value} format if needed
+        if (field.options && Array.isArray(field.options)) {
+            const optionsDict = {};
+            field.options.forEach(option => {
+                optionsDict[option] = option;
+            });
+            return {
+                ...field,
+                options: optionsDict
+            };
+        }
+        return field;
+    });
+    
+    const templateData = {
+        name,
+        description: description || null,
+        category: category || null,
+        fields: processedFields
+    };
+    
+    console.log('Submitting template data:', templateData);
+    
+    const method = currentTemplateId ? 'PUT' : 'POST';
+    const url = currentTemplateId ? 
+        `${API_BASE_URL}/templates/${currentTemplateId}` : 
+        `${API_BASE_URL}/templates`;
+    
     try {
-        const response = await fetch(`${API_BASE_URL}/templates`, {
-            method: 'POST',
+        const response = await fetch(url, {
+            method,
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                name,
-                description,
-                category,
-                fields
-            })
+            body: JSON.stringify(templateData)
         });
         
         if (!response.ok) {
             const errorData = await response.json();
-            console.error('Validation errors:', errorData);
             throw new Error(errorData.detail || 'Failed to save template');
         }
         
@@ -7441,8 +7448,8 @@ async function saveTemplate() {
         document.getElementById('template-editor-modal').classList.remove('active');
         loadTemplates();
     } catch (error) {
-        console.error('Save template error:', error);
-        showAlert(error.message || 'Failed to save template. Please check all fields.', 'danger');
+        console.error('Error saving template:', error);
+        showAlert(error.message, 'danger');
     } finally {
         document.getElementById('save-template-text').textContent = 'Save Template';
         document.getElementById('save-template-spinner').classList.add('hidden');
