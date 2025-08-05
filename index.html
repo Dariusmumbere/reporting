@@ -8769,6 +8769,12 @@ function addUserMessage(text) {
 }
 
 function addBotMessage(text) {
+    const chatbotBox = document.getElementById('chatbot-box');
+    if (!chatbotBox) {
+        console.error('Chatbot box element not found');
+        return;
+    }
+
     const messageDiv = document.createElement('div');
     messageDiv.className = 'chatbot-message bot';
     
@@ -8780,7 +8786,7 @@ function addBotMessage(text) {
         .replace(/\n/g, '<br>'); // New lines
     
     messageDiv.innerHTML = htmlText;
-    document.getElementById('chatbot-box').appendChild(messageDiv);
+    chatbotBox.appendChild(messageDiv);
     scrollChatToBottom();
 }
 
