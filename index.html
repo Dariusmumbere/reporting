@@ -5076,17 +5076,7 @@ function setupUIForUser() {
         } else {
             view.classList.add('hidden');
         }
-        const pageHeader = document.querySelector(`#${viewId}-view .page-header`);
-    if (pageHeader && !pageHeader.querySelector('.ai-help-btn')) {
-        const helpBtn = document.createElement('button');
-        helpBtn.className = 'ai-help-btn';
-        helpBtn.innerHTML = '<i class="fas fa-question-circle"></i> AI Help';
-        helpBtn.addEventListener('click', () => {
-            showContextualHelp(viewId);
-        });
-        pageHeader.appendChild(helpBtn);
-    }
-    
+       
     });
     
     // Close sidebar on mobile
@@ -5094,50 +5084,7 @@ function setupUIForUser() {
         sidebar.classList.remove('active');
     }
 }
-async function showContextualHelp(viewId) {
-    const viewTitles = {
-        'dashboard': 'Reporting Dashboard',
-        'reports': 'Reports Management',
-        'chat': 'Team Messaging',
-        'users': 'User Management',
-        'settings': 'System Settings',
-        'export': 'Data Export'
-    };
-    
-    try {
-        const prompt = `Provide a concise help guide for the "${viewTitles[viewId]}" section of a reporting application. 
-            Include 3-5 key tips or frequently asked questions with brief answers. 
-            Format as HTML with <h3> for questions and <p> for answers.`;
-            
-        const response = await callGeminiAPI(prompt);
-        
-        // Show in modal
-        const modal = document.createElement('div');
-        modal.className = 'modal active';
-        modal.innerHTML = `
-            <div class="modal-content" style="max-width: 600px;">
-                <div class="modal-header">
-                    <h3 class="modal-title">AI Help: ${viewTitles[viewId]}</h3>
-                    <button class="modal-close" id="close-ai-help">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="ai-help-content">${response}</div>
-                </div>
-            </div>
-        `;
-        
-        document.body.appendChild(modal);
-        document.getElementById('close-ai-help').addEventListener('click', () => {
-            modal.remove();
-        });
-        
-    } catch (error) {
-        console.error('AI Help Error:', error);
-        showAlert('Failed to load AI help', 'danger');
-    }
-}
+
 async function loadTemplatesForExport() {
     try {
         const response = await fetch(`${API_BASE_URL}/templates`, {
