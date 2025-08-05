@@ -8946,6 +8946,9 @@ async function fetchWithBackoff(url, options, retries = 3, delay = 1000) {
         throw error;
     }
 }
+// Global variable to maintain conversation history
+let conversationHistory = [];
+
 function initChatbot() {
     const chatbotView = document.getElementById('chatbot-view');
     chatbotView.innerHTML = `
@@ -8996,11 +8999,20 @@ function initChatbot() {
                         <button class="ai-tool-btn" id="ai-summarize-data">
                             <i class="fas fa-comment-alt"></i> Summarize Data
                         </button>
+                        <button class="ai-tool-btn" id="ai-clear-conversation">
+                            <i class="fas fa-trash-alt"></i> Clear Chat
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
     `;
+
+    // Initialize conversation history
+    conversationHistory = [{
+        role: "ai",
+        content: "Hello! I'm your AI reporting assistant. How can I help you today?"
+    }];
 
     // Set up event listeners
     document.getElementById('ai-send-btn').addEventListener('click', handleAIPrompt);
@@ -9022,6 +9034,29 @@ function initChatbot() {
     document.getElementById('ai-summarize-data').addEventListener('click', () => {
         summarizeDataWithAI();
     });
+    
+    document.getElementById('ai-clear-conversation').addEventListener('click', () => {
+        clearConversation();
+    });
+}
+
+function clearConversation() {
+    const messagesContainer = document.getElementById('chatbot-box');
+    messagesContainer.innerHTML = `
+        <div class="chatbot-message ai-message">
+            <div class="chat-avatar">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div class="chat-message-content">
+                <p>Hello! I'm your AI reporting assistant. How can I help you today?</p>
+            </div>
+        </div>
+    `;
+    
+    conversationHistory = [{
+        role: "ai",
+        content: "Hello! I'm your AI reporting assistant. How can I help you today?"
+    }];
 }
 
 // Handle AI prompts with enhanced context awareness
@@ -9031,8 +9066,13 @@ async function handleAIPrompt() {
     
     if (!prompt) return;
     
-    // Add user message to chat
+    // Add user message to chat and history
     addAIMessage(prompt, 'user');
+    conversationHistory.push({
+        role: "user",
+        content: prompt
+    });
+    
     promptInput.value = '';
     
     // Show loading state
@@ -9042,12 +9082,23 @@ async function handleAIPrompt() {
         // Get enhanced context based on prompt
         const context = await getEnhancedAIContext(prompt);
         
-        // Call Gemini API with context
+        // Call Gemini API with context and conversation history
         const response = await callGeminiAPI(prompt, context);
         
         // Update loading message with actual response
         loadingMessage.querySelector('.chat-message-content').innerHTML = formatAIResponse(response);
         loadingMessage.classList.remove('loading');
+        
+        // Add AI response to conversation history
+        conversationHistory.push({
+            role: "ai",
+            content: response
+        });
+        
+        // Limit conversation history to last 10 messages to avoid token limits
+        if (conversationHistory.length > 10) {
+            conversationHistory = conversationHistory.slice(-10);
+        }
     } catch (error) {
         console.error('AI Error:', error);
         loadingMessage.querySelector('.chat-message-content').innerHTML = 
@@ -9060,6 +9111,9 @@ async function handleAIPrompt() {
 async function getEnhancedAIContext(prompt) {
     const lowerPrompt = prompt.toLowerCase();
     let context = '';
+    
+    // Add conversation history to context
+    context += `Conversation History:\n${conversationHistory.map(msg => `${msg.role}: ${msg.content}`).join('\n')}\n\n`;
     
     // Get user context
     const userContext = await getUserContext();
@@ -9214,24 +9268,33 @@ async function getRecentActivityContext() {
     }
 }
 
-// Call Gemini API with enhanced context handling
+// Call Gemini API with enhanced context handling and conversation history
 async function callGeminiAPI(prompt, context = '') {
     const apiKey = "AIzaSyAfGhtKkofAFP9NZqOB0MR3Fr0fUZYfiT0";
     const apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=" + apiKey;
     
-    const fullPrompt = `You are an expert reporting assistant and a general knowledge(you should reply appropriately and accurately to any question given to you even if out of context of reporthub system chatbot for the ReportHub system. 
-        The user is asking: "${prompt}"
+    // Format conversation history for the API
+    const historyForAPI = conversationHistory.map(msg => ({
+        role: msg.role === 'user' ? 'user' : 'model',
+        parts: [{ text: msg.content }]
+    }));
+    
+    const fullPrompt = `You are an expert reporting assistant and a general knowledge assistant for the ReportHub system. 
+        Maintain context from previous messages in this conversation and provide helpful responses.
         
-        Here is the current context:
+        Current user question: "${prompt}"
+        
+        Here is additional context:
         ${context || 'No additional context provided'}
         
-        Please provide a helpful, concise response considering:
-        1. The user's role and permissions
-        2. The current application state
-        3. Relevant reports/templates data
-        4. Recent user activity
-        
-        Format your response with appropriate markdown for readability.`;
+        Guidelines for your response:
+        1. Maintain context from the ongoing conversation
+        2. Consider the user's role and permissions
+        3. Be aware of the current application state
+        4. Reference relevant reports/templates when appropriate
+        5. Keep responses concise but thorough
+        6. Use markdown formatting for readability
+        7. If unsure, ask clarifying questions`;
     
     const response = await fetch(apiUrl, {
         method: 'POST',
@@ -9239,11 +9302,15 @@ async function callGeminiAPI(prompt, context = '') {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            contents: [{
-                parts: [{
-                    text: fullPrompt
-                }]
-            }]
+            contents: [
+                ...historyForAPI,
+                {
+                    role: "user",
+                    parts: [{
+                        text: fullPrompt
+                    }]
+                }
+            ]
         })
     });
     
@@ -9319,6 +9386,10 @@ function formatAIResponse(response) {
 async function analyzeReportsWithAI() {
     try {
         addAIMessage("Analyzing reports with context... Please wait.", 'ai');
+        conversationHistory.push({
+            role: "ai",
+            content: "Analyzing reports with context... Please wait."
+        });
 
         // Get comprehensive context
         const userContext = await getUserContext();
@@ -9328,6 +9399,10 @@ async function analyzeReportsWithAI() {
         if (!reportContext || reportContext.length === 0) {
             showAlert('No reports found to analyze', 'warning');
             addAIMessage("No reports found to analyze.", 'ai');
+            conversationHistory.push({
+                role: "ai",
+                content: "No reports found to analyze."
+            });
             return;
         }
         
@@ -9345,15 +9420,27 @@ async function analyzeReportsWithAI() {
             4. Relevant visualizations suggestions`;
         
         addAIMessage("Context gathered. Analyzing with AI...", 'ai');
+        conversationHistory.push({
+            role: "ai",
+            content: "Context gathered. Analyzing with AI..."
+        });
         
         const response = await callGeminiAPI(prompt);
         
-        // Push AI response to chat
+        // Push AI response to chat and history
         addAIMessage("AI Analysis complete:\n\n" + response, 'ai');
+        conversationHistory.push({
+            role: "ai",
+            content: "AI Analysis complete:\n\n" + response
+        });
     } catch (error) {
         console.error('AI Analysis Error:', error);
         showAlert('Failed to analyze reports', 'danger');
         addAIMessage("Failed to analyze reports. Please try again.", 'ai');
+        conversationHistory.push({
+            role: "ai",
+            content: "Failed to analyze reports. Please try again."
+        });
     }
 }
 
@@ -9363,6 +9450,13 @@ async function generateTemplateWithAI() {
     if (!userInput) return;
     
     try {
+        // Add to conversation history
+        addAIMessage(`User requested template generation: ${userInput}`, 'user');
+        conversationHistory.push({
+            role: "user",
+            content: `User requested template generation: ${userInput}`
+        });
+        
         // Get context for better template generation
         const userContext = await getUserContext();
         const templateContext = await getTemplateContext();
@@ -9416,18 +9510,36 @@ async function generateTemplateWithAI() {
             return field;
         });
         
+        // Add to conversation history
+        addAIMessage("Generated template specification:\n\n" + JSON.stringify(templateData, null, 2), 'ai');
+        conversationHistory.push({
+            role: "ai",
+            content: "Generated template specification:\n\n" + JSON.stringify(templateData, null, 2)
+        });
+        
         // Open template editor with the validated data
         openTemplateEditor(templateData);
         
     } catch (error) {
         console.error('AI Template Generation Error:', error);
         showAlert('Failed to generate template with AI. Please check the format and try again.', 'danger');
+        addAIMessage("Failed to generate template. Please try again with a different description.", 'ai');
+        conversationHistory.push({
+            role: "ai",
+            content: "Failed to generate template. Please try again with a different description."
+        });
     }
 }
 
 // Context-aware data summarization
 async function summarizeDataWithAI() {
     try {
+        addAIMessage("Summarizing data with context... Please wait.", 'ai');
+        conversationHistory.push({
+            role: "ai",
+            content: "Summarizing data with context... Please wait."
+        });
+
         // Get comprehensive context
         const userContext = await getUserContext();
         const reportContext = await getReportContext();
@@ -9435,6 +9547,11 @@ async function summarizeDataWithAI() {
         
         if (!reportContext || reportContext.length === 0) {
             showAlert('No reports found to summarize', 'warning');
+            addAIMessage("No reports found to summarize.", 'ai');
+            conversationHistory.push({
+                role: "ai",
+                content: "No reports found to summarize."
+            });
             return;
         }
         
@@ -9453,9 +9570,18 @@ async function summarizeDataWithAI() {
             
         const response = await callGeminiAPI(prompt);
         addAIMessage(response, 'ai');
+        conversationHistory.push({
+            role: "ai",
+            content: response
+        });
     } catch (error) {
         console.error('AI Summary Error:', error);
         showAlert('Failed to summarize data', 'danger');
+        addAIMessage("Failed to summarize data. Please try again.", 'ai');
+        conversationHistory.push({
+            role: "ai",
+            content: "Failed to summarize data. Please try again."
+        });
     }
 }
 
