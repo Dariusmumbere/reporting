@@ -9208,6 +9208,61 @@ async function generateTemplateWithAI() {
         showAlert('Failed to generate template with AI', 'danger');
     }
 }
+async function analyzeReportsWithAI() {
+    try {
+        const reports = await fetchReportsForAI();
+        if (reports.length === 0) {
+            showAlert('No reports found to analyze', 'warning');
+            return;
+        }
+        
+        const prompt = `Analyze these reports and provide key insights:
+            ${reports.map(r => `- ${r.title} (${r.status}): ${r.description.substring(0, 100)}...`).join('\n')}
+            
+            Please identify trends, anomalies, and provide recommendations.`;
+            
+        const response = await callGeminiAPI(prompt);
+        addBotMessage(response);
+    } catch (error) {
+        console.error('AI Analysis Error:', error);
+        showAlert('Failed to analyze reports', 'danger');
+    }
+}
+async function summarizeDataWithAI() {
+    try {
+        const reports = await fetchReportsForAI();
+        if (reports.length === 0) {
+            showAlert('No reports found to summarize', 'warning');
+            return;
+        }
+        
+        const prompt = `Summarize the key points from these reports:
+            ${reports.map(r => `- ${r.title}`).join('\n')}
+            
+            Provide a concise summary highlighting the most important information.`;
+            
+        const response = await callGeminiAPI(prompt);
+        addBotMessage(response);
+    } catch (error) {
+        console.error('AI Summary Error:', error);
+        showAlert('Failed to summarize data', 'danger');
+    }
+}
+async function fetchTemplatesForAI() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/templates`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        
+        if (!response.ok) throw new Error('Failed to fetch templates');
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching templates for AI:', error);
+        return [];
+    }
+}
         document.addEventListener('DOMContentLoaded', init);
     </script>
     
