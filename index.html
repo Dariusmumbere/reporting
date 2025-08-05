@@ -14,36 +14,211 @@
     <link rel="stylesheet" href="styles.css">
     
     <style>
-.ai-tools {
+/* Chatbot Container */
+.chatbot-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 180px);
+    background: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+/* Chat Header */
+.chatbot-header {
+    padding: 15px 20px;
+    background: var(--primary-color);
+    color: white;
+}
+
+.ai-tools-container {
     display: flex;
     gap: 10px;
-    margin-top: 15px;
-    flex-wrap: wrap;
-    justify-content: center;
+    overflow-x: auto;
+    padding-bottom: 8px;
 }
 
 .ai-tool-btn {
-    padding: 8px 15px;
+    flex: 1 0 auto;
+    padding: 10px 15px;
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
     border-radius: 20px;
-    background-color: #f0f4f8;
-    border: 1px solid #d0d8e0;
-    color: #4361ee;
+    color: white;
     font-size: 14px;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s;
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 8px;
+    white-space: nowrap;
 }
 
 .ai-tool-btn:hover {
-    background-color: #4361ee;
-    color: white;
-    border-color: #4361ee;
+    background: rgba(255, 255, 255, 0.25);
 }
 
 .ai-tool-btn i {
-    font-size: 12px;
+    font-size: 16px;
+}
+
+/* Chat Messages */
+.chatbot-messages {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.ai-welcome-message {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.ai-avatar {
+    width: 36px;
+    height: 36px;
+    background: var(--primary-color);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.ai-message-content {
+    flex: 1;
+}
+
+.ai-message-content h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: var(--text-primary);
+}
+
+.ai-suggestions {
+    padding-left: 20px;
+    color: var(--text-secondary);
+    margin-bottom: 0;
+}
+
+.ai-suggestions li {
+    margin-bottom: 5px;
+}
+
+/* Message Bubbles */
+.chatbot-message {
+    display: flex;
+    gap: 12px;
+    max-width: 85%;
+}
+
+.user-message {
+    margin-left: auto;
+    flex-direction: row-reverse;
+}
+
+.user-message .message-content {
+    background: var(--primary-color);
+    color: white;
+    border-radius: 18px 18px 0 18px;
+}
+
+.bot-message .message-content {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border-radius: 18px 18px 18px 0;
+}
+
+.message-content {
+    padding: 12px 16px;
+    line-height: 1.5;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Input Area */
+.chatbot-input-container {
+    padding: 15px 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.chatbot-form {
+    display: flex;
+    gap: 10px;
+}
+
+.input-group {
+    display: flex;
+    flex: 1;
+    background: var(--bg-secondary);
+    border-radius: 24px;
+    padding: 8px 15px;
+    align-items: center;
+}
+
+.chatbot-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    resize: none;
+    max-height: 120px;
+    outline: none;
+    font-family: inherit;
+    color: var(--text-primary);
+}
+
+.chatbot-send-button {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+}
+
+.chatbot-send-button:disabled {
+    background: var(--text-tertiary);
+    cursor: not-allowed;
+}
+
+/* Typing Indicator */
+.typing-indicator {
+    display: flex;
+    gap: 5px;
+    padding: 10px 15px;
+}
+
+.typing-indicator span {
+    width: 8px;
+    height: 8px;
+    background: var(--text-secondary);
+    border-radius: 50%;
+    display: inline-block;
+    animation: typing 1s infinite ease-in-out;
+}
+
+.typing-indicator span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-indicator span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typing {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
 }
 /* Add this to your styles.css file or in a style tag */
 /* Chatbot Styles */
@@ -8824,102 +8999,66 @@ async function fetchWithBackoff(url, options, retries = 3, delay = 1000) {
 }
 
 
+// Initialize chatbot
 function initChatbot() {
-    const chatbotView = document.getElementById('chatbot-view');
-    chatbotView.innerHTML = `
-        <div class="page-header">
-            <h1 class="page-title">AI Assistant</h1>
-        </div>
-        
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">Ask the AI Assistant</h2>
-            </div>
-            <div class="card-body">
-                <div class="ai-assistant-container">
-    <div class="ai-messages" id="ai-messages">
-        <!-- Messages will appear here -->
-    </div>
-    
-    <!-- Move tools above input -->
-    <div class="ai-tools">
-        <button class="ai-tool-btn" id="ai-analyze-reports">
-            <i class="fas fa-chart-bar"></i> Analyze Reports
-        </button>
-        <button class="ai-tool-btn" id="ai-generate-template">
-            <i class="fas fa-file-alt"></i> Generate Template
-        </button>
-        <button class="ai-tool-btn" id="ai-summarize-data">
-            <i class="fas fa-comment-alt"></i> Summarize Data
-        </button>
-    </div>
-    
-    <div class="ai-input-container">
-        <textarea id="ai-prompt" placeholder="Ask the AI anything about your reports..." rows="2"></textarea>
-        <button id="ai-send-btn" class="btn btn-primary">
-            <i class="fas fa-paper-plane"></i>
-        </button>
-    </div>
-</div>
-                    
-                    <div class="ai-input-container">
-                        <textarea id="ai-prompt" placeholder="Ask the AI anything about your reports..." rows="2"></textarea>
-                        <button id="ai-send-btn" class="btn btn-primary">
-                            <i class="fas fa-paper-plane"></i>
-                        </button>
-                    </div>
-                    
-                    <div class="ai-tools">
-                        <button class="ai-tool-btn" id="ai-analyze-reports">
-                            <i class="fas fa-chart-bar"></i> Analyze Reports
-                        </button>
-                        <button class="ai-tool-btn" id="ai-generate-template">
-                            <i class="fas fa-file-alt"></i> Generate Template
-                        </button>
-                        <button class="ai-tool-btn" id="ai-summarize-data">
-                            <i class="fas fa-comment-alt"></i> Summarize Data
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
+    // Clear previous messages (except welcome)
+    const chatbotBox = document.getElementById('chatbot-box');
+    if (chatbotBox) {
+        const welcomeMessage = chatbotBox.querySelector('.ai-welcome-message');
+        chatbotBox.innerHTML = '';
+        if (welcomeMessage) {
+            chatbotBox.appendChild(welcomeMessage);
+        }
+    }
 
     // Set up event listeners
-    document.getElementById('ai-send-btn').addEventListener('click', handleAIPrompt);
-    document.getElementById('ai-prompt').addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
+    const chatbotForm = document.getElementById('chatbot-form');
+    const chatbotInput = document.getElementById('chatbot-input');
+    const sendButton = document.getElementById('chatbot-send-button');
+    const clearButton = document.getElementById('clear-chat');
+
+    if (chatbotInput && sendButton) {
+        chatbotInput.addEventListener('input', function() {
+            sendButton.disabled = this.value.trim() === '';
+            // Auto-resize textarea
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+    }
+
+    if (chatbotForm) {
+        chatbotForm.addEventListener('submit', function(e) {
             e.preventDefault();
             handleAIPrompt();
-        }
-    });
-    
-    document.getElementById('ai-analyze-reports').addEventListener('click', () => {
-        analyzeReportsWithAI();
-    });
-    
-    document.getElementById('ai-generate-template').addEventListener('click', () => {
-        generateTemplateWithAI();
-    });
-    
-    document.getElementById('ai-summarize-data').addEventListener('click', () => {
-        summarizeDataWithAI();
-    });
+        });
+    }
+
+    if (clearButton) {
+        clearButton.addEventListener('click', function() {
+            initChatbot(); // Re-initialize to clear chat
+        });
+    }
+
+    // Set up AI tool buttons
+    document.getElementById('ai-analyze-reports')?.addEventListener('click', analyzeReportsWithAI);
+    document.getElementById('ai-generate-template')?.addEventListener('click', generateTemplateWithAI);
+    document.getElementById('ai-summarize-data')?.addEventListener('click', summarizeDataWithAI);
 }
 
 // Handle AI prompts
 async function handleAIPrompt() {
-    const promptInput = document.getElementById('ai-prompt');
-    const prompt = promptInput.value.trim();
+    const chatbotInput = document.getElementById('chatbot-input');
+    const prompt = chatbotInput?.value.trim();
     
-    if (!prompt) return;
+    if (!prompt || !chatbotInput) return;
     
     // Add user message to chat
     addAIMessage(prompt, 'user');
-    promptInput.value = '';
+    chatbotInput.value = '';
+    document.getElementById('chatbot-send-button').disabled = true;
     
-    // Show loading state
-    const loadingMessage = addAIMessage('Thinking...', 'ai', true);
+    // Show typing indicator
+    const typingIndicator = showTypingIndicator();
     
     try {
         // Get relevant data based on prompt
@@ -8928,140 +9067,83 @@ async function handleAIPrompt() {
         // Call Gemini API
         const response = await callGeminiAPI(prompt, context);
         
-        // Update loading message with actual response
-        loadingMessage.querySelector('.ai-message-content').innerHTML = formatAIResponse(response);
-        loadingMessage.classList.remove('loading');
+        // Remove typing indicator and add bot response
+        removeTypingIndicator(typingIndicator);
+        addAIMessage(response, 'bot');
     } catch (error) {
         console.error('AI Error:', error);
-        loadingMessage.querySelector('.ai-message-content').innerHTML = 
-            `<p>Sorry, I encountered an error processing your request. Please try again.</p>`;
-        loadingMessage.classList.remove('loading');
+        removeTypingIndicator(typingIndicator);
+        addAIMessage("Sorry, I encountered an error processing your request. Please try again.", 'bot');
     }
 }
 
-// Call Gemini API
-async function callGeminiAPI(prompt, context = '') {
-    const apiKey = "AIzaSyAfGhtKkofAFP9NZqOB0MR3Fr0fUZYfiT0";
-    const apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=" + apiKey;
+// Show typing indicator
+function showTypingIndicator() {
+    const chatbotBox = document.getElementById('chatbot-box');
+    if (!chatbotBox) return null;
     
-    const fullPrompt = `You are an expert reporting assistant for the ReportHub system. 
-        The user is asking: "${prompt}"
-        ${context ? `Here is some relevant context:\n${context}` : ''}
-        Please provide a helpful, concise response.`;
-    
-    const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            contents: [{
-                parts: [{
-                    text: fullPrompt
-                }]
-            }]
-        })
-    });
-    
-    if (!response.ok) {
-        throw new Error('AI API request failed');
-    }
-    
-    const data = await response.json();
-    return data.candidates[0].content.parts[0].text;
-}
-
-// Get relevant context for AI based on prompt
-async function getAIContext(prompt) {
-    const lowerPrompt = prompt.toLowerCase();
-    let context = '';
-    
-    // If asking about reports, fetch recent reports data
-    if (lowerPrompt.includes('report') || lowerPrompt.includes('data') || lowerPrompt.includes('analyze')) {
-        const reports = await fetchReportsForAI();
-        if (reports.length > 0) {
-            context += `Recent Reports Data:\n`;
-            context += reports.map(r => 
-                `- ${r.title} (${r.status}): ${r.description.substring(0, 100)}...`
-            ).join('\n');
-        }
-    }
-    
-    // If asking about templates, fetch templates data
-    if (lowerPrompt.includes('template') || lowerPrompt.includes('form')) {
-        const templates = await fetchTemplatesForAI();
-        if (templates.length > 0) {
-            context += `\n\nAvailable Templates:\n`;
-            context += templates.map(t => 
-                `- ${t.name} (${t.category}): ${t.fields.length} fields`
-            ).join('\n');
-        }
-    }
-    
-    return context;
-}
-
-// Add message to AI chat
-// Add AI/User message to chatbot with markdown rendering and avatar
-function addAIMessage(content, sender = 'ai', isLoading = false) {
-    const messagesContainer = document.getElementById('chatbot-box');
-    if (!messagesContainer) {
-        console.error("Chat container with ID 'chatbot-box' not found.");
-        return;
-    }
-
-    const messageElement = document.createElement('div');
-    messageElement.className = `chatbot-message ${sender}-message ${isLoading ? 'loading' : ''}`;
-
-    // Convert Markdown to HTML for AI messages
-    let formattedContent = content;
-    if (sender === 'ai') {
-        formattedContent = content
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')   // Bold
-            .replace(/\*(.*?)\*/g, '<em>$1</em>')               // Italic
-            .replace(/`(.*?)`/g, '<code>$1</code>')             // Inline code
-            .replace(/\n/g, '<br>');                             // Line breaks
-    } else {
-        // Escape HTML for user messages to prevent XSS
-        formattedContent = `<p>${escapeHTML(content)}</p>`;
-    }
-
-    messageElement.innerHTML = `
-        <div class="chat-avatar">
-            ${sender === 'ai' ? '<i class="fas fa-robot"></i>' : '<i class="fas fa-user"></i>'}
+    const typingDiv = document.createElement('div');
+    typingDiv.className = 'chatbot-message bot-message';
+    typingDiv.innerHTML = `
+        <div class="ai-avatar">
+            <i class="fas fa-robot"></i>
         </div>
-        <div class="chat-message-content">${formattedContent}</div>
+        <div class="message-content typing-indicator">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
     `;
-
-    messagesContainer.appendChild(messageElement);
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
-
-    return messageElement;
+    
+    chatbotBox.appendChild(typingDiv);
+    chatbotBox.scrollTop = chatbotBox.scrollHeight;
+    return typingDiv;
 }
 
-// Utility to escape HTML special characters in user messages
-function escapeHTML(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+// Remove typing indicator
+function removeTypingIndicator(typingIndicator) {
+    if (typingIndicator && typingIndicator.parentNode) {
+        typingIndicator.remove();
+    }
 }
 
+// Add message to chat
+function addAIMessage(content, sender = 'bot') {
+    const chatbotBox = document.getElementById('chatbot-box');
+    if (!chatbotBox) return;
 
-// Format AI response with markdown support
-function formatAIResponse(response) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `chatbot-message ${sender}-message`;
+    
+    messageDiv.innerHTML = `
+        <div class="ai-avatar">
+            <i class="fas ${sender === 'bot' ? 'fa-robot' : 'fa-user'}"></i>
+        </div>
+        <div class="message-content">
+            ${formatAIResponse(content)}
+        </div>
+    `;
+    
+    chatbotBox.appendChild(messageDiv);
+    chatbotBox.scrollTop = chatbotBox.scrollHeight;
+}
+
+// Format AI response
+function formatAIResponse(text) {
     // Convert markdown to HTML
-    let html = response
+    let html = text
         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // bold
         .replace(/\*(.*?)\*/g, '<em>$1</em>') // italic
         .replace(/`(.*?)`/g, '<code>$1</code>') // code
         .replace(/\n/g, '<br>'); // line breaks
     
-    // Detect lists and format them
-    html = html.replace(/(\d+\.\s+.*(\n|$))/g, '<ol><li>$1</li></ol>');
-    html = html.replace(/(-\s+.*(\n|$))/g, '<ul><li>$1</li></ul>');
+    // Detect lists
+    html = html.replace(/^\s*-\s+(.*)$/gm, '<li>$1</li>');
+    html = html.replace(/<li>.*<\/li>/g, '<ul>$&</ul>');
     
     return html;
 }
+        
 function openAIReportAssistant() {
     const modal = document.createElement('div');
     modal.className = 'modal active';
