@@ -5076,11 +5076,66 @@ function setupUIForUser() {
         } else {
             view.classList.add('hidden');
         }
+        const pageHeader = document.querySelector(`#${viewId}-view .page-header`);
+    if (pageHeader && !pageHeader.querySelector('.ai-help-btn')) {
+        const helpBtn = document.createElement('button');
+        helpBtn.className = 'ai-help-btn';
+        helpBtn.innerHTML = '<i class="fas fa-question-circle"></i> AI Help';
+        helpBtn.addEventListener('click', () => {
+            showContextualHelp(viewId);
+        });
+        pageHeader.appendChild(helpBtn);
+    }
+    
     });
     
     // Close sidebar on mobile
     if (window.innerWidth < 768) {
         sidebar.classList.remove('active');
+    }
+}
+async function showContextualHelp(viewId) {
+    const viewTitles = {
+        'dashboard': 'Reporting Dashboard',
+        'reports': 'Reports Management',
+        'chat': 'Team Messaging',
+        'users': 'User Management',
+        'settings': 'System Settings',
+        'export': 'Data Export'
+    };
+    
+    try {
+        const prompt = `Provide a concise help guide for the "${viewTitles[viewId]}" section of a reporting application. 
+            Include 3-5 key tips or frequently asked questions with brief answers. 
+            Format as HTML with <h3> for questions and <p> for answers.`;
+            
+        const response = await callGeminiAPI(prompt);
+        
+        // Show in modal
+        const modal = document.createElement('div');
+        modal.className = 'modal active';
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width: 600px;">
+                <div class="modal-header">
+                    <h3 class="modal-title">AI Help: ${viewTitles[viewId]}</h3>
+                    <button class="modal-close" id="close-ai-help">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="ai-help-content">${response}</div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        document.getElementById('close-ai-help').addEventListener('click', () => {
+            modal.remove();
+        });
+        
+    } catch (error) {
+        console.error('AI Help Error:', error);
+        showAlert('Failed to load AI help', 'danger');
     }
 }
 async function loadTemplatesForExport() {
@@ -5119,86 +5174,147 @@ async function loadTemplatesForExport() {
 async function handleExportSubmit(e) {
     e.preventDefault();
     
+    // Get export parameters
     const templateId = document.getElementById('export-template').value;
     const dateRange = document.getElementById('export-date-range').value;
     const status = document.getElementById('export-status').value;
     const format = document.getElementById('export-format').value;
-    
+    const useAI = document.getElementById('ai-enhance-export').checked;
+
     let startDate, endDate;
-    
+
     if (dateRange === 'custom') {
         startDate = document.getElementById('export-start-date').value;
         endDate = document.getElementById('export-end-date').value;
-        
+
         if (!startDate || !endDate) {
             showAlert('Please select both start and end dates for custom range', 'danger');
             return;
         }
     }
-    
+
     // Show loading state
     document.getElementById('export-btn-text').textContent = 'Generating...';
     document.getElementById('export-spinner').classList.remove('hidden');
     document.getElementById('export-submit-btn').disabled = true;
-    
+
     try {
-        // Build query parameters
-        const params = new URLSearchParams();
-        params.append('template_id', templateId);
-        params.append('format', format);
-        
-        if (dateRange !== 'all' && dateRange !== 'custom') {
-            params.append('date_range', dateRange);
-        }
-        
-        if (dateRange === 'custom') {
-            params.append('start_date', startDate);
-            params.append('end_date', endDate);
-        }
-        
-        if (status !== 'all') {
-            params.append('status', status);
-        }
-        
-        // Trigger export
-        const response = await fetch(`${API_BASE_URL}/export/reports?${params.toString()}`, {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
+        if (useAI) {
+            // Build query for AI export
+            const params = new URLSearchParams();
+            params.append('template_id', templateId);
+            params.append('format', 'json'); // Fetch JSON for AI processing
+            if (dateRange !== 'all' && dateRange !== 'custom') params.append('date_range', dateRange);
+            if (dateRange === 'custom') {
+                params.append('start_date', startDate);
+                params.append('end_date', endDate);
             }
-        });
-        
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.detail || 'Failed to generate export');
-        }
-        
-        // Handle different response types
-        if (format === 'json') {
-            const data = await response.json();
-            downloadJSON(data, `reports_export_${new Date().toISOString().split('T')[0]}.json`);
+            if (status !== 'all') params.append('status', status);
+
+            const response = await fetch(`${API_BASE_URL}/export/reports?${params.toString()}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+
+            if (!response.ok) throw new Error('Failed to fetch export data');
+
+            const reports = await response.json();
+
+            // AI Analysis
+            const aiPrompt = `Analyze these reports and enhance the export with additional insights:
+            
+            Reports:
+            ${JSON.stringify(reports.slice(0, 5), null, 2)} [showing first 5 of ${reports.length}]
+            
+            Please add:
+            1. A summary section with key statistics
+            2. Trend analysis
+            3. Recommendations
+            4. Any anomalies detected
+            
+            Return in Markdown format suitable for inclusion in the export.`;
+
+            const aiResponse = await callGeminiAPI(aiPrompt);
+
+            const enhancedExport = {
+                reports,
+                aiAnalysis: aiResponse
+            };
+
+            // Download AI-enhanced export
+            if (format === 'json') {
+                downloadJSON(enhancedExport, `enhanced_reports_export_${new Date().toISOString().split('T')[0]}.json`);
+            } else if (format === 'csv') {
+                const content = convertToCSV(enhancedExport);
+                downloadFile(content, `enhanced_reports_export_${new Date().toISOString().split('T')[0]}.csv`);
+            } else if (format === 'pdf') {
+                const content = await generatePDF(enhancedExport);
+                downloadFile(content, `enhanced_reports_export_${new Date().toISOString().split('T')[0]}.pdf`);
+            } else if (format === 'excel') {
+                const content = await convertToExcel(enhancedExport);
+                downloadFile(content, `enhanced_reports_export_${new Date().toISOString().split('T')[0]}.xlsx`);
+            }
+
+            showAlert('AI-enhanced export generated successfully', 'success');
+
         } else {
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            
-            let extension;
-            switch(format) {
-                case 'excel': extension = 'xlsx'; break;
-                case 'csv': extension = 'csv'; break;
-                case 'pdf': extension = 'pdf'; break;
-                default: extension = 'file';
+            // Standard Export Logic
+            const params = new URLSearchParams();
+            params.append('template_id', templateId);
+            params.append('format', format);
+
+            if (dateRange !== 'all' && dateRange !== 'custom') {
+                params.append('date_range', dateRange);
             }
-            
-            a.download = `reports_export_${new Date().toISOString().split('T')[0]}.${extension}`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
+
+            if (dateRange === 'custom') {
+                params.append('start_date', startDate);
+                params.append('end_date', endDate);
+            }
+
+            if (status !== 'all') {
+                params.append('status', status);
+            }
+
+            const response = await fetch(`${API_BASE_URL}/export/reports?${params.toString()}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Failed to generate export');
+            }
+
+            if (format === 'json') {
+                const data = await response.json();
+                downloadJSON(data, `reports_export_${new Date().toISOString().split('T')[0]}.json`);
+            } else {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+
+                let extension;
+                switch (format) {
+                    case 'excel': extension = 'xlsx'; break;
+                    case 'csv': extension = 'csv'; break;
+                    case 'pdf': extension = 'pdf'; break;
+                    default: extension = 'file';
+                }
+
+                a.download = `reports_export_${new Date().toISOString().split('T')[0]}.${extension}`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            }
+
+            showAlert('Export generated successfully', 'success');
         }
-        
-        showAlert('Export generated successfully', 'success');
-        
+
     } catch (error) {
         console.error('Export error:', error);
         showAlert(error.message || 'Failed to generate export', 'danger');
@@ -5208,7 +5324,6 @@ async function handleExportSubmit(e) {
         document.getElementById('export-submit-btn').disabled = false;
     }
 }
-
 // Helper function to download JSON
 function downloadJSON(data, filename) {
     const jsonStr = JSON.stringify(data, null, 2);
@@ -6317,13 +6432,26 @@ async function viewReport(reportId) {
         },
         placeholder: 'Enter report description...'
     });
-    
+
     // Update hidden input with HTML content when editor changes
     quill.on('text-change', function() {
         document.getElementById('report-description').value = quill.root.innerHTML;
     });
-}
-        
+
+    // === AI Button Integration ===
+    // Add AI button handler
+    const toolbar = quill.getModule('toolbar');
+    toolbar.addHandler('ai', function() {
+        openAIReportAssistant();
+    });
+
+    // Insert AI button into toolbar
+    quill.getModule('toolbar').container.querySelector('.ql-formats').insertAdjacentHTML('beforeend', `
+        <button class="ql-ai" title="AI Assistant">
+            <i class="fas fa-robot"></i>
+        </button>
+    `);
+}        
         // Reset Quill editor when modal is closed
         document.getElementById('close-create-report-modal').addEventListener('click', resetQuillEditor);
         document.getElementById('cancel-create-report').addEventListener('click', resetQuillEditor);
@@ -7900,6 +8028,107 @@ async function loadDashboardData() {
             </tr>
         `;
     }
+    const pageActions = document.querySelector('#dashboard-view .page-actions');
+    if (pageActions && !pageActions.querySelector('#ai-analyze-dashboard')) {
+        const aiButton = document.createElement('button');
+        aiButton.className = 'btn btn-outline-primary';
+        aiButton.id = 'ai-analyze-dashboard';
+        aiButton.innerHTML = '<i class="fas fa-robot"></i> AI Analysis';
+        pageActions.appendChild(aiButton);
+        
+        aiButton.addEventListener('click', analyzeDashboardWithAI);
+    }
+}
+async function analyzeDashboardWithAI() {
+    try {
+        // Fetch dashboard data
+        const response = await fetch(`${API_BASE_URL}/dashboard`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        
+        if (!response.ok) throw new Error('Failed to fetch dashboard data');
+        
+        const dashboardData = await response.json();
+        
+        // Prepare data for AI
+        const dataSummary = `
+            Dashboard Statistics:
+            - Total Reports: ${dashboardData.counts.total}
+            - Pending: ${dashboardData.counts.pending}
+            - Approved: ${dashboardData.counts.approved}
+            - Rejected: ${dashboardData.counts.rejected}
+            
+            Recent Activity:
+            ${dashboardData.recentActivity.map(a => `- ${a.message}`).join('\n')}
+            
+            Categories:
+            ${dashboardData.categories.map(c => `- ${c.name}: ${c.count}`).join('\n')}
+        `;
+        
+        // Call AI
+        const prompt = `Analyze this reporting dashboard data and provide 3-5 key insights and recommendations:
+        
+        ${dataSummary}
+        
+        Respond with clear bullet points in this format:
+        - Insight: [your insight]
+        - Recommendation: [your recommendation]`;
+        
+        const aiResponse = await callGeminiAPI(prompt);
+        
+        // Show results in modal
+        const modal = document.createElement('div');
+        modal.className = 'modal active';
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width: 700px;">
+                <div class="modal-header">
+                    <h3 class="modal-title">AI Dashboard Analysis</h3>
+                    <button class="modal-close" id="close-ai-analysis">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="ai-analysis-result">
+                        <h4>Key Insights & Recommendations</h4>
+                        <div class="ai-analysis-content">${formatAIResponse(aiResponse)}</div>
+                    </div>
+                    <div class="ai-analysis-actions">
+                        <button class="btn btn-primary" id="ai-create-report-from-analysis">
+                            <i class="fas fa-file-alt"></i> Create Report from Analysis
+                        </button>
+                        <button class="btn btn-outline" id="ai-close-analysis">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Set up event listeners
+        document.getElementById('close-ai-analysis').addEventListener('click', () => {
+            modal.remove();
+        });
+        
+        document.getElementById('ai-close-analysis').addEventListener('click', () => {
+            modal.remove();
+        });
+        
+        document.getElementById('ai-create-report-from-analysis').addEventListener('click', () => {
+            modal.remove();
+            createReportModal.classList.add('active');
+            document.getElementById('report-title').value = 'Dashboard Analysis Report';
+            quill.root.innerHTML = `<h2>Dashboard Analysis</h2><p>${aiResponse.replace(/\n/g, '<br>')}</p>`;
+            document.getElementById('report-description').value = quill.root.innerHTML;
+        });
+        
+    } catch (error) {
+        console.error('AI Analysis Error:', error);
+        showAlert('Failed to perform AI analysis', 'danger');
+    }
 }
 // Update trend indicator with value and direction
 function updateTrendIndicator(elementId, trendData) {
@@ -8653,7 +8882,385 @@ async function fetchWithBackoff(url, options, retries = 3, delay = 1000) {
 
 // Initialize chatbot when the view is shown
 document.getElementById('chatbot-view')?.addEventListener('viewShown', initChatbot);
-        // Initialize the app
+function initChatbot() {
+    const chatbotView = document.getElementById('chatbot-view');
+    chatbotView.innerHTML = `
+        <div class="page-header">
+            <h1 class="page-title">AI Assistant</h1>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Ask the AI Assistant</h2>
+            </div>
+            <div class="card-body">
+                <div class="ai-assistant-container">
+                    <div class="ai-messages" id="ai-messages">
+                        <div class="ai-welcome-message">
+                            <div class="ai-avatar">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div class="ai-message-content">
+                                <p>Hello! I'm your AI reporting assistant. How can I help you today?</p>
+                                <div class="ai-quick-questions">
+                                    <p><strong>Try asking:</strong></p>
+                                    <ul>
+                                        <li>Help me analyze my recent reports</li>
+                                        <li>Generate a summary of last month's data</li>
+                                        <li>Create a financial report template</li>
+                                        <li>Find trends in my approval rates</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="ai-input-container">
+                        <textarea id="ai-prompt" placeholder="Ask the AI anything about your reports..." rows="2"></textarea>
+                        <button id="ai-send-btn" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="ai-tools">
+                        <button class="ai-tool-btn" id="ai-analyze-reports">
+                            <i class="fas fa-chart-bar"></i> Analyze Reports
+                        </button>
+                        <button class="ai-tool-btn" id="ai-generate-template">
+                            <i class="fas fa-file-alt"></i> Generate Template
+                        </button>
+                        <button class="ai-tool-btn" id="ai-summarize-data">
+                            <i class="fas fa-comment-alt"></i> Summarize Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Set up event listeners
+    document.getElementById('ai-send-btn').addEventListener('click', handleAIPrompt);
+    document.getElementById('ai-prompt').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleAIPrompt();
+        }
+    });
+    
+    document.getElementById('ai-analyze-reports').addEventListener('click', () => {
+        analyzeReportsWithAI();
+    });
+    
+    document.getElementById('ai-generate-template').addEventListener('click', () => {
+        generateTemplateWithAI();
+    });
+    
+    document.getElementById('ai-summarize-data').addEventListener('click', () => {
+        summarizeDataWithAI();
+    });
+}
+
+// Handle AI prompts
+async function handleAIPrompt() {
+    const promptInput = document.getElementById('ai-prompt');
+    const prompt = promptInput.value.trim();
+    
+    if (!prompt) return;
+    
+    // Add user message to chat
+    addAIMessage(prompt, 'user');
+    promptInput.value = '';
+    
+    // Show loading state
+    const loadingMessage = addAIMessage('Thinking...', 'ai', true);
+    
+    try {
+        // Get relevant data based on prompt
+        const context = await getAIContext(prompt);
+        
+        // Call Gemini API
+        const response = await callGeminiAPI(prompt, context);
+        
+        // Update loading message with actual response
+        loadingMessage.querySelector('.ai-message-content').innerHTML = formatAIResponse(response);
+        loadingMessage.classList.remove('loading');
+    } catch (error) {
+        console.error('AI Error:', error);
+        loadingMessage.querySelector('.ai-message-content').innerHTML = 
+            `<p>Sorry, I encountered an error processing your request. Please try again.</p>`;
+        loadingMessage.classList.remove('loading');
+    }
+}
+
+// Call Gemini API
+async function callGeminiAPI(prompt, context = '') {
+    const apiKey = "AIzaSyAfGhtKkofAFP9NZqOB0MR3Fr0fUZYfiT0";
+    const apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=" + apiKey;
+    
+    const fullPrompt = `You are an expert reporting assistant for the ReportHub system. 
+        The user is asking: "${prompt}"
+        ${context ? `Here is some relevant context:\n${context}` : ''}
+        Please provide a helpful, concise response.`;
+    
+    const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            contents: [{
+                parts: [{
+                    text: fullPrompt
+                }]
+            }]
+        })
+    });
+    
+    if (!response.ok) {
+        throw new Error('AI API request failed');
+    }
+    
+    const data = await response.json();
+    return data.candidates[0].content.parts[0].text;
+}
+
+// Get relevant context for AI based on prompt
+async function getAIContext(prompt) {
+    const lowerPrompt = prompt.toLowerCase();
+    let context = '';
+    
+    // If asking about reports, fetch recent reports data
+    if (lowerPrompt.includes('report') || lowerPrompt.includes('data') || lowerPrompt.includes('analyze')) {
+        const reports = await fetchReportsForAI();
+        if (reports.length > 0) {
+            context += `Recent Reports Data:\n`;
+            context += reports.map(r => 
+                `- ${r.title} (${r.status}): ${r.description.substring(0, 100)}...`
+            ).join('\n');
+        }
+    }
+    
+    // If asking about templates, fetch templates data
+    if (lowerPrompt.includes('template') || lowerPrompt.includes('form')) {
+        const templates = await fetchTemplatesForAI();
+        if (templates.length > 0) {
+            context += `\n\nAvailable Templates:\n`;
+            context += templates.map(t => 
+                `- ${t.name} (${t.category}): ${t.fields.length} fields`
+            ).join('\n');
+        }
+    }
+    
+    return context;
+}
+
+// Add message to AI chat
+function addAIMessage(content, sender, isLoading = false) {
+    const messagesContainer = document.getElementById('ai-messages');
+    const messageElement = document.createElement('div');
+    messageElement.className = `ai-message ${sender}-message ${isLoading ? 'loading' : ''}`;
+    
+    messageElement.innerHTML = `
+        <div class="ai-avatar">
+            ${sender === 'ai' ? '<i class="fas fa-robot"></i>' : '<i class="fas fa-user"></i>'}
+        </div>
+        <div class="ai-message-content">
+            ${sender === 'user' ? `<p>${content}</p>` : content}
+        </div>
+    `;
+    
+    messagesContainer.appendChild(messageElement);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    
+    return messageElement;
+}
+
+// Format AI response with markdown support
+function formatAIResponse(response) {
+    // Convert markdown to HTML
+    let html = response
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // bold
+        .replace(/\*(.*?)\*/g, '<em>$1</em>') // italic
+        .replace(/`(.*?)`/g, '<code>$1</code>') // code
+        .replace(/\n/g, '<br>'); // line breaks
+    
+    // Detect lists and format them
+    html = html.replace(/(\d+\.\s+.*(\n|$))/g, '<ol><li>$1</li></ol>');
+    html = html.replace(/(-\s+.*(\n|$))/g, '<ul><li>$1</li></ul>');
+    
+    return html;
+}
+function openAIReportAssistant() {
+    const modal = document.createElement('div');
+    modal.className = 'modal active';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 class="modal-title">AI Report Assistant</h3>
+                <button class="modal-close" id="close-ai-assistant">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">What kind of report would you like to create?</label>
+                    <textarea id="ai-report-prompt" class="form-control" 
+                        placeholder="Describe the report you want to create (e.g., 'A financial report for Q2 with revenue breakdown')" 
+                        rows="3"></textarea>
+                </div>
+                <div class="ai-report-options">
+                    <button class="btn btn-outline" id="ai-suggest-title">
+                        Suggest Title
+                    </button>
+                    <button class="btn btn-outline" id="ai-generate-description">
+                        Generate Description
+                    </button>
+                    <button class="btn btn-primary" id="ai-create-full-report">
+                        Create Full Report
+                    </button>
+                </div>
+                <div class="ai-result-container hidden" id="ai-report-result">
+                    <div class="ai-result-header">
+                        <h4>AI Suggestion</h4>
+                        <button class="btn btn-sm btn-outline" id="ai-apply-result">
+                            Apply to Report
+                        </button>
+                    </div>
+                    <div class="ai-result-content" id="ai-report-result-content"></div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Set up event listeners
+    document.getElementById('close-ai-assistant').addEventListener('click', () => {
+        modal.remove();
+    });
+    
+    document.getElementById('ai-suggest-title').addEventListener('click', async () => {
+        const prompt = document.getElementById('ai-report-prompt').value;
+        if (!prompt) {
+            showAlert('Please describe the report you want to create', 'danger');
+            return;
+        }
+        
+        const response = await callGeminiAPI(`Suggest a concise, professional title for a report about: ${prompt}`);
+        showAIResult(response, 'title');
+    });
+    
+    document.getElementById('ai-generate-description').addEventListener('click', async () => {
+        const prompt = document.getElementById('ai-report-prompt').value;
+        if (!prompt) {
+            showAlert('Please describe the report you want to create', 'danger');
+            return;
+        }
+        
+        const response = await callGeminiAPI(`Write a professional report description for a report about: ${prompt}. Include key sections that should be covered.`);
+        showAIResult(response, 'description');
+    });
+    
+    document.getElementById('ai-create-full-report').addEventListener('click', async () => {
+        const prompt = document.getElementById('ai-report-prompt').value;
+        if (!prompt) {
+            showAlert('Please describe the report you want to create', 'danger');
+            return;
+        }
+        
+        const response = await callGeminiAPI(`Create a full report outline about: ${prompt}. Include a title, detailed description, and suggested sections with bullet points for each. Format as HTML.`);
+        showAIResult(response, 'full');
+    });
+    
+    document.getElementById('ai-apply-result').addEventListener('click', () => {
+        const resultType = modal.dataset.resultType;
+        const content = document.getElementById('ai-report-result-content').innerHTML;
+        
+        if (resultType === 'title') {
+            document.getElementById('report-title').value = content;
+        } else if (resultType === 'description') {
+            quill.root.innerHTML = content;
+            document.getElementById('report-description').value = content;
+        } else if (resultType === 'full') {
+            // Parse the full report and apply parts
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(content, 'text/html');
+            
+            const title = doc.querySelector('h1')?.textContent || 
+                          doc.querySelector('h2')?.textContent || 
+                          doc.querySelector('strong')?.textContent || '';
+            
+            if (title) {
+                document.getElementById('report-title').value = title;
+            }
+            
+            const description = doc.querySelector('p')?.outerHTML || content;
+            quill.root.innerHTML = description;
+            document.getElementById('report-description').value = description;
+        }
+        
+        modal.remove();
+    });
+}
+
+// Show AI result in modal
+function showAIResult(content, type) {
+    const resultContainer = document.getElementById('ai-report-result');
+    const resultContent = document.getElementById('ai-report-result-content');
+    
+    resultContent.innerHTML = type === 'title' ? `<p>${content}</p>` : content;
+    resultContainer.classList.remove('hidden');
+    resultContainer.parentElement.dataset.resultType = type;
+}
+// Add AI template generation
+async function generateTemplateWithAI() {
+    const prompt = prompt('Describe the template you want to create (e.g., "A financial report template with sections for revenue, expenses, and profit")');
+    if (!prompt) return;
+    
+    try {
+        const aiResponse = await callGeminiAPI(`
+            Create a report template specification based on this description: ${prompt}
+            
+            Respond in JSON format with these fields:
+            - name: Template name
+            - description: Template description
+            - category: Template category
+            - fields: Array of fields with:
+              - name: Field ID (snake_case)
+              - label: Display name
+              - field_type: text/textarea/number/date/dropdown/checkbox
+              - required: true/false
+              - options: For dropdown/checkbox fields
+              - placeholder: Example text
+              
+            Example:
+            {
+                "name": "Financial Report",
+                "description": "Template for quarterly financial reports",
+                "category": "Finance",
+                "fields": [
+                    {
+                        "name": "revenue",
+                        "label": "Total Revenue",
+                        "field_type": "number",
+                        "required": true,
+                        "placeholder": "Enter total revenue"
+                    }
+                ]
+            }
+        `);
+        
+        // Parse JSON response
+        const templateData = JSON.parse(aiResponse.trim());
+        
+        // Open template editor with AI-generated template
+        openTemplateEditor(templateData);
+        
+    } catch (error) {
+        console.error('AI Template Generation Error:', error);
+        showAlert('Failed to generate template with AI', 'danger');
+    }
+}
         document.addEventListener('DOMContentLoaded', init);
     </script>
     
