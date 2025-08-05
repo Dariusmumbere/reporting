@@ -9263,6 +9263,21 @@ async function fetchTemplatesForAI() {
         return [];
     }
 }
+async function fetchReportsForAI() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/reports`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        
+        if (!response.ok) throw new Error('Failed to fetch reports');
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching reports for AI:', error);
+        return [];
+    }
+}
         document.addEventListener('DOMContentLoaded', init);
     </script>
     
