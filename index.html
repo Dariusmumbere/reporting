@@ -9210,9 +9210,12 @@ async function generateTemplateWithAI() {
 }
 async function analyzeReportsWithAI() {
     try {
+        addBotMessage("🤖 Analyzing reports... Please wait.");
+
         const reports = await fetchReportsForAI();
         if (reports.length === 0) {
             showAlert('No reports found to analyze', 'warning');
+            addBotMessage("⚠️ No reports found to analyze.");
             return;
         }
         
@@ -9220,14 +9223,20 @@ async function analyzeReportsWithAI() {
             ${reports.map(r => `- ${r.title} (${r.status}): ${r.description.substring(0, 100)}...`).join('\n')}
             
             Please identify trends, anomalies, and provide recommendations.`;
-            
+        
+        addBotMessage("📄 Reports fetched. Sending to AI for analysis...");
+        
         const response = await callGeminiAPI(prompt);
-        addBotMessage(response);
+        
+        // Push AI response to chat
+        addBotMessage("✅ AI Analysis complete:\n\n" + response);
     } catch (error) {
         console.error('AI Analysis Error:', error);
         showAlert('Failed to analyze reports', 'danger');
+        addBotMessage("❌ Failed to analyze reports. Please try again.");
     }
 }
+
 async function summarizeDataWithAI() {
     try {
         const reports = await fetchReportsForAI();
