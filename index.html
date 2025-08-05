@@ -5121,147 +5121,86 @@ async function loadTemplatesForExport() {
 async function handleExportSubmit(e) {
     e.preventDefault();
     
-    // Get export parameters
     const templateId = document.getElementById('export-template').value;
     const dateRange = document.getElementById('export-date-range').value;
     const status = document.getElementById('export-status').value;
     const format = document.getElementById('export-format').value;
-    const useAI = document.getElementById('ai-enhance-export').checked;
-
+    
     let startDate, endDate;
-
+    
     if (dateRange === 'custom') {
         startDate = document.getElementById('export-start-date').value;
         endDate = document.getElementById('export-end-date').value;
-
+        
         if (!startDate || !endDate) {
             showAlert('Please select both start and end dates for custom range', 'danger');
             return;
         }
     }
-
+    
     // Show loading state
     document.getElementById('export-btn-text').textContent = 'Generating...';
     document.getElementById('export-spinner').classList.remove('hidden');
     document.getElementById('export-submit-btn').disabled = true;
-
+    
     try {
-        if (useAI) {
-            // Build query for AI export
-            const params = new URLSearchParams();
-            params.append('template_id', templateId);
-            params.append('format', 'json'); // Fetch JSON for AI processing
-            if (dateRange !== 'all' && dateRange !== 'custom') params.append('date_range', dateRange);
-            if (dateRange === 'custom') {
-                params.append('start_date', startDate);
-                params.append('end_date', endDate);
-            }
-            if (status !== 'all') params.append('status', status);
-
-            const response = await fetch(`${API_BASE_URL}/export/reports?${params.toString()}`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            });
-
-            if (!response.ok) throw new Error('Failed to fetch export data');
-
-            const reports = await response.json();
-
-            // AI Analysis
-            const aiPrompt = `Analyze these reports and enhance the export with additional insights:
-            
-            Reports:
-            ${JSON.stringify(reports.slice(0, 5), null, 2)} [showing first 5 of ${reports.length}]
-            
-            Please add:
-            1. A summary section with key statistics
-            2. Trend analysis
-            3. Recommendations
-            4. Any anomalies detected
-            
-            Return in Markdown format suitable for inclusion in the export.`;
-
-            const aiResponse = await callGeminiAPI(aiPrompt);
-
-            const enhancedExport = {
-                reports,
-                aiAnalysis: aiResponse
-            };
-
-            // Download AI-enhanced export
-            if (format === 'json') {
-                downloadJSON(enhancedExport, `enhanced_reports_export_${new Date().toISOString().split('T')[0]}.json`);
-            } else if (format === 'csv') {
-                const content = convertToCSV(enhancedExport);
-                downloadFile(content, `enhanced_reports_export_${new Date().toISOString().split('T')[0]}.csv`);
-            } else if (format === 'pdf') {
-                const content = await generatePDF(enhancedExport);
-                downloadFile(content, `enhanced_reports_export_${new Date().toISOString().split('T')[0]}.pdf`);
-            } else if (format === 'excel') {
-                const content = await convertToExcel(enhancedExport);
-                downloadFile(content, `enhanced_reports_export_${new Date().toISOString().split('T')[0]}.xlsx`);
-            }
-
-            showAlert('AI-enhanced export generated successfully', 'success');
-
-        } else {
-            // Standard Export Logic
-            const params = new URLSearchParams();
-            params.append('template_id', templateId);
-            params.append('format', format);
-
-            if (dateRange !== 'all' && dateRange !== 'custom') {
-                params.append('date_range', dateRange);
-            }
-
-            if (dateRange === 'custom') {
-                params.append('start_date', startDate);
-                params.append('end_date', endDate);
-            }
-
-            if (status !== 'all') {
-                params.append('status', status);
-            }
-
-            const response = await fetch(`${API_BASE_URL}/export/reports?${params.toString()}`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.detail || 'Failed to generate export');
-            }
-
-            if (format === 'json') {
-                const data = await response.json();
-                downloadJSON(data, `reports_export_${new Date().toISOString().split('T')[0]}.json`);
-            } else {
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-
-                let extension;
-                switch (format) {
-                    case 'excel': extension = 'xlsx'; break;
-                    case 'csv': extension = 'csv'; break;
-                    case 'pdf': extension = 'pdf'; break;
-                    default: extension = 'file';
-                }
-
-                a.download = `reports_export_${new Date().toISOString().split('T')[0]}.${extension}`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                window.URL.revokeObjectURL(url);
-            }
-
-            showAlert('Export generated successfully', 'success');
+        // Build query parameters
+        const params = new URLSearchParams();
+        params.append('template_id', templateId);
+        params.append('format', format);
+        
+        if (dateRange !== 'all' && dateRange !== 'custom') {
+            params.append('date_range', dateRange);
         }
-
+        
+        if (dateRange === 'custom') {
+            params.append('start_date', startDate);
+            params.append('end_date', endDate);
+        }
+        
+        if (status !== 'all') {
+            params.append('status', status);
+        }
+        
+        // Trigger export
+        const response = await fetch(`${API_BASE_URL}/export/reports?${params.toString()}`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || 'Failed to generate export');
+        }
+        
+        // Handle different response types
+        if (format === 'json') {
+            const data = await response.json();
+            downloadJSON(data, `reports_export_${new Date().toISOString().split('T')[0]}.json`);
+        } else {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            
+            let extension;
+            switch(format) {
+                case 'excel': extension = 'xlsx'; break;
+                case 'csv': extension = 'csv'; break;
+                case 'pdf': extension = 'pdf'; break;
+                default: extension = 'file';
+            }
+            
+            a.download = `reports_export_${new Date().toISOString().split('T')[0]}.${extension}`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+        
+        showAlert('Export generated successfully', 'success');
+        
     } catch (error) {
         console.error('Export error:', error);
         showAlert(error.message || 'Failed to generate export', 'danger');
@@ -5271,6 +5210,7 @@ async function handleExportSubmit(e) {
         document.getElementById('export-submit-btn').disabled = false;
     }
 }
+
 // Helper function to download JSON
 function downloadJSON(data, filename) {
     const jsonStr = JSON.stringify(data, null, 2);
