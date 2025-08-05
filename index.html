@@ -14,6 +14,193 @@
     <link rel="stylesheet" href="styles.css">
     
     <style>
+/* Chatbot Container Styles */
+.ai-assistant-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: #f8f9fa;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* Messages Container */
+#chatbot-box {
+    flex: 1;
+    padding: 16px;
+    overflow-y: auto;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Message Bubbles */
+.chatbot-message {
+    display: flex;
+    max-width: 80%;
+    padding: 12px 16px;
+    border-radius: 18px;
+    line-height: 1.4;
+    position: relative;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* AI Message (Left) */
+.ai-message {
+    align-self: flex-start;
+    background: #f1f3f5;
+    border-bottom-left-radius: 4px;
+    color: #212529;
+    margin-right: auto;
+}
+
+/* User Message (Right) */
+.user-message {
+    align-self: flex-end;
+    background: #3b5bdb;
+    color: white;
+    border-bottom-right-radius: 4px;
+    margin-left: auto;
+}
+
+/* Loading State */
+.loading .chat-message-content::after {
+    content: "...";
+    display: inline-block;
+    animation: dots 1.5s infinite;
+}
+
+@keyframes dots {
+    0%, 20% { content: "."; }
+    40% { content: ".."; }
+    60%, 100% { content: "..."; }
+}
+
+/* Avatars */
+.chat-avatar {
+    margin-right: 12px;
+    font-size: 18px;
+    color: #495057;
+}
+
+.user-message .chat-avatar {
+    color: white;
+    margin-right: 0;
+    margin-left: 12px;
+    order: 1;
+}
+
+/* Message Content */
+.chat-message-content {
+    flex: 1;
+}
+
+.chat-message-content p {
+    margin: 0;
+}
+
+/* Quick Questions */
+.ai-quick-questions {
+    margin-top: 12px;
+    font-size: 14px;
+}
+
+.ai-quick-questions ul {
+    padding-left: 20px;
+    margin: 8px 0 0;
+}
+
+/* Input Container */
+.ai-input-container {
+    display: flex;
+    padding: 16px;
+    background: white;
+    border-top: 1px solid #e9ecef;
+    gap: 8px;
+    align-items: flex-end;
+}
+
+.ai-input-container textarea {
+    flex: 1;
+    border: 1px solid #ced4da;
+    border-radius: 20px;
+    padding: 10px 16px;
+    resize: none;
+    font-family: inherit;
+    font-size: 14px;
+    min-height: 44px;
+    max-height: 120px;
+    outline: none;
+    transition: border 0.2s;
+}
+
+.ai-input-container textarea:focus {
+    border-color: #3b5bdb;
+    box-shadow: 0 0 0 2px rgba(59, 91, 219, 0.1);
+}
+
+#ai-send-btn {
+    height: 44px;
+    width: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #3b5bdb;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+#ai-send-btn:hover {
+    background: #2f4ac0;
+}
+
+/* AI Tools */
+.ai-tools {
+    display: flex;
+    gap: 8px;
+    padding: 0 16px 16px;
+    flex-wrap: wrap;
+}
+
+.ai-tool-btn {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 13px;
+    color: #495057;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ai-tool-btn:hover {
+    background: #f1f3f5;
+    border-color: #dee2e6;
+}
+
+.ai-tool-btn i {
+    font-size: 14px;
+}
+
+/* Welcome Message */
+.ai-welcome-message {
+    background: #f1f3f5;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
 /* Add this to your styles.css file or in a style tag */
 /* Chatbot Styles */
 .chatbot-container {
