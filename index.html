@@ -9001,24 +9001,47 @@ async function getAIContext(prompt) {
 }
 
 // Add message to AI chat
-function addAIMessage(content, sender, isLoading = false) {
-    const messagesContainer = document.getElementById('ai-messages');
+function addAIMessage(content, sender = 'ai', isLoading = false) {
+    const messagesContainer = document.getElementById('chatbot-box');
+    if (!messagesContainer) {
+        console.error("Chat container with ID 'chatbot-box' not found.");
+        return;
+    }
+
     const messageElement = document.createElement('div');
-    messageElement.className = `ai-message ${sender}-message ${isLoading ? 'loading' : ''}`;
-    
+    messageElement.className = `chatbot-message ${sender}-message ${isLoading ? 'loading' : ''}`;
+
+    // Convert Markdown to HTML (AI messages only)
+    let formattedContent = content;
+    if (sender === 'ai') {
+        formattedContent = content
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
+            .replace(/\*(.*?)\*/g, '<em>$1</em>') // Italic
+            .replace(/`(.*?)`/g, '<code>$1</code>') // Inline code
+            .replace(/\n/g, '<br>'); // Line breaks
+    } else {
+        // Escape HTML for user messages to prevent injection
+        formattedContent = `<p>${escapeHTML(content)}</p>`;
+    }
+
     messageElement.innerHTML = `
-        <div class="ai-avatar">
+        <div class="chat-avatar">
             ${sender === 'ai' ? '<i class="fas fa-robot"></i>' : '<i class="fas fa-user"></i>'}
         </div>
-        <div class="ai-message-content">
-            ${sender === 'user' ? `<p>${content}</p>` : content}
-        </div>
+        <div class="chat-message-content">${formattedContent}</div>
     `;
-    
+
     messagesContainer.appendChild(messageElement);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    
+
     return messageElement;
+}
+
+// Utility: Escape HTML for user messages
+function escapeHTML(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 // Format AI response with markdown support
