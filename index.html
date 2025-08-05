@@ -7398,30 +7398,23 @@ async function saveTemplate() {
     // Show loading state
     document.getElementById('save-template-text').textContent = 'Saving...';
     document.getElementById('save-template-spinner').classList.remove('hidden');
+    document.getElementById('save-template-btn').disabled = true;
     
     // Prepare the template data
     const templateData = {
         name,
         description: description || null,
         category: category || null,
-        fields: currentTemplateFields.map(field => {
-            // Format options properly for the backend
-            let options = field.options;
-            if (options && typeof options === 'string') {
-                options = options.split('\n').map(o => o.trim()).filter(o => o);
-            }
-            
-            return {
-                name: field.name,
-                label: field.label,
-                field_type: field.field_type,
-                required: field.required || false,
-                placeholder: field.placeholder || null,
-                default_value: field.default_value || null,
-                order: field.order || 0,
-                options: options || null
-            };
-        })
+        fields: currentTemplateFields.map(field => ({
+            name: field.name,
+            label: field.label,
+            field_type: field.field_type,
+            required: field.required || false,
+            placeholder: field.placeholder || null,
+            default_value: field.default_value || null,
+            order: field.order || 0,
+            options: field.options || null
+        }))
     };
     
     const method = currentTemplateId ? 'PUT' : 'POST';
@@ -7429,6 +7422,7 @@ async function saveTemplate() {
         `${API_BASE_URL}/templates/${currentTemplateId}` : 
         `${API_BASE_URL}/templates`;
     
+    console.log('Submitting template data:', JSON.stringify(templateData, null, 2));
     try {
         const response = await fetch(url, {
             method,
@@ -7440,19 +7434,36 @@ async function saveTemplate() {
         });
         
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.detail || 'Failed to save template');
+            // Try to parse the error response
+            let errorMessage = 'Failed to save template';
+            try {
+                const errorData = await response.json();
+                if (errorData.detail) {
+                    if (typeof errorData.detail === 'string') {
+                        errorMessage = errorData.detail;
+                    } else if (Array.isArray(errorData.detail)) {
+                        errorMessage = errorData.detail.map(e => e.msg || JSON.stringify(e)).join(', ');
+                    }
+                }
+            } catch (e) {
+                console.error('Error parsing error response:', e);
+            }
+            throw new Error(errorMessage);
         }
         
+        const result = await response.json();
         showAlert('Template saved successfully', 'success');
         document.getElementById('template-editor-modal').classList.remove('active');
         loadTemplates();
+        return result;
     } catch (error) {
         console.error('Error saving template:', error);
         showAlert(error.message || 'Failed to save template', 'danger');
+        throw error;
     } finally {
         document.getElementById('save-template-text').textContent = 'Save Template';
         document.getElementById('save-template-spinner').classList.add('hidden');
+        document.getElementById('save-template-btn').disabled = false;
     }
 }
 
