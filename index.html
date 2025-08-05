@@ -7390,83 +7390,65 @@ async function saveTemplate() {
         return;
     }
     
-    if (currentTemplateFields.length === 0) {
-        showAlert('Please add at least one field to the template', 'danger');
-        return;
-    }
+    // Prepare fields data
+    const fields = currentTemplateFields.map(field => {
+        const fieldData = {
+            name: field.name,
+            label: field.label,
+            field_type: field.field_type,
+            required: field.required,
+            order: field.order || 0,
+            placeholder: field.placeholder || null,
+            default_value: field.default_value || null
+        };
+        
+        // Only include options for relevant field types
+        if (["dropdown", "checkbox", "radio"].includes(field.field_type)) {
+            fieldData.options = field.options || [];
+        } else {
+            fieldData.options = null;
+        }
+        
+        return fieldData;
+    });
     
     // Show loading state
     document.getElementById('save-template-text').textContent = 'Saving...';
     document.getElementById('save-template-spinner').classList.remove('hidden');
-    document.getElementById('save-template-btn').disabled = true;
     
-    // Prepare the template data
-    const templateData = {
-        name,
-        description: description || null,
-        category: category || null,
-        fields: currentTemplateFields.map(field => ({
-            name: field.name,
-            label: field.label,
-            field_type: field.field_type,
-            required: field.required || false,
-            placeholder: field.placeholder || null,
-            default_value: field.default_value || null,
-            order: field.order || 0,
-            options: field.options || null
-        }))
-    };
-    
-    const method = currentTemplateId ? 'PUT' : 'POST';
-    const url = currentTemplateId ? 
-        `${API_BASE_URL}/templates/${currentTemplateId}` : 
-        `${API_BASE_URL}/templates`;
-    
-    console.log('Submitting template data:', JSON.stringify(templateData, null, 2));
     try {
-        const response = await fetch(url, {
-            method,
+        const response = await fetch(`${API_BASE_URL}/templates`, {
+            method: 'POST',
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(templateData)
+            body: JSON.stringify({
+                name,
+                description,
+                category,
+                fields
+            })
         });
         
         if (!response.ok) {
-            // Try to parse the error response
-            let errorMessage = 'Failed to save template';
-            try {
-                const errorData = await response.json();
-                if (errorData.detail) {
-                    if (typeof errorData.detail === 'string') {
-                        errorMessage = errorData.detail;
-                    } else if (Array.isArray(errorData.detail)) {
-                        errorMessage = errorData.detail.map(e => e.msg || JSON.stringify(e)).join(', ');
-                    }
-                }
-            } catch (e) {
-                console.error('Error parsing error response:', e);
-            }
-            throw new Error(errorMessage);
+            const errorData = await response.json();
+            console.error('Validation errors:', errorData);
+            throw new Error(errorData.detail || 'Failed to save template');
         }
         
-        const result = await response.json();
         showAlert('Template saved successfully', 'success');
         document.getElementById('template-editor-modal').classList.remove('active');
         loadTemplates();
-        return result;
     } catch (error) {
-        console.error('Error saving template:', error);
-        showAlert(error.message || 'Failed to save template', 'danger');
-        throw error;
+        console.error('Save template error:', error);
+        showAlert(error.message || 'Failed to save template. Please check all fields.', 'danger');
     } finally {
         document.getElementById('save-template-text').textContent = 'Save Template';
         document.getElementById('save-template-spinner').classList.add('hidden');
-        document.getElementById('save-template-btn').disabled = false;
     }
 }
-
+        
 // Edit existing template
 function editTemplate(templateId) {
     const template = templates.find(t => t.id == templateId);
@@ -9189,7 +9171,7 @@ function showAIResult(content, type) {
 }
 // Add AI template generation
 async function generateTemplateWithAI() {
-    const userInput = window.prompt('Describe the template you want to create (e.g., "A financial report template with sections for revenue, expenses, and profit")');
+    const userInput = window.prompt('Describe the template you want to create...');
     if (!userInput) return;
     
     try {
@@ -9203,12 +9185,12 @@ async function generateTemplateWithAI() {
             - fields: Array of fields with:
               - name: Field ID (snake_case)
               - label: Display name
-              - field_type: One of [text, textarea, number, date, datetime, dropdown, checkbox, radio, file]
+              - field_type: One of ["text", "textarea", "number", "date", "datetime", "dropdown", "checkbox", "radio", "file"]
               - required: true/false
-              - options: For dropdown/checkbox/radio fields (array of values)
+              - options: Only for dropdown/checkbox/radio fields, as array of strings
               - placeholder: Example text
               - default_value: Default value
-              - order: Display order
+              - order: Display order (number)
               
             Example response (only the JSON part):
             {
@@ -9224,63 +9206,44 @@ async function generateTemplateWithAI() {
                         "placeholder": "Enter total revenue",
                         "default_value": "0",
                         "order": 1
-                    },
-                    {
-                        "name": "report_period",
-                        "label": "Report Period",
-                        "field_type": "dropdown",
-                        "required": true,
-                        "options": ["Q1", "Q2", "Q3", "Q4"],
-                        "order": 2
                     }
                 ]
             }
         `);
         
-        // Clean the response by removing Markdown code blocks if present
+        // Clean and parse the response
         let cleanedResponse = aiResponse.trim();
-        if (cleanedResponse.startsWith('```json')) {
-            cleanedResponse = cleanedResponse.substring(7); // Remove ```json
-        }
-        if (cleanedResponse.endsWith('```')) {
-            cleanedResponse = cleanedResponse.substring(0, cleanedResponse.length - 3); // Remove ```
-        }
+        // Remove Markdown code blocks if present
+        cleanedResponse = cleanedResponse.replace(/^```json|```$/g, '');
         
-        // Parse JSON response
         const templateData = JSON.parse(cleanedResponse);
         
-        // Validate and format the fields properly
-        if (templateData.fields && Array.isArray(templateData.fields)) {
-            templateData.fields = templateData.fields.map(field => {
-                // Ensure field_type is valid
-                const validTypes = ['text', 'textarea', 'number', 'date', 'datetime', 'dropdown', 'checkbox', 'radio', 'file'];
-                if (!validTypes.includes(field.field_type)) {
-                    field.field_type = 'text'; // Default to text if invalid
+        // Validate and normalize field types
+        const validFieldTypes = ["text", "textarea", "number", "date", "datetime", "dropdown", "checkbox", "radio", "file"];
+        templateData.fields = templateData.fields.map(field => {
+            // Ensure field_type is valid
+            if (!validFieldTypes.includes(field.field_type)) {
+                field.field_type = "text"; // default to text if invalid
+            }
+            
+            // Ensure options is an array for relevant field types
+            if (["dropdown", "checkbox", "radio"].includes(field.field_type)) {
+                if (!Array.isArray(field.options)) {
+                    field.options = field.options ? [field.options] : [];
                 }
-                
-                // Convert options to proper format
-                if (field.options && !Array.isArray(field.options)) {
-                    if (typeof field.options === 'string') {
-                        field.options = field.options.split('\n').map(o => o.trim()).filter(o => o);
-                    } else {
-                        field.options = [];
-                    }
-                }
-                
-                // Ensure required fields are present
-                field.required = !!field.required;
-                field.order = field.order || 0;
-                
-                return field;
-            });
-        }
+            } else {
+                field.options = null;
+            }
+            
+            return field;
+        });
         
-        // Open template editor with AI-generated template
+        // Open template editor with the validated data
         openTemplateEditor(templateData);
         
     } catch (error) {
         console.error('AI Template Generation Error:', error);
-        showAlert('Failed to generate template with AI. The response format was invalid.', 'danger');
+        showAlert('Failed to generate template with AI. Please check the format and try again.', 'danger');
     }
 }
         
