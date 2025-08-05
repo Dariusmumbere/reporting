@@ -8695,70 +8695,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return new Date(dateString).toLocaleDateString(undefined, options);
     }
 });
-function initChatbot() {
-    const chatbotForm = document.getElementById('chatbot-form');
-    const chatbotInput = document.getElementById('chatbot-input');
-    const chatbotSendButton = document.getElementById('chatbot-send-button');
-    const chatbotBox = document.getElementById('chatbot-box');
-    const clearChatButton = document.getElementById('clear-chat');
 
-    // Add initial message
-    if (chatHistory.length === 0) {
-        addBotMessage("Hello! I'm your AI assistant powered by Gemini. How can I help you with ReportHub today?");
-    }
-
-    chatbotForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const prompt = chatbotInput.value.trim();
-        if (!prompt) return;
-
-        // Add user message
-        addUserMessage(prompt);
-        chatbotInput.value = '';
-        chatbotSendButton.disabled = true;
-
-        // Show typing indicator
-        const typingIndicator = showTypingIndicator();
-
-        try {
-            // Add user message to chat history
-            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
-
-            const response = await fetchWithBackoff(apiUrl + apiKey, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents: chatHistory })
-            });
-
-            const result = await response.json();
-
-            // Remove typing indicator
-            removeTypingIndicator(typingIndicator);
-
-            if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
-                const botResponse = result.candidates[0].content.parts[0].text;
-                addBotMessage(botResponse);
-                chatHistory.push({ role: "model", parts: [{ text: botResponse }] });
-            } else {
-                addBotMessage("Sorry, I couldn't generate a response. Please try again.");
-                console.error('Unexpected API response:', result);
-            }
-        } catch (error) {
-            removeTypingIndicator(typingIndicator);
-            addBotMessage("An error occurred while processing your request.");
-            console.error('Chatbot error:', error);
-        } finally {
-            chatbotSendButton.disabled = false;
-            chatbotInput.focus();
-        }
-    });
-
-    clearChatButton.addEventListener('click', () => {
-        chatHistory = [];
-        chatbotBox.innerHTML = '';
-        addBotMessage("Hello! I'm your AI assistant powered by Gemini. How can I help you with ReportHub today?");
-    });
-}
 
 function addUserMessage(text) {
     const messageDiv = document.createElement('div');
