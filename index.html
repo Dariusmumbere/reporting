@@ -14,6 +14,29 @@
     <link rel="stylesheet" href="styles.css">
     
     <style>
+/* AI Buttons Styling */
+.btn-group {
+    display: inline-flex;
+    margin-left: 10px;
+    gap: 5px;
+}
+
+#ai-create-report-btn,
+#ai-generate-template-btn {
+    background-color: #6c5ce7;
+    border-color: #6c5ce7;
+}
+
+#ai-create-report-btn:hover,
+#ai-generate-template-btn:hover {
+    background-color: #5d4aec;
+    border-color: #5d4aec;
+}
+
+/* Loading spinner for AI buttons */
+.fa-spinner {
+    margin-right: 5px;
+}
 .ai-assistant-container {
     display: flex;
     flex-direction: column;
@@ -2842,6 +2865,14 @@
                                 <button class="btn btn-primary" id="create-report-btn">
                                     <i class="fas fa-plus"></i> Create Report
                                 </button>
+                                <div class="btn-group">
+        <button class="btn btn-primary" id="ai-create-report-btn">
+            <i class="fas fa-robot"></i> AI Create Report
+        </button>
+        <button class="btn btn-primary" id="ai-generate-template-btn">
+            <i class="fas fa-magic"></i> AI Generate Template
+        </button>
+    </div>
                             </div>
                         </div>
 
@@ -9615,7 +9646,131 @@ async function summarizeDataWithAI() {
         });
     }
 }
+// AI Create Report Button
+document.getElementById('ai-create-report-btn')?.addEventListener('click', async function() {
+    try {
+        // Show loading state
+        const originalText = this.innerHTML;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> AI Thinking...';
+        this.disabled = true;
+        
+        // Get recent reports for context
+        const reports = await fetchReports();
+        
+        // Call AI to suggest report structure
+        const prompt = `Based on these recent reports (for context), suggest a comprehensive report structure:
+        
+        Recent Reports:
+        ${reports.slice(0, 3).map(r => `- ${r.title} (${r.category}): ${r.description.substring(0, 100)}...`).join('\n')}
+        
+        Please provide:
+        1. A suggested report title
+        2. Recommended categories/sections
+        3. Key points to include
+        4. Suggested attachments if needed
+        
+        Respond in this JSON format:
+        {
+            "title": "Suggested title",
+            "description": "Suggested description",
+            "category": "Suggested category",
+            "sections": ["section 1", "section 2"],
+            "key_points": ["point 1", "point 2"],
+            "attachments": ["type 1", "type 2"]
+        }`;
+        
+        const aiResponse = await callGeminiAPI(prompt);
+        
+        // Parse the AI response
+        let jsonResponse;
+        try {
+            // Clean the response (remove markdown code blocks if present)
+            const cleanedResponse = aiResponse.replace(/```json|```/g, '').trim();
+            jsonResponse = JSON.parse(cleanedResponse);
+        } catch (e) {
+            console.error('Error parsing AI response:', e);
+            throw new Error('Failed to parse AI suggestions');
+        }
+        
+        // Open the create report modal with AI suggestions
+        createReportModal.classList.add('active');
+        
+        // Set AI-suggested values
+        document.getElementById('report-title').value = jsonResponse.title || 'AI-Suggested Report';
+        document.getElementById('report-category').value = jsonResponse.category || 'general';
+        
+        // Initialize Quill editor if not already done
+        if (!quill) {
+            initQuillEditor();
+        }
+        
+        // Set description with AI suggestions
+        let descriptionHTML = `<h2>${jsonResponse.title || 'Report'}</h2>`;
+        
+        if (jsonResponse.description) {
+            descriptionHTML += `<p>${jsonResponse.description}</p>`;
+        }
+        
+        if (jsonResponse.sections?.length > 0) {
+            descriptionHTML += `<h3>Recommended Sections:</h3><ul>${
+                jsonResponse.sections.map(s => `<li>${s}</li>`).join('')
+            }</ul>`;
+        }
+        
+        if (jsonResponse.key_points?.length > 0) {
+            descriptionHTML += `<h3>Key Points to Include:</h3><ul>${
+                jsonResponse.key_points.map(k => `<li>${k}</li>`).join('')
+            }</ul>`;
+        }
+        
+        quill.root.innerHTML = descriptionHTML;
+        document.getElementById('report-description').value = descriptionHTML;
+        
+        // Show attachment suggestions if any
+        if (jsonResponse.attachments?.length > 0) {
+            showAlert(`AI suggests including these attachments: ${jsonResponse.attachments.join(', ')}`, 'info');
+        }
+        
+    } catch (error) {
+        console.error('AI Report Creation Error:', error);
+        showAlert('AI-assisted report creation failed. Please try again or create manually.', 'danger');
+    } finally {
+        // Reset button state
+        const btn = document.getElementById('ai-create-report-btn');
+        if (btn) {
+            btn.innerHTML = '<i class="fas fa-robot"></i> AI Create Report';
+            btn.disabled = false;
+        }
+    }
+});
 
+// AI Generate Template Button (reuses the function from chatbot view)
+document.getElementById('ai-generate-template-btn')?.addEventListener('click', async function() {
+    const userInput = window.prompt('Describe the template you want to create. For example: "A sales report template with customer details, products sold, and revenue metrics"');
+    
+    if (!userInput) return;
+    
+    try {
+        // Show loading state
+        const originalText = this.innerHTML;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+        this.disabled = true;
+        
+        // Reuse the generateTemplateWithAI function from chatbot view
+        await generateTemplateWithAI(userInput);
+        
+    } catch (error) {
+        console.error('AI Template Generation Error:', error);
+        showAlert('Failed to generate template with AI. Please try again.', 'danger');
+    } finally {
+        // Reset button state
+        const btn = document.getElementById('ai-generate-template-btn');
+        if (btn) {
+            btn.innerHTML = '<i class="fas fa-magic"></i> AI Generate Template';
+            btn.disabled = false;
+        }
+    }
+});
 // Initialize chatbot when the view is shown
 document.getElementById('chatbot-view')?.addEventListener('viewShown', initChatbot);
         document.addEventListener('DOMContentLoaded', init);
