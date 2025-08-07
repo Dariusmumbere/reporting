@@ -9535,10 +9535,12 @@ async function analyzeReportsWithAI() {
 }
 
 // Context-aware template generation
-async function generateTemplateWithAI() {
-    const userInput = window.prompt('Describe the template you want to create...');
-    if (!userInput) return;
-    
+async function generateTemplateWithAI(userInput) {
+    if (!userInput) {
+        showAlert('Template description cannot be empty', 'warning');
+        return;
+    }
+
     try {
         // Add to conversation history
         addAIMessage(`User requested template generation: ${userInput}`, 'user');
@@ -9548,11 +9550,13 @@ async function generateTemplateWithAI() {
         });
         
         // Get context for better template generation
-        const userContext = await getUserContext();
-        const templateContext = await getTemplateContext();
-        
-        const aiResponse = await callGeminiAPI(`
-            Create a report template specification based on this description: ${userInput}
+        const [userContext, templateContext] = await Promise.all([
+            getUserContext(),
+            getTemplateContext()
+        ]);
+
+        const prompt = `
+            Create a comprehensive report template specification based on this description: ${userInput}
             
             User Context:
             - Role: ${userContext?.role || 'standard'}
@@ -9562,19 +9566,22 @@ async function generateTemplateWithAI() {
             ${templateContext?.map(t => `- ${t.name} (${t.category})`).join('\n') || 'None'}
             
             Respond with ONLY the JSON content (no Markdown formatting or additional text) with these fields:
-            - name: Template name
-            - description: Template description
-            - category: Template category
+            - name: Template name (should be clear and descriptive)
+            - description: Detailed template description
+            - category: Template category (e.g., "Sales", "HR", "Operations")
             - fields: Array of fields with:
-              - name: Field ID (snake_case)
-              - label: Display name
+              - name: Field ID (snake_case, unique)
+              - label: Display name (user-friendly)
               - field_type: One of ["text", "textarea", "number", "date", "datetime", "dropdown", "checkbox", "radio", "file"]
               - required: true/false
               - options: Only for dropdown/checkbox/radio fields, as array of strings
               - placeholder: Example text
               - default_value: Default value
               - order: Display order (number)
-        `);
+              - validation: Optional validation rules
+        `;
+
+        const aiResponse = await callGeminiAPI(prompt);
         
         // Clean and parse the response
         let cleanedResponse = aiResponse.trim();
@@ -9582,23 +9589,55 @@ async function generateTemplateWithAI() {
         
         const templateData = JSON.parse(cleanedResponse);
         
+        // Validate and normalize template data
+        if (!templateData.name || !templateData.description || !templateData.category) {
+            throw new Error('AI response missing required template fields');
+        }
+
+        if (!Array.isArray(templateData.fields)) {
+            throw new Error('AI response fields must be an array');
+        }
+
         // Validate and normalize field types
         const validFieldTypes = ["text", "textarea", "number", "date", "datetime", "dropdown", "checkbox", "radio", "file"];
-        templateData.fields = templateData.fields.map(field => {
+        templateData.fields = templateData.fields.map((field, index) => {
+            if (!field.name || !field.label) {
+                throw new Error(`Field at position ${index} missing name or label`);
+            }
+
+            // Normalize field name to snake_case
+            field.name = field.name
+                .trim()
+                .toLowerCase()
+                .replace(/\s+/g, '_')
+                .replace(/[^a-z0-9_]/g, '');
+
+            // Validate field type
             if (!validFieldTypes.includes(field.field_type)) {
                 field.field_type = "text";
             }
             
+            // Normalize options for relevant field types
             if (["dropdown", "checkbox", "radio"].includes(field.field_type)) {
                 if (!Array.isArray(field.options)) {
-                    field.options = field.options ? [field.options] : [];
+                    field.options = field.options ? [String(field.options)] : [];
+                } else {
+                    field.options = field.options.map(opt => String(opt));
                 }
             } else {
                 field.options = null;
             }
-            
+
+            // Set default order if not provided
+            if (typeof field.order !== 'number') {
+                field.order = index + 1;
+            }
+
             return field;
         });
+
+        // Sort fields by order
+        templateData.fields.sort((a, b) => a.order - b.order);
         
         // Add to conversation history
         addAIMessage("Generated template specification:\n\n" + JSON.stringify(templateData, null, 2), 'ai');
@@ -9612,11 +9651,16 @@ async function generateTemplateWithAI() {
         
     } catch (error) {
         console.error('AI Template Generation Error:', error);
-        showAlert('Failed to generate template with AI. Please check the format and try again.', 'danger');
-        addAIMessage("Failed to generate template. Please try again with a different description.", 'ai');
+        
+        const errorMessage = error.message.includes('AI response') 
+            ? 'The AI returned an invalid format. Please try again with a different description.'
+            : 'Failed to generate template. Please try again later.';
+            
+        showAlert(errorMessage, 'danger');
+        addAIMessage(`Template generation failed: ${error.message}`, 'ai');
         conversationHistory.push({
             role: "ai",
-            content: "Failed to generate template. Please try again with a different description."
+            content: `Template generation failed: ${error.message}`
         });
     }
 }
