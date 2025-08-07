@@ -9068,36 +9068,6 @@ function initChatbot() {
                 </div>
             </div>
         </div>
-        
-        <!-- AI Template Generator Modal -->
-        <div class="modal" id="ai-template-modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 class="modal-title">Generate Template with AI</h3>
-                    <button type="button" class="modal-close" id="close-ai-template-modal">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form id="ai-template-form">
-                        <div class="form-group">
-                            <label for="template-description" class="form-label">Template Description</label>
-                            <textarea id="template-description" name="template-description" class="form-control" 
-                                      placeholder="Describe the template you want to create (e.g., 'A sales report template with customer details, product information, and sales figures')" 
-                                      rows="4" required></textarea>
-                            <div class="form-hint">Be as specific as possible for better results</div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline" id="cancel-ai-template">Cancel</button>
-                    <button type="submit" form="ai-template-form" class="btn btn-primary" id="submit-ai-template">
-                        <span id="submit-template-text">Generate Template</span>
-                        <span class="spinner hidden" id="submit-template-spinner"></span>
-                    </button>
-                </div>
-            </div>
-        </div>
     `;
 
     // Initialize conversation history
@@ -9119,14 +9089,8 @@ function initChatbot() {
         analyzeReportsWithAI();
     });
     
-    // Updated Generate Template event listener
-    document.getElementById('ai-generate-template').addEventListener('click', async () => {
-        try {
-            await generateTemplateWithAI();
-        } catch (error) {
-            console.error('Template generation failed:', error);
-            showAlert('Failed to start template generation. Please try again.', 'danger');
-        }
+    document.getElementById('ai-generate-template').addEventListener('click', () => {
+        generateTemplateWithAI();
     });
     
     document.getElementById('ai-summarize-data').addEventListener('click', () => {
@@ -9136,149 +9100,6 @@ function initChatbot() {
     document.getElementById('ai-clear-conversation').addEventListener('click', () => {
         clearConversation();
     });
-
-    // Modal event listeners
-    document.getElementById('cancel-ai-template').addEventListener('click', () => {
-        document.getElementById('ai-template-modal').classList.remove('open');
-    });
-    
-    document.getElementById('close-ai-template-modal').addEventListener('click', () => {
-        document.getElementById('ai-template-modal').classList.remove('open');
-    });
-}
-
-// Ensure this is in your global scope
-async function generateTemplateWithAI() {
-    // Show the modal
-    const modal = document.getElementById('ai-template-modal');
-    const form = document.getElementById('ai-template-form');
-    const descriptionInput = document.getElementById('template-description');
-    const submitBtn = document.getElementById('submit-ai-template');
-    const submitText = document.getElementById('submit-template-text');
-    const spinner = document.getElementById('submit-template-spinner');
-    
-    // Reset form and show modal
-    form.reset();
-    modal.classList.add('open');
-    
-    // Wait for user input via the modal form
-    const userInput = await new Promise((resolve) => {
-        // Handle form submission
-        form.onsubmit = async (e) => {
-            e.preventDefault();
-            const description = descriptionInput.value.trim();
-            
-            if (!description) {
-                showAlert('Please enter a template description', 'warning');
-                return;
-            }
-            
-            // Show loading state
-            submitText.textContent = 'Generating...';
-            spinner.classList.remove('hidden');
-            submitBtn.disabled = true;
-            
-            resolve(description);
-        };
-        
-        // Handle cancel/close (resolve with null)
-        const cancelHandler = () => {
-            modal.classList.remove('open');
-            resolve(null);
-        };
-        
-        document.getElementById('cancel-ai-template').onclick = cancelHandler;
-        document.getElementById('close-ai-template-modal').onclick = cancelHandler;
-    });
-    
-    // Clean up
-    submitText.textContent = 'Generate Template';
-    spinner.classList.add('hidden');
-    submitBtn.disabled = false;
-    modal.classList.remove('open');
-    
-    if (!userInput) return;
-
-    try {
-        // Add to conversation history
-        addAIMessage(`User requested template generation: ${userInput}`, 'user');
-        conversationHistory.push({
-            role: "user",
-            content: `User requested template generation: ${userInput}`
-        });
-        
-        // Get context for better template generation
-        const userContext = await getUserContext();
-        const templateContext = await getTemplateContext();
-        
-        const aiResponse = await callGeminiAPI(`
-            Create a report template specification based on this description: ${userInput}
-            
-            User Context:
-            - Role: ${userContext?.role || 'standard'}
-            - Department: ${userContext?.department || 'general'}
-            
-            Existing Templates (for reference):
-            ${templateContext?.map(t => `- ${t.name} (${t.category})`).join('\n') || 'None'}
-            
-            Respond with ONLY the JSON content (no Markdown formatting or additional text) with these fields:
-            - name: Template name
-            - description: Template description
-            - category: Template category
-            - fields: Array of fields with:
-              - name: Field ID (snake_case)
-              - label: Display name
-              - field_type: One of ["text", "textarea", "number", "date", "datetime", "dropdown", "checkbox", "radio", "file"]
-              - required: true/false
-              - options: Only for dropdown/checkbox/radio fields, as array of strings
-              - placeholder: Example text
-              - default_value: Default value
-              - order: Display order (number)
-        `);
-        
-        // Clean and parse the response
-        let cleanedResponse = aiResponse.trim();
-        cleanedResponse = cleanedResponse.replace(/^```json|```$/g, '');
-        
-        const templateData = JSON.parse(cleanedResponse);
-        
-        // Validate and normalize field types
-        const validFieldTypes = ["text", "textarea", "number", "date", "datetime", "dropdown", "checkbox", "radio", "file"];
-        templateData.fields = templateData.fields.map(field => {
-            if (!validFieldTypes.includes(field.field_type)) {
-                field.field_type = "text";
-            }
-            
-            if (["dropdown", "checkbox", "radio"].includes(field.field_type)) {
-                if (!Array.isArray(field.options)) {
-                    field.options = field.options ? [field.options] : [];
-                }
-            } else {
-                field.options = null;
-            }
-            
-            return field;
-        });
-        
-        // Add to conversation history
-        addAIMessage("Generated template specification:\n\n" + JSON.stringify(templateData, null, 2), 'ai');
-        conversationHistory.push({
-            role: "ai",
-            content: "Generated template specification:\n\n" + JSON.stringify(templateData, null, 2)
-        });
-        
-        // Open template editor with the validated data
-        openTemplateEditor(templateData);
-        
-    } catch (error) {
-        console.error('AI Template Generation Error:', error);
-        showAlert('Failed to generate template with AI. Please check the format and try again.', 'danger');
-        addAIMessage("Failed to generate template. Please try again with a different description.", 'ai');
-        conversationHistory.push({
-            role: "ai",
-            content: "Failed to generate template. Please try again with a different description."
-        });
-    }
 }
 
 function clearConversation() {
@@ -9687,56 +9508,9 @@ async function analyzeReportsWithAI() {
 
 // Context-aware template generation
 async function generateTemplateWithAI() {
-    // Show the modal
-    const modal = document.getElementById('ai-template-modal');
-    const form = document.getElementById('ai-template-form');
-    const descriptionInput = document.getElementById('template-description');
-    const submitBtn = document.getElementById('submit-ai-template');
-    const submitText = document.getElementById('submit-template-text');
-    const spinner = document.getElementById('submit-template-spinner');
-    
-    // Reset form and show modal
-    form.reset();
-    modal.classList.add('open');
-    
-    // Wait for user input via the modal form
-    const userInput = await new Promise((resolve) => {
-        // Handle form submission
-        form.onsubmit = async (e) => {
-            e.preventDefault();
-            const description = descriptionInput.value.trim();
-            
-            if (!description) {
-                showAlert('Please enter a template description', 'warning');
-                return;
-            }
-            
-            // Show loading state
-            submitText.textContent = 'Generating...';
-            spinner.classList.remove('hidden');
-            submitBtn.disabled = true;
-            
-            resolve(description);
-        };
-        
-        // Handle cancel/close (resolve with null)
-        const cancelHandler = () => {
-            modal.classList.remove('open');
-            resolve(null);
-        };
-        
-        document.getElementById('cancel-ai-template').onclick = cancelHandler;
-        document.getElementById('close-ai-template-modal').onclick = cancelHandler;
-    });
-    
-    // Clean up
-    submitText.textContent = 'Generate Template';
-    spinner.classList.add('hidden');
-    submitBtn.disabled = false;
-    modal.classList.remove('open');
-    
+    const userInput = window.prompt('Describe the template you want to create...');
     if (!userInput) return;
-
+    
     try {
         // Add to conversation history
         addAIMessage(`User requested template generation: ${userInput}`, 'user');
