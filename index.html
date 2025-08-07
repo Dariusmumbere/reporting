@@ -9687,7 +9687,7 @@ async function analyzeReportsWithAI() {
 
 // Context-aware template generation
 async function generateTemplateWithAI() {
-    // Show the modal instead of using window.prompt
+    // Show the modal
     const modal = document.getElementById('ai-template-modal');
     const form = document.getElementById('ai-template-form');
     const descriptionInput = document.getElementById('template-description');
@@ -9719,17 +9719,14 @@ async function generateTemplateWithAI() {
             resolve(description);
         };
         
-        // Handle cancel button
-        document.getElementById('cancel-ai-template').onclick = () => {
+        // Handle cancel/close (resolve with null)
+        const cancelHandler = () => {
             modal.classList.remove('open');
             resolve(null);
         };
         
-        // Handle close button
-        document.getElementById('close-ai-template-modal').onclick = () => {
-            modal.classList.remove('open');
-            resolve(null);
-        };
+        document.getElementById('cancel-ai-template').onclick = cancelHandler;
+        document.getElementById('close-ai-template-modal').onclick = cancelHandler;
     });
     
     // Clean up
@@ -9739,7 +9736,7 @@ async function generateTemplateWithAI() {
     modal.classList.remove('open');
     
     if (!userInput) return;
-    
+
     try {
         // Add to conversation history
         addAIMessage(`User requested template generation: ${userInput}`, 'user');
