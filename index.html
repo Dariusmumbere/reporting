@@ -3723,6 +3723,34 @@
                 </div>
             </div>
         </div>
+        <!-- AI Generate Template Modal -->
+<div class="modal" id="ai-generate-template-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">AI Template Generator</h3>
+            <button type="button" class="modal-close" id="close-ai-generate-template-modal">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="ai-generate-template-form">
+                <div class="form-group">
+                    <label for="template-description" class="form-label">Template Description</label>
+                    <textarea id="template-description" name="template-description" class="form-control" 
+                              placeholder="Describe the template you want to create. For example: 'A sales report template with customer details, products sold, and revenue metrics'" 
+                              rows="4" required></textarea>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" id="cancel-ai-generate-template">Cancel</button>
+            <button type="submit" form="ai-generate-template-form" class="btn btn-primary" id="submit-ai-generate-template">
+                <span id="submit-template-text"><i class="fas fa-magic"></i> Generate Template</span>
+                <span class="spinner hidden" id="submit-template-spinner"></span>
+            </button>
+        </div>
+    </div>
+</div>
 
         <!-- View Report Modal -->
         <div class="modal" id="view-report-modal">
@@ -9769,6 +9797,93 @@ document.getElementById('ai-generate-template-btn')?.addEventListener('click', a
             btn.innerHTML = '<i class="fas fa-magic"></i> AI Generate Template';
             btn.disabled = false;
         }
+    }
+});
+// Open AI Generate Template Modal
+document.getElementById('ai-generate-template-btn')?.addEventListener('click', function() {
+    // Show the modal
+    const modal = document.getElementById('ai-generate-template-modal');
+    if (modal) {
+        modal.style.display = 'flex';
+        document.getElementById('template-description').focus();
+    }
+});
+
+// Handle form submission
+document.getElementById('ai-generate-template-form')?.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const userInput = document.getElementById('template-description').value.trim();
+    if (!userInput) {
+        showAlert('Please enter a template description', 'warning');
+        return;
+    }
+    
+    const submitBtn = document.getElementById('submit-ai-generate-template');
+    const submitText = document.getElementById('submit-template-text');
+    const spinner = document.getElementById('submit-template-spinner');
+    const modal = document.getElementById('ai-generate-template-modal');
+    
+    try {
+        // Show loading state
+        submitText.textContent = 'Generating...';
+        spinner.classList.remove('hidden');
+        submitBtn.disabled = true;
+        
+        // Close the modal
+        modal.style.display = 'none';
+        
+        // Show loading state on the main button if it exists
+        const mainBtn = document.getElementById('ai-generate-template-btn');
+        if (mainBtn) {
+            mainBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+            mainBtn.disabled = true;
+        }
+        
+        // Generate the template
+        await generateTemplateWithAI(userInput);
+        
+    } catch (error) {
+        console.error('AI Template Generation Error:', error);
+        showAlert('Failed to generate template with AI. Please try again.', 'danger');
+    } finally {
+        // Reset modal button state
+        submitText.innerHTML = '<i class="fas fa-magic"></i> Generate Template';
+        spinner.classList.add('hidden');
+        submitBtn.disabled = false;
+        
+        // Reset main button state
+        const mainBtn = document.getElementById('ai-generate-template-btn');
+        if (mainBtn) {
+            mainBtn.innerHTML = '<i class="fas fa-magic"></i> AI Generate Template';
+            mainBtn.disabled = false;
+        }
+        
+        // Clear the input
+        document.getElementById('template-description').value = '';
+    }
+});
+
+// Close modal handlers
+function closeAITemplateModal() {
+    document.getElementById('ai-generate-template-modal').style.display = 'none';
+}
+
+document.getElementById('close-ai-generate-template-modal')?.addEventListener('click', closeAITemplateModal);
+document.getElementById('cancel-ai-generate-template')?.addEventListener('click', closeAITemplateModal);
+
+// Close modal when clicking outside the content
+document.getElementById('ai-generate-template-modal')?.addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeAITemplateModal();
+    }
+});
+
+// Optional: Close modal with Escape key
+document.addEventListener('keydown', function(e) {
+    const modal = document.getElementById('ai-generate-template-modal');
+    if (e.key === 'Escape' && modal && modal.style.display === 'flex') {
+        closeAITemplateModal();
     }
 });
 // Initialize chatbot when the view is shown
