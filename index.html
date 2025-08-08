@@ -14,6 +14,37 @@
     <link rel="stylesheet" href="styles.css">
     
     <style>
+/* Skip Logic Styles */
+.skip-logic-container {
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 10px;
+    margin-top: 5px;
+}
+
+.skip-logic-rule {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.skip-logic-rule select {
+    flex: 1;
+}
+
+.skip-logic-rule input {
+    flex: 1;
+}
+
+.skip-logic-rule .skip-logic-remove {
+    flex: 0 0 36px;
+    height: 36px;
+}
+
+.skip-logic-operator {
+    flex: 0 0 150px !important;
+}
 /* AI Buttons Styling */
 .btn-group {
     display: inline-flex;
@@ -1044,32 +1075,7 @@
     align-items: center;
     gap: 0.75rem;
 }
-.skip-logic-container {
-    border: 1px solid #e0e0e0;
-    padding: 10px;
-    border-radius: 4px;
-    background-color: #f9f9f9;
-}
 
-.skip-logic-rule {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    padding: 8px;
-    background-color: white;
-    border-radius: 4px;
-    margin-bottom: 8px;
-    border: 1px solid #e0e0e0;
-}
-
-.skip-logic-rule select, 
-.skip-logic-rule input {
-    flex: 1;
-}
-
-.remove-skip-logic {
-    flex: 0 0 32px;
-}
 .support-info li i {
     color: var(--primary-color);
     width: 20px;
@@ -3693,41 +3699,49 @@
                     <label for="field-order" class="form-label">Display Order</label>
                     <input type="number" id="field-order" class="form-control" min="0" value="0">
                 </div>
+                <!-- Add this to your field-editor-modal, after the field-order input -->
+<div class="form-group">
+    <label class="form-label">Skip Logic</label>
+    <div class="skip-logic-container">
+        <div class="form-check mb-2">
+            <input type="checkbox" id="enable-skip-logic" class="form-check-input">
+            <label for="enable-skip-logic" class="form-check-label">Enable skip logic for this field</label>
+        </div>
+        
+        <div id="skip-logic-rules" class="hidden">
+            <div class="skip-logic-rule mb-2">
+                <select class="form-control form-select skip-logic-field">
+                    <option value="">Select field</option>
+                    <!-- Will be populated with other fields -->
+                </select>
+                <select class="form-control form-select skip-logic-operator">
+                    <option value="==">equals</option>
+                    <option value="!=">does not equal</option>
+                    <option value=">">greater than</option>
+                    <option value="<">less than</option>
+                    <option value=">=">greater or equal</option>
+                    <option value="<=">less or equal</option>
+                    <option value="contains">contains</option>
+                    <option value="not_contains">does not contain</option>
+                </select>
+                <input type="text" class="form-control skip-logic-value" placeholder="Value">
+                <button type="button" class="btn btn-outline-danger skip-logic-remove">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="add-skip-logic-rule">
+                <i class="fas fa-plus"></i> Add Rule
+            </button>
+            <div class="form-text">Field will only show when ALL conditions are met</div>
+        </div>
+    </div>
+</div>
             </form>
         </div>
         <div class="modal-footer">
             <button class="btn btn-outline" id="cancel-field-editor">Cancel</button>
             <button class="btn btn-primary" id="save-field-btn">Save Field</button>
         </div>
-         <!-- Add this to the field-editor-modal div, inside the modal-body -->
-<div class="form-group">
-    <label class="form-label">Skip Logic</label>
-    <div class="skip-logic-container">
-        <div class="skip-logic-rule mb-2">
-            <select class="form-control skip-logic-field" style="width: 150px;">
-                <option value="">No skip logic</option>
-                <!-- Fields will be populated dynamically -->
-            </select>
-            <select class="form-control skip-logic-operator" style="width: 120px;" disabled>
-                <option value="equals">equals</option>
-                <option value="not_equals">not equals</option>
-                <option value="contains">contains</option>
-                <option value="not_contains">not contains</option>
-                <option value="greater">greater than</option>
-                <option value="less">less than</option>
-                <option value="empty">is empty</option>
-                <option value="not_empty">is not empty</option>
-            </select>
-            <input type="text" class="form-control skip-logic-value" style="width: 150px;" disabled placeholder="Value">
-            <button class="btn btn-outline-danger btn-sm remove-skip-logic" disabled>
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <button class="btn btn-sm btn-outline-primary" id="add-skip-logic-rule">
-            <i class="fas fa-plus"></i> Add Rule
-        </button>
-    </div>
-</div>
     </div>
 </div>
 
@@ -3995,9 +4009,6 @@
         // OTP verification state
         let otpVerificationEmail = null;
 
-        let skipLogicFields = [];
-        let currentSkipLogicRules = [];
-
         // DOM Elements
         const loginForm = document.getElementById('login-form');
         const signupForm = document.getElementById('signup-form');
@@ -4142,7 +4153,6 @@
             initTemplateManagement();
             updateToggleIndicator();
             fetchAndLogReports();
-            initSkipLogic();
             document.getElementById('users-view')?.addEventListener('viewShown', loadActiveInvitations);
         }
 
@@ -7517,7 +7527,7 @@ function openFieldEditor(field = null, index = null) {
     // Reset form
     document.getElementById('field-editor-form').reset();
     document.getElementById('field-options-group').classList.add('hidden');
-
+    
     // Set form values if editing existing field
     if (field) {
         document.getElementById('field-name').value = field.name;
@@ -7527,7 +7537,7 @@ function openFieldEditor(field = null, index = null) {
         document.getElementById('field-placeholder').value = field.placeholder || '';
         document.getElementById('field-default-value').value = field.default_value || '';
         document.getElementById('field-order').value = field.order || 0;
-
+        
         // Handle options for dropdown/radio/checkbox
         if (field.options) {
             const optionsText = Object.entries(field.options)
@@ -7535,31 +7545,57 @@ function openFieldEditor(field = null, index = null) {
                 .join('\n');
             document.getElementById('field-options').value = optionsText;
         }
-
+        
         // Show options group if needed
         if (['dropdown', 'radio', 'checkbox'].includes(field.field_type)) {
             document.getElementById('field-options-group').classList.remove('hidden');
         }
     }
 
-    // Set skip logic fields to all other fields in the template
-    skipLogicFields = currentTemplateFields
-        .filter(f => f.name !== field?.name) // Exclude current field
-        .map(f => ({ name: f.name, label: f.label }));
+    // Populate skip logic field dropdown with other fields
+    const fieldSelects = document.querySelectorAll('.skip-logic-field');
+    fieldSelects.forEach(select => {
+        select.innerHTML = '<option value="">Select field</option>';
+        currentTemplateFields.forEach((f, i) => {
+            if (i !== currentFieldIndex) { // Don't allow self-reference
+                select.innerHTML += `<option value="${f.name}">${f.label}</option>`;
+            }
+        });
+    });
 
-    // Populate skip logic fields dropdown
-    populateSkipLogicFields();
-
-    // Load skip logic rules if editing existing field
+    // Set skip logic values if editing existing field
     if (field?.skip_logic) {
-        loadSkipLogicRules(field.skip_logic);
-    } else {
-        loadSkipLogicRules([]);
+        document.getElementById('enable-skip-logic').checked = true;
+        document.getElementById('skip-logic-rules').classList.remove('hidden');
+        
+        // Clear existing rules (keep one)
+        const rulesContainer = document.getElementById('skip-logic-rules');
+        const firstRule = rulesContainer.querySelector('.skip-logic-rule');
+        while (rulesContainer.querySelectorAll('.skip-logic-rule').length > 1) {
+            rulesContainer.querySelector('.skip-logic-rule:not(:first-child)').remove();
+        }
+        
+        // Set first rule values
+        if (field.skip_logic.rules.length > 0) {
+            firstRule.querySelector('.skip-logic-field').value = field.skip_logic.rules[0].field;
+            firstRule.querySelector('.skip-logic-operator').value = field.skip_logic.rules[0].operator;
+            firstRule.querySelector('.skip-logic-value').value = field.skip_logic.rules[0].value;
+            
+            // Add additional rules
+            for (let i = 1; i < field.skip_logic.rules.length; i++) {
+                const newRule = firstRule.cloneNode(true);
+                newRule.querySelector('.skip-logic-field').value = field.skip_logic.rules[i].field;
+                newRule.querySelector('.skip-logic-operator').value = field.skip_logic.rules[i].operator;
+                newRule.querySelector('.skip-logic-value').value = field.skip_logic.rules[i].value;
+                rulesContainer.insertBefore(newRule, document.getElementById('add-skip-logic-rule'));
+            }
+        }
     }
 
     // Show modal
     document.getElementById('field-editor-modal').classList.add('active');
 }
+
 // Save field to template
 function saveField() {
     const name = document.getElementById('field-name').value.trim();
@@ -7569,19 +7605,19 @@ function saveField() {
     const placeholder = document.getElementById('field-placeholder').value.trim();
     const defaultValue = document.getElementById('field-default-value').value.trim();
     const order = parseInt(document.getElementById('field-order').value) || 0;
-
+    
     // Validate
     if (!name || !label) {
         showAlert('Field name and label are required', 'danger');
         return;
     }
-
+    
     // Validate field name format (no spaces, only letters, numbers, underscores)
     if (!/^[a-zA-Z0-9_]+$/.test(name)) {
         showAlert('Field name can only contain letters, numbers, and underscores', 'danger');
         return;
     }
-
+    
     // Process options for dropdown/radio/checkbox
     let options = null;
     if (['dropdown', 'radio', 'checkbox'].includes(fieldType)) {
@@ -7598,7 +7634,7 @@ function saveField() {
             });
         }
     }
-
+    
     // Create field object
     const field = {
         name,
@@ -7611,11 +7647,31 @@ function saveField() {
         order
     };
 
-    // ✅ Add skip logic to field data
-    const skipLogic = gatherSkipLogicRules();
-    if (skipLogic.length > 0) {
-        field.skip_logic = skipLogic;
+    // --- Skip Logic Integration ---
+    const skipLogic = {
+        enabled: document.getElementById('enable-skip-logic').checked,
+        rules: []
+    };
+    
+    if (skipLogic.enabled) {
+        document.querySelectorAll('.skip-logic-rule').forEach(rule => {
+            const fieldName = rule.querySelector('.skip-logic-field').value;
+            const operator = rule.querySelector('.skip-logic-operator').value;
+            const value = rule.querySelector('.skip-logic-value').value;
+            
+            if (fieldName && value) {
+                skipLogic.rules.push({ field: fieldName, operator, value });
+            }
+        });
+        
+        // If no valid rules, disable skip logic
+        if (skipLogic.rules.length === 0) {
+            skipLogic.enabled = false;
+        }
     }
+    
+    field.skip_logic = skipLogic;
+    // --- End Skip Logic Integration ---
 
     // Add or update field in template
     if (currentFieldIndex !== null) {
@@ -7623,11 +7679,87 @@ function saveField() {
     } else {
         currentTemplateFields.push(field);
     }
-
+    
     // Close modal and refresh fields display
     document.getElementById('field-editor-modal').classList.remove('active');
     renderTemplateFields();
 }
+// Function to evaluate skip logic conditions
+function evaluateSkipLogic(field, formValues) {
+    if (!field.skip_logic?.enabled || !field.skip_logic.rules?.length) {
+        return true; // No skip logic, always show
+    }
+    
+    // All rules must be true (AND logic)
+    return field.skip_logic.rules.every(rule => {
+        const fieldValue = formValues[rule.field]?.toString() || '';
+        const ruleValue = rule.value.toString();
+        
+        switch (rule.operator) {
+            case '==': return fieldValue === ruleValue;
+            case '!=': return fieldValue !== ruleValue;
+            case '>': return parseFloat(fieldValue) > parseFloat(ruleValue);
+            case '<': return parseFloat(fieldValue) < parseFloat(ruleValue);
+            case '>=': return parseFloat(fieldValue) >= parseFloat(ruleValue);
+            case '<=': return parseFloat(fieldValue) <= parseFloat(ruleValue);
+            case 'contains': return fieldValue.includes(ruleValue);
+            case 'not_contains': return !fieldValue.includes(ruleValue);
+            default: return true;
+        }
+    });
+}
+
+// Function to update field visibility based on current form values
+function updateFieldVisibility(formContainer) {
+    const formValues = {};
+    
+    // First collect all current values
+    formContainer.querySelectorAll('.template-field').forEach(fieldGroup => {
+        const fieldName = fieldGroup.dataset.fieldName;
+        const input = fieldGroup.querySelector('input, select, textarea');
+        
+        if (input) {
+            if (input.type === 'checkbox' && !input.name) {
+                // Single checkbox
+                formValues[fieldName] = input.checked ? input.value : false;
+            } else if (input.type === 'checkbox' || input.type === 'radio') {
+                // Multiple checkboxes or radios
+                const inputs = fieldGroup.querySelectorAll(`input[name="${input.name}"]`);
+                if (inputs.length > 1) {
+                    const values = [];
+                    inputs.forEach(i => {
+                        if (i.checked) values.push(i.value);
+                    });
+                    formValues[fieldName] = values.length > 0 ? values : null;
+                } else {
+                    formValues[fieldName] = inputs[0].checked ? inputs[0].value : null;
+                }
+            } else {
+                formValues[fieldName] = input.value;
+            }
+        }
+    });
+    
+    // Then evaluate visibility for each field
+    formContainer.querySelectorAll('.template-field').forEach(fieldGroup => {
+        const fieldName = fieldGroup.dataset.fieldName;
+        const field = currentTemplateFields.find(f => f.name === fieldName);
+        
+        if (field) {
+            const shouldShow = evaluateSkipLogic(field, formValues);
+            fieldGroup.style.display = shouldShow ? 'block' : 'none';
+        }
+    });
+}
+
+// Add event listeners to form fields to update visibility on change
+function addSkipLogicListeners(formContainer) {
+    formContainer.querySelectorAll('input, select, textarea').forEach(input => {
+        input.addEventListener('change', () => updateFieldVisibility(formContainer));
+        input.addEventListener('input', debounce(() => updateFieldVisibility(formContainer), 300));
+    });
+}
+
 // Edit existing field
 function editField(index) {
     if (index >= 0 && index < currentTemplateFields.length) {
@@ -7665,20 +7797,28 @@ async function saveTemplate() {
     document.getElementById('save-template-text').textContent = 'Saving...';
     document.getElementById('save-template-spinner').classList.remove('hidden');
     
-    // Process fields to ensure dropdown options are in correct format
+    // Process fields to ensure dropdown options are in correct format & skip logic is properly saved
     const processedFields = currentTemplateFields.map(field => {
-        // Convert array options to {value: value} format if needed
-        if (field.options && Array.isArray(field.options)) {
+        let updatedField = { ...field };
+
+        // Convert array options to {value: label} format if needed
+        if (updatedField.options && Array.isArray(updatedField.options)) {
             const optionsDict = {};
-            field.options.forEach(option => {
+            updatedField.options.forEach(option => {
                 optionsDict[option] = option;
             });
-            return {
-                ...field,
-                options: optionsDict
+            updatedField.options = optionsDict;
+        }
+
+        // Convert skip logic to proper format
+        if (updatedField.skip_logic) {
+            updatedField.skip_logic = {
+                enabled: updatedField.skip_logic.enabled,
+                rules: updatedField.skip_logic.rules || []
             };
         }
-        return field;
+
+        return updatedField;
     });
     
     const templateData = {
@@ -7720,8 +7860,7 @@ async function saveTemplate() {
         document.getElementById('save-template-text').textContent = 'Save Template';
         document.getElementById('save-template-spinner').classList.add('hidden');
     }
-}
-        
+}        
 // Edit existing template
 function editTemplate(templateId) {
     const template = templates.find(t => t.id == templateId);
@@ -7807,6 +7946,11 @@ function createReportFromTemplate(template) {
     // Insert fields container after the description editor's parent
     const descriptionEditorParent = document.getElementById('report-description-editor').parentNode;
     descriptionEditorParent.parentNode.insertBefore(fieldsContainer, descriptionEditorParent.nextSibling);
+
+    // --- Skip Logic Integration ---
+    addSkipLogicListeners(fieldsContainer); // Attach listeners for field changes
+    updateFieldVisibility(fieldsContainer); // Apply initial visibility rules
+    // --- End Skip Logic Integration ---
     
     // Show create report modal
     document.getElementById('create-report-modal').classList.add('active');
@@ -7817,35 +7961,29 @@ function createFieldElement(field) {
     const fieldGroup = document.createElement('div');
     fieldGroup.className = 'form-group template-field';
     fieldGroup.dataset.fieldName = field.name;
-
-    // Add skip logic class and data attributes
-    if (field.skip_logic) {
-        fieldGroup.classList.add('skip-logic-field');
-        fieldGroup.dataset.skipLogic = JSON.stringify(field.skip_logic);
-    }
-
+    
     const label = document.createElement('label');
     label.className = 'form-label';
     label.textContent = field.label;
     if (field.required) {
         label.innerHTML += ' <span class="text-danger">*</span>';
     }
-
+    
     fieldGroup.appendChild(label);
-
+    
     let inputElement;
-
+    
     switch(field.field_type) {
         case 'textarea':
             inputElement = document.createElement('textarea');
             inputElement.className = 'form-control';
             inputElement.rows = 3;
             break;
-
+            
         case 'dropdown':
             inputElement = document.createElement('select');
             inputElement.className = 'form-control';
-
+            
             if (field.placeholder) {
                 const placeholderOption = document.createElement('option');
                 placeholderOption.value = '';
@@ -7854,7 +7992,7 @@ function createFieldElement(field) {
                 placeholderOption.disabled = true;
                 inputElement.appendChild(placeholderOption);
             }
-
+            
             if (field.options) {
                 Object.entries(field.options).forEach(([value, label]) => {
                     const option = document.createElement('option');
@@ -7867,58 +8005,59 @@ function createFieldElement(field) {
                 });
             }
             break;
-
+            
         case 'checkbox':
             inputElement = document.createElement('div');
             if (field.options) {
                 Object.entries(field.options).forEach(([value, label]) => {
                     const checkboxGroup = document.createElement('div');
                     checkboxGroup.className = 'form-check';
-
+                    
                     const checkbox = document.createElement('input');
                     checkbox.type = 'checkbox';
                     checkbox.className = 'form-check-input';
                     checkbox.id = `${field.name}_${value}`;
                     checkbox.value = value;
                     checkbox.name = field.name;
-
+                    
                     const checkboxLabel = document.createElement('label');
                     checkboxLabel.className = 'form-check-label';
                     checkboxLabel.htmlFor = checkbox.id;
                     checkboxLabel.textContent = label;
-
+                    
                     checkboxGroup.appendChild(checkbox);
                     checkboxGroup.appendChild(checkboxLabel);
                     inputElement.appendChild(checkboxGroup);
                 });
             } else {
+                // Single checkbox
                 const checkboxGroup = document.createElement('div');
                 checkboxGroup.className = 'form-check';
-
+                
                 const checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
                 checkbox.className = 'form-check-input';
                 checkbox.id = field.name;
                 checkbox.value = 'true';
-
+                
                 const checkboxLabel = document.createElement('label');
                 checkboxLabel.className = 'form-check-label';
                 checkboxLabel.htmlFor = checkbox.id;
                 checkboxLabel.textContent = field.label;
-
+                
                 checkboxGroup.appendChild(checkbox);
                 checkboxGroup.appendChild(checkboxLabel);
                 inputElement.appendChild(checkboxGroup);
             }
             break;
-
+            
         case 'radio':
             inputElement = document.createElement('div');
             if (field.options) {
                 Object.entries(field.options).forEach(([value, label]) => {
                     const radioGroup = document.createElement('div');
                     radioGroup.className = 'form-check';
-
+                    
                     const radio = document.createElement('input');
                     radio.type = 'radio';
                     radio.className = 'form-check-input';
@@ -7928,74 +8067,66 @@ function createFieldElement(field) {
                     if (field.default_value && value === field.default_value) {
                         radio.checked = true;
                     }
-
+                    
                     const radioLabel = document.createElement('label');
                     radioLabel.className = 'form-check-label';
                     radioLabel.htmlFor = radio.id;
                     radioLabel.textContent = label;
-
+                    
                     radioGroup.appendChild(radio);
                     radioGroup.appendChild(radioLabel);
                     inputElement.appendChild(radioGroup);
                 });
             }
             break;
-
+            
         case 'date':
             inputElement = document.createElement('input');
             inputElement.type = 'date';
             inputElement.className = 'form-control';
             break;
-
+            
         case 'datetime':
             inputElement = document.createElement('input');
             inputElement.type = 'datetime-local';
             inputElement.className = 'form-control';
             break;
-
+            
         case 'file':
             inputElement = document.createElement('input');
             inputElement.type = 'file';
             inputElement.className = 'form-control';
             break;
-
+            
         case 'number':
             inputElement = document.createElement('input');
             inputElement.type = 'number';
             inputElement.className = 'form-control';
             break;
-
-        default:
+            
+        default: // text
             inputElement = document.createElement('input');
             inputElement.type = 'text';
             inputElement.className = 'form-control';
     }
-
+    
     // Set common attributes
     if (['input', 'textarea', 'select'].includes(inputElement.tagName.toLowerCase())) {
         inputElement.id = field.name;
         inputElement.name = field.name;
         inputElement.required = field.required;
-
+        
         if (field.placeholder) {
             inputElement.placeholder = field.placeholder;
         }
-
+        
         if (field.default_value && !['checkbox', 'radio'].includes(field.field_type)) {
             inputElement.value = field.default_value;
         }
     }
-
+    
     fieldGroup.appendChild(inputElement);
-
-    // Add event listeners to fields that are referenced in skip logic
-    if (typeof skipLogicFields !== 'undefined' && skipLogicFields.some(f => f.name === field.name)) {
-        const targetInput = fieldGroup.querySelector('input, select, textarea');
-        if (targetInput) {
-            targetInput.addEventListener('change', updateSkipLogicVisibility);
-        }
-    }
-
+    
     return fieldGroup;
 }
 function updateMessageVisibility() {
@@ -9861,207 +9992,31 @@ document.getElementById('ai-generate-template-btn')?.addEventListener('click', a
         }
     }
 });
-function initSkipLogic() {
-    // Event listener for adding new skip logic rules
-    document.getElementById('add-skip-logic-rule')?.addEventListener('click', addSkipLogicRule);
-    
-    // Event delegation for removing rules
-    document.querySelector('.skip-logic-container')?.addEventListener('click', function(e) {
-        if (e.target.closest('.remove-skip-logic')) {
-            e.target.closest('.skip-logic-rule').remove();
-        }
-    });
-    
-    // Handle operator change to show/hide value input
-    document.querySelector('.skip-logic-container')?.addEventListener('change', function(e) {
-        if (e.target.classList.contains('skip-logic-operator')) {
-            const valueInput = e.target.closest('.skip-logic-rule').querySelector('.skip-logic-value');
-            const removeBtn = e.target.closest('.skip-logic-rule').querySelector('.remove-skip-logic');
-            
-            if (e.target.value === 'empty' || e.target.value === 'not_empty') {
-                valueInput.disabled = true;
-                valueInput.value = '';
-            } else {
-                valueInput.disabled = false;
-            }
-            
-            // Enable remove button once an operator is selected
-            removeBtn.disabled = false;
-        }
-    });
-}
+// Field Editor Modal - Skip Logic
+document.getElementById('enable-skip-logic').addEventListener('change', function(e) {
+    document.getElementById('skip-logic-rules').classList.toggle('hidden', !e.target.checked);
+});
 
-// Add this function to handle adding new skip logic rules
-function addSkipLogicRule() {
-    const container = document.querySelector('.skip-logic-container');
-    const ruleTemplate = document.querySelector('.skip-logic-rule').cloneNode(true);
-    
-    // Reset the cloned rule
-    ruleTemplate.querySelector('.skip-logic-field').value = '';
-    ruleTemplate.querySelector('.skip-logic-operator').value = 'equals';
-    ruleTemplate.querySelector('.skip-logic-operator').disabled = true;
-    ruleTemplate.querySelector('.skip-logic-value').value = '';
-    ruleTemplate.querySelector('.skip-logic-value').disabled = true;
-    ruleTemplate.querySelector('.remove-skip-logic').disabled = true;
-    
-    // Insert before the add button
-    container.insertBefore(ruleTemplate, document.getElementById('add-skip-logic-rule'));
-    
-    // Populate field dropdown if fields are available
-    if (skipLogicFields.length > 0) {
-        populateSkipLogicFields(ruleTemplate);
+// Add new skip logic rule
+document.getElementById('add-skip-logic-rule').addEventListener('click', function() {
+    const newRule = document.querySelector('.skip-logic-rule').cloneNode(true);
+    newRule.querySelector('.skip-logic-value').value = '';
+    document.getElementById('skip-logic-rules').insertBefore(newRule, this);
+});
+
+// Remove skip logic rule
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.skip-logic-remove')) {
+        const rule = e.target.closest('.skip-logic-rule');
+        if (document.querySelectorAll('.skip-logic-rule').length > 1) {
+            rule.remove();
+        } else {
+            // If it's the last rule, just clear the values
+            rule.querySelector('.skip-logic-field').value = '';
+            rule.querySelector('.skip-logic-operator').value = '==';
+            rule.querySelector('.skip-logic-value').value = '';
+        }
     }
-}
-
-// Add this function to populate skip logic field dropdowns
-function populateSkipLogicFields(ruleElement = null) {
-    const fieldSelects = ruleElement ? 
-        [ruleElement.querySelector('.skip-logic-field')] : 
-        document.querySelectorAll('.skip-logic-field');
-    
-    fieldSelects.forEach(select => {
-        const currentValue = select.value;
-        select.innerHTML = '<option value="">No skip logic</option>';
-        
-        skipLogicFields.forEach(field => {
-            const option = document.createElement('option');
-            option.value = field.name;
-            option.textContent = field.label;
-            select.appendChild(option);
-        });
-        
-        // Restore previous value if it exists
-        if (currentValue && skipLogicFields.some(f => f.name === currentValue)) {
-            select.value = currentValue;
-        }
-        
-        // Add event listener to enable operator when field is selected
-        select.addEventListener('change', function() {
-            const rule = this.closest('.skip-logic-rule');
-            const operator = rule.querySelector('.skip-logic-operator');
-            operator.disabled = !this.value;
-            
-            if (!this.value) {
-                operator.value = 'equals';
-                rule.querySelector('.skip-logic-value').value = '';
-                rule.querySelector('.skip-logic-value').disabled = true;
-                rule.querySelector('.remove-skip-logic').disabled = true;
-            }
-        });
-    });
-}
-
-// Add this function to gather skip logic rules from the UI
-function gatherSkipLogicRules() {
-    const rules = [];
-    document.querySelectorAll('.skip-logic-rule').forEach(ruleElement => {
-        const field = ruleElement.querySelector('.skip-logic-field').value;
-        const operator = ruleElement.querySelector('.skip-logic-operator').value;
-        const value = ruleElement.querySelector('.skip-logic-value').value;
-        
-        if (field && operator) {
-            rules.push({
-                field,
-                operator,
-                value: ['empty', 'not_empty'].includes(operator) ? null : value
-            });
-        }
-    });
-    return rules;
-}
-
-// Add this function to load skip logic rules into the UI
-function loadSkipLogicRules(rules) {
-    // Clear existing rules except the first one
-    const container = document.querySelector('.skip-logic-container');
-    const existingRules = container.querySelectorAll('.skip-logic-rule');
-    
-    for (let i = 1; i < existingRules.length; i++) {
-        existingRules[i].remove();
-    }
-    
-    // Reset the first rule
-    const firstRule = existingRules[0];
-    firstRule.querySelector('.skip-logic-field').value = '';
-    firstRule.querySelector('.skip-logic-operator').value = 'equals';
-    firstRule.querySelector('.skip-logic-operator').disabled = true;
-    firstRule.querySelector('.skip-logic-value').value = '';
-    firstRule.querySelector('.skip-logic-value').disabled = true;
-    firstRule.querySelector('.remove-skip-logic').disabled = true;
-    
-    // Add rules if any exist
-    if (rules && rules.length > 0) {
-        rules.forEach((rule, index) => {
-            const ruleElement = index === 0 ? firstRule : addSkipLogicRule();
-            
-            ruleElement.querySelector('.skip-logic-field').value = rule.field;
-            ruleElement.querySelector('.skip-logic-operator').value = rule.operator;
-            ruleElement.querySelector('.skip-logic-operator').disabled = false;
-            
-            if (rule.value) {
-                ruleElement.querySelector('.skip-logic-value').value = rule.value;
-                ruleElement.querySelector('.skip-logic-value').disabled = false;
-            } else {
-                ruleElement.querySelector('.skip-logic-value').disabled = 
-                    ['empty', 'not_empty'].includes(rule.operator);
-            }
-            
-            ruleElement.querySelector('.remove-skip-logic').disabled = false;
-        });
-    }
-}
-function evaluateSkipLogic(fieldName, fieldValue, templateFields) {
-    const field = templateFields.find(f => f.name === fieldName);
-    if (!field || !field.skip_logic) return true;
-    
-    return field.skip_logic.every(rule => {
-        const targetField = templateFields.find(f => f.name === rule.field);
-        if (!targetField) return true;
-        
-        const targetValue = document.querySelector(`[name="${targetField.name}"]`)?.value || '';
-        
-        switch(rule.operator) {
-            case 'equals': 
-                return targetValue == rule.value;
-            case 'not_equals': 
-                return targetValue != rule.value;
-            case 'contains': 
-                return targetValue.includes(rule.value);
-            case 'not_contains': 
-                return !targetValue.includes(rule.value);
-            case 'greater': 
-                return parseFloat(targetValue) > parseFloat(rule.value);
-            case 'less': 
-                return parseFloat(targetValue) < parseFloat(rule.value);
-            case 'empty': 
-                return targetValue === '';
-            case 'not_empty': 
-                return targetValue !== '';
-            default: 
-                return true;
-        }
-    });
-}
-function updateSkipLogicVisibility() {
-    const form = document.getElementById('create-report-form');
-    const templateFields = Array.from(form.querySelectorAll('.template-field'))
-        .map(el => ({
-            name: el.dataset.fieldName,
-            skip_logic: el.dataset.skipLogic ? JSON.parse(el.dataset.skipLogic) : null
-        }));
-    
-    templateFields.forEach(field => {
-        const fieldElement = form.querySelector(`[data-field-name="${field.name}"]`);
-        if (!fieldElement) return;
-        
-        const shouldShow = evaluateSkipLogic(field.name, '', templateFields);
-        fieldElement.style.display = shouldShow ? 'block' : 'none';
-    });
-}
-
-// Call updateSkipLogicVisibility when the form loads
-document.getElementById('create-report-form')?.addEventListener('submit', function(e) {
-    updateSkipLogicVisibility();
 });
 // Initialize chatbot when the view is shown
 document.getElementById('chatbot-view')?.addEventListener('viewShown', initChatbot);
