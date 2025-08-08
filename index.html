@@ -4344,6 +4344,7 @@
                 
                 // Edit report buttons
                 if (e.target.closest('.edit-report-btn')) {
+                    e.preventDefault(); 
                     const btn = e.target.closest('.edit-report-btn');
                     const reportId = btn.getAttribute('data-id');
                     editReport(reportId);
