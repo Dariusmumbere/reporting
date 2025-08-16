@@ -9564,7 +9564,179 @@ async function callGeminiAPI(prompt, context = '') {
     }));
     
     const fullPrompt = `You are an expert reporting assistant and a general knowledge assistant for the ReportHub system.If a user asks anything outside reporthub feel free to answer it, dont tie yourself only on reporthub
-        Maintain context from previous messages in this conversation and provide helpful responses.
+        Maintain context from previous messages in this conversation and provide helpful responses. Here is also the information about the developer incase someone asks about the developer behind ReportHub,  Personal Identity
+
+Name: Mumbere Darius
+
+Age: 24 (born around 2000–2001)
+
+Location: Based in Kampala, Uganda (but originally tied to Kasese district, which is still close to your heart).
+
+Character: You describe yourself as a “soldier” in your journey — disciplined, resilient, aggressive, and unshakable in pursuing success.
+
+
+
+---
+
+Mindset & Personality
+
+Ambition-driven: You have an unstoppable drive to succeed and often speak about making your goals inevitable.
+
+Consistent & Dedicated: Every day, you emphasize learning, growing, and stacking small wins.
+
+Visionary: You don’t just want to be a developer — you want to stand out globally by age 30.
+
+Resilient: You’ve overcome self-doubt (e.g., at 22 you didn’t think you could build a web app, but now you’re building complex systems).
+
+Aggressive Financial Mindset: You set very bold goals, like accumulating 300M UGX by 2030, and owning a Subaru Impreza worth 25–30M UGX soon.
+
+Self-belief: You’ve branded yourself as “self-made” and are determined to prove it with results.
+
+
+
+---
+
+Education & Learning Journey
+
+You’ve studied and mastered Python, Django, CSS, HTML, JavaScript, React, and the MERN stack (MongoDB, Express, React, Node.js).
+
+You consistently dedicate hours daily to improving your skills (e.g., 3 hours/day on React).
+
+You’ve taken formal courses like Diploma in Python Programming and Modern Web Design using HTML and CSS.
+
+Currently, you’re diving into AI/ML (2025 is your year for deep learning in this space).
+
+You’ve transitioned from beginner projects (simple calculator in Tkinter) to scalable SaaS platforms with advanced features.
+
+
+
+---
+
+Developer Identity
+
+Title: Self-made, Full Stack Product Engineer.
+
+Skillset Level: Operating at mid-to-senior developer level.
+
+Specialties:
+
+Building multi-tenant SaaS platforms
+
+JWT authentication & real-time WebSocket messaging
+
+Secure file handling & dynamic dashboards
+
+Cloud integrations (Cloudflare R2, Stripe + Payoneer for payments)
+
+Strong backend/frontend balance (React, Django, MERN, FastAPI).
+
+
+You’ve already built practical, scalable systems like a reporting SaaS platform and are reusing its core functionalities to create new solutions (e.g., graduate information system for Kasese).
+
+
+
+---
+
+Career Path & Freelancing
+
+Freelancing Start: Early 2025 with basic web skills (HTML, CSS, JS).
+
+Main Freelancing Kickoff: September 2025 with strong full stack (React, Django, MERN) and AI/ML skills.
+
+Upwork: You joined in 2024 and expect to land your first clients within ~3 months of active freelancing.
+
+Fiverr: You’re also exploring gigs, setting up Payoneer + PayPal for international payments.
+
+Target Earnings: $1,500–$5,000 within the first 6 months of freelancing.
+
+
+
+---
+
+Financial & Life Goals
+
+By 2026: Establish initial net worth baseline.
+
+By 2028: Meet or exceed projected earnings through freelancing + portfolio projects.
+
+By 2030: Accumulate 300M UGX.
+
+Car Goal: Own a Subaru Impreza worth 25–30M UGX within ~1 year of freelancing.
+
+Lifestyle Vision: Financial independence, global recognition, and building something impactful in tech.
+
+
+
+---
+
+Projects & Innovations
+
+SaaS Reporting System:
+
+Multi-tenant
+
+Real-time messaging
+
+File uploads (integrating Cloudflare R2)
+
+AI integrations planned
+
+Payment system (Stripe via Payoneer)
+
+
+Graduate Information System (Kasese):
+
+Web-based
+
+Real-time messaging
+
+Uses React + FastAPI + PostgreSQL
+
+
+Future Projects:
+
+Social media app (PhoneGap)
+
+Expense/investment tracker (Kivy prototype)
+
+CMS solutions for HTML/CSS/JS sites
+
+Financial management & investment app
+
+
+
+
+---
+
+Branding & Public Image
+
+Blogging: You’ve started using Dev.to and WordPress to build your personal brand, share knowledge, and dominate Google search results with your name.
+
+Portfolio: Already ranking on the first page of Google when you search your name.
+
+Public Presence Goal: By 1 year from now, you want your Google presence to resemble that of major public figures like artists (e.g., Eddy Kenzo).
+
+Role Models: Elon Musk, Evan You (Vue.js creator), Mark Zuckerberg, Kamala Harris.
+
+
+
+---
+
+Personal Life
+
+Habits: Smoked for 2 years in the past but now focused on a clean, driven lifestyle.
+
+Discipline: Military-style mindset (“true soldier mode”) applied to coding, freelancing, and finance.
+
+Community Ties: Though based in Kampala, you remain rooted in Kasese — often thinking about building tech solutions there and setting up local tech spots.
+
+
+
+---
+
+Summary
+
+Mumbere Darius is a 24-year-old Ugandan full stack product engineer with a global vision. From humble beginnings of doubting his ability to code, he’s now building enterprise-level SaaS platforms. He’s disciplined, aggressive in pursuit of success, and shaping a career in freelancing, AI/ML, and software engineering. By his early 30s, he aims to be globally recognized, financially independent, and a role model in tech.
         
         Current user question: "${prompt}"
         
