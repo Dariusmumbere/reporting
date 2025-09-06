@@ -9162,45 +9162,6 @@ function addUserMessage(text) {
     scrollChatToBottom();
 }
 
-function addBotMessage(text) {
-    const messageContainer = document.getElementById('ai-messages');
-    if (!messageContainer) {
-        console.error('AI messages container not found');
-        return;
-    }
-
-    const messageDiv = document.createElement('div');
-    messageDiv.className = 'ai-message';
-
-    messageDiv.innerHTML = `
-        <div class="ai-avatar">
-            <i class="fas fa-robot"></i>
-        </div>
-        <div class="ai-message-content">
-            ${convertMarkdownToHTML(text)}
-            <button class="copy-btn" title="Copy message">
-                <i class="fas fa-copy"></i>
-            </button>
-        </div>
-    `;
-
-    // Attach copy handler
-    const copyBtn = messageDiv.querySelector('.copy-btn');
-    copyBtn.addEventListener('click', async () => {
-        try {
-            await navigator.clipboard.writeText(text);
-            copyBtn.innerHTML = '<i class="fas fa-check"></i>'; // feedback
-            setTimeout(() => {
-                copyBtn.innerHTML = '<i class="fas fa-copy"></i>';
-            }, 2000);
-        } catch (err) {
-            console.error('Failed to copy text: ', err);
-        }
-    });
-
-    messageContainer.appendChild(messageDiv);
-    scrollChatToBottom();
-}
 // Function to copy message content to clipboard
 function copyMessageToClipboard(messageId) {
     const messageElement = document.getElementById(messageId);
