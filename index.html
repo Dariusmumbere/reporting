@@ -9334,11 +9334,11 @@ function initChatbot() {
             <div class="card-body">
                 <div class="ai-assistant-container">
                     <div class="ai-messages" id="chatbot-box">
-                        <div class="chatbot-message ai-message">
-                            <div class="chat-avatar">
+                        <div class="ai-message">
+                            <div class="ai-avatar">
                                 <i class="fas fa-robot"></i>
                             </div>
-                            <div class="chat-message-content">
+                            <div class="ai-message-content" id="welcome-message">
                                 <p>Hello! I'm your AI reporting assistant. How can I help you today?</p>
                                 <div class="ai-quick-questions">
                                     <p><strong>Try asking:</strong></p>
@@ -9349,6 +9349,11 @@ function initChatbot() {
                                         <li>Find trends in my approval rates</li>
                                     </ul>
                                 </div>
+                            </div>
+                            <div class="ai-message-actions">
+                                <button class="copy-btn" data-message-id="welcome-message" title="Copy message">
+                                    <i class="fas fa-copy"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -9382,7 +9387,7 @@ function initChatbot() {
     // Initialize conversation history
     conversationHistory = [{
         role: "ai",
-        content: "Hello! I'm your AI reporting assistant. How can I help you today?"
+        content: "Hello! I'm your AI reporting assistant. How can I help you today? Try asking: Help me analyze my recent reports, Generate a summary of last month's data, Create a financial report template, or Find trends in my approval rates."
     }];
 
     // Set up event listeners
@@ -9409,8 +9414,24 @@ function initChatbot() {
     document.getElementById('ai-clear-conversation').addEventListener('click', () => {
         clearConversation();
     });
+    
+    // Add copy functionality to the welcome message
+    const welcomeCopyBtn = document.querySelector('[data-message-id="welcome-message"]');
+    if (welcomeCopyBtn) {
+        welcomeCopyBtn.addEventListener('click', () => {
+            copyMessageToClipboard('welcome-message');
+            
+            // Provide visual feedback
+            const icon = welcomeCopyBtn.querySelector('i');
+            icon.className = 'fas fa-check';
+            
+            // Revert icon after 2 seconds
+            setTimeout(() => {
+                icon.className = 'fas fa-copy';
+            }, 2000);
+        });
+    }
 }
-
 function clearConversation() {
     const messagesContainer = document.getElementById('chatbot-box');
     messagesContainer.innerHTML = `
