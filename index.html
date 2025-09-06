@@ -14,71 +14,36 @@
     <link rel="stylesheet" href="styles.css">
     
     <style>
-.copy-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: #f1f3f4;
-            border: none;
-            border-radius: 4px;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            opacity: 0.7;
-            transition: opacity 0.2s, background 0.2s;
-        }
-        
-        .copy-btn:hover {
-            opacity: 1;
-            background: #e4e6e8;
-        }
-        
-        .copy-btn i {
-            font-size: 14px;
-            color: #5f6368;
-        }
-        
-        .copy-notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #4caf50;
-            color: white;
-            padding: 10px 15px;
-            border-radius: 4px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
-            opacity: 0;
-            transform: translateY(-10px);
-            transition: opacity 0.3s, transform 0.3s;
-        }
-        
-        .copy-notification.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-.copy-button {
+.ai-message {
+    position: relative;
+    display: flex;
+    margin-bottom: 1rem;
+}
+
+.ai-message-actions {
     position: absolute;
-    top: 8px;
-    right: 8px;
-    background: rgba(255, 255, 255, 0.7);
-    border: none;
-    border-radius: 4px;
-    padding: 4px 6px;
-    cursor: pointer;
+    top: 0.5rem;
+    right: 0.5rem;
     opacity: 0;
     transition: opacity 0.2s ease;
 }
 
-.ai-message:hover .copy-button {
+.ai-message:hover .ai-message-actions {
     opacity: 1;
 }
 
-.copy-button:hover {
-    background: rgba(255, 255, 255, 0.9);
+.copy-btn {
+    background: rgba(255, 255, 255, 0.8);
+    border: none;
+    border-radius: 4px;
+    padding: 0.25rem 0.5rem;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: background 0.2s ease;
+}
+
+.copy-btn:hover {
+    background: rgba(255, 255, 255, 1);
 }
 /* Skip Logic Styles */
 .skip-logic-container {
@@ -4032,10 +3997,6 @@
             </div>
         </div>
     </div>
-    
-    <div class="copy-notification" id="copy-notification">
-        Message copied to clipboard!
-    </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         // API Configuration
@@ -4216,7 +4177,6 @@
         // Initialize the application
         function init() {
             applyTheme();
-            setupCopyButtons();
             setupSidebar();
             setupEventListeners();
             checkAuth();
@@ -9211,45 +9171,76 @@ function addBotMessage(text) {
 
     const messageDiv = document.createElement('div');
     messageDiv.className = 'ai-message';
-
-    // Message structure with avatar, markdown content & copy button
+    
+    // Create a unique ID for this message
+    const messageId = 'ai-message-' + Date.now();
+    
     messageDiv.innerHTML = `
         <div class="ai-avatar">
             <i class="fas fa-robot"></i>
         </div>
-        <div class="ai-message-content">
+        <div class="ai-message-content" id="${messageId}">
             ${convertMarkdownToHTML(text)}
-            <button class="copy-btn" title="Copy message">
+        </div>
+        <div class="ai-message-actions">
+            <button class="copy-btn" data-message-id="${messageId}" title="Copy message">
                 <i class="fas fa-copy"></i>
-                <span class="copy-tooltip">Copy</span>
             </button>
         </div>
     `;
-
+    
     messageContainer.appendChild(messageDiv);
-
-    // Copy functionality
-    const copyButton = messageDiv.querySelector('.copy-btn');
-    copyButton.addEventListener('click', async () => {
-        try {
-            await copyToClipboard(text);
-
-            // Visual feedback
-            const icon = copyButton.querySelector('i');
-            const tooltip = copyButton.querySelector('.copy-tooltip');
-            icon.className = 'fas fa-check';
-            tooltip.textContent = 'Copied!';
-
-            setTimeout(() => {
-                icon.className = 'fas fa-copy';
-                tooltip.textContent = 'Copy';
-            }, 2000);
-        } catch (err) {
-            console.error('Failed to copy text: ', err);
-        }
+    
+    // Add event listener to the copy button
+    const copyBtn = messageDiv.querySelector('.copy-btn');
+    copyBtn.addEventListener('click', () => {
+        copyMessageToClipboard(messageId);
+        
+        // Provide visual feedback
+        const icon = copyBtn.querySelector('i');
+        icon.className = 'fas fa-check';
+        
+        // Revert icon after 2 seconds
+        setTimeout(() => {
+            icon.className = 'fas fa-copy';
+        }, 2000);
     });
-
+    
     scrollChatToBottom();
+    return messageDiv;
+}
+
+// Function to copy message content to clipboard
+function copyMessageToClipboard(messageId) {
+    const messageElement = document.getElementById(messageId);
+    if (!messageElement) return;
+    
+    // Get the text content (without HTML tags)
+    const textToCopy = messageElement.textContent || messageElement.innerText;
+    
+    // Use the Clipboard API
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        console.log('Message copied to clipboard');
+    }).catch(err => {
+        console.error('Failed to copy message: ', err);
+        
+        // Fallback method for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = textToCopy;
+        textArea.style.position = 'fixed';
+        textArea.style.opacity = '0';
+        document.body.appendChild(textArea);
+        textArea.select();
+        
+        try {
+            document.execCommand('copy');
+            console.log('Fallback: Message copied to clipboard');
+        } catch (fallbackErr) {
+            console.error('Fallback failed too: ', fallbackErr);
+        }
+        
+        document.body.removeChild(textArea);
+    });
 }
 // Helper function for markdown conversion
 function convertMarkdownToHTML(text) {
@@ -10288,45 +10279,22 @@ document.addEventListener('click', function(e) {
     }
 });
 
-function setupCopyButtons() {
-            // Add event delegation for copy buttons
-            document.getElementById('chatbot-box').addEventListener('click', function(e) {
-                if (e.target.closest('.copy-btn')) {
-                    const copyBtn = e.target.closest('.copy-btn');
-                    const messageContent = copyBtn.parentElement;
-                    // Remove the copy button from the content to be copied
-                    const tempDiv = document.createElement('div');
-                    tempDiv.innerHTML = messageContent.innerHTML;
-                    const copyButton = tempDiv.querySelector('.copy-btn');
-                    if (copyButton) copyButton.remove();
-                    
-                    // Copy the text content to clipboard
-                    copyToClipboard(tempDiv.textContent.trim());
-                    
-                    // Show notification
-                    showCopyNotification();
-                }
-            });
-        }
-        
-        function copyToClipboard(text) {
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            document.body.appendChild(textarea);
-            textarea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textarea);
-        }
-        
-        function showCopyNotification() {
-            const notification = document.getElementById('copy-notification');
-            notification.classList.add('show');
-            
-            setTimeout(() => {
-                notification.classList.remove('show');
-            }, 2000);
-        }
-        
+function copyToClipboard(text) {
+    // Create a temporary textarea element
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.setAttribute('readonly', '');
+    textarea.style.position = 'absolute';
+    textarea.style.left = '-9999px';
+    document.body.appendChild(textarea);
+    
+    // Select and copy the text
+    textarea.select();
+    document.execCommand('copy');
+    
+    // Clean up
+    document.body.removeChild(textarea);
+}
 // Initialize chatbot when the view is shown
 document.getElementById('chatbot-view')?.addEventListener('viewShown', initChatbot);
         document.addEventListener('DOMContentLoaded', init);
