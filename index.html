@@ -9171,45 +9171,36 @@ function addBotMessage(text) {
 
     const messageDiv = document.createElement('div');
     messageDiv.className = 'ai-message';
-    
-    // Create a unique ID for this message
-    const messageId = 'ai-message-' + Date.now();
-    
+
     messageDiv.innerHTML = `
         <div class="ai-avatar">
             <i class="fas fa-robot"></i>
         </div>
-        <div class="ai-message-content" id="${messageId}">
+        <div class="ai-message-content">
             ${convertMarkdownToHTML(text)}
-        </div>
-        <div class="ai-message-actions">
-            <button class="copy-btn" data-message-id="${messageId}" title="Copy message">
+            <button class="copy-btn" title="Copy message">
                 <i class="fas fa-copy"></i>
             </button>
         </div>
     `;
-    
-    messageContainer.appendChild(messageDiv);
-    
-    // Add event listener to the copy button
-    const copyBtn = messageDiv.querySelector('.copy-btn');
-    copyBtn.addEventListener('click', () => {
-        copyMessageToClipboard(messageId);
-        
-        // Provide visual feedback
-        const icon = copyBtn.querySelector('i');
-        icon.className = 'fas fa-check';
-        
-        // Revert icon after 2 seconds
-        setTimeout(() => {
-            icon.className = 'fas fa-copy';
-        }, 2000);
-    });
-    
-    scrollChatToBottom();
-    return messageDiv;
-}
 
+    // Attach copy handler
+    const copyBtn = messageDiv.querySelector('.copy-btn');
+    copyBtn.addEventListener('click', async () => {
+        try {
+            await navigator.clipboard.writeText(text);
+            copyBtn.innerHTML = '<i class="fas fa-check"></i>'; // feedback
+            setTimeout(() => {
+                copyBtn.innerHTML = '<i class="fas fa-copy"></i>';
+            }, 2000);
+        } catch (err) {
+            console.error('Failed to copy text: ', err);
+        }
+    });
+
+    messageContainer.appendChild(messageDiv);
+    scrollChatToBottom();
+}
 // Function to copy message content to clipboard
 function copyMessageToClipboard(messageId) {
     const messageElement = document.getElementById(messageId);
