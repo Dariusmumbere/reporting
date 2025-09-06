@@ -14,6 +14,52 @@
     <link rel="stylesheet" href="styles.css">
     
     <style>
+.copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #f1f3f4;
+            border: none;
+            border-radius: 4px;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s, background 0.2s;
+        }
+        
+        .copy-btn:hover {
+            opacity: 1;
+            background: #e4e6e8;
+        }
+        
+        .copy-btn i {
+            font-size: 14px;
+            color: #5f6368;
+        }
+        
+        .copy-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4caf50;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        
+        .copy-notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
 .copy-button {
     position: absolute;
     top: 8px;
@@ -3986,6 +4032,10 @@
             </div>
         </div>
     </div>
+    
+    <div class="copy-notification" id="copy-notification">
+        Message copied to clipboard!
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         // API Configuration
@@ -4166,6 +4216,7 @@
         // Initialize the application
         function init() {
             applyTheme();
+            setupCopyButtons();
             setupSidebar();
             setupEventListeners();
             checkAuth();
@@ -9160,33 +9211,35 @@ function addBotMessage(text) {
 
     const messageDiv = document.createElement('div');
     messageDiv.className = 'ai-message';
-    
+
+    // Message structure with avatar, markdown content & copy button
     messageDiv.innerHTML = `
         <div class="ai-avatar">
             <i class="fas fa-robot"></i>
         </div>
         <div class="ai-message-content">
             ${convertMarkdownToHTML(text)}
-            <button class="copy-button" title="Copy message">
+            <button class="copy-btn" title="Copy message">
                 <i class="fas fa-copy"></i>
                 <span class="copy-tooltip">Copy</span>
             </button>
         </div>
     `;
-    
+
     messageContainer.appendChild(messageDiv);
-    
-    const copyButton = messageDiv.querySelector('.copy-button');
+
+    // Copy functionality
+    const copyButton = messageDiv.querySelector('.copy-btn');
     copyButton.addEventListener('click', async () => {
         try {
             await copyToClipboard(text);
-            
+
             // Visual feedback
             const icon = copyButton.querySelector('i');
             const tooltip = copyButton.querySelector('.copy-tooltip');
             icon.className = 'fas fa-check';
             tooltip.textContent = 'Copied!';
-            
+
             setTimeout(() => {
                 icon.className = 'fas fa-copy';
                 tooltip.textContent = 'Copy';
@@ -9195,7 +9248,7 @@ function addBotMessage(text) {
             console.error('Failed to copy text: ', err);
         }
     });
-    
+
     scrollChatToBottom();
 }
 // Helper function for markdown conversion
@@ -10235,22 +10288,45 @@ document.addEventListener('click', function(e) {
     }
 });
 
-function copyToClipboard(text) {
-    // Create a temporary textarea element
-    const textarea = document.createElement('textarea');
-    textarea.value = text;
-    textarea.setAttribute('readonly', '');
-    textarea.style.position = 'absolute';
-    textarea.style.left = '-9999px';
-    document.body.appendChild(textarea);
-    
-    // Select and copy the text
-    textarea.select();
-    document.execCommand('copy');
-    
-    // Clean up
-    document.body.removeChild(textarea);
-}
+function setupCopyButtons() {
+            // Add event delegation for copy buttons
+            document.getElementById('chatbot-box').addEventListener('click', function(e) {
+                if (e.target.closest('.copy-btn')) {
+                    const copyBtn = e.target.closest('.copy-btn');
+                    const messageContent = copyBtn.parentElement;
+                    // Remove the copy button from the content to be copied
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = messageContent.innerHTML;
+                    const copyButton = tempDiv.querySelector('.copy-btn');
+                    if (copyButton) copyButton.remove();
+                    
+                    // Copy the text content to clipboard
+                    copyToClipboard(tempDiv.textContent.trim());
+                    
+                    // Show notification
+                    showCopyNotification();
+                }
+            });
+        }
+        
+        function copyToClipboard(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+        }
+        
+        function showCopyNotification() {
+            const notification = document.getElementById('copy-notification');
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 2000);
+        }
+        
 // Initialize chatbot when the view is shown
 document.getElementById('chatbot-view')?.addEventListener('viewShown', initChatbot);
         document.addEventListener('DOMContentLoaded', init);
