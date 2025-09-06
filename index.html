@@ -14,6 +14,26 @@
     <link rel="stylesheet" href="styles.css">
     
     <style>
+.copy-button {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(255, 255, 255, 0.7);
+    border: none;
+    border-radius: 4px;
+    padding: 4px 6px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.ai-message:hover .copy-button {
+    opacity: 1;
+}
+
+.copy-button:hover {
+    background: rgba(255, 255, 255, 0.9);
+}
 /* Skip Logic Styles */
 .skip-logic-container {
     border: 1px solid var(--border-color);
@@ -10191,6 +10211,22 @@ document.addEventListener('click', function(e) {
         }
     }
 });
+function copyToClipboard(text) {
+    // Create a temporary textarea element
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.setAttribute('readonly', '');
+    textarea.style.position = 'absolute';
+    textarea.style.left = '-9999px';
+    document.body.appendChild(textarea);
+    
+    // Select and copy the text
+    textarea.select();
+    document.execCommand('copy');
+    
+    // Clean up
+    document.body.removeChild(textarea);
+}
 // Initialize chatbot when the view is shown
 document.getElementById('chatbot-view')?.addEventListener('viewShown', initChatbot);
         document.addEventListener('DOMContentLoaded', init);
