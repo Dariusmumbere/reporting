@@ -1569,69 +1569,6 @@
             vertical-align: middle;
         }
         
-        /* OTP verification modal styles */
-        .otp-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s;
-        }
-        
-        .otp-modal.active {
-            opacity: 1;
-            visibility: visible;
-        }
-        
-        .otp-modal-content {
-            background-color: var(--card-bg);
-            padding: 2rem;
-            border-radius: 0.5rem;
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-        }
-        
-        .otp-input-container {
-            display: flex;
-            justify-content: space-between;
-            margin: 1rem 0;
-        }
-        
-        .otp-input {
-            width: 50px;
-            height: 50px;
-            text-align: center;
-            font-size: 1.5rem;
-            border: 1px solid var(--border-color);
-            border-radius: 0.25rem;
-            background-color: var(--background-color);
-            color: var(--text-primary);
-        }
-        
-        .otp-input:focus {
-            border-color: var(--primary-color);
-            outline: none;
-        }
-        
-        .resend-otp {
-            margin-top: 1rem;
-            text-align: center;
-        }
-        
-        .resend-otp a {
-            color: var(--primary-color);
-            cursor: pointer;
-        }
-        
         .chat-container {
             display: flex;
             flex-direction: column;
@@ -2545,40 +2482,6 @@
         </div>
     </div>
 
-
-        <!-- OTP Verification Modal -->
-        <div class="otp-modal" id="otp-modal">
-            <div class="otp-modal-content">
-                <h2>Verify Your Email</h2>
-                <p>We've sent a 6-digit verification code to your email address. Please enter it below:</p>
-                
-                <div class="otp-input-container" id="otp-input-container">
-                    <input type="text" class="otp-input" maxlength="1" data-index="0">
-                    <input type="text" class="otp-input" maxlength="1" data-index="1">
-                    <input type="text" class="otp-input" maxlength="1" data-index="2">
-                    <input type="text" class="otp-input" maxlength="1" data-index="3">
-                    <input type="text" class="otp-input" maxlength="1" data-index="4">
-                    <input type="text" class="otp-input" maxlength="1" data-index="5">
-                </div>
-                
-                <div class="alert alert-danger hidden" id="otp-error">
-                    <i class="fas fa-exclamation-circle"></i>
-                    <div class="alert-content">
-                        <div class="alert-title">Verification failed</div>
-                        <p class="alert-message" id="otp-error-message">Invalid or expired OTP</p>
-                    </div>
-                </div>
-                
-                <button class="btn btn-primary w-100" id="verify-otp-btn">
-                    <span id="verify-otp-text">Verify</span>
-                    <span class="spinner hidden" id="verify-otp-spinner"></span>
-                </button>
-                
-                <div class="resend-otp">
-                    Didn't receive a code? <a href="#" id="resend-otp">Resend code</a>
-                </div>
-            </div>
-        </div>
 
         <!-- Main App View (hidden initially) -->
         <div class="hidden" id="app-view">
@@ -4037,9 +3940,6 @@
         let notificationPollingInterval;
 
 
-        // OTP verification state
-        let otpVerificationEmail = null;
-
         // DOM Elements
         const loginForm = document.getElementById('login-form');
         const signupForm = document.getElementById('signup-form');
@@ -4152,16 +4052,6 @@
         const chatHeaderStatusText = document.getElementById('chat-header-status-text');
         const unreadMessagesBadge = document.getElementById('unread-messages-count');
         
-        // OTP verification elements
-        const otpModal = document.getElementById('otp-modal');
-        const otpInputs = document.querySelectorAll('.otp-input');
-        const verifyOtpBtn = document.getElementById('verify-otp-btn');
-        const verifyOtpText = document.getElementById('verify-otp-text');
-        const verifyOtpSpinner = document.getElementById('verify-otp-spinner');
-        const otpError = document.getElementById('otp-error');
-        const otpErrorMessage = document.getElementById('otp-error-message');
-        const resendOtpLink = document.getElementById('resend-otp');
-
         //Invite DOM elements
         const inviteOrgItem = document.getElementById('invite-org-item');
         const inviteOrgModal = document.getElementById('invite-org-modal');
@@ -4462,34 +4352,6 @@
                 activeChat.classList.add('hidden');
                 chatEmptyState.classList.remove('hidden');
                 activeChatUserId = null;
-            });
-            
-            // OTP verification inputs
-            otpInputs.forEach((input, index) => {
-                input.addEventListener('input', (e) => {
-                    if (e.target.value.length === 1) {
-                        if (index < otpInputs.length - 1) {
-                            otpInputs[index + 1].focus();
-                        }
-                    }
-                });
-                
-                input.addEventListener('keydown', (e) => {
-                    if (e.key === 'Backspace' && e.target.value.length === 0) {
-                        if (index > 0) {
-                            otpInputs[index - 1].focus();
-                        }
-                    }
-                });
-            });
-            
-            // Verify OTP button
-            verifyOtpBtn.addEventListener('click', verifyOtp);
-            
-            // Resend OTP link
-            resendOtpLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                resendOtp();
             });
             
         }
@@ -5110,96 +4972,18 @@ async function handleSignup(e) {
     signupError.classList.add('hidden');
     
     try {
-        // First send verification email
-        const otpResponse = await fetch(`${API_BASE_URL}/auth/send-verification-email`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                email: email
-            })
-        });
-        
-        if (!otpResponse.ok) {
-            const errorData = await otpResponse.json();
-            throw new Error(errorData.detail || 'Failed to send verification email');
-        }
-        
-        // Store the email and signup data for verification
-        otpVerificationEmail = email;
-        otpSignupData = {
-            name,
-            email,
-            password,
-            organizationName,
-            inviteToken
-        };
-        
-        // Show OTP verification modal
-        otpModal.classList.add('active');
-        
-        // Focus first OTP input
-        otpInputs[0].focus();
-        
-    } catch (error) {
-        console.error('Signup error:', error);
-        showSignupError(error.message || 'An error occurred during signup');
-    } finally {
-        signupBtnText.textContent = 'Create Account';
-        signupSpinner.classList.add('hidden');
-    }
-}
-
-// Verify OTP and complete signup
-async function verifyOtp() {
-    // Get OTP from inputs
-    let otp = '';
-    otpInputs.forEach(input => {
-        otp += input.value;
-    });
-    
-    if (otp.length !== 6) {
-        otpErrorMessage.textContent = 'Please enter a 6-digit code';
-        otpError.classList.remove('hidden');
-        return;
-    }
-    
-    // Show loading state
-    verifyOtpText.textContent = 'Verifying...';
-    verifyOtpSpinner.classList.remove('hidden');
-    otpError.classList.add('hidden');
-    
-    try {
-        // Verify OTP with backend
-        const verifyResponse = await fetch(`${API_BASE_URL}/auth/verify-otp`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                email: otpVerificationEmail,
-                otp: otp
-            })
-        });
-        
-        if (!verifyResponse.ok) {
-            const errorData = await verifyResponse.json();
-            throw new Error(errorData.detail || 'Invalid or expired OTP');
-        }
-        
-        // Now proceed with signup
+        // Create the account directly
         const formData = new FormData();
-        formData.append('name', otpSignupData.name);
-        formData.append('email', otpSignupData.email);
-        formData.append('password', otpSignupData.password);
+        formData.append('name', name);
+        formData.append('email', email);
+        formData.append('password', password);
         
-        if (otpSignupData.organizationName) {
-            formData.append('organization_name', otpSignupData.organizationName);
+        if (organizationName) {
+            formData.append('organization_name', organizationName);
         }
         
-        if (otpSignupData.inviteToken) {
-            formData.append('invite_token', otpSignupData.inviteToken);
+        if (inviteToken) {
+            formData.append('invite_token', inviteToken);
         }
         
         const signupResponse = await fetch(`${API_BASE_URL}/auth/signup`, {
@@ -5216,9 +5000,6 @@ async function verifyOtp() {
         
         // Store the token
         localStorage.setItem('token', data.access_token);
-        
-        // Close OTP modal
-        otpModal.classList.remove('active');
         
         // Check if organization registration is needed
         if (data.requires_org_registration) {
@@ -5246,12 +5027,11 @@ async function verifyOtp() {
         }
         
     } catch (error) {
-        console.error('OTP verification error:', error);
-        otpErrorMessage.textContent = error.message || 'Invalid or expired OTP';
-        otpError.classList.remove('hidden');
+        console.error('Signup error:', error);
+        showSignupError(error.message || 'An error occurred during signup');
     } finally {
-        verifyOtpText.textContent = 'Verify';
-        verifyOtpSpinner.classList.add('hidden');
+        signupBtnText.textContent = 'Create Account';
+        signupSpinner.classList.add('hidden');
     }
 }
         // Handle organization registration
